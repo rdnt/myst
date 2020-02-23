@@ -1,0 +1,8 @@
+/*.env.*
+/.fsw.json
+/*.bat
+/tmp
+/build
+/logs
+/cert
+/static

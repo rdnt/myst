@@ -1,0 +1,87 @@
+// main: main.less
+#login {
+    display: block;
+    display: none;
+    position: absolute;
+    width: 100vw;
+    margin: 0;
+    height: 100vh;
+
+    // transform: translate(-50%, -50%);
+    pointer-events: all;
+    opacity: 1;
+    text-align: center;
+    // z-index: 9999;
+        // opacity: 0;
+    background-image: linear-gradient(to bottom, #10121a, #0a0b0c);
+    &.hide {
+        & {
+            opacity: 0;
+            transition: .3s ease;
+        }
+        & ~ main {
+            opacity: 1;
+            transform: scale(1);
+            transition: .3s ease;
+        }
+    }
+    form {
+        position: absolute;
+        width: 300px;
+        height: auto;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        .logo {
+            display: block;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            transition: transform 1s cubic-bezier(0, 0, 0, 1), opacity 1s cubic-bezier(0, 0, 0, 1);
+            pointer-events: none;
+            &.click {
+                animation: click 1s ease;
+            }
+            @keyframes click {
+                0% {
+                    transform: translateY(0);
+                }
+                30% {
+                    transform: translateY(5px);
+                }
+                100% {
+                    transform: translateY(0);
+                }
+            }
+        }
+        .field {
+            display: block;
+            text-align: center;
+            width: 270px;
+            height: 30px;
+            padding: 10px 13px;
+            margin: 20px 2px;
+            border: 0;
+            background-color: transparent !important;
+            color: #fff;
+            font-weight: 400;
+            border-radius: 2px;
+            transition: background-color 0s ease;
+            caret-color: #667;
+            font-size: 1.2rem;
+            letter-spacing: .1rem;
+            &::placeholder {
+                font-size: 1rem;
+                font-family: Consolas;
+            }
+            &:focus {
+                &::placeholder {
+                    opacity: 0;
+                }
+            }
+            &::selection {
+                background: #7f7f7f;
+            }
+        }
+    }
+}

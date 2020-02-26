@@ -3,44 +3,53 @@ package routes
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sht/shtdev/go/keystore"
+	"github.com/sht/myst/go/keystore"
+	"github.com/sht/myst/go/logger"
 )
 
 // Init creates all the HTTP routes
 func Init(r *gin.Engine) {
 
-	ks := r.Group("/entries")
+	g := r.Group("/entries")
 	{
-		ks.GET("", GetEntries)
-		ks.GET("/get", GetEntry)
-		ks.GET("/add", AddEntry)
-		ks.GET("/remove", RemoveEntry)
+		g.GET("", GetEntries)
+		g.PUT("", AddEntry)
+	}
+	g = r.Group("/entry/:id")
+	{
+		g.GET("", GetEntry)
+		g.DELETE("", RemoveEntry)
 	}
 
 }
 
+type RequireMasterPassword struct {
+	MasterPassword string `form:"master_password" binding:"required,regex=master_password"`
+}
+
 type GetEntriesData struct {
-	MasterPassword string `form:"master_password" binding:"required"`
+	RequireMasterPassword
 }
 
 func GetEntries(c *gin.Context) {
 	var data GetEntriesData
 	err := c.ShouldBind(&data)
 	if err != nil {
-		HTTPError(c, 400)
+		fmt.Println(err)
+		ValidationError(c, err)
 		return
 	}
-	enc, err := keystore.Load("keystore.mst")
+	raw, err := keystore.Load("keystore.mst")
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
 
-	ks, err := keystore.Decrypt(enc, data.MasterPassword)
+	ks, err := keystore.Decrypt(raw, data.MasterPassword)
 	if err != nil {
-		fmt.Println(err)
-		HTTPError(c, 500)
+		logger.Errorf("KEYSTORE", err)
+		HTTPError(c, 403)
 		return
 	}
 
@@ -48,36 +57,42 @@ func GetEntries(c *gin.Context) {
 	Success(c, entries)
 }
 
+type GetEntryUri struct {
+	ID string `uri:"id" binding:"required,regex=uuid"`
+}
+
 type GetEntryData struct {
-	MasterPassword string `form:"master_password" binding:"required"`
-	ID             string `form:"id" binding:"required"`
+	RequireMasterPassword
 }
 
 func GetEntry(c *gin.Context) {
+	var uri GetEntryUri
 	var data GetEntryData
-	err := c.ShouldBind(&data)
-	if err != nil {
-		HTTPError(c, 400)
+	err1 := c.ShouldBindUri(&uri)
+	err2 := c.ShouldBind(&data)
+	if err1 != nil || err2 != nil {
+		fmt.Println("dafuq")
+		ValidationError(c, err1, err2)
 		return
 	}
-	enc, err := keystore.Load("keystore.mst")
+	raw, err := keystore.Load("keystore.mst")
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
-
-	ks, err := keystore.Decrypt(enc, data.MasterPassword)
+	ks, err := keystore.Decrypt(raw, data.MasterPassword)
 	if err != nil {
-		fmt.Println(err)
-		HTTPError(c, 500)
+		logger.Errorf("KEYSTORE", err)
+		HTTPError(c, 403)
 		return
 	}
-	entry, err := ks.Get(data.ID)
+	entry, err := ks.Get(uri.ID)
 	if err == keystore.ErrNoEntry {
 		HTTPError(c, 404)
 		return
 	} else if err != nil {
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
@@ -85,74 +100,82 @@ func GetEntry(c *gin.Context) {
 }
 
 type AddEntryData struct {
-	MasterPassword string `form:"master_password" binding:"required"`
-	Email          string `form:"email" binding:"required"`
-	Password       string `form:"password" binding:"required"`
+	RequireMasterPassword
+	Email    string `form:"email" binding:"required"`
+	Password string `form:"password" binding:"required"`
 }
 
 func AddEntry(c *gin.Context) {
 	var data AddEntryData
 	err := c.ShouldBind(&data)
 	if err != nil {
-		HTTPError(c, 400)
+		ValidationError(c, err)
 		return
 	}
 	enc, err := keystore.Load("keystore.mst")
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
 
 	ks, err := keystore.Decrypt(enc, data.MasterPassword)
 	if err != nil {
-		fmt.Println(err)
-		HTTPError(c, 500)
+		logger.Errorf("KEYSTORE", err)
+		HTTPError(c, 403)
 		return
 	}
 	entry, err := ks.Add(data.Email, data.Password)
 	if err != nil {
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
 	err = ks.Save("keystore.mst", data.MasterPassword)
 	if err != nil {
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
 	Success(c, entry)
 }
 
+type RemoveEntryUri struct {
+	ID string `uri:"id" binding:"required,regex=uuid"`
+}
+
 type RemoveEntryData struct {
-	MasterPassword string `form:"master_password" binding:"required"`
-	ID             string `form:"id" binding:"required"`
+	RequireMasterPassword
 }
 
 func RemoveEntry(c *gin.Context) {
+	var uri RemoveEntryUri
 	var data RemoveEntryData
-	err := c.ShouldBind(&data)
-	if err != nil {
-		HTTPError(c, 400)
+	err1 := c.ShouldBindUri(&uri)
+	err2 := c.ShouldBind(&data)
+	if err1 != nil || err2 != nil {
+		ValidationError(c, err1, err2)
 		return
 	}
-	enc, err := keystore.Load("keystore.mst")
+	raw, err := keystore.Load("keystore.mst")
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}
 
-	ks, err := keystore.Decrypt(enc, data.MasterPassword)
+	ks, err := keystore.Decrypt(raw, data.MasterPassword)
 	if err != nil {
-		fmt.Println(err)
-		HTTPError(c, 500)
+		logger.Errorf("KEYSTORE", err)
+		HTTPError(c, 403)
 		return
 	}
-	removed, err := ks.Remove(data.ID)
+	removed, err := ks.Remove(uri.ID)
 	if err == keystore.ErrNoEntry {
 		HTTPError(c, 404)
 		return
 	} else if err != nil || removed == false {
+		logger.Errorf("KEYSTORE", err)
 		HTTPError(c, 500)
 		return
 	}

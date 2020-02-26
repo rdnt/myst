@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/sht/shtdev/go/crypto"
+	"github.com/sht/myst/go/crypto"
 	"io"
 	"os"
 )

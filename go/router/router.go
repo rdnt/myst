@@ -1,17 +1,38 @@
 package router
 
 import (
+	// "fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-errors/errors"
-	"github.com/sht/shtdev/go/config"
-	"github.com/sht/shtdev/go/logger"
-	"github.com/sht/shtdev/go/responses"
-	"github.com/sht/shtdev/go/routes"
+	"github.com/sht/myst/go/config"
+	"github.com/sht/myst/go/logger"
+	"github.com/sht/myst/go/regex"
+	"github.com/sht/myst/go/responses"
+	"github.com/sht/myst/go/routes"
 	"github.com/unrolled/secure"
+	"gopkg.in/go-playground/validator.v9"
 	"io/ioutil"
 	"net/http/httputil"
+	// "reflect"
 	"strings"
 )
+
+var validateRegex validator.Func = func(fl validator.FieldLevel) bool {
+	// name := fl.FieldName()
+	rex := fl.Param()
+	val := fl.Field().String()
+	match := regex.Match(rex, val)
+	if !match {
+		// routes.Invalidate(
+		// 	c,
+		// 	name,
+		// 	"Validation failed for field "+name,
+		// )
+		return false
+	}
+	return true
+}
 
 func Init() *gin.Engine {
 	// Disable console color by default
@@ -61,6 +82,12 @@ func Init() *gin.Engine {
 	}
 
 	r.Use(HTTPSRedirect())
+
+	v, ok := binding.Validator.Engine().(*validator.Validate)
+	if ok {
+		// gin.DisableBindValidation()
+		v.RegisterValidation("regex", validateRegex)
+	}
 
 	// Attach client error collecting middleware
 	r.Use(Pusher())

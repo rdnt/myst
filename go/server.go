@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sht/shtdev/go/config"
-	"github.com/sht/shtdev/go/logger"
-	"github.com/sht/shtdev/go/regex"
-	"github.com/sht/shtdev/go/router"
+	"github.com/sht/myst/go/config"
+	"github.com/sht/myst/go/logger"
+	"github.com/sht/myst/go/regex"
+	"github.com/sht/myst/go/router"
 	"net"
 	"net/http"
 )
@@ -15,7 +15,7 @@ func main() {
 	err := config.Load()
 	logger.Init()
 	if err != nil {
-		logger.Printf("STARTUP", "No environment files found. Using OS environment variables.")
+		logger.Logf("STARTUP", "No environment files found. Using OS environment variables.")
 	}
 	err = regex.Load()
 	if err != nil {
@@ -51,7 +51,7 @@ func Start(r *gin.Engine) (err error) {
 	default:
 		netw = "tcp"
 		if port == "" {
-			port = "80"
+			port = "8625"
 		}
 		addr = host + ":" + port
 	}

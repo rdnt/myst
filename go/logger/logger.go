@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/color"
-	"github.com/sht/shtdev/go/config"
+	"github.com/sht/myst/go/config"
 	"log"
 	"os"
 	"strings"
 	"time"
 )
 
-var routesPrefix = "github.com/sht/shtdev/go/routes."
+var routesPrefix = "github.com/sht/myst/go/routes."
 
 var accessLogWriter *os.File
 var errorLogWriter *os.File
@@ -68,21 +68,35 @@ func Printf(domain, format string, a ...interface{}) {
 	StdoutLogger.logger.Printf("[%s] "+format, a...)
 }
 
-func Logf(domain, format string, a ...interface{}) {
+func Logf(domain, format interface{}, a ...interface{}) {
+	switch format.(type) {
+	case string:
+	case error:
+		format = format.(error).Error()
+	default:
+		format = ""
+	}
 	a = append([]interface{}{domain}, a...)
-	AccessLogger.logger.Printf("[%s] "+format+"\n", a...)
+	AccessLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
 	if config.Debug {
 		// Also log to console if debugging
-		StdoutLogger.logger.Printf("[%s] "+format, a...)
+		StdoutLogger.logger.Printf("[%s] "+format.(string), a...)
 	}
 }
 
-func Errorf(domain, format string, a ...interface{}) {
+func Errorf(domain, format interface{}, a ...interface{}) {
+	switch format.(type) {
+	case string:
+	case error:
+		format = format.(error).Error()
+	default:
+		format = ""
+	}
 	a = append([]interface{}{domain}, a...)
-	ErrorLogger.logger.Printf("[%s] "+format+"\n", a...)
+	ErrorLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
 	if config.Debug {
 		// Also log to console if debugging
-		StderrLogger.logger.Printf("[%s] "+format+"\n", a...)
+		StderrLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
 	}
 }
 

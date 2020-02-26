@@ -16,13 +16,12 @@ var regexes = map[string]interface{}{
 	//           at least 1 number
 	//           at least 1 special character (TODO @sht remove)
 	//           8-64 characters
-	"password": []string{
+	"master_password": []string{
 		`[A-Za-z]+`,
-		// "[0-9]+",
-		// "[^\\w\\s]+",
+		"[0-9]+",
 		`^.{8,64}$`,
-		// `(`, // TODO remove
 	},
+	"uuid": `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$`,
 }
 
 // Match returns true if the given string matches the pattern(s) of the

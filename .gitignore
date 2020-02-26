@@ -6,3 +6,5 @@
 /logs
 /cert
 /static
+*.mst
+*.exe

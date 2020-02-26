@@ -22,5 +22,5 @@ func Load() error {
 }
 
 func Get(key string) string {
-	return os.Getenv("MIST_" + key)
+	return os.Getenv("MYST_" + key)
 }

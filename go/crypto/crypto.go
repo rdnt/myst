@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+var debug = false
+
 // GenerateRandomBytes returns a bytes slice with size n that contains
 // cryptographically secure random bytes.
 func GenerateRandomBytes(n uint) ([]byte, error) {
@@ -65,13 +67,11 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Pad the plaintext if required so that its size if multiple of the
-	// default AES block size
-	if len(plaintext)%aes.BlockSize != 0 {
-		plaintext, err = PKCS7Pad(plaintext, aes.BlockSize)
-		if err != nil {
-			return nil, err
-		}
+	// Pad the plaintext so that its size is multiple of the default AES
+	// block size
+	plaintext, err = PKCS7Pad(plaintext, aes.BlockSize)
+	if err != nil {
+		return nil, err
 	}
 	// Generate a random initialization vector.
 	iv, err := GenerateRandomBytes(aes.BlockSize)
@@ -83,7 +83,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	// Encrypt the plaintext
 	ciphertext := make([]byte, len(plaintext))
 
-	if true {
+	if debug {
 		copy(ciphertext, plaintext)
 	} else {
 		mode.CryptBlocks(ciphertext, plaintext)
@@ -121,18 +121,16 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	mode := cipher.NewCBCDecrypter(block, iv)
 	// Decrypt the ciphertext
 	plaintext := make([]byte, len(ciphertext))
-	if true {
+	if debug {
 		copy(plaintext, ciphertext)
 	} else {
 		mode.CryptBlocks(plaintext, ciphertext)
 	}
 
-	// Unpad the plaintext if necessary
-	if len(plaintext)%aes.BlockSize == 0 {
-		plaintext, err = PKCS7Unpad(plaintext, aes.BlockSize)
-		if err != nil {
-			return nil, err
-		}
+	// Unpad the plaintext
+	plaintext, err = PKCS7Unpad(plaintext, aes.BlockSize)
+	if err != nil {
+		return nil, err
 	}
 	// Return the plaintext
 	return plaintext, nil

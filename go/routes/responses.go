@@ -3,7 +3,8 @@ package routes
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sht/shtdev/go/responses"
+	"github.com/sht/myst/go/responses"
+	"gopkg.in/go-playground/validator.v9"
 	"strconv"
 )
 
@@ -41,7 +42,7 @@ func Error(c *gin.Context, code string, message interface{}) {
 }
 
 // Invalidate invalidates a specific data field and sets a reason
-func Invalidate(c *gin.Context, name, desc string) {
+func invalidate(c *gin.Context, name, desc string) {
 	// Format fail message
 	err := responses.AddError(name, desc)
 	errors, exists := c.Get("errors")
@@ -56,20 +57,61 @@ func Invalidate(c *gin.Context, name, desc string) {
 // request should be dropped or not
 func DataValid(c *gin.Context) bool {
 	// Format fail message
-	errors, exists := c.Get("errors")
-	if !exists {
+	errors, ok := c.Get("errors")
+	if !ok {
 
 	}
-	errarr := errors.([]responses.Error)
-	if len(errarr) > 0 {
-		msg := responses.NewFail(errarr)
+	errs := errors.([]responses.Error)
+	if len(errs) > 0 {
+		msg := responses.NewFail(errs)
 		// Send response
-		c.JSON(200, msg)
+		c.JSON(400, msg)
 		// Stop the chain of middleware
 		c.Abort()
 		return false
 	}
 	return true
+}
+
+func ValidationError(c *gin.Context, errs ...error) {
+	fmt.Println(errs)
+	for _, err := range errs {
+		verrs, ok := err.(validator.ValidationErrors)
+		if ok {
+			for _, ferr := range verrs {
+				name := ferr.Field()
+				tag := ferr.Tag()
+				fmt.Println(tag)
+				invalidate(
+					c,
+					name,
+					tag,
+				)
+				// show type of error (e.g. Regex Validation failed...)
+			}
+		} else {
+			fmt.Println("INVALID ERROR")
+			fmt.Println(err)
+			continue
+		}
+	}
+	errors, ok := c.Get("errors")
+	if !ok {
+		HTTPError(c, 400)
+		return
+	}
+	cerrs := errors.([]responses.Error)
+	if len(cerrs) > 0 {
+		// if there are validation errors print them
+		msg := responses.NewFail(cerrs)
+		c.JSON(400, msg)
+		c.Abort()
+		return
+	}
+	// this will fire if the request is invalid, e.g. form-data is empty or
+	// invalid json
+	HTTPError(c, 400)
+	return
 }
 
 // WithPagination sets the correct HTTP headers based on the pagination provided

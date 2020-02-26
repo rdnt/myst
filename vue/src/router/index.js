@@ -1,29 +1,38 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Entries from "@/views/Entries";
+import Sites from "@/views/Sites";
 import PasswordGenerator from "@/views/PasswordGenerator";
 import Settings from "@/views/Settings";
 import Appearance from "@/views/Settings";
 import Security from "@/views/Settings";
 import Error404 from "@/errors/404";
+import EditSite from "@/views/EditSite";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Entries",
-    redirect: "/entries"
+    name: "Home",
+    redirect: "/sites"
   },
   {
-    path: "/entries",
-    name: "Entries",
-    component: Entries,
+    path: "/sites",
+    name: "Sites",
+    component: Sites,
     props: {
       sidebar: true,
       icon:
         "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0yMy42MjEgOS4wMTJjLjI0Ny45NTkuMzc5IDEuOTY0LjM3OSAzIDAgNi42MjMtNS4zNzcgMTEuOTg4LTEyIDExLjk4OHMtMTItNS4zNjUtMTItMTEuOTg4YzAtNi42MjMgNS4zNzctMTIgMTItMTIgMi41ODEgMCA0Ljk2OS44MjIgNi45MjcgMi4yMTFsMS43MTgtMi4yMjMgMS45MzUgNi4wMTJoLTYuNThsMS43MDMtMi4yMDRjLTEuNjItMS4xMjgtMy41ODItMS43OTYtNS43MDMtMS43OTYtNS41MiAwLTEwIDQuNDgxLTEwIDEwIDAgNS41MiA0LjQ4IDEwIDEwIDEwIDUuNTE5IDAgMTAtNC40OCAxMC0xMCAwLTEuMDQ1LS4xNjEtMi4wNTMtLjQ1OC0zaDIuMDc5em0tNy42MjEgNy45ODhoLTh2LTZoMXYtMmMwLTEuNjU2IDEuMzQ0LTMgMy0zczMgMS4zNDQgMyAzdjJoMXY2em0tNS04djJoMnYtMmMwLS41NTItLjQ0OC0xLTEtMXMtMSAuNDQ4LTEgMXoiLz48L3N2Zz4="
     }
+  },
+  {
+    path: "/site/:id(\\d+)/edit",
+    name: "EditSite",
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: EditSite
   },
   {
     path: "/generator",

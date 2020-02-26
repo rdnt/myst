@@ -1,7 +1,9 @@
 // Misc
 
 @use '@/styles/misc/Reset';
+@use '@/styles/fonts/axiforma';
 @use '@/styles/misc/migrate';
+// @use '@/styles/misc/simplebar';
 // Com@/styles/ponents
 @use '@/styles/components/SystemBar';
 @use '@/styles/components/Preloader';
@@ -32,7 +34,7 @@ html, body {
     // max-height: 100%; // TODO
     height: 100vh;
     // top: 24px;
-    overflow: hidden;
+    // overflow: hidden;
     // top: 0;
     background-color: #0a0b0c;
     background: #f5f7fb;
@@ -70,7 +72,8 @@ html, body {
             // height: 100vh;
             background: #fff;
             background-color: #f2f3f5;
-            // background-color: #fff;
+            background-color: #edeef5;
+            background-color: #fff;
             transform: translateX(0);
             font-size: 0;
             // overflow: hidden;
@@ -86,6 +89,7 @@ html, body {
                 // * {
                 //     font-size: initial;
                 // }
+
             }
         }
     }
@@ -93,14 +97,28 @@ html, body {
     ::selection {
         background: #f1f2f3;
     }
+
     ::-webkit-scrollbar {
-        background-color: #fff;
-        width: .8em;
+        width: 12px;
+
     }
-    ::-webkit-scrollbar-thumb:window-inactive,
+    ::-webkit-scrollbar-button {
+
+    }
     ::-webkit-scrollbar-thumb {
-        background: black;
+        background: #969ba2;
+        border-radius: 7px;
+        border: 4px solid #fff;
     }
+    ::-webkit-scrollbar-track {
+        background: #fff;
+    }
+    ::-webkit-scrollbar-track-piece {
+        background: #f1f2f5;
+        border-radius: 7px;
+        border: 4px solid #fff;
+    }
+
 }
 .card {
     position: relative;

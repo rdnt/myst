@@ -23,13 +23,13 @@ module.exports = {
 
   },
   devServer: {
-    public: "192.168.1.12:8081",
+    public: "0.0.0.0:8081",
     host: "",
     port: 8081,
     contentBase: path.resolve(__dirname, "../public/"),
     proxy: {
       '/api': {
-        target: 'http://:8080',
+        target: 'http://0.0.0.0:8080',
         ws: true,
         changeOrigin: true,
         hostRewrite: true,

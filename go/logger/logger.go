@@ -3,7 +3,7 @@ package logger
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/color"
+	"github.com/sht/color"
 	"github.com/sht/myst/go/config"
 	"log"
 	"os"
@@ -26,6 +26,7 @@ type logger struct {
 }
 
 func (l *logger) Write(p []byte) (n int, err error) {
+	fmt.Printf("%X\n\n", string(p))
 	color.Lprint(l.logger, string(p))
 	return 0, nil
 }

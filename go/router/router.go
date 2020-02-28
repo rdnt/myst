@@ -1,7 +1,7 @@
 package router
 
 import (
-	// "fmt"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-errors/errors"
@@ -14,7 +14,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"io/ioutil"
 	"net/http/httputil"
-	// "reflect"
 	"strings"
 )
 
@@ -35,6 +34,11 @@ var validateRegex validator.Func = func(fl validator.FieldLevel) bool {
 }
 
 func Init() *gin.Engine {
+	// cwd, err := os.Getwd()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
 	// Disable console color by default
 	gin.DisableConsoleColor()
 	// Set gin mode
@@ -48,8 +52,8 @@ func Init() *gin.Engine {
 	// Create gin router instance
 	r := gin.New()
 	// Do not redirect folders to trailing slash
-	r.RedirectTrailingSlash = true
-	r.RedirectFixedPath = true
+	r.RedirectTrailingSlash = false
+	r.RedirectFixedPath = false
 	// Log to stdout and stderr by default
 	if config.Debug {
 		gin.DefaultWriter = &logger.StdoutLogger
@@ -81,23 +85,35 @@ func Init() *gin.Engine {
 		r.Use(fileLogger)
 	}
 
-	r.Use(HTTPSRedirect())
+	// r.Use(HTTPSRedirect())
 
 	v, ok := binding.Validator.Engine().(*validator.Validate)
 	if ok {
-		// gin.DisableBindValidation()
 		v.RegisterValidation("regex", validateRegex)
 	}
 
 	// Attach client error collecting middleware
 	r.Use(Pusher())
 	r.Use(ClientErrors())
+	r.Use(static.Serve("/", static.LocalFile("static", false)))
+	// r.Use(static.Serve("/assets/", static.LocalFile(cwd+"/../assets", false)))
+	// r.Static("/assets", "assets")
+	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
+
 	// 404 handling
+
 	r.NoRoute(func(c *gin.Context) {
-		data := responses.NewHTTPError(404)
-		c.JSON(404, data)
-		c.Abort()
+		if strings.HasPrefix(c.Request.URL.Path, "/api") {
+			rsp := responses.NewHTTPError(404)
+			c.JSON(404, rsp)
+			c.Abort()
+		} else {
+			c.File("static/index.html")
+			c.Abort()
+		}
 	})
+	r.RedirectTrailingSlash = true
+	r.RedirectFixedPath = true
 
 	// Initialize the rest of the routes
 	routes.Init(r)

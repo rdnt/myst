@@ -9,18 +9,26 @@ import (
 
 // Init creates all the HTTP routes
 func Init(r *gin.Engine) {
+	// r.GET("/", LoadUI)
 
-	g := r.Group("/entries")
+	api := r.Group("/api")
+
+	g := api.Group("/entries")
 	{
 		g.GET("", GetEntries)
 		g.PUT("", AddEntry)
 	}
-	g = r.Group("/entry/:id")
+	g = api.Group("/entry/:id")
 	{
 		g.GET("", GetEntry)
 		g.DELETE("", RemoveEntry)
 	}
 
+}
+
+func LoadUI(c *gin.Context) {
+	c.File("../static")
+	c.Abort()
 }
 
 type RequireMasterPassword struct {

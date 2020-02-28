@@ -56,6 +56,7 @@ Vue.prototype.$wasm = window.Go;
 Vue.config.productionTip = false;
 
 Vue.use(WebSocket, "ws://" + window.location.host, {
+  connectManually: true,
   reconnection: false,
   store: store,
   format: "json"

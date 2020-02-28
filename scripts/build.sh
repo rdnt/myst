@@ -1,5 +1,5 @@
 #!/bin/bash
-echo Building for production...
+echo "Building for production..."
 sleep 1
 echo "Cleaning up old files..."
 rm -r "build" > /dev/null 2>&1
@@ -23,8 +23,8 @@ echo "Compiling frontend bundle..."
 npm --prefix vue/ run build > /dev/null 2>&1
 echo "Frontend bundle compiled."
 echo "Copying assets..."
-cp -r "static" "build/static"
-cp -r ".env."* "build"
-cp -r "assets" "build/assets"
+cp -r "static" "build/static"  > /dev/null 2>&1
+cp -r ".env."* "build" > /dev/null 2>&1
+cp -r "assets" "build/assets" > /dev/null 2>&1
 echo "Build Successful."
 sleep 3

@@ -26,7 +26,9 @@ module.exports = {
     public: "0.0.0.0:8081",
     host: "",
     port: 8081,
-    contentBase: path.resolve(__dirname, "../public/"),
+    contentBase: path.resolve(__dirname, "../assets/"),
+    contentBasePublicPath: "/assets/",
+    // publicPath: "./assets/",
     proxy: {
       '/api': {
         target: 'http://0.0.0.0:8080',
@@ -34,6 +36,11 @@ module.exports = {
         changeOrigin: true,
         hostRewrite: true,
       },
+      // '/assets': {
+      //   target: 'http://0.0.0.0:8081/',
+      //   // changeOrigin: true,
+      //   // hostRewrite: true,
+      // },
     },
   },
   pluginOptions: {

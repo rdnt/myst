@@ -43,12 +43,11 @@ export default {
   },
   created() {
     // this.$store.dispatch('initialize')
-    this.$socket.onopen = () => {
-      this.$store.dispatch("get", "sites");
-      // this.$store.send('getSites', '')
-      // this.$store.commit('initialize')
-    };
-
+    // this.$socket.onopen = () => {
+    //   this.$store.dispatch("get", "sites");
+    //   // this.$store.send('getSites', '')
+    //   // this.$store.commit('initialize')
+    // };
     // setTimeout(() => {
     //
     // }, 1000)

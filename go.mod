@@ -7,7 +7,7 @@ require (
 	github.com/go-errors/errors v1.0.1
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/gookit/color v1.2.0
+	github.com/gookit/color v1.2.3
 	github.com/joho/godotenv v1.3.0
 	github.com/unrolled/secure v1.0.7
 	golang.org/x/crypto v0.0.0-20191219195013-becbf705a915

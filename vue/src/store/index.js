@@ -1,10 +1,21 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import * as util from "@/util";
 import sites from "./modules/sites";
+import uuidv4 from "uuid/v4";
 
-const uuidv4 = require("uuid/v4");
-// import products from './modules/products'
-// import createLogger from '../../../src/plugins/logger'
+console.log(util.supportsWebAssembly);
+const state = {
+  loggedIn: false,
+  socket: {
+    isConnected: false,
+    message: "",
+    reconnectError: false
+  },
+  supports: {
+    webAssembly: util.supportsWebAssembly
+  }
+};
 
 Vue.use(Vuex);
 
@@ -15,14 +26,7 @@ export default new Vuex.Store({
   modules: {
     sites
   },
-  state: {
-    socket: {
-      isConnected: false,
-      message: "",
-      reconnectError: false
-    }
-    // sites: {}
-  },
+  state,
   strict: debug,
   actions: {
     get: function(_, type) {

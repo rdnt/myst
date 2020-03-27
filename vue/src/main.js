@@ -1,29 +1,37 @@
 import Vue from "vue";
 import App from "@/App";
-import WebSocket from "vue-native-websocket";
+// import WebSocket from "vue-native-websocket";
 import store from "@/store";
 import router from "@/router";
 
-if (!WebAssembly.instantiateStreaming) {
-  // polyfill
-  WebAssembly.instantiateStreaming = async (resp, importObject) => {
-    const source = await (await resp).arrayBuffer();
-    return await WebAssembly.instantiate(source, importObject);
-  };
-}
-const go = new window.Go();
-let mod, inst;
-WebAssembly.instantiateStreaming(
-  fetch("/assets/wasm/main0.wasm"),
-  go.importObject
-).then(result => {
-  mod = result.module;
-  inst = result.instance;
-  go.run(inst);
-  WebAssembly.instantiate(mod, go.importObject); // reset instance
-});
+// if (window.supportsWebAssembly) {
+// console.log(store.state);
+// store.$state.supports.webAssembly = window.supportsWebAssembly;
+// if (!WebAssembly.instantiateStreaming) {
+//   // polyfill
+//   WebAssembly.instantiateStreaming = async (resp, importObject) => {
+//     const source = await (await resp).arrayBuffer();
+//     return await WebAssembly.instantiate(source, importObject);
+//   };
+// }
 
-Vue.prototype.$wasm = window.Go;
+// const go = new window.Go();
+// let mod, inst;
+// WebAssembly.instantiateStreaming(
+//   fetch("/assets/wasm/main.wasm"),
+//   go.importObject
+// ).then(result => {
+//   mod = result.module;
+//   inst = result.instanc;
+//   go.run(inst);
+//   WebAssembly.instantiate(mod, go.importObject); // reset instance
+//   // init();
+// });
+
+// }
+
+// Vue.prototype.$wasm = window.Go;
+// console.log(window.Go.decrypt());
 
 // import VueWasm from "./wasm";
 // import Go from "@/../../public/assets/wasm/wasm_exec";
@@ -55,24 +63,28 @@ Vue.prototype.$wasm = window.Go;
 
 Vue.config.productionTip = false;
 
-Vue.use(WebSocket, "ws://" + window.location.host, {
-  connectManually: true,
-  reconnection: false,
-  store: store,
-  format: "json"
-});
+// Vue.use(WebSocket, "ws://" + window.location.host, {
+//   connectManually: true,
+//   reconnection: false,
+//   store: store,
+//   format: "json"
+// });
 
-const init = async () => {
-  // await VueWasm(Vue, { modules: { go } });
-  /* eslint-disable no-new */
-  new Vue({
-    store,
-    router,
-    render: h => h(App)
-  }).$mount("#app");
-};
+// const init = async () => {
+//   // await VueWasm(Vue, { modules: { go } });
+//   /* eslint-disable no-new */
+//   new Vue({
+//     store,
+//     router,
+//     render: h => h(App)
+//   }).$mount("#app");
+// };
 
-init();
+new Vue({
+  store,
+  router,
+  render: h => h(App)
+}).$mount("#app");
 
 // new Vue({
 //   store,

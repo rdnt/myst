@@ -1,6 +1,6 @@
 export GOOS=js
 export GOARCH=wasm
-go build -o main.wasm main.go
-cp "c:/Program Files/Go/misc/wasm/wasm_exec.js" "./wasm_exec.js"
+go build -o ../assets/wasm/main.wasm main.go
+cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ../assets/wasm/
 echo "Done"
-sleep 9999
+sleep 30

@@ -4,7 +4,7 @@
 @use '@/styles/fonts/axiforma';
 @use '@/styles/misc/migrate';
 // @use '@/styles/misc/simplebar';
-// Com@/styles/ponents
+// @/styles/Components
 @use '@/styles/components/SystemBar';
 @use '@/styles/components/Preloader';
 @use '@/styles/components/Login';
@@ -30,8 +30,6 @@ html, body {
 }
 #app {
     width: 100vw;
-    // max-height: calc(100vh - 24px);
-    // max-height: 100%; // TODO
     height: 100vh;
     // top: 24px;
     // overflow: hidden;
@@ -46,50 +44,39 @@ html, body {
     //     transition: .3s ease;
     // }
     main {
-        box-sizing: border-box;
+        // box-sizing: border-box;
         // padding: 40px;
         // max-height: calc(100vh - 84px);
         // max-height: calc(100vh - 60px);
-        height: 100%;
-        width: 100%;
+        height: 100vh;
+        width: 100vw;
         // TODO
         // overflow: hidden;
         // overflow-y: auto;
         // backface-visibility: hidden;
-        transform: scale(.98);
-        opacity: 0;
+        // transform-origin: 50% 50%;
+        pointer-events: all;
+        opacity: 1;
+        transform: scale(1);
+        transition: .3s ease;
+        // opacity: 0;
         &.show {
-            transform: scale(1);
+            // transform: scale(1);
             opacity: 1;
         }
         #container {
             position: absolute;
+            width: calc(100vw - #{$nav-width});
             height: 100vh;
             top: 0;
             right: 0;
-            width: calc(100% - #{$nav-width});
-            box-sizing: border-box;
-            // height: 100vh;
             background: #fff;
             background-color: #f2f3f5;
             background-color: #edeef5;
             background-color: #fff;
-            transform: translateX(0);
             font-size: 0;
-            // overflow: hidden;
             & > .container {
                 padding: 30px;
-                font-size: 0;
-                box-sizing: border-box;
-                // overflow-x: hidden;
-                // overflow-y: auto;
-                overflow: auto;
-                // height: 100%;
-                // backface-visibility: hidden;
-                // * {
-                //     font-size: initial;
-                // }
-
             }
         }
     }
@@ -98,26 +85,40 @@ html, body {
         background: #f1f2f3;
     }
 
-    ::-webkit-scrollbar {
-        width: 12px;
-
-    }
-    ::-webkit-scrollbar-button {
-
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #969ba2;
-        border-radius: 7px;
-        border: 4px solid #fff;
-    }
-    ::-webkit-scrollbar-track {
-        background: #fff;
-    }
-    ::-webkit-scrollbar-track-piece {
-        background: #f1f2f5;
-        border-radius: 7px;
-        border: 4px solid #fff;
-    }
+    // ::-webkit-scrollbar {
+    //     width: 0;
+    //     // position:fixed;
+    // }
+    // ::-webkit-scrollbar-button {
+    //     width: 0;
+    //     height: 0;
+    //     display: none;
+    // }
+    // ::-webkit-scrollbar-thumb {
+    //     background: #c6cbd2;
+    //     background: #faa;
+    //     border-radius: 7px;
+    //     border: 4px solid #fff;
+    //     // border: 4px solid #fff;
+    //     background-clip: padding-box;
+    //     border: 4px solid transparent;
+    //     box-shadow: inset -1px -1px 0px transparent, inset 1px 1px 0px transparent;
+    // }
+    // ::-webkit-scrollbar-track {
+    //   background: #fff;
+    //   border: 4px solid #fff;
+    // }
+    // ::-webkit-scrollbar-track-piece {
+    //     background: #f1f2f5;
+    //     background-clip: padding-box;
+    //     border: 4px solid rgba(0, 0, 0, 0);
+    //     border-radius: 7px;
+    //     border: 4px solid #fff;
+    // }
+    //
+    // ::-webkit-scrollbar-corner {
+    //     background-color: transparent;
+    // }
 
 }
 .card {
@@ -140,4 +141,78 @@ html, body {
         box-shadow: inset 0 0 0 2px #4c7dff;
         transition: transform .1s ease, box-shadow .1s ease;
     }
+}
+
+.scroll-view {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  &:hover {
+    .scroll-overlay {
+      opacity: 1;
+      transition: opacity .25s ease;
+    }
+  }
+  .scroll-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px;
+    // width: 50%;
+    height: 100%;
+    // z-index: 9999;
+    opacity: .5;
+    overflow-y: overlay;
+    mix-blend-mode: multiply;
+    pointer-events: all;
+    transition: opacity 1s ease .5s;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+
+    // &::-webkit-scrollbar {
+    //     width: 12px !important;
+    // }
+    // &::-webkit-scrollbar-button {
+    //     width: 0;
+    //     height: 0;
+    //     display: none;
+    // }
+    // &::-webkit-scrollbar-thumb {
+    //     background: #bfbfbf;
+    //     border-radius: 7px;
+    //     border: 4px solid #fff;
+    //     // border: 4px solid #fff;
+    //     background-clip: padding-box;
+    //     border: 4px solid transparent;
+    //     box-shadow: inset -1px -1px 0px transparent, inset 1px 1px 0px transparent;
+    // }
+    // &::-webkit-scrollbar-track {
+    //   background: #fff;
+    //   border: 4px solid #fff;
+    // }
+    // &::-webkit-scrollbar-track-piece {
+    //     background: #fff;
+    //     background-clip: padding-box;
+    //     border: 4px solid rgba(0, 0, 0, 0);
+    //     border-radius: 7px;
+    //     border: 4px solid #fff;
+    // }
+    //
+    // &::-webkit-scrollbar-corner {
+    //     background-color: transparent;
+    // }
+    .dummy {
+      width: 12px;
+      height: 60px;
+    }
+  }
+  .scroll-area {
+    height: 100%;
+    overflow-y: auto;
+    pointer-events: auto;
+    transform: translateZ(0);
+  }
+
+
 }

@@ -32,26 +32,37 @@
         </div>
       </div>
       <!-- <simplebar class="entries" data-simplebar-auto-hide="false"> -->
-      <div class="entries">
-        <router-link
-          v-for="(entry, i) in entries"
-          :key="i"
-          class="row entry card"
-          :to="{ path: '/site/' + i + '/edit' }"
-        >
-          <div class="col icon">
-            <img src="/assets/images/logos/medium-logo.png" />
-          </div>
-          <div class="col name">
-            <div class="label">Medium</div>
-          </div>
-          <div class="col user">
-            <div class="label">tasos@sht.gr</div>
-          </div>
-          <div class="col pass">
-            <div class="label">1234#Abcd</div>
-          </div>
-        </router-link>
+      <div class="entries scroll-view">
+        <div class="scroll-overlay" v-on:scroll="scrollView">
+          <div v-for="(entry, i) in entries" :key="i" class="dummy"></div>
+        </div>
+        <!-- <div
+          class="scroll-area"
+          v-on:scroll="scrollView"
+          v-on:mouseover="mouseover"
+          v-on:mouseleave="mouseleave"
+        > -->
+        <div class="scroll-area">
+          <router-link
+            v-for="(entry, i) in entries"
+            :key="i"
+            class="row entry card"
+            :to="{ path: '/site/' + i + '/edit' }"
+          >
+            <div class="col icon">
+              <img src="/assets/images/logos/medium-logo.png" />
+            </div>
+            <div class="col name">
+              <div class="label">Medium</div>
+            </div>
+            <div class="col user">
+              <div class="label">tasos@sht.gr</div>
+            </div>
+            <div class="col pass">
+              <div class="label">1234#Abcd</div>
+            </div>
+          </router-link>
+        </div>
         <!-- </simplebar> -->
       </div>
     </div>
@@ -75,6 +86,7 @@ export default {
   },
   data() {
     return {
+      over: false,
       showEditModal: false,
       entries: [
         {},
@@ -119,6 +131,35 @@ export default {
       } else {
         this.showEditModal = false;
       }
+    }
+  },
+  methods: {
+    scrollView(event) {
+      if (event.target.classList.contains("scroll-overlay")) {
+        if (!this.over) {
+          event.target.parentNode.querySelector(".scroll-area").scrollTop =
+            event.target.scrollTop;
+        }
+      } else {
+        if (this.over) {
+          event.target.parentNode.querySelector(".scroll-overlay").scrollTop =
+            event.target.scrollTop;
+        }
+      }
+      // console.log(event);
+      // console.log();
+      // event.target.parentNode.dispatchEvent(new Event("scroll", event));
+      // console.log(event.target.parentNode.querySelector(".scroll-area"));
+      // console.log(event.target);
+    },
+    scrolls() {
+      console.log("Scroll triggered");
+    },
+    mouseover() {
+      this.over = true;
+    },
+    mouseleave() {
+      this.over = false;
     }
   }
 };

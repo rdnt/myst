@@ -5,15 +5,25 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/sht/myst/go/crypto"
 	"io"
 	"os"
+
+	"github.com/google/uuid"
+	"github.com/sht/myst/go/crypto"
 )
 
 // store holds the keystore in-memory
 var store Keystore
 var key []byte
+
+// func SaveToFS() {
+// 	filename := ""
+// 	data := []byte{}
+// 	err := ioutil2.WriteFileAtomic(filename, data, 0664)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
 
 var ErrNoEntry = fmt.Errorf("entry not found")
 var ErrNotModified = fmt.Errorf("keystore not modified")
@@ -22,6 +32,7 @@ var ErrAuthFailed = fmt.Errorf("authentication failed")
 // Keystore holds all the data
 type Keystore struct {
 	modified bool
+	ID       string            `json:"id"`
 	Entries  map[string]*Entry `json:"entries"`
 }
 
@@ -34,22 +45,81 @@ type Entry struct {
 	Password string `json:"password"`
 }
 
-func Decrypt(data []byte, password string) (*Keystore, error) {
+// func DecryptOld(data []byte, password string) (*Keystore, error) {
+// 	if len(data) == 0 {
+// 		store := Keystore{
+// 			ID:       uuid.New().String(),
+// 			Entries:  map[string]*Entry{},
+// 			modified: true,
+// 		}
+// 		return &store, nil
+// 	}
+//
+// 	p := crypto.GetArgon2IdParams()
+//
+// 	salt := data[:p.SaltLength]
+// 	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
+// 	data = data[p.SaltLength+sha256.Size:]
+//
+// 	key := crypto.Argon2Id([]byte(password), salt)
+//
+// 	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
+// 	if !valid {
+// 		return nil, ErrAuthFailed
+// 	}
+//
+// 	// Decrypt keystore
+// 	data, err := crypto.AES256CBC_Decrypt(key, data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// Decode decrypted keystore from json
+// 	err = json.Unmarshal(data, &store)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// Return the keystore
+// 	return &store, nil
+// }
+
+func GenerateHash(data, password []byte) ([]byte, error) {
+
+	return nil, nil
+}
+
+// func Decrypt(data []byte, key []byte) ([]byte, error) {
+// 	if len(data) == 0 {
+// 		return []byte{}, nil
+// 	}
+//
+// 	p := crypto.GetArgon2IdParams()
+//
+// 	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
+// 	data = data[p.SaltLength+sha256.Size:]
+//
+// 	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
+// 	if !valid {
+// 		return nil, ErrAuthFailed
+// 	}
+//
+// 	// Decrypt keystore
+// 	data, err := crypto.AES256CBC_Decrypt(key, data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// Decode decrypted keystore from json
+// 	return data, nil
+// }
+
+func Decrypt(data []byte, key []byte) ([]byte, error) {
 	if len(data) == 0 {
-		store := Keystore{
-			modified: true,
-			Entries:  map[string]*Entry{},
-		}
-		return &store, nil
+		return []byte{}, nil
 	}
 
 	p := crypto.GetArgon2IdParams()
 
-	salt := data[:p.SaltLength]
 	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
 	data = data[p.SaltLength+sha256.Size:]
-
-	key := crypto.Argon2Id([]byte(password), salt)
 
 	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
 	if !valid {
@@ -62,17 +132,117 @@ func Decrypt(data []byte, password string) (*Keystore, error) {
 		return nil, err
 	}
 	// Decode decrypted keystore from json
-	err = json.Unmarshal(data, &store)
+	return data, nil
+}
+
+// func DecryptWithPass(data []byte, password string) ([]byte, error) {
+// 	if len(data) == 0 {
+// 		return []byte{}, nil
+// 	}
+//
+// 	p := crypto.GetArgon2IdParams()
+//
+// 	salt := data[:p.SaltLength]
+// 	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
+// 	data = data[p.SaltLength+sha256.Size:]
+//
+// 	key := crypto.Argon2Id([]byte(password), salt)
+//
+// 	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
+// 	if !valid {
+// 		return nil, ErrAuthFailed
+// 	}
+//
+// 	// Decrypt keystore
+// 	data, err := crypto.AES256CBC_Decrypt(key, data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// Decode decrypted keystore from json
+// 	return data, nil
+// }
+
+func (ks *Keystore) Encrypt(password string) ([]byte, error) {
+	p := crypto.GetArgon2IdParams()
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
 	if err != nil {
 		return nil, err
 	}
-	// Return the keystore
-	return &store, nil
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	// Encode to json
+	data, err := json.Marshal(ks)
+	if err != nil {
+		return nil, err
+	}
+
+	// Encrypt keystore
+	data, err = crypto.AES256CBC_Encrypt(key, data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Authenticate ciphertext
+	mac := crypto.HMAC_SHA256(key, data)
+	data = append(mac, data...)
+	data = append(salt, data...)
+
+	// Return encrypted keystore as bytes slice
+	return data, nil
+}
+
+func EncryptWithPass(data []byte, password string) ([]byte, error) {
+
+	p := crypto.GetArgon2IdParams()
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return nil, err
+	}
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	// Encrypt keystore
+	data, err = crypto.AES256CBC_Encrypt(key, data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Authenticate ciphertext
+	mac := crypto.HMAC_SHA256(key, data)
+	data = append(mac, data...)
+	data = append(salt, data...)
+
+	// Return encrypted keystore as bytes slice
+	return data, nil
+}
+
+func Encrypt(data []byte, key []byte) ([]byte, error) {
+
+	p := crypto.GetArgon2IdParams()
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return nil, err
+	}
+
+	// Encrypt keystore
+	data, err = crypto.AES256CBC_Encrypt(key, data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Authenticate ciphertext
+	mac := crypto.HMAC_SHA256(key, data)
+	data = append(mac, data...)
+	data = append(salt, data...)
+
+	// Return encrypted keystore as bytes slice
+	return data, nil
 }
 
 func Load(path string) ([]byte, error) {
 	// Acquire file handle
-	f, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(path, os.O_RDONLY, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -132,6 +302,47 @@ func (ks *Keystore) Save(path, password string) error {
 	return nil
 }
 
+func (ks *Keystore) Save2(path, password string) error {
+	if !ks.modified {
+		return ErrNotModified
+	}
+
+	ks.ID = uuid.New().String()
+
+	p := crypto.GetArgon2IdParams()
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return err
+	}
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	// Encode to json
+	data, err := json.Marshal(ks)
+	if err != nil {
+		return err
+	}
+
+	// Encrypt keystore
+	data, err = crypto.AES256CBC_Encrypt(key, data)
+	if err != nil {
+		return err
+	}
+
+	// Authenticate ciphertext
+	mac := crypto.HMAC_SHA256(key, data)
+	data = append(mac, data...)
+	data = append(salt, data...)
+
+	// Write encrypted keystore to file
+	// filename := "data/keystores/" + ks.ID + ".mst"
+	// err = ioutil2.WriteFileAtomic(filename, data, 0664)
+	// if err != nil {
+	// 	return err
+	// }
+	return nil
+}
+
 // String implements the stringer interface
 func (ks *Keystore) String() string {
 	data, err := json.Marshal(ks)
@@ -147,10 +358,7 @@ func (ks *Keystore) Add(email, password string) (*Entry, error) {
 	}
 	var entry *Entry
 	for {
-		uid, err := uuid.NewV4()
-		if err != nil {
-			return nil, err
-		}
+		uid := uuid.New()
 		id := uid.String()
 		if _, exists := ks.Entries[id]; !exists {
 			entry = &Entry{
@@ -188,3 +396,34 @@ func (ks *Keystore) Get(id string) (*Entry, error) {
 	return ks.Entries[id], nil
 
 }
+
+func GenerateDecryptionKey(data, pass, salt []byte) {
+	if len(salt) == 0 {
+
+	}
+}
+
+// func EncryptWithPass(data []byte, password string) ([]byte, error) {
+//
+// 	p := crypto.GetArgon2IdParams()
+// 	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	key := crypto.Argon2Id([]byte(password), salt)
+//
+// 	// Encrypt keystore
+// 	data, err = crypto.AES256CBC_Encrypt(key, data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// Authenticate ciphertext
+// 	mac := crypto.HMAC_SHA256(key, data)
+// 	data = append(mac, data...)
+// 	data = append(salt, data...)
+//
+// 	// Return encrypted keystore as bytes slice
+// 	return data, nil
+// }

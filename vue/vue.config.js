@@ -1,6 +1,7 @@
 const path = require("path");
 
 module.exports = {
+  // entry: ["@babel/polyfill", "src"],
   outputDir: path.resolve(__dirname, "../static/"),
   chainWebpack: config => {
     // config.optimization.delete('splitChunks')
@@ -8,6 +9,7 @@ module.exports = {
     config.module.rule('eslint').use('eslint-loader').options({
       fix: true,
     });
+
 
 
     config.experiments = { asyncWebAssembly: true, importAsync: true };
@@ -18,8 +20,8 @@ module.exports = {
     //    .use('wasm-loader')
     //    .loader('wasm-loader')
 
-      //  test: /\.wasm$/,
-      // loaders: ['wasm-loader']
+    //  test: /\.wasm$/,
+    // loaders: ['wasm-loader']
 
   },
   devServer: {

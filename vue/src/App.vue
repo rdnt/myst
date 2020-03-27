@@ -17,7 +17,7 @@ import SystemBar from "./components/SystemBar.vue";
 import Preloader from "./components/Preloader.vue";
 import Navigation from "./components/Navigation.vue";
 import Login from "./components/Login.vue";
-
+// import Keystore from "@/keystore";
 // import Search from "./components/Search.vue";
 // import Authenticator from "./components/Authenticator.vue";
 // import PasswordGenerator from "./components/Generator.vue";
@@ -41,21 +41,11 @@ export default {
       client: "browser"
     };
   },
-  created() {
-    // this.$store.dispatch('initialize')
-    // this.$socket.onopen = () => {
-    //   this.$store.dispatch("get", "sites");
-    //   // this.$store.send('getSites', '')
-    //   // this.$store.commit('initialize')
-    // };
-    // setTimeout(() => {
-    //
-    // }, 1000)
-  },
-  mounted() {
-    // console.log(this.$wasm.test());
-  }
+  created() {},
+  mounted() {}
 };
+
+// eslint-disable-next-line no-unused-vars
 </script>
 
 <style lang="scss">

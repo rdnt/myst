@@ -1,6 +1,7 @@
 package router
 
 import (
+	// "fmt"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"

@@ -1,10 +1,16 @@
+# environment variables
 /*.env.*
 !.env.development
+
+# automation
 /.fsw.json
 /*.bat
+
+# generated
+/logs
+/data
 /tmp
 /build
-/logs
 /cert
 /static
 *.mst

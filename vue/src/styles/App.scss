@@ -44,6 +44,7 @@ html, body {
     //     transition: .3s ease;
     // }
     main {
+        backface-visibility: hidden;
         // box-sizing: border-box;
         // padding: 40px;
         // max-height: calc(100vh - 84px);
@@ -55,14 +56,20 @@ html, body {
         // overflow-y: auto;
         // backface-visibility: hidden;
         // transform-origin: 50% 50%;
-        pointer-events: all;
-        opacity: 1;
-        transform: scale(1);
-        transition: .3s ease;
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(.975);
+        transition: transform .3s ease, opacity .3s ease;
         // opacity: 0;
+        // &.show {
+        //     // transform: scale(1);
+        //     opacity: 1;
+        //     pointer-events: all;
+        // }
         &.show {
-            // transform: scale(1);
             opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
         }
         #container {
             position: absolute;

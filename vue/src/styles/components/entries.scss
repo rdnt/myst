@@ -80,10 +80,10 @@
         // border-radius: 15px;
         // overflow: hidden;
         .header {
-            height: 60px;
+            height: 50px;
             background: #fff;
             font-size: .9rem;
-            line-height: 80px;
+            // line-height: 50px;
             // padding: 0 30px;
             font-family: 'Axiforma';
             font-weight: 400;
@@ -104,7 +104,7 @@
             display: block;
             float: left;
             height: 100%;
-            line-height: 60px;
+            line-height: 50px;
             // font-size: 1.1rem;
             // font-weight: 500;
             // padding-left: 10px;
@@ -130,7 +130,7 @@
             // margin-right: 10px;
             font-size: 1.1rem;
             background: #00f;
-            height: 60px;
+            height: 50px;
             background: #fff;
             font-family: 'Assistant';
             // transition: .15s ease;
@@ -174,8 +174,12 @@
                     display: block;
                     height: 30px;
                     width: 30px;
-                    padding: 15px;
+                    padding: 10px;
                 }
+            }
+            background-color: rgba(#285deb, .2);
+            &:focus {
+                outline: 0;
             }
         }
 

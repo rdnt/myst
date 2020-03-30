@@ -2,9 +2,8 @@ import Vue from "vue";
 import Vuex from "vuex";
 import * as util from "@/util";
 import sites from "./modules/sites";
-import uuidv4 from "uuid/v4";
+// import { v4 as uuidv4 } from "uuid";
 
-console.log(util.supportsWebAssembly);
 const state = {
   loggedIn: false,
   socket: {
@@ -29,46 +28,46 @@ export default new Vuex.Store({
   state,
   strict: debug,
   actions: {
-    get: function(_, type) {
-      var id = Math.random()
-        .toString()
-        .slice(2, 10);
-      id = uuidv4();
-      var msg = {
-        id: id,
-        action: "get",
-        type: type
-      };
-      Vue.prototype.$socket.send(JSON.stringify(msg));
-      // Vue.prototype.$socket.onmessage = message => {
-      //     if (message) {
-      //         try {
-      //             var response = JSON.parse(message.data)
-      //         } catch (e) {
-      //             console.log(e)
-      //         }
-      //     }
-      //     // if (response['id'] == id) {
-      //     //     return response
-      //     // } else {
-      //     //     console.log('response ignored')
-      //     // }
-      // }
-      Vue.prototype.$socket.onmessage = message => {
-        if (message) {
-          try {
-            var response = JSON.parse(message.data);
-          } catch (error) {
-            // console.log(error)
-          }
-          if (response["id"] === id) {
-            this.commit("sites/setSites", response.data);
-          } else {
-            // console.log('response ignored')
-          }
-        }
-      };
-    }
+    // get: function(_, type) {
+    //   var id = Math.random()
+    //     .toString()
+    //     .slice(2, 10);
+    //   // id = uuidv4();
+    //   // var msg = {
+    //   //   id: id,
+    //   //   action: "get",
+    //   //   type: type
+    //   // };
+    //   // Vue.prototype.$socket.send(JSON.stringify(msg));
+    //   // Vue.prototype.$socket.onmessage = message => {
+    //   //     if (message) {
+    //   //         try {
+    //   //             var response = JSON.parse(message.data)
+    //   //         } catch (e) {
+    //   //             console.log(e)
+    //   //         }
+    //   //     }
+    //   //     // if (response['id'] == id) {
+    //   //     //     return response
+    //   //     // } else {
+    //   //     //     console.log('response ignored')
+    //   //     // }
+    //   // }
+    //   Vue.prototype.$socket.onmessage = message => {
+    //     if (message) {
+    //       try {
+    //         var response = JSON.parse(message.data);
+    //       } catch (error) {
+    //         // console.log(error)
+    //       }
+    //       if (response["id"] === id) {
+    //         this.commit("sites/setSites", response.data);
+    //       } else {
+    //         // console.log('response ignored')
+    //       }
+    //     }
+    //   };
+    // }
   },
   mutations: {
     SOCKET_ONOPEN(state, event) {
@@ -92,6 +91,10 @@ export default new Vuex.Store({
     // },
     SOCKET_RECONNECT_ERROR(state) {
       state.socket.reconnectError = true;
+    },
+
+    login(state) {
+      state.loggedIn = true;
     }
   }
 });

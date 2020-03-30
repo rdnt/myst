@@ -3,7 +3,7 @@
     <system-bar v-if="client == 'electron'"></system-bar>
     <preloader></preloader>
     <login></login>
-    <main class="transition">
+    <main class="transition" :class="{ show: loggedIn }">
       <navigation></navigation>
       <div id="container">
         <router-view></router-view>
@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import SystemBar from "./components/SystemBar.vue";
 import Preloader from "./components/Preloader.vue";
 import Navigation from "./components/Navigation.vue";
@@ -41,6 +42,9 @@ export default {
       client: "browser"
     };
   },
+  computed: mapState({
+    loggedIn: state => state.loggedIn
+  }),
   created() {},
   mounted() {}
 };

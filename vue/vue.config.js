@@ -6,11 +6,12 @@ module.exports = {
   chainWebpack: config => {
     // config.optimization.delete('splitChunks')
     config.resolve.symlinks(false);
-    config.module.rule('eslint').use('eslint-loader').options({
-      fix: true,
-    });
-
-
+    config.module
+      .rule("eslint")
+      .use("eslint-loader")
+      .options({
+        fix: true
+      });
 
     config.experiments = { asyncWebAssembly: true, importAsync: true };
 
@@ -22,7 +23,6 @@ module.exports = {
 
     //  test: /\.wasm$/,
     // loaders: ['wasm-loader']
-
   },
   devServer: {
     public: "0.0.0.0:8081",
@@ -32,18 +32,18 @@ module.exports = {
     contentBasePublicPath: "/assets/",
     // publicPath: "./assets/",
     proxy: {
-      '/api': {
-        target: 'http://0.0.0.0:8080',
+      "/api": {
+        target: "http://0.0.0.0:8080",
         ws: true,
         changeOrigin: true,
-        hostRewrite: true,
-      },
+        hostRewrite: true
+      }
       // '/assets': {
       //   target: 'http://0.0.0.0:8081/',
       //   // changeOrigin: true,
       //   // hostRewrite: true,
       // },
-    },
+    }
   },
   pluginOptions: {
     "style-resources-loader": {

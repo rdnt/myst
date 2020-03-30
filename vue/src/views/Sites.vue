@@ -59,7 +59,7 @@
               <div class="label">tasos@sht.gr</div>
             </div>
             <div class="col pass">
-              <div class="label">1234#Abcd</div>
+              <div class="label">Ex4mplePassw0rd</div>
             </div>
           </router-link>
         </div>

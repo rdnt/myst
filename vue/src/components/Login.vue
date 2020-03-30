@@ -1,16 +1,43 @@
 <template>
   <div id="login" :class="{ show: !loggedIn }">
-    <form>
-      <img class="logo" src="/assets/images/vault.svg" alt="" />
-      <input
-        class="field"
-        name="PASSWORD"
-        placeholder="PASSWORD"
-        type="password"
-        autocomplete="off"
-        autofocus
+    <div id="loader"></div>
+    <div class="form">
+      <img
+        class="logo"
+        :class="{ submitting: loggingIn }"
+        src="/assets/images/vault.svg"
+        alt=""
       />
-    </form>
+      <div class="label">Master Password</div>
+      <div class="master-password">
+        <input
+          class="field placeholder"
+          type="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          :value="placeholder"
+          tabindex="-1"
+        />
+        <input
+          class="field"
+          type="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          autofocus
+          v-model="password"
+          @keydown.enter="setEnter(true)"
+          @keyup="setEnter(false)"
+          @focusout="setEnter(false)"
+        />
+      </div>
+      <div class="prompt" :class="{ 'enter-pressed': enter }">
+        Press <span class="code">enter</span> to submit
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,15 +45,38 @@
 import { mapState } from "vuex";
 export default {
   data() {
-    return {};
+    return {
+      password: "",
+      placeholder: "",
+      enter: false,
+      loggingIn: false
+    };
   },
   computed: mapState({
     loggedIn: state => state.loggedIn
   }),
-  mounted() {
-    setTimeout(() => {
-      this.login = true;
-    }, 2500);
+  mounted() {},
+  watch: {
+    password: function() {
+      this.placeholder = "•".repeat(this.password.length);
+    }
+  },
+  methods: {
+    setPassword(event) {
+      this.password = event.target.value;
+    },
+    setEnter(pressed) {
+      this.enter = pressed;
+      if (pressed) {
+        // calculate hash and login
+        // this.loggingIn = true;
+        // setTimeout(() => {
+        //   this.loggingIn = false;
+        // }, 1000);
+
+        this.$store.commit("login");
+      }
+    }
   }
 };
 </script>

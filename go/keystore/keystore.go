@@ -45,42 +45,42 @@ type Entry struct {
 	Password string `json:"password"`
 }
 
-// func DecryptOld(data []byte, password string) (*Keystore, error) {
-// 	if len(data) == 0 {
-// 		store := Keystore{
-// 			ID:       uuid.New().String(),
-// 			Entries:  map[string]*Entry{},
-// 			modified: true,
-// 		}
-// 		return &store, nil
-// 	}
-//
-// 	p := crypto.GetArgon2IdParams()
-//
-// 	salt := data[:p.SaltLength]
-// 	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
-// 	data = data[p.SaltLength+sha256.Size:]
-//
-// 	key := crypto.Argon2Id([]byte(password), salt)
-//
-// 	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
-// 	if !valid {
-// 		return nil, ErrAuthFailed
-// 	}
-//
-// 	// Decrypt keystore
-// 	data, err := crypto.AES256CBC_Decrypt(key, data)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// Decode decrypted keystore from json
-// 	err = json.Unmarshal(data, &store)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// Return the keystore
-// 	return &store, nil
-// }
+func DecryptOld(data []byte, password string) (*Keystore, error) {
+	if len(data) == 0 {
+		store := Keystore{
+			ID:       uuid.New().String(),
+			Entries:  map[string]*Entry{},
+			modified: true,
+		}
+		return &store, nil
+	}
+
+	p := crypto.GetArgon2IdParams()
+
+	salt := data[:p.SaltLength]
+	mac := data[p.SaltLength : sha256.Size+p.SaltLength]
+	data = data[p.SaltLength+sha256.Size:]
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	valid := crypto.VerifyHMAC_SHA256(key, mac, data)
+	if !valid {
+		return nil, ErrAuthFailed
+	}
+
+	// Decrypt keystore
+	data, err := crypto.AES256CBC_Decrypt(key, data)
+	if err != nil {
+		return nil, err
+	}
+	// Decode decrypted keystore from json
+	err = json.Unmarshal(data, &store)
+	if err != nil {
+		return nil, err
+	}
+	// Return the keystore
+	return &store, nil
+}
 
 func GenerateHash(data, password []byte) ([]byte, error) {
 

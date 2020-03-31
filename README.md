@@ -1,4 +1,4 @@
-![go-build](https://github.com/SHT/myst/workflows/go-build/badge.svg)
+![go-build](https://github.com/SHT/myst/workflows/go-build/badge.svg) ![vue-build](https://github.com/SHT/myst/workflows/vue-build/badge.svg)
 
 Make sure you have Golang & Node.js w/ NPM installed.  
 Then:

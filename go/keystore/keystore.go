@@ -218,7 +218,6 @@ func EncryptWithPass(data []byte, password string) ([]byte, error) {
 }
 
 func Encrypt(data []byte, key []byte) ([]byte, error) {
-
 	p := crypto.GetArgon2IdParams()
 	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
 	if err != nil {

@@ -1,0 +1,40 @@
+name: gh-pages
+
+on:
+  release:
+    types: [created]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  MYST_DEBUG: false
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+    - name: Checkout
+      id: checkout
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - name: Set up Node.js ${{ matrix.node-version }}
+      id: setup-node
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Build
+      id: build
+      run: run: |
+          npm --prefix vue install
+          npm --prefix vue run build
+    - name: Deploy
+      id: deploy
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: static

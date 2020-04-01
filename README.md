@@ -1,12 +1,4 @@
-![go-build](https://github.com/SHT/myst/workflows/go-build/badge.svg) ![vue-build](https://github.com/SHT/myst/workflows/vue-build/badge.svg)
+[![go-build status](https://github.com/SHT/myst/workflows/go-build/badge.svg)](https://github.com/SHT/myst/actions?query=workflow%3Ago-build)
+[![vue-build status](https://github.com/SHT/myst/workflows/vue-build/badge.svg)](https://github.com/SHT/myst/actions?query=workflow%3Avue-build)
 
-Make sure you have Golang & Node.js w/ NPM installed.  
-Then:
-- Install fswatch:  
-`go get -u -v github.com/codeskyblue/fswatch`
-- Install vue-cli:  
-`npm install -g @vue/cli`
-npm install -g @vue/cli-service-global
-
-cd vue
-npm install
+Myst: The cloudless password manager.

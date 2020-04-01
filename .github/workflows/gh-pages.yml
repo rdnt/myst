@@ -28,7 +28,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Build
       id: build
-      run: run: |
+      run: |
           npm --prefix vue install
           npm --prefix vue run build
     - name: Deploy

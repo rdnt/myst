@@ -53,5 +53,5 @@ export default {
 </script>
 
 <style lang="scss">
-@use "@/styles/App.scss";
+@use "@/styles/App";
 </style>

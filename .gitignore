@@ -5,6 +5,7 @@
 # automation
 /.fsw.json
 /*.bat
+/act
 
 # generated
 /logs

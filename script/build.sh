@@ -14,9 +14,9 @@ if [[ -z "${GOARCH}" ]]; then
 fi
 echo "  detected platform: $GOOS, architecture: $GOARCH"
 if [ $GOOS = windows ]; then
-    go build -o build/server-${GOOS}-${GOARCH}.exe go/server.go
+    go build -o build/server-${GOOS}-${GOARCH}.exe go/main.go
 else
-    go build -o build/server-${GOOS}-${GOARCH} go/server.go
+    go build -o build/server-${GOOS}-${GOARCH} go/main.go
 fi
 echo "Server binary compiled."
 echo "Compiling frontend bundle..."

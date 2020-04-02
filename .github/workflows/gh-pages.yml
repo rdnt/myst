@@ -13,7 +13,6 @@ env:
 
 jobs:
   deploy:
-    uses: peaceiris/actions-gh-pages@v3
     name: deploy
     runs-on: ubuntu-latest
     strategy:
@@ -23,8 +22,6 @@ jobs:
     - name: Checkout
       id: checkout
       uses: actions/checkout@v2
-      with:
-        persist-credentials: false
     - name: Set up Node.js ${{ matrix.node-version }}
       id: setup-node
       uses: actions/setup-node@v1
@@ -40,13 +37,33 @@ jobs:
           cd ..
     - name: Deploy App
       id: app-deploy
+      uses: peaceiris/actions-gh-pages@v3
       with:
         deploy_key: ${{ secrets.ACCESS_TOKEN }}
         publish_dir: ./static
     - name: Deploy Assets
       id: assets-deploy
+      uses: peaceiris/actions-gh-pages@v3
       with:
         deploy_key: ${{ secrets.ASSETS_DEPLOY_KEY }}
         publish_dir: ./assets
         external_repository: SHT/assets
         publish_branch: master
+  deploy-assets:
+    name: deploy-assets
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+    - name: Checkout
+      id: checkout
+      uses: actions/checkout@v2
+    - name: Deploy Assets
+      id: assets-deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+      deploy_key: ${{ secrets.ASSETS_DEPLOY_KEY }}
+      publish_dir: ./assets
+      external_repository: SHT/assets
+      publish_branch: master

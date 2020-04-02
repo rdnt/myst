@@ -33,7 +33,7 @@ jobs:
       id: build
       run: |
           cd vue
-          VUE_APP_PUBLIC_PATH=/myst
+          export VUE_APP_PUBLIC_PATH=/myst
           npm install
           npm run build
           cd ..

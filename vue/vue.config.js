@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  // entry: ["@babel/polyfill", "src"],
+  publicPath: process.env.VUE_APP_PUBLIC_PATH ? process.env.VUE_APP_PUBLIC_PATH : "/",
   outputDir: path.resolve(__dirname, "../static/"),
   chainWebpack: config => {
     // config.optimization.delete('splitChunks')

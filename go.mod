@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-errors/errors v1.0.2
 	github.com/google/uuid v1.1.1
-	github.com/gookit/color v1.2.4
+	github.com/gookit/color v1.2.9
 	github.com/joho/godotenv v1.3.0
 	github.com/unrolled/secure v1.0.7
 	github.com/vitessio/vitess v2.1.1+incompatible

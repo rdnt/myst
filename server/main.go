@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sht/myst/go/config"
-	"github.com/sht/myst/go/logger"
-	"github.com/sht/myst/go/regex"
-	"github.com/sht/myst/go/router"
+	"github.com/sht/myst/server/config"
+	"github.com/sht/myst/server/logger"
+	"github.com/sht/myst/server/regex"
+	"github.com/sht/myst/server/router"
 	"net"
 	"net/http"
 )

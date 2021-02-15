@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/sht/myst/go/crypto"
+	"github.com/sht/myst/server/crypto"
 )
 
 // store holds the keystore in-memory

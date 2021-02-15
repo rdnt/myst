@@ -3,7 +3,7 @@ package routes
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sht/myst/go/responses"
+	"github.com/sht/myst/server/responses"
 	"gopkg.in/go-playground/validator.v9"
 	"strconv"
 )

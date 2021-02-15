@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if ! go fmt ./server/...; then
+    exit
+fi
+
+if ! go build -o tmp/server server/main.go; then
+    exit
+fi
+
+tmp/server

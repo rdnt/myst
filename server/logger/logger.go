@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/color"
-	"github.com/sht/myst/go/config"
+	"github.com/sht/myst/server/config"
 	"log"
 	"os"
 	"strings"

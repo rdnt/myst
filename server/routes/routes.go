@@ -3,9 +3,9 @@ package routes
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sht/myst/go/keystore"
-	"github.com/sht/myst/go/logger"
-	"github.com/sht/myst/go/responses"
+	"github.com/sht/myst/server/keystore"
+	"github.com/sht/myst/server/logger"
+	"github.com/sht/myst/server/responses"
 	"strings"
 )
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/sht/myst/go/database"
-	"github.com/sht/myst/go/keystore"
+	"github.com/sht/myst/server/database"
+	"github.com/sht/myst/server/keystore"
 )
 
 func GetKeystore(c *gin.Context) {

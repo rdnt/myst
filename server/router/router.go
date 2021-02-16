@@ -1,47 +1,30 @@
 package router
 
 import (
-	// "fmt"
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-errors/errors"
-	"github.com/sht/myst/server/config"
-	"github.com/sht/myst/server/logger"
-	"github.com/sht/myst/server/regex"
-	"github.com/sht/myst/server/responses"
-	"github.com/sht/myst/server/routes"
-	"github.com/unrolled/secure"
-	"gopkg.in/go-playground/validator.v9"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/http/httputil"
 	"strings"
+	"time"
+
+	"myst/server/api"
+	"myst/server/config"
+	"myst/server/logger"
+	"myst/server/responses"
+
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	"github.com/go-errors/errors"
+	cors "github.com/rs/cors/wrapper/gin"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
 )
 
-var validateRegex validator.Func = func(fl validator.FieldLevel) bool {
-	// name := fl.FieldName()
-	rex := fl.Param()
-	val := fl.Field().String()
-	match := regex.Match(rex, val)
-	if !match {
-		// routes.Invalidate(
-		// 	c,
-		// 	name,
-		// 	"Validation failed for field "+name,
-		// )
-		return false
-	}
-	return true
-}
+var (
+	log = logger.NewLogger("router", logger.GreenFg)
+)
 
 func Init() *gin.Engine {
-	// cwd, err := os.Getwd()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// Disable console color by default
-	gin.DisableConsoleColor()
 	// Set gin mode
 	if config.Debug {
 		gin.SetMode(gin.DebugMode)
@@ -53,98 +36,63 @@ func Init() *gin.Engine {
 	// Create gin router instance
 	r := gin.New()
 	// Do not redirect folders to trailing slash
-	r.RedirectTrailingSlash = false
-	r.RedirectFixedPath = false
+	r.RedirectTrailingSlash = true
+	r.RedirectFixedPath = true
 	// Log to stdout and stderr by default
-	if config.Debug {
-		gin.DefaultWriter = &logger.StdoutLogger
-		gin.DefaultErrorWriter = &logger.StderrLogger
-	} else {
-		gin.DefaultWriter = &logger.AccessLogger
-		gin.DefaultErrorWriter = &logger.ErrorLogger
-	}
 	// Custom PrintRouteFunc
-	gin.DebugPrintRouteFunc = logger.PrintRoutes
-	// Always use recovery middleware
+	gin.DebugPrintRouteFunc = PrintRoutes
+	// always use recovery middleware
 	r.Use(Recovery(RecoveryHandler))
-	// Initialize custom console & file logging middleware
-	consoleLogger := gin.LoggerWithConfig(gin.LoggerConfig{
-		Formatter: logger.ConsoleFormatter,
-		Output:    &logger.StdoutLogger,
-		SkipPaths: []string{},
-	})
-	fileLogger := gin.LoggerWithConfig(gin.LoggerConfig{
-		Formatter: logger.LogFormatter,
-		Output:    &logger.AccessLogger,
-		SkipPaths: []string{},
-	})
-	// Enable logging to console & logfiles if debugging, else only log to logfiles
+	// custom logging middleware
+	r.Use(LoggerMiddleware)
+	// metrics
 	if config.Debug {
-		r.Use(consoleLogger)
-		r.Use(fileLogger)
-	} else {
-		r.Use(fileLogger)
+		p := ginprometheus.NewPrometheus("gin")
+		p.Use(r)
 	}
-
-	// r.Use(HTTPSRedirect())
-
-	v, ok := binding.Validator.Engine().(*validator.Validate)
-	if ok {
-		v.RegisterValidation("regex", validateRegex)
-	}
-
-	// Attach client error collecting middleware
-	r.Use(Pusher())
-	r.Use(ClientErrors())
-	r.Use(static.Serve("/", static.LocalFile("static", false)))
-	// r.Use(static.Serve("/assets/", static.LocalFile(cwd+"/../assets", false)))
-	// r.Static("/assets", "assets")
-	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
-
-	// 404 handling
-
+	// error 404 handling
 	r.NoRoute(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, "/api") {
-			rsp := responses.NewHTTPError(404)
-			c.JSON(404, rsp)
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			// serve a json 404 error if it's an API call
+			data := responses.NewErrorResponse(404, "Route not found")
+			c.JSON(404, data)
 			c.Abort()
 		} else {
+			// serve ui and let it handle the error otherwise
 			c.File("static/index.html")
 			c.Abort()
 		}
 	})
-	r.RedirectTrailingSlash = true
-	r.RedirectFixedPath = true
 
-	// Initialize the rest of the routes
-	routes.Init(r)
+	// Attach static serve middleware for / and /assets
+	r.Use(static.Serve("/", static.LocalFile("static", false)))
+	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
+
+	r.Use(cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:80", "http://localhost:8081"},
+		// TODO allow more methods (DELETE?)
+		AllowedMethods: []string{http.MethodGet, http.MethodPost},
+		// TODO expose ratelimiting headers
+		ExposedHeaders: []string{},
+		// TODO check if we can disable this on release mode so that no
+		// authorization tokens are passed on to the frontend.
+		// No harm, but no need either.
+		// Required to pass authentication headers on development environment
+		AllowCredentials: true,
+		Debug:            false, // too verbose, only enable for testing CORS
+	}))
+
+	// Pass fizz to route handlers
+	api.Init(r)
+
 	return r
 }
 
-func HTTPSRedirect() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		sec := secure.New(secure.Options{
-			SSLRedirect: true,
-			// Don't redirect when in debug mode
-			IsDevelopment: config.Debug,
-		})
-		err := sec.Process(c.Writer, c.Request)
-		// If there was an error abort handlers and return
-		if err != nil {
-			c.Abort()
-			return
-		}
-		// Prevents errors due to headers already being sent
-		if status := c.Writer.Status(); status > 300 && status < 399 {
-			c.Abort()
-		}
-	}
-}
-
+// RecoveryHandler sends a 500 response if a panic occurs during serving
 func RecoveryHandler(c *gin.Context, err interface{}) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// If error occured in an API route print JSON error response
-		data := responses.NewHTTPError(500)
+		// If error occurred in an API route print JSON error response
+		data := responses.NewErrorResponse(500, nil)
 		c.JSON(500, data)
 		c.Abort()
 	} else {
@@ -155,43 +103,83 @@ func RecoveryHandler(c *gin.Context, err interface{}) {
 	}
 }
 
-// ClientErrorsMiddleware initializes the validation errors slice and stores
-// it in the context
-func ClientErrors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Initialize validation errors slice
-		c.Set("errors", []responses.Error{})
-		// Pass onto the next handler
-		c.Next()
-	}
-}
-
-func Pusher() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if c.Request.URL.Path == "/" {
-			PushAssets(c)
-		}
-	}
-}
-
-func PushAssets(c *gin.Context) {
-	p := c.Writer.Pusher()
-	if p == nil {
-		return
-	}
-	p.Push("/assets/images/logo.svg", nil)
-}
-
+// Recovery is a panic recovery middleware
 func Recovery(f func(c *gin.Context, err interface{})) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				httprequest, _ := httputil.DumpRequest(c.Request, false)
 				goErr := errors.Wrap(err, 3)
-				logger.Errorf("RECOVERY", "Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
+				log.Errorf("Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
 				f(c, err)
 			}
 		}()
 		c.Next()
+	}
+}
+
+// PrintRoutes prints all active routes to the console on startup
+func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
+	if handlerName == "" {
+		return
+	}
+	log.Debugf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
+}
+
+func LoggerMiddleware(c *gin.Context) {
+	// Start timer
+	start := time.Now()
+	// Process request
+	c.Next()
+	// calculate latency
+	latency := time.Since(start)
+
+	path := c.Request.URL.Path
+	query := c.Request.URL.RawQuery
+	if query != "" {
+		path = path + "?" + query
+	}
+
+	status := c.Writer.Status()
+	method := c.Request.Method
+
+	log.Printf(
+		"%5s  %13v  %15s  %-21s  %s\n%s",
+		logger.Colorize(fmt.Sprintf(" %d ", status), StatusColor(status)),
+		latency,
+		c.ClientIP(),
+		logger.Colorize(fmt.Sprintf(" %s ", method), MethodColor(method)),
+		path,
+		c.Errors.ByType(gin.ErrorTypePrivate).String(),
+	)
+}
+
+func StatusColor(status int) logger.Color {
+	switch {
+	case status >= http.StatusOK && status < http.StatusMultipleChoices:
+		return logger.GreenBg | logger.BlackFg
+	case status >= http.StatusMultipleChoices && status < http.StatusBadRequest:
+		return logger.WhiteBg | logger.BlackFg
+	case status >= http.StatusBadRequest && status < http.StatusInternalServerError:
+		return logger.YellowBg | logger.BlackFg
+	default:
+		return logger.RedBg | logger.BlackFg
+	}
+}
+
+func MethodColor(method string) logger.Color {
+	switch method {
+	case http.MethodGet:
+		return logger.GreenBg | logger.BlackFg
+	case http.MethodPost:
+		return logger.YellowBg | logger.BlackFg
+	case http.MethodPut:
+		return logger.BlueBg | logger.BlackFg
+	case http.MethodPatch:
+		return logger.CyanBg | logger.BlackFg
+	case http.MethodDelete:
+		return logger.RedBg | logger.BlackFg
+	default:
+		return logger.BlackBg
 	}
 }

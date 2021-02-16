@@ -1,11 +1,11 @@
-package routes
+package api
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sht/myst/server/keystore"
-	"github.com/sht/myst/server/logger"
-	"github.com/sht/myst/server/responses"
+	"myst/server/keystore"
+	"myst/server/logger"
+	"myst/server/responses"
 	"strings"
 )
 
@@ -15,7 +15,7 @@ func AuthenticationRequired() gin.HandlerFunc {
 		// Remove the "Bearer" prefix
 		parts := strings.Split(auth, "Bearer")
 		if len(parts) != 2 {
-			rsp := responses.NewHTTPError(400)
+			rsp := responses.NewErrorResponse(400, nil)
 			c.JSON(400, rsp)
 			c.Abort()
 			return
@@ -25,7 +25,7 @@ func AuthenticationRequired() gin.HandlerFunc {
 
 		if auth == "" {
 			fmt.Println("authorization required")
-			rsp := responses.NewHTTPError(403)
+			rsp := responses.NewErrorResponse(403, nil)
 			c.JSON(403, rsp)
 			c.Abort()
 			return
@@ -34,7 +34,7 @@ func AuthenticationRequired() gin.HandlerFunc {
 		raw, err := keystore.Load("keystore.mst")
 		if err != nil {
 			logger.Errorf("KEYSTORE", err)
-			HTTPError(c, 500)
+			Error(c, 500, nil)
 			c.Abort()
 			return
 		}
@@ -42,7 +42,7 @@ func AuthenticationRequired() gin.HandlerFunc {
 		_, err = keystore.DecryptOld(raw, auth)
 		if err != nil {
 			logger.Errorf("KEYSTORE", err)
-			HTTPError(c, 403)
+			Error(c, 403, nil)
 			c.Abort()
 			return
 		}
@@ -100,21 +100,21 @@ func GetEntries(c *gin.Context) {
 	raw, err := keystore.Load("keystore.mst")
 	if err != nil {
 		logger.Errorf("KEYSTORE", err)
-		HTTPError(c, 500)
+		Error(c, 500, nil)
 		return
 	}
 
 	ks, err := keystore.DecryptOld(raw, pass)
 	if err != nil {
 		logger.Errorf("KEYSTORE", err)
-		HTTPError(c, 403)
+		Error(c, 403, nil)
 		return
 	}
 
 	err = ks.Save("keystore.mst", pass)
 	if err != nil {
 		logger.Errorf("KEYSTORE", err)
-		HTTPError(c, 500)
+		Error(c, 500, nil)
 		return
 	}
 

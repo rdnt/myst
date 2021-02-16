@@ -8,27 +8,17 @@
         src="/assets/images/vault.svg"
         alt=""
       />
-      <div class="label">Master Password</div>
+      <div class="label">Myst</div>
       <div class="master-password">
         <input
-          class="field placeholder"
-          type="text"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          :value="placeholder"
-          tabindex="-1"
-        />
-        <input
           class="field"
-          type="text"
+          type="password"
           autocomplete="off"
-          autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
           autofocus
           v-model="password"
+          :placeholder="'master password'"
           @keydown.enter="setEnter(true)"
           @keyup="setEnter(false)"
           @focusout="setEnter(false)"
@@ -47,7 +37,6 @@ export default {
   data() {
     return {
       password: "",
-      placeholder: "",
       enter: false,
       loggingIn: false
     };
@@ -74,7 +63,9 @@ export default {
         //   this.loggingIn = false;
         // }, 1000);
 
-        this.$store.commit("login");
+        setTimeout(() => {
+          this.$store.commit("login");
+        }, 1000);
       }
     }
   }

@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"syscall/js"
 
-	"github.com/sht/myst/go/keystore"
+	"github.com/sht/myst/server/keystore"
 )
 
 func main() {

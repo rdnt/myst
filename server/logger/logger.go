@@ -2,141 +2,248 @@ package logger
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/color"
-	"github.com/sht/myst/server/config"
+	"io/ioutil"
 	"log"
 	"os"
+	"runtime/debug"
 	"strings"
-	"time"
+
+	"myst/server/config"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/mattn/go-colorable"
 )
 
-var routesPrefix = "github.com/sht/myst/go/routes."
+const (
+	DefaultColor = Color(0)
 
-var accessLogWriter *os.File
-var errorLogWriter *os.File
+	BlackFg   = Color(aurora.BlackFg)
+	RedFg     = Color(aurora.RedFg)
+	GreenFg   = Color(aurora.GreenFg)
+	YellowFg  = Color(aurora.YellowFg)
+	BlueFg    = Color(aurora.BlueFg)
+	MagentaFg = Color(aurora.MagentaFg)
+	CyanFg    = Color(aurora.CyanFg)
+	WhiteFg   = Color(aurora.WhiteFg)
 
-var StdoutLogger logger
-var StderrLogger logger
-var AccessLogger logger
-var ErrorLogger logger
+	BlackBg   = Color(aurora.BlackBg)
+	RedBg     = Color(aurora.RedBg)
+	GreenBg   = Color(aurora.GreenBg)
+	YellowBg  = Color(aurora.YellowBg)
+	BlueBg    = Color(aurora.BlueBg)
+	MagentaBg = Color(aurora.MagentaBg)
+	CyanBg    = Color(aurora.CyanBg)
+	WhiteBg   = Color(aurora.WhiteBg)
+)
 
-type logger struct {
-	logger *log.Logger
+var (
+	StdoutWriter   *Writer
+	StderrWriter   *Writer
+	DebugLogWriter *Writer
+	ErrorLogWriter *Writer
+
+	defaultLogger *Logger
+)
+
+type Color int
+
+type Logger struct {
+	stdout   *log.Logger
+	stderr   *log.Logger
+	debugLog *log.Logger
+	errorLog *log.Logger
 }
 
-func (l *logger) Write(p []byte) (n int, err error) {
-	str := color.Sprint(string(p))
-	l.logger.Print(str)
-	// color.Lprint(l.logger, string(p))
-	return 0, nil
+func init() {
+	// create default stdout and stderr loggers before logger init
+	StdoutWriter = NewWriter(colorable.NewColorable(os.Stdout))
+	StderrWriter = NewWriter(colorable.NewColorable(os.Stderr))
+	// initialize default log writers/loggers
+	DebugLogWriter = NewWriter(ioutil.Discard)
+	ErrorLogWriter = NewWriter(ioutil.Discard)
+	// create default logger
+	defaultLogger = NewLogger("SERVER", DefaultColor)
+}
+
+func Colorize(s string, c Color) string {
+	return aurora.Colorize(s, aurora.Color(c)).String()
+}
+
+func NewLogger(prefix string, color Color) *Logger {
+	prefix = strings.ToUpper(prefix)
+	prefix = fmt.Sprintf("[%s] ", prefix)
+	prefix = Colorize(prefix, color)
+	return &Logger{
+		stdout:   log.New(StdoutWriter, prefix, 0),
+		stderr:   log.New(StderrWriter, prefix, log.Lshortfile),
+		debugLog: log.New(DebugLogWriter, prefix, log.Ldate|log.Ltime|log.Lmicroseconds),
+		errorLog: log.New(ErrorLogWriter, prefix, log.Ldate|log.Ltime|log.Lmicroseconds),
+	}
+}
+
+func (l *Logger) print(s string) {
+	s = strings.TrimRight(s, "\n")
+	_ = l.stdout.Output(3, s)
+}
+
+func (l *Logger) debugPrint(s string) {
+	s = strings.TrimRight(s, "\n")
+	_ = l.debugLog.Output(3, s)
+	if config.Debug {
+		_ = l.stdout.Output(3, s)
+	}
+}
+
+func (l *Logger) errorPrint(s string) {
+	s = strings.TrimRight(s, "\n")
+	s = Colorize(s, RedFg)
+	_ = l.errorLog.Output(3, s)
+	if config.Debug {
+		_ = l.stderr.Output(3, s)
+	}
+}
+
+func (l *Logger) tracePrint() {
+	stack := debug.Stack()
+	s := Colorize(string(stack), RedFg)
+	_ = l.errorLog.Output(3, s)
+	if config.Debug {
+		_ = l.stderr.Output(3, s)
+	}
 }
 
 func Init() error {
-	// Create logs folder if it doesn't already exist
+	// create logs folder if it doesn't already exist
 	_, err := os.Stat("logs")
 	if os.IsNotExist(err) {
-		err = os.Mkdir("logs", 0666)
+		err = os.Mkdir("logs", os.ModePerm)
 		if err != nil {
-			fmt.Println(err)
+			_ = defaultLogger.stderr.Output(0, err.Error())
 			return err
 		}
 	}
-	// Assign access and error log writers to their respective files
-	accessLogWriter, err = os.OpenFile("logs/access.log",
-		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	// get debug and error log file
+	debugLog, err := os.OpenFile(
+		"logs/debug.log",
+		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666,
+	)
 	if err != nil {
+		_ = defaultLogger.stderr.Output(0, err.Error())
 		return err
 	}
-	errorLogWriter, err = os.OpenFile("logs/error.log",
-		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	errorLog, err := os.OpenFile(
+		"logs/error.log",
+		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666,
+	)
 	if err != nil {
+		_ = defaultLogger.stderr.Output(0, err.Error())
 		return err
 	}
-
-	flag := log.Ldate | log.Ltime | log.Lmicroseconds
-
-	// Create goroutine-safe loggers
-	StdoutLogger.logger = log.New(os.Stdout, "", 0)
-	StderrLogger.logger = log.New(os.Stderr, "", 0)
-	AccessLogger.logger = log.New(accessLogWriter, "", flag)
-	ErrorLogger.logger = log.New(errorLogWriter, "", flag)
-
+	// update the writers and loggers
+	DebugLogWriter.SetWriter(colorable.NewNonColorable(debugLog))
+	ErrorLogWriter.SetWriter(colorable.NewNonColorable(errorLog))
 	return nil
 }
 
-func Printf(domain, format string, a ...interface{}) {
-	a = append([]interface{}{domain}, a...)
-	StdoutLogger.logger.Printf("[%s] "+format, a...)
-}
-
-func Logf(domain, format interface{}, a ...interface{}) {
-	switch format.(type) {
-	case string:
-	case error:
-		format = format.(error).Error()
-	default:
-		format = ""
+func Close() {
+	err := DebugLogWriter.Sync()
+	if err != nil {
+		Error(err)
+		return
 	}
-	a = append([]interface{}{domain}, a...)
-	AccessLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
-	if config.Debug {
-		// Also log to console if debugging
-		StdoutLogger.logger.Printf("[%s] "+format.(string), a...)
+	err = DebugLogWriter.Close()
+	if err != nil {
+		Error(err)
+		return
 	}
-}
-
-func Errorf(domain, format interface{}, a ...interface{}) {
-	switch format.(type) {
-	case string:
-	case error:
-		format = format.(error).Error()
-	default:
-		format = ""
+	err = ErrorLogWriter.Sync()
+	if err != nil {
+		Error(err)
+		return
 	}
-	a = append([]interface{}{domain}, a...)
-	ErrorLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
-	if config.Debug {
-		// Also log to console if debugging
-		StderrLogger.logger.Printf("[%s] "+format.(string)+"\n", a...)
+	err = ErrorLogWriter.Close()
+	if err != nil {
+		Error(err)
+		return
 	}
 }
 
-func LogFormatter(param gin.LogFormatterParams) string {
-	if param.Latency > time.Minute {
-		// Truncate in a golang < 1.8 safe way
-		param.Latency = param.Latency - param.Latency%time.Second
-	}
-	return fmt.Sprintf("[GIN] %3d | %13v | %15s | %-7s %s\n%s",
-		param.StatusCode,
-		param.Latency,
-		param.ClientIP,
-		param.Method,
-		param.Path,
-		param.ErrorMessage,
-	)
+func (l *Logger) Debug(v ...interface{}) {
+	l.print(fmt.Sprint(v...))
 }
 
-func ConsoleFormatter(param gin.LogFormatterParams) string {
-	statusColor := param.StatusCodeColor()
-	methodColor := param.MethodColor()
-	resetColor := param.ResetColor()
-
-	if param.Latency > time.Minute {
-		// Truncate in a golang < 1.8 safe way
-		param.Latency = param.Latency - param.Latency%time.Second
-	}
-	return fmt.Sprintf("[GIN] %s %3d %s | %13v | %15s | %s %-7s %s %s\n%s",
-		statusColor, param.StatusCode, resetColor,
-		param.Latency,
-		param.ClientIP,
-		methodColor, param.Method, resetColor,
-		param.Path,
-		param.ErrorMessage,
-	)
+func (l *Logger) Debugf(format string, v ...interface{}) {
+	l.print(fmt.Sprintf(format, v...))
 }
 
-func PrintRoutes(httpMethod, absolutePath, handlerName string, nuHandlers int) {
-	handlerName = strings.TrimPrefix(handlerName, routesPrefix)
-	Printf("ROUTES", "%-7s %-25s --> %6s", httpMethod, absolutePath, handlerName)
+func (l *Logger) Debugln(v ...interface{}) {
+	l.print(fmt.Sprintln(v...))
+}
+
+func (l *Logger) Print(v ...interface{}) {
+	l.debugPrint(fmt.Sprint(v...))
+}
+
+func (l *Logger) Printf(format string, v ...interface{}) {
+	l.debugPrint(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Println(v ...interface{}) {
+	l.debugPrint(fmt.Sprintln(v...))
+}
+
+func (l *Logger) Error(v ...interface{}) {
+	l.errorPrint(fmt.Sprint(v...))
+}
+
+func (l *Logger) Errorf(format string, v ...interface{}) {
+	l.errorPrint(fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Errorln(v ...interface{}) {
+	l.errorPrint(fmt.Sprintln(v...))
+}
+
+func (l *Logger) Trace() {
+	l.tracePrint()
+}
+
+func Debug(v ...interface{}) {
+	defaultLogger.print(fmt.Sprint(v...))
+}
+
+func Debugf(format string, v ...interface{}) {
+	defaultLogger.print(fmt.Sprintf(format, v...))
+}
+
+func Debugln(v ...interface{}) {
+	defaultLogger.print(fmt.Sprintln(v...))
+}
+
+func Print(v ...interface{}) {
+	defaultLogger.debugPrint(fmt.Sprint(v...))
+}
+
+func Printf(format string, v ...interface{}) {
+	defaultLogger.debugPrint(fmt.Sprintf(format, v...))
+}
+
+func Println(v ...interface{}) {
+	defaultLogger.debugPrint(fmt.Sprintln(v...))
+}
+
+func Error(v ...interface{}) {
+	defaultLogger.errorPrint(fmt.Sprint(v...))
+}
+
+func Errorf(format string, v ...interface{}) {
+	defaultLogger.errorPrint(fmt.Sprintf(format, v...))
+}
+
+func Errorln(v ...interface{}) {
+	defaultLogger.errorPrint(fmt.Sprintln(v...))
+}
+
+func Trace() {
+	defaultLogger.tracePrint()
 }

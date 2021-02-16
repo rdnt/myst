@@ -20,7 +20,10 @@ else
 fi
 echo "Server binary compiled."
 echo "Compiling frontend bundle..."
-npm --prefix vue/ run build > /dev/null 2>&1
+cd vue > /dev/null 2>&1
+npm install > /dev/null 2>&1
+npm run build > /dev/null 2>&1
+cd .. > /dev/null 2>&1
 echo "Frontend bundle compiled."
 echo "Copying assets..."
 cp -r "static" "build/static"  > /dev/null 2>&1

@@ -22,8 +22,6 @@ jobs:
     - name: Checkout
       id: checkout
       uses: actions/checkout@v2
-      with:
-        persist-credentials: false
     - name: Set up Node.js ${{ matrix.node-version }}
       id: setup-node
       uses: actions/setup-node@v1
@@ -32,12 +30,30 @@ jobs:
     - name: Build
       id: build
       run: |
-          npm --prefix vue install
-          npm --prefix vue run build
-    - name: Deploy
-      id: deploy
-      uses: JamesIves/github-pages-deploy-action@releases/v3
+          export VUE_APP_PUBLIC_PATH=/myst
+          npm --prefix ui install ui
+          npm --prefix ui run build
+    - name: Deploy App
+      id: app-deploy
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: static
+        deploy_key: ${{ secrets.ACCESS_TOKEN }}
+        publish_dir: ./static
+  deploy-assets:
+    name: deploy-assets
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+    - name: Checkout
+      id: checkout
+      uses: actions/checkout@v2
+    - name: Deploy Assets
+      id: assets-deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        deploy_key: ${{ secrets.ASSETS_DEPLOY_KEY }}
+        publish_dir: ./assets
+        external_repository: SHT/assets
+        publish_branch: master

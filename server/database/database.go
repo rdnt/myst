@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"github.com/vitessio/vitess/go/ioutil2"
 	"io/ioutil"
+	"vitess.io/vitess/go/ioutil2"
 )
 
 func GetKeystore(id string) ([]byte, error) {

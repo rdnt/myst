@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sht/myst/go/config"
-	"github.com/sht/myst/go/logger"
-	"github.com/sht/myst/go/regex"
-	"github.com/sht/myst/go/router"
+	"myst/server/config"
+	"myst/server/logger"
+	"myst/server/regex"
+	"myst/server/router"
 	"net"
 	"net/http"
 )
@@ -15,11 +15,11 @@ func main() {
 	err := config.Load()
 	logger.Init()
 	if err != nil {
-		logger.Logf("STARTUP", "No environment files found. Using OS environment variables.")
+		logger.Debugf("No environment files found. Using OS environment variables.")
 	}
 	err = regex.Load()
 	if err != nil {
-		logger.Errorf("STARTUP", "Regex validation failed: %s", err)
+		logger.Errorf("Regex validation failed: %s", err)
 		return
 	}
 
@@ -27,12 +27,13 @@ func main() {
 	if config.Debug == true {
 		mode = "debug"
 	}
-	logger.Logf("STARTUP", "Starting server in %s mode...", mode)
+	logger.Debugf("Starting server in %s mode...", mode)
 
 	r := router.Init()
 	err = Start(r)
 	if err != nil {
-		logger.Errorf("FATAL", "Failed to start server: %s", err)
+		logger.Errorf("Failed to start server: %s", err)
+		return
 	}
 }
 
@@ -59,11 +60,11 @@ func Start(r *gin.Engine) (err error) {
 	if err != nil {
 		return err
 	}
-	logger.Logf("STARTUP", "Server started on port %s", port)
+	logger.Debugf("Server started on port %s", port)
 
 	err = http.Serve(ln, r)
 	if err != nil {
-		logger.Errorf("STARTUP", "Failed to start HTTP server: %s", err)
+		logger.Errorf("Failed to start HTTP server: %s", err)
 	}
 
 	return nil

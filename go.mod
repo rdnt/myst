@@ -11,7 +11,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.8
 	github.com/rs/cors v1.7.0
-	github.com/unrolled/secure v1.0.8
+	github.com/unrolled/secure v1.0.9
 	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gopkg.in/go-playground/validator.v9 v9.31.0

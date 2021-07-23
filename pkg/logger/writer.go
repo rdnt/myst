@@ -13,8 +13,7 @@ type Writer struct {
 	writer io.Writer
 }
 
-// NewWriter wraps an io.Writer
-func NewWriter(w io.Writer) *Writer {
+func newWriter(w io.Writer) *Writer {
 	return &Writer{writer: w}
 }
 

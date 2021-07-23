@@ -1,4 +1,4 @@
-package models
+package timestamp
 
 import (
 	"encoding/json"
@@ -12,8 +12,14 @@ type Timestamp struct {
 	time.Time
 }
 
+// assert timestamp has custom json marshaler/unmarshaler on compile-time
 var _ json.Marshaler = (*Timestamp)(nil)
 var _ json.Unmarshaler = (*Timestamp)(nil)
+
+// New returns a timestamp with the current time
+func New() Timestamp {
+	return Timestamp{time.Now()}
+}
 
 // MarshalJSON implements the json.Marshaler interface
 func (t *Timestamp) MarshalJSON() ([]byte, error) {

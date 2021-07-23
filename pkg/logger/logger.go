@@ -55,23 +55,24 @@ type Logger struct {
 
 func init() {
 	// create default stdout and stderr loggers before logger init
-	StdoutWriter = NewWriter(colorable.NewColorable(os.Stdout))
-	StderrWriter = NewWriter(colorable.NewColorable(os.Stderr))
+	StdoutWriter = newWriter(colorable.NewColorable(os.Stdout))
+	StderrWriter = newWriter(colorable.NewColorable(os.Stderr))
 	// initialize default log writers/loggers
-	DebugLogWriter = NewWriter(ioutil.Discard)
-	ErrorLogWriter = NewWriter(ioutil.Discard)
+	DebugLogWriter = newWriter(ioutil.Discard)
+	ErrorLogWriter = newWriter(ioutil.Discard)
 	// create default logger
-	defaultLogger = NewLogger("SERVER", DefaultColor)
+	defaultLogger = New("SERVER", DefaultColor)
 }
 
 func Colorize(s string, c Color) string {
 	return aurora.Colorize(s, aurora.Color(c)).String()
 }
 
-func NewLogger(prefix string, color Color) *Logger {
+func New(prefix string, color Color) *Logger {
 	prefix = strings.ToUpper(prefix)
-	prefix = fmt.Sprintf("[%s] ", prefix)
+	prefix = fmt.Sprintf("[%s]", prefix)
 	prefix = Colorize(prefix, color)
+	prefix = fmt.Sprintf("%s ", prefix)
 	return &Logger{
 		stdout:   log.New(StdoutWriter, prefix, 0),
 		stderr:   log.New(StderrWriter, prefix, log.Lshortfile),

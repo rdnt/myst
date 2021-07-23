@@ -5,41 +5,33 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"myst/server/models"
-	"myst/server/regex"
 	"net/http"
 	"os"
 	"strings"
+
+	"myst/pkg/regex"
+	"myst/pkg/user"
 )
 
-var jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-var apiKey = os.Getenv("API_KEY")
-
 var (
+	jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+
 	ErrAuthenticationRequired = fmt.Errorf("authentication required")
 	ErrAuthenticationFailed   = fmt.Errorf("authentication failed")
 )
 
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := tokenAuthentication(c)
-		if err == ErrAuthenticationRequired {
-			Error(c, http.StatusForbidden, ErrAuthenticationRequired)
-			c.Abort()
-			return
-		} else if err == ErrAuthenticationFailed {
-			Error(c, http.StatusForbidden, ErrAuthenticationFailed)
-			c.Abort()
-			return
-		} else if err != nil {
-			Error(c, http.StatusInternalServerError, err)
+		err := TokenAuthentication(c)
+		if err != nil {
+			Error(c, http.StatusForbidden, err)
 			c.Abort()
 			return
 		}
 	}
 }
 
-func tokenAuthentication(c *gin.Context) error {
+func TokenAuthentication(c *gin.Context) error {
 	auth := c.GetHeader("Authorization")
 	if auth != "" {
 		// Remove the "Bearer" prefix
@@ -93,8 +85,8 @@ func tokenAuthentication(c *gin.Context) error {
 		return ErrAuthenticationFailed
 	}
 
-	u, err := models.GetUser(username)
-	if err == models.ErrNotFound {
+	u, err := user.Get(username)
+	if err == user.ErrNotFound {
 		return ErrAuthenticationFailed
 	} else if err != nil {
 		return err

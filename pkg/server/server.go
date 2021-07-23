@@ -15,7 +15,7 @@ import (
 
 var (
 	httpSrv *http.Server
-	log     = logger.NewLogger("server", logger.DefaultColor)
+	log     = logger.New("server", logger.DefaultColor)
 
 	ErrInvalidServerNetwork = fmt.Errorf("invalid server network")
 )

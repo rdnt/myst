@@ -1,4 +1,4 @@
-package responses
+package rest
 
 import (
 	"net/http"
@@ -6,8 +6,21 @@ import (
 
 // SuccessResponse is a success response with embedded data (if passed)
 type SuccessResponse struct {
-	Status string      `json:"status"`
-	Data   interface{} `json:"data,omitempty"`
+	Status     string                 `json:"status"`
+	Data       interface{}            `json:"data,omitempty"`
+	Links      map[string]interface{} `json:"links,omitempty"`
+	Pagination *Pagination            `json:"pagination,omitempty"`
+}
+
+type Link struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+// Pagination adds optional pagination metadata to a response
+type Pagination struct {
+	Total   int `json:"total"`
+	PerPage int `json:"per-page"`
 }
 
 // ErrorResponse is an error response. Adds a default http status message if

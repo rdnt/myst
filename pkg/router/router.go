@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"myst/server/logger"
-	"myst/server/responses"
+	"myst/pkg/logger"
+	"myst/pkg/rest"
 )
 
 var (
-	log = logger.NewLogger("router", logger.GreenFg)
+	log = logger.New("router", logger.GreenFg)
 )
 
 func init() {
@@ -54,7 +54,7 @@ func New(debug bool) *gin.Engine {
 		func(c *gin.Context) {
 			if strings.HasPrefix(c.Request.URL.Path, "/api/") {
 				// serve a json 404 error if it's an API call
-				data := responses.NewErrorResponse(404, "Route not found")
+				data := rest.NewErrorResponse(404, "Route not found")
 				c.JSON(404, data)
 				c.Abort()
 			} else {
@@ -76,7 +76,7 @@ func New(debug bool) *gin.Engine {
 func RecoveryHandler(c *gin.Context, err interface{}) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
 		// If error occurred in an API route print JSON error response
-		data := responses.NewErrorResponse(500, nil)
+		data := rest.NewErrorResponse(500, nil)
 		c.JSON(500, data)
 		c.Abort()
 	} else {

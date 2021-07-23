@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"myst/server/config"
+	"myst/server/database"
 	"myst/server/logger"
 	"myst/server/regex"
 	"myst/server/router"
@@ -11,22 +12,32 @@ import (
 )
 
 func main() {
-
 	err := config.Load()
-	logger.Init()
 	if err != nil {
 		logger.Debugf("No environment files found. Using OS environment variables.")
 	}
+
+	err = logger.Init()
+	if err != nil {
+		logger.Errorf("Logger initialization failed: %s", err)
+	}
+
 	err = regex.Load()
 	if err != nil {
-		logger.Errorf("Regex validation failed: %s", err)
+		logger.Errorf("Regex initialization failed: %s", err)
 		return
+	}
+
+	err = database.Init()
+	if err != nil {
+		logger.Errorf("Database initialization failed: %s", err)
 	}
 
 	mode := "release"
 	if config.Debug == true {
 		mode = "debug"
 	}
+
 	logger.Debugf("Starting server in %s mode...", mode)
 
 	r := router.Init()

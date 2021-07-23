@@ -23,9 +23,9 @@
           @keyup="setEnter(false)"
           @focusout="setEnter(false)"
         />
-      </div>
-      <div class="prompt" :class="{ 'enter-pressed': enter }">
-        Press <span class="code">enter</span> to submit
+        <div class="prompt" :class="{ 'enter-pressed': enter }">
+          <span>↵ enter</span>
+        </div>
       </div>
     </div>
   </div>

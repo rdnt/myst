@@ -1,9 +1,8 @@
 package api
 
 import (
-	"myst/server/responses"
-
 	"github.com/gin-gonic/gin"
+	"myst/server/responses"
 )
 
 // Success prints a successful response (with optional data field) and cancels

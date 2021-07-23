@@ -1,86 +1,54 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"myst/server/keystore"
-	"myst/server/logger"
-	"myst/server/responses"
-	"strings"
 )
 
-func AuthenticationRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		auth := c.GetHeader("Authorization")
-		// Remove the "Bearer" prefix
-		parts := strings.Split(auth, "Bearer")
-		if len(parts) != 2 {
-			rsp := responses.NewErrorResponse(400, nil)
-			c.JSON(400, rsp)
-			c.Abort()
-			return
-		}
-		// Trim the space that separated Bearer from the JWT
-		auth = strings.TrimSpace(parts[1])
+//func AuthenticationRequired() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		auth := c.GetHeader("Authorization")
+//		// Remove the "Bearer" prefix
+//		parts := strings.Split(auth, "Bearer")
+//		if len(parts) != 2 {
+//			rsp := responses.NewErrorResponse(400, nil)
+//			c.JSON(400, rsp)
+//			c.Abort()
+//			return
+//		}
+//		// Trim the space that separated Bearer from the JWT
+//		auth = strings.TrimSpace(parts[1])
+//
+//		if auth == "" {
+//			fmt.Println("authorization required")
+//			rsp := responses.NewErrorResponse(403, nil)
+//			c.JSON(403, rsp)
+//			c.Abort()
+//			return
+//		}
+//
+//		raw, err := tmp.Load("keystore.mst")
+//		if err != nil {
+//			logger.Errorf("KEYSTORE", err)
+//			Error(c, 500, nil)
+//			c.Abort()
+//			return
+//		}
+//
+//		_, err = tmp.DecryptOld(raw, auth)
+//		if err != nil {
+//			logger.Errorf("KEYSTORE", err)
+//			Error(c, 403, nil)
+//			c.Abort()
+//			return
+//		}
+//
+//		c.Set("master_password", auth)
+//		// Pass onto the next handler
+//		c.Next()
+//	}
+//}
 
-		if auth == "" {
-			fmt.Println("authorization required")
-			rsp := responses.NewErrorResponse(403, nil)
-			c.JSON(403, rsp)
-			c.Abort()
-			return
-		}
-
-		raw, err := keystore.Load("keystore.mst")
-		if err != nil {
-			logger.Errorf("KEYSTORE", err)
-			Error(c, 500, nil)
-			c.Abort()
-			return
-		}
-
-		_, err = keystore.DecryptOld(raw, auth)
-		if err != nil {
-			logger.Errorf("KEYSTORE", err)
-			Error(c, 403, nil)
-			c.Abort()
-			return
-		}
-
-		c.Set("master_password", auth)
-		// Pass onto the next handler
-		c.Next()
-	}
-}
-
-// Init creates all the HTTP routes
-func Init(r *gin.Engine) {
-	// r.GET("/", LoadUI)
-
-	api := r.Group("/api")
-	api.GET("/uuid4", NewUUIDv4)
-
-	g := api.Group("/entries")
-	g.Use(AuthenticationRequired())
-	{
-		g.GET("", GetEntries)
-		// g.PUT("", AddEntry)
-	}
-	g = api.Group("/entry/:id")
-	g.Use(AuthenticationRequired())
-	{
-		// g.GET("", GetEntry)
-		// g.DELETE("", RemoveEntry)
-	}
-
-	g = api.Group("/keystore/:id")
-	// g.Use(AuthenticationRequired())
-	{
-		g.GET("", GetKeystore)
-		g.POST("", UpdateKeystore)
-	}
-
-}
+var pass = "1234567890"
 
 func LoadUI(c *gin.Context) {
 	c.File("../static")
@@ -95,32 +63,32 @@ func LoadUI(c *gin.Context) {
 // 	RequireMasterPassword
 // }
 
-func GetEntries(c *gin.Context) {
-	pass := c.GetString("master_password")
-	raw, err := keystore.Load("keystore.mst")
-	if err != nil {
-		logger.Errorf("KEYSTORE", err)
-		Error(c, 500, nil)
-		return
-	}
-
-	ks, err := keystore.DecryptOld(raw, pass)
-	if err != nil {
-		logger.Errorf("KEYSTORE", err)
-		Error(c, 403, nil)
-		return
-	}
-
-	err = ks.Save("keystore.mst", pass)
-	if err != nil {
-		logger.Errorf("KEYSTORE", err)
-		Error(c, 500, nil)
-		return
-	}
-
-	entries := ks.Entries
-	Success(c, entries)
-}
+//func GetEntries(c *gin.Context) {
+//	pass := c.GetString("master_password")
+//	raw, err := tmp.Load("keystore.mst")
+//	if err != nil {
+//		logger.Errorf("KEYSTORE", err)
+//		Error(c, 500, nil)
+//		return
+//	}
+//
+//	ks, err := tmp.DecryptOld(raw, pass)
+//	if err != nil {
+//		logger.Errorf("KEYSTORE", err)
+//		Error(c, 403, nil)
+//		return
+//	}
+//
+//	err = ks.Save("keystore.mst", pass)
+//	if err != nil {
+//		logger.Errorf("KEYSTORE", err)
+//		Error(c, 500, nil)
+//		return
+//	}
+//
+//	entries := ks.Entries
+//	Success(c, entries)
+//}
 
 // type GetEntryUri struct {
 // 	ID string `uri:"id" binding:"required,regex=uuid"`

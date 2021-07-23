@@ -6,9 +6,8 @@ package main
 
 import (
 	"encoding/hex"
+	"myst/tmp"
 	"syscall/js"
-
-	"github.com/sht/myst/server/keystore"
 )
 
 func main() {
@@ -32,7 +31,7 @@ func Decrypt(this js.Value, args []js.Value) interface{} {
 			cb.Invoke(nil, err.Error())
 			return nil
 		}
-		json, err := keystore.Decrypt(b, []byte(pass))
+		json, err := tmp.Decrypt(b, []byte(pass))
 		if err != nil {
 			cb.Invoke(nil, err.Error())
 			return nil
@@ -48,7 +47,7 @@ func Encrypt(this js.Value, args []js.Value) interface{} {
 		json := args[0].String()
 		pass := args[1].String()
 		cb := args[2]
-		b, err := keystore.Encrypt([]byte(json), []byte(pass))
+		b, err := tmp.Encrypt([]byte(json), []byte(pass))
 		if err != nil {
 			cb.Invoke(nil, err.Error())
 			return nil

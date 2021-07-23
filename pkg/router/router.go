@@ -2,87 +2,72 @@ package router
 
 import (
 	"fmt"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	"github.com/go-errors/errors"
+	"github.com/zsais/go-gin-prometheus"
 	"io/ioutil"
-	"myst/server/api"
-	"myst/server/config"
-	"myst/server/logger"
-	"myst/server/responses"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
 
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
-	"github.com/go-errors/errors"
-	cors "github.com/rs/cors/wrapper/gin"
-	ginprometheus "github.com/zsais/go-gin-prometheus"
+	"myst/server/logger"
+	"myst/server/responses"
 )
 
 var (
 	log = logger.NewLogger("router", logger.GreenFg)
 )
 
-func Init() *gin.Engine {
+func init() {
+	// Discard gin's startup messages
+	gin.DefaultWriter = ioutil.Discard
+	// Custom PrintRouteFunc
+	gin.DebugPrintRouteFunc = PrintRoutes
+}
+
+func New(debug bool) *gin.Engine {
 	// Set gin mode
-	if config.Debug {
+	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	// Discard gin's startup messages
-	gin.DefaultWriter = ioutil.Discard
 	// Create gin router instance
 	r := gin.New()
 	// Do not redirect folders to trailing slash
 	r.RedirectTrailingSlash = true
 	r.RedirectFixedPath = true
-	// Log to stdout and stderr by default
-	// Custom PrintRouteFunc
-	gin.DebugPrintRouteFunc = PrintRoutes
 	// always use recovery middleware
 	r.Use(Recovery(RecoveryHandler))
 	// custom logging middleware
 	r.Use(LoggerMiddleware)
-	// metrics
-	if config.Debug {
+	// metrics (only enable if debugging)
+	if debug {
 		p := ginprometheus.NewPrometheus("gin")
 		p.Use(r)
 	}
+
 	// error 404 handling
-	r.NoRoute(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-			// serve a json 404 error if it's an API call
-			data := responses.NewErrorResponse(404, "Route not found")
-			c.JSON(404, data)
-			c.Abort()
-		} else {
-			// serve ui and let it handle the error otherwise
-			c.File("static/index.html")
-			c.Abort()
-		}
-	})
+	r.NoRoute(
+		func(c *gin.Context) {
+			if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+				// serve a json 404 error if it's an API call
+				data := responses.NewErrorResponse(404, "Route not found")
+				c.JSON(404, data)
+				c.Abort()
+			} else {
+				// serve ui and let it handle the error otherwise
+				c.File("static/index.html")
+				c.Abort()
+			}
+		},
+	)
 
 	// Attach static serve middleware for / and /assets
 	r.Use(static.Serve("/", static.LocalFile("static", false)))
 	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
-
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:80", "http://localhost:8081"},
-		// TODO allow more methods (DELETE?)
-		AllowedMethods: []string{http.MethodGet, http.MethodPost},
-		// TODO expose ratelimiting headers
-		ExposedHeaders: []string{},
-		// TODO check if we can disable this on release mode so that no
-		// authorization tokens are passed on to the frontend.
-		// No harm, but no need either.
-		// Required to pass authentication headers on development environment
-		AllowCredentials: true,
-		Debug:            false, // too verbose, only enable for testing CORS
-	}))
-
-	// Pass fizz to route handlers
-	api.Init(r)
 
 	return r
 }

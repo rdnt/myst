@@ -1,6 +1,8 @@
 package responses
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // SuccessResponse is a success response with embedded data (if passed)
 type SuccessResponse struct {
@@ -28,6 +30,10 @@ func NewSuccessResponse(data interface{}) *SuccessResponse {
 func NewErrorResponse(code int, msg interface{}) *ErrorResponse {
 	if msg == nil {
 		msg = http.StatusText(code)
+	}
+	err, ok := msg.(error)
+	if ok {
+		msg = err.Error()
 	}
 	// Format response message
 	return &ErrorResponse{

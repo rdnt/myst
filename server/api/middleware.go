@@ -1,0 +1,110 @@
+package api
+
+import (
+	"encoding/base64"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"myst/server/models"
+	"myst/server/regex"
+	"net/http"
+	"os"
+	"strings"
+)
+
+var jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+var apiKey = os.Getenv("API_KEY")
+
+var (
+	ErrAuthenticationRequired = fmt.Errorf("authentication required")
+	ErrAuthenticationFailed   = fmt.Errorf("authentication failed")
+)
+
+func Authentication() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := tokenAuthentication(c)
+		if err == ErrAuthenticationRequired {
+			Error(c, http.StatusForbidden, ErrAuthenticationRequired)
+			c.Abort()
+			return
+		} else if err == ErrAuthenticationFailed {
+			Error(c, http.StatusForbidden, ErrAuthenticationFailed)
+			c.Abort()
+			return
+		} else if err != nil {
+			Error(c, http.StatusInternalServerError, err)
+			c.Abort()
+			return
+		}
+	}
+}
+
+func tokenAuthentication(c *gin.Context) error {
+	auth := c.GetHeader("Authorization")
+	if auth != "" {
+		// Remove the "Bearer" prefix
+		parts := strings.Split(auth, "Bearer")
+		if len(parts) != 2 {
+			return ErrAuthenticationFailed
+		}
+		auth = strings.TrimSpace(parts[1])
+	} else {
+		cookie, err := c.Cookie("auth_token")
+		if err == nil {
+			auth = cookie
+		}
+	}
+
+	if auth == "" {
+		return ErrAuthenticationRequired
+	}
+
+	// Validate token format
+	match := regex.Match("jwt", auth)
+	if !match {
+		return ErrAuthenticationFailed
+	}
+
+	// Check if authentication token is in the valid format
+	token, err := jwt.Parse(auth, func(token *jwt.Token) (interface{}, error) {
+		// Verify signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected token signing method: %v", token.Header["alg"])
+		}
+		key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
+		if err != nil {
+			return nil, fmt.Errorf("jwt secret decode failed")
+		}
+		// return the secret when token is valid format
+		return key, nil
+	})
+
+	if err != nil {
+		return ErrAuthenticationFailed
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return ErrAuthenticationFailed
+	}
+
+	username, ok := claims["usr"].(string)
+	if !ok {
+		return ErrAuthenticationFailed
+	}
+
+	u, err := models.GetUser(username)
+	if err == models.ErrNotFound {
+		return ErrAuthenticationFailed
+	} else if err != nil {
+		return err
+	}
+
+	err = claims.Valid()
+	if err != nil {
+		return ErrAuthenticationFailed
+	}
+
+	c.Set("user", u.Username)
+	return nil
+}

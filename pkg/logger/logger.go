@@ -2,15 +2,15 @@ package logger
 
 import (
 	"fmt"
+	"github.com/logrusorgru/aurora"
+	"github.com/mattn/go-colorable"
 	"io/ioutil"
 	"log"
-	"myst/server/config"
 	"os"
 	"runtime/debug"
 	"strings"
 
-	"github.com/logrusorgru/aurora"
-	"github.com/mattn/go-colorable"
+	"myst/pkg/config"
 )
 
 const (

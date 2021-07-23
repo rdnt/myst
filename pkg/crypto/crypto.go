@@ -10,10 +10,9 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"golang.org/x/crypto/argon2"
 	"reflect"
 	"strings"
-
-	"golang.org/x/crypto/argon2"
 )
 
 var (
@@ -66,12 +65,8 @@ func GenerateRandomBytes(n uint) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 	if err != nil {
-		// rand.Read() can error out if the system does not have enough entropy
 		return nil, err
 	}
-	// for i := range b {
-	//     b[i] = byte(n)
-	// }
 	return b, nil
 }
 

@@ -8,7 +8,9 @@ import (
 	"myst/pkg/logger"
 )
 
-var log = logger.New("router", logger.GreenFg)
+var (
+	log = logger.New("router", logger.GreenFg)
+)
 
 // Init creates all the API endpoints for the server
 func Init(r *gin.Engine) {

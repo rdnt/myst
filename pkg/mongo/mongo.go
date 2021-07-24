@@ -10,11 +10,13 @@ import (
 
 var (
 	log = logger.New("mongo", logger.BlueFg)
+	db  *mongo.Client
 )
 
 func New(uri string) (*mongo.Client, error) {
 	ctx := context.Background()
-	db, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	var err error
+	db, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -31,7 +33,12 @@ func New(uri string) (*mongo.Client, error) {
 	return db, nil
 }
 
-func Close(db *mongo.Client) {
+// NewWithClient creates a new mongodb connection with the given mongodb client
+func NewWithClient(mdb *mongo.Client) {
+	db = mdb
+}
+
+func Close() {
 	if db == nil {
 		return
 	}

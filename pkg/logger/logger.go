@@ -2,15 +2,18 @@ package logger
 
 import (
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/mattn/go-colorable"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 	"runtime/debug"
 	"strings"
 
 	"myst/pkg/config"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/mattn/go-colorable"
 )
 
 const (
@@ -47,6 +50,7 @@ var (
 type Color int
 
 type Logger struct {
+	name     string
 	stdout   *log.Logger
 	stderr   *log.Logger
 	debugLog *log.Logger
@@ -68,47 +72,75 @@ func Colorize(s string, c Color) string {
 	return aurora.Colorize(s, aurora.Color(c)).String()
 }
 
-func New(prefix string, color Color) *Logger {
-	prefix = strings.ToUpper(prefix)
-	prefix = fmt.Sprintf("[%s]", prefix)
-	prefix = Colorize(prefix, color)
-	prefix = fmt.Sprintf("%s ", prefix)
+func New(name string, color Color) *Logger {
+	name = strings.ToUpper(name)
+	name = fmt.Sprintf("[%s]", name)
+	name = Colorize(name, color)
+	name = fmt.Sprintf("%s ", name)
 	return &Logger{
-		stdout:   log.New(StdoutWriter, prefix, 0),
-		stderr:   log.New(StderrWriter, prefix, log.Lshortfile),
-		debugLog: log.New(DebugLogWriter, prefix, log.Ldate|log.Ltime|log.Lmicroseconds),
-		errorLog: log.New(ErrorLogWriter, prefix, log.Ldate|log.Ltime|log.Lmicroseconds),
+		name:     name,
+		stdout:   log.New(StdoutWriter, "", 0),
+		stderr:   log.New(StderrWriter, "", 0),
+		debugLog: log.New(DebugLogWriter, "", log.Ldate|log.Ltime|log.Lmicroseconds),
+		errorLog: log.New(ErrorLogWriter, "", log.Ldate|log.Ltime|log.Lmicroseconds),
 	}
+}
+
+var cwd *string
+
+func init() {
+	wd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	wd = filepath.ToSlash(wd + "/")
+	cwd = &wd
+}
+
+func (l *Logger) prefix(caller bool) string {
+	prefix := l.name
+	if caller {
+		_, file, line, ok := runtime.Caller(3)
+		if !ok {
+			file = "???"
+			line = 0
+		}
+		if cwd != nil {
+			file = strings.Replace(file, *cwd, "", 1)
+		}
+		prefix = fmt.Sprintf("%s%s:%d ", prefix, file, line)
+	}
+	return prefix
 }
 
 func (l *Logger) print(s string) {
 	s = strings.TrimRight(s, "\n")
-	_ = l.stdout.Output(3, s)
+	_ = l.stdout.Output(3, l.prefix(false)+s)
 }
 
 func (l *Logger) debugPrint(s string) {
 	s = strings.TrimRight(s, "\n")
-	_ = l.debugLog.Output(3, s)
+	_ = l.debugLog.Output(3, l.prefix(false)+s)
 	if config.Debug {
-		_ = l.stdout.Output(3, s)
+		_ = l.stdout.Output(3, l.prefix(false)+s)
 	}
 }
 
 func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	s = Colorize(s, RedFg)
-	_ = l.errorLog.Output(3, s)
+	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if config.Debug {
-		_ = l.stderr.Output(3, s)
+		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }
 
 func (l *Logger) tracePrint() {
 	stack := debug.Stack()
 	s := Colorize(string(stack), RedFg)
-	_ = l.errorLog.Output(3, s)
+	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if config.Debug {
-		_ = l.stderr.Output(3, s)
+		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }
 

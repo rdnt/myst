@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/go-playground/assert/v2"
 	"myst/pkg/crypto"
 	"testing"
@@ -19,6 +21,8 @@ func TestKeystore(t *testing.T) {
 	}
 
 	// [enc, mac is sent to the server]
+	btest, _ := json.Marshal(append(enc, mac...))
+	fmt.Println("store", string(btest))
 
 	b, err = decryptKeystore(enc, keystoreKey, mac)
 	if err != nil {
@@ -46,6 +50,8 @@ func TestKey(t *testing.T) {
 	}
 
 	// [enc,mac] is sent to server (encrypted key)
+	btest, _ := json.Marshal(append(enc, mac...))
+	fmt.Println("key", string(btest))
 
 	b, err := decryptKey(enc, masterKey, mac)
 	if err != nil {

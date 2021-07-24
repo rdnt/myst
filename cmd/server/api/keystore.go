@@ -1,20 +1,16 @@
 package api
 
 import (
-	"myst/pkg/keystore"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"myst/pkg/userkeystore"
 )
 
 func CreateKeystore(c *gin.Context) {
+	uid := GetCurrentUser(c)
 
-}
-
-func CreateEncryptedKeystore(c *gin.Context) {
 	var data struct {
-		Password string `form:"password" binding:"required"`
-		Payload  string `form:"payload" binding:"required"`
+		Key   []byte `form:"key" binding:"required"`
+		Store []byte `form:"store" binding:"required"`
 	}
 	err := c.ShouldBind(&data)
 	if err != nil {
@@ -22,12 +18,7 @@ func CreateEncryptedKeystore(c *gin.Context) {
 		return
 	}
 
-	e, err := keystore.NewEncrypted(data.Payload, data.Password)
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
+	uk := userkeystore.New(uid, data.Key, data.Store)
 
-	e.Save()
+	uk.Save()
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"myst/pkg/mongo"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,6 +40,13 @@ func main() {
 		logger.Errorf("Database initialization failed: %s", err)
 		return
 	}
+
+	db, err := mongo.New("mongodb://localhost:27017")
+	if err != nil {
+		logger.Errorf("Database initialization failed: %s", err)
+		return
+	}
+	defer mongo.Close(db)
 
 	r := router.New(config.Debug)
 

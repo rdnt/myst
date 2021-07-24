@@ -32,5 +32,5 @@ func AuthenticatedAPI(api gin.IRoutes) {
 		c.String(http.StatusOK, "PING!")
 	})
 
-	api.POST("/keystores", CreateEncryptedKeystore)
+	api.POST("/keystores", CreateKeystore)
 }

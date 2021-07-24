@@ -1,9 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 
 	"myst/pkg/rest"
+)
+
+var (
+	ErrUnauthenticatedRoute = fmt.Errorf("unauthenticated route")
 )
 
 func Paginate(c *gin.Context, total int) {
@@ -53,4 +58,13 @@ func Error(c *gin.Context, code int, msg interface{}) {
 	c.JSON(code, resp)
 	// Stop the chain of handlers
 	c.Abort()
+}
+
+// GetCurrentUser returns the username of the currently logged-in user
+func GetCurrentUser(c *gin.Context) string {
+	uid, ok := c.Get("user")
+	if !ok {
+		panic(ErrUnauthenticatedRoute)
+	}
+	return uid.(string)
 }

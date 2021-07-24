@@ -228,9 +228,9 @@ type Argon2IdParams struct {
 	KeyLength   uint32
 }
 
-func Argon2Id(pass string, salt []byte) []byte {
+func Argon2Id(pass []byte, salt []byte) []byte {
 	return argon2.IDKey(
-		[]byte(pass), salt,
+		pass, salt,
 		DefaultArgon2IdParams.Time,
 		DefaultArgon2IdParams.Memory,
 		DefaultArgon2IdParams.Parallelism,
@@ -244,7 +244,7 @@ func GenerateRandomSalt() ([]byte, error) {
 }
 
 // Argon2IdHash hashes a password and returns the hash in modular script format, or error on failure
-func Argon2IdHash(pass string, salt []byte) ([]byte, []byte, error) {
+func Argon2IdHash(pass []byte, salt []byte) ([]byte, []byte, error) {
 	// Pass the password, salt and parameters to the argon2.IDKey function.
 	// This will generate a hash of the password using the Argon2id algorithm
 	hash := Argon2Id(pass, salt)

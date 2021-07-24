@@ -1,6 +1,10 @@
 package keystore
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/sanity-io/litter"
+	"myst/pkg/crypto"
+)
 
 type Keystore struct {
 	ID      string           `json:"id"`
@@ -21,11 +25,17 @@ type EncryptedKeystore struct {
 }
 
 // NewEncrypted creates and saves an encrypted keystore from the given payload
-func NewEncrypted(payload, password string) *EncryptedKeystore {
-	enc := EncryptedKeystore(payload)
-	return &enc
+func NewEncrypted(store, password string) (*EncryptedKeystore, error) {
+	key, err := crypto.GenerateRandomBytes(32)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(key)
+	return &EncryptedKeystore{
+		Keystore: store,
+	}, nil
 }
 
 func (e *EncryptedKeystore) Save() {
-	fmt.Println("save", e)
+	fmt.Println("save", litter.Sdump(e))
 }

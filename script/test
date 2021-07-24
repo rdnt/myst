@@ -1,0 +1,2 @@
+#!/bin/bash
+go test ./cmd/poc -test.v -count=1

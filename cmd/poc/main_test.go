@@ -13,12 +13,14 @@ func TestKeystore(t *testing.T) {
 	key := []byte("{\"id\":\"keATfB8JP2ggT7U9JZrpV9\"}")
 	b := key
 
-	b, mac, err := encryptKeystore(b, keystoreKey)
+	enc, mac, err := encryptKeystore(b, keystoreKey)
 	if err != nil {
 		panic(err)
 	}
 
-	b, err = decryptKeystore(b, keystoreKey, mac)
+	// [enc, mac is sent to the server]
+
+	b, err = decryptKeystore(enc, keystoreKey, mac)
 	if err != nil {
 		panic(err)
 	}

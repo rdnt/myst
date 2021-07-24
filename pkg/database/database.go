@@ -3,8 +3,9 @@ package database
 import (
 	"bytes"
 	"fmt"
-	"github.com/natefinch/atomic"
 	"os"
+
+	"github.com/natefinch/atomic"
 )
 
 var (

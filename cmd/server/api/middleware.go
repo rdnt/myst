@@ -3,11 +3,12 @@ package api
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 
 	"myst/pkg/regex"
 	"myst/pkg/user"

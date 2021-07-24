@@ -3,20 +3,22 @@ package api
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 
 	"myst/pkg/crypto"
 	"myst/pkg/regex"
 	"myst/pkg/user"
 )
 
+// "$argon2id$v=19$m=262144,t=10,p=2$ny7MyNZJ5OMSWyWBIOGV4g$U32rqke4W3y3uBlM+bF/2MfBYZC3dm9Z8F6YquPoUtY"
+
 var (
 	jwtCookieLifetime = 604800
-	debugHash         = "$argon2id$v=19$m=262144,t=10,p=2$ny7MyNZJ5OMSWyWBIOGV4g$U32rqke4W3y3uBlM+bF/2MfBYZC3dm9Z8F6YquPoUtY"
 )
 
 // LoginHandler handles login requests and throttles them
@@ -76,8 +78,6 @@ func LoginHandler(c *gin.Context) {
 		Error(c, 500, nil)
 		return
 	}
-
-	Success(c, u.ToRest())
 }
 
 // RegisterHandler creates a new user
@@ -115,8 +115,6 @@ func RegisterHandler(c *gin.Context) {
 		Error(c, http.StatusInternalServerError, nil)
 		return
 	}
-
-	Success(c, u.ToRest())
 }
 
 func loginUser(c *gin.Context, username string) error {
@@ -151,6 +149,8 @@ func loginUser(c *gin.Context, username string) error {
 		false,        // TODO: true on production, false on development
 		true,
 	)
+
+	Success(c, enc)
 
 	return nil
 }

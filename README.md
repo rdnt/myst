@@ -3,6 +3,9 @@
 
 Myst: The cloudless password manager.
 
+### Development requirements
+- Go v1.16
+
 // keystores
 //  - 0000.mst
 //  - 0001.mst

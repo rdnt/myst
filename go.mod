@@ -7,7 +7,6 @@ require (
 	github.com/gin-contrib/static v0.0.0-20200916080430-d45d9a37d28e
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-errors/errors v1.1.1
-	github.com/google/uuid v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
@@ -16,7 +15,6 @@ require (
 	github.com/mattn/go-colorable v0.1.8
 	github.com/natefinch/atomic v0.0.0-20200526193002-18c0533a5b09
 	github.com/prometheus/client_golang v1.4.1 // indirect
-	github.com/rs/cors v1.7.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect

@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/sanity-io/litter"
 	"go.mongodb.org/mongo-driver/bson"
+
 	"myst/timestamp"
-	"time"
 )
 
 func main() {

@@ -2,18 +2,18 @@ package database
 
 import (
 	"context"
-	"fmt"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+
 	"myst/logger"
 )
 
 var (
-	log         = logger.New("database", logger.BlueFg)
-	client      *mongo.Client
-	db          *mongo.Database
-	ErrNotReady = fmt.Errorf("not ready")
+	log    = logger.New("database", logger.BlueFg)
+	client *mongo.Client
+	db     *mongo.Database
 )
 
 func New(uri string) (*mongo.Database, error) {
@@ -33,7 +33,7 @@ func New(uri string) (*mongo.Database, error) {
 			log.Print("MongoDB connected.")
 		}
 	}()
-	db = client.Database("myst")
+	db = client.Database("myst") // TODO configurable database name
 	return db, nil
 }
 

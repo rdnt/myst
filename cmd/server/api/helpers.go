@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"myst/rest"
@@ -60,8 +61,8 @@ func Error(c *gin.Context, code int, msg interface{}) {
 	c.Abort()
 }
 
-// GetCurrentUser returns the username of the currently logged-in user
-func GetCurrentUser(c *gin.Context) string {
+// GetCurrentUserID returns the username of the currently logged-in user
+func GetCurrentUserID(c *gin.Context) string {
 	uid, ok := c.Get("user")
 	if !ok {
 		panic(ErrUnauthenticatedRoute)

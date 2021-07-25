@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+
 	"myst/crypto"
 )
 
 var (
 	ErrAuthenticationFailed = fmt.Errorf("authentication failed")
 )
+
+func main() {
+
+}
 
 func encryptKeystore(b, key []byte) ([]byte, []byte, error) {
 	// Encrypt keystore

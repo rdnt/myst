@@ -24,8 +24,8 @@ var (
 // LoginHandler handles login requests and throttles them
 func LoginHandler(c *gin.Context) {
 	var data struct {
-		Username string `form:"username" binding:"required"`
-		Password string `form:"password" binding:"required"`
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
 	}
 	err := c.ShouldBind(&data)
 	if err != nil {
@@ -83,8 +83,8 @@ func LoginHandler(c *gin.Context) {
 // RegisterHandler creates a new user
 func RegisterHandler(c *gin.Context) {
 	var data struct {
-		Username string `form:"username" binding:"required"`
-		Password string `form:"password" binding:"required"`
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
 	}
 	err := c.ShouldBind(&data)
 	if err != nil {

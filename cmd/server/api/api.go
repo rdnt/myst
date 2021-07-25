@@ -37,5 +37,8 @@ func AuthenticatedAPI(api gin.IRoutes) {
 	})
 
 	api.POST("/keystores", CreateKeystore)
-	api.GET("/keystore/:keystore_id", GetKeystore)
+	api.GET("/keystore/:keystore", GetKeystore)
+
+	// keystore invitations
+	api.POST("/keystore/:keystore/invitations", CreateKeystoreInvitation)
 }

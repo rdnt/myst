@@ -1,10 +1,16 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"myst/cmd/server/internal/keystore"
-	"myst/userkey"
 	"net/http"
+
+	"myst/cmd/server/keystoreinvitation"
+
+	"myst/user"
+
+	"github.com/gin-gonic/gin"
+
+	"myst/cmd/server/keystore"
+	"myst/userkey"
 )
 
 type RestUserKeystoreKey struct {
@@ -13,12 +19,12 @@ type RestUserKeystoreKey struct {
 }
 
 func CreateKeystore(c *gin.Context) {
-	uid := GetCurrentUser(c)
+	uid := GetCurrentUserID(c)
 
 	var data struct {
-		Name     string `form:"name" binding:"required"`
-		Key      []byte `form:"key" binding:"required"`
-		Keystore []byte `form:"keystore" binding:"required"`
+		Name     string `json:"name" binding:"required"`
+		Key      []byte `json:"key" binding:"required"`
+		Keystore []byte `json:"keystore" binding:"required"`
 	}
 	err := c.ShouldBind(&data)
 	if err != nil {
@@ -45,10 +51,10 @@ func CreateKeystore(c *gin.Context) {
 }
 
 func GetKeystore(c *gin.Context) {
-	uid := GetCurrentUser(c)
-	keystoreID := c.Param("keystore_id")
+	uid := GetCurrentUserID(c)
+	keystoreName := c.Param("keystore")
 
-	store, err := keystore.Get("id", keystoreID)
+	store, err := keystore.Get("name", keystoreName)
 	if err == keystore.ErrNotFound {
 		log.Error(err)
 		Error(c, http.StatusNotFound, err)
@@ -61,7 +67,7 @@ func GetKeystore(c *gin.Context) {
 
 	key, err := userkey.Get(map[string]string{
 		"user_id":     uid,
-		"keystore_id": keystoreID,
+		"keystore_id": store.ID,
 	})
 	if err == userkey.ErrNotFound {
 		log.Error(err)
@@ -79,4 +85,46 @@ func GetKeystore(c *gin.Context) {
 	}
 
 	Success(c, restStore)
+}
+
+func CreateKeystoreInvitation(c *gin.Context) {
+	inviterID := GetCurrentUserID(c)
+	keystoreName := c.Param("keystore")
+
+	var data struct {
+		Username  string `json:"username" binding:"required"`
+		PublicKey []byte `json:"public_key" binding:"required"`
+	}
+	err := c.ShouldBind(&data)
+	if err != nil {
+		Error(c, 400, err)
+		return
+	}
+
+	store, err := keystore.Get("name", keystoreName)
+	if err == keystore.ErrNotFound {
+		log.Error(err)
+		Error(c, http.StatusNotFound, err)
+		return
+	} else if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	invitee, err := user.Get("username", data.Username)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	inv, err := keystoreinvitation.New(inviterID, store.ID, invitee.ID, data.PublicKey)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, inv.ToRest())
 }

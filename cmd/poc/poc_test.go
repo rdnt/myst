@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/assert/v2"
-	"myst/crypto"
 	"testing"
+
+	"github.com/go-playground/assert/v2"
+
+	"myst/crypto"
 )
 
 func TestKeystore(t *testing.T) {

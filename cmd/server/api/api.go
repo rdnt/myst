@@ -26,6 +26,8 @@ func Init(r *gin.Engine) {
 		auth.POST("/register", RegisterHandler)
 	}
 
+	api.POST("/init", InitData)
+
 	AuthenticatedAPI(api.Group("").Use(Authentication()))
 }
 
@@ -35,4 +37,5 @@ func AuthenticatedAPI(api gin.IRoutes) {
 	})
 
 	api.POST("/keystores", CreateKeystore)
+	api.GET("/keystore/:keystore_id", GetKeystore)
 }

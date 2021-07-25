@@ -12,15 +12,16 @@ import (
 )
 
 var (
-	ErrNotFound = fmt.Errorf("user not found")
+	ErrNotFound     = fmt.Errorf("user not found")
+	ErrInvalidField = fmt.Errorf("invalid field")
 )
 
 type User struct {
-	ID           string              `json:"id" bson:"_id"`
-	Username     string              `json:"username" bson:"username"`
-	PasswordHash string              `json:"password_hash" bson:"password_hash"`
-	CreatedAt    timestamp.Timestamp `json:"created_at" bson:"created_at"`
-	UpdatedAt    timestamp.Timestamp `json:"updated_at" bson:"updated_at"`
+	ID           string              `bson:"_id"`
+	Username     string              `bson:"username"`
+	PasswordHash string              `bson:"password_hash"`
+	CreatedAt    timestamp.Timestamp `bson:"created_at"`
+	UpdatedAt    timestamp.Timestamp `bson:"updated_at"`
 }
 
 // Save saves the user on the storage
@@ -89,6 +90,14 @@ func New(username, password string) (*User, error) {
 
 // Get returns a user that matches the field/value pairs provided
 func Get(field, value string) (*User, error) {
+	switch field {
+	case "id":
+		field = "_id"
+	case "username":
+		break
+	default:
+		return nil, ErrInvalidField
+	}
 	var u *User
 	err := database.DB().Collection("users").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
 	if err == mongo.ErrNoDocuments {

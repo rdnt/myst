@@ -72,7 +72,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	err = loginUser(c, u.Username)
+	err = loginUser(c, u.ID)
 	if err != nil {
 		log.Error(err)
 		Error(c, 500, nil)
@@ -109,7 +109,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	err = loginUser(c, u.Username)
+	err = loginUser(c, u.ID)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, nil)
@@ -117,7 +117,7 @@ func RegisterHandler(c *gin.Context) {
 	}
 }
 
-func loginUser(c *gin.Context, username string) error {
+func loginUser(c *gin.Context, userID string) error {
 	exp := time.Now().Unix() + int64(jwtCookieLifetime)
 	iat := time.Now().Unix()
 	nbf := time.Now().Unix()
@@ -128,7 +128,7 @@ func loginUser(c *gin.Context, username string) error {
 			"exp": exp,
 			"iat": iat,
 			"nbf": nbf,
-			"usr": username,
+			"usr": userID,
 		},
 	)
 	key, err := base64.StdEncoding.DecodeString(jwtSecretKey)

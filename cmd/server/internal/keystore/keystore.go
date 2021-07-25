@@ -2,24 +2,36 @@ package keystore
 
 import (
 	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"myst/database"
 	"myst/timestamp"
 	"myst/util"
 )
 
+var (
+	ErrNotFound     = fmt.Errorf("keystore not found")
+	ErrInvalidField = fmt.Errorf("invalid field")
+)
+
 type Keystore struct {
-	ID        string              `json:"id" bson:"_id"`
-	Keystore  []byte              `json:"keystore" bson:"keystore"`
-	CreatedAt timestamp.Timestamp `json:"created_at" bson:"created_at"`
-	UpdatedAt timestamp.Timestamp `json:"updated_at" bson:"updated_at"`
+	ID        string              `bson:"_id"`
+	Keystore  []byte              `bson:"keystore"`
+	CreatedAt timestamp.Timestamp `bson:"created_at"`
+	UpdatedAt timestamp.Timestamp `bson:"updated_at"`
 }
 
 // New creates a keystore entry that holds the binary encrypted keystore data
-func New(store []byte) *Keystore {
-	return &Keystore{
-		ID:       "",
-		Keystore: store,
+func New(b []byte) (*Keystore, error) {
+	store := &Keystore{
+		Keystore: b,
 	}
+	err := store.Save()
+	if err != nil {
+		return nil, err
+	}
+	return store, nil
 }
 
 // Save saves the keystore along with the user key on the database
@@ -37,4 +49,39 @@ func (store *Keystore) Save() error {
 	}
 
 	return nil
+}
+
+type RestKeystore struct {
+	ID        string              `json:"id"`
+	Keystore  []byte              `json:"keystore"`
+	CreatedAt timestamp.Timestamp `json:"created_at"`
+	UpdatedAt timestamp.Timestamp `json:"updated_at"`
+}
+
+// ToRest removes sensitive information from the struct
+func (store *Keystore) ToRest() *RestKeystore {
+	return &RestKeystore{
+		ID:        store.ID,
+		Keystore:  store.Keystore,
+		CreatedAt: store.CreatedAt,
+		UpdatedAt: store.UpdatedAt,
+	}
+}
+
+// Get returns a keystore that matches the field/value pairs provided
+func Get(field, value string) (*Keystore, error) {
+	switch field {
+	case "id":
+		field = "_id"
+	default:
+		return nil, ErrInvalidField
+	}
+	var u *Keystore
+	err := database.DB().Collection("keystores").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
+	if err == mongo.ErrNoDocuments {
+		return nil, ErrNotFound
+	} else if err != nil {
+		return nil, err
+	}
+	return u, err
 }

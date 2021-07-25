@@ -4,50 +4,42 @@ import (
 	"context"
 	"fmt"
 	"myst/mongo"
-	"myst/util"
+	"myst/timestamp"
 )
 
 type UserKeystore struct {
-	Key      Key
-	Keystore Keystore
+	ID         string              `json:"id" bson:"_id"`
+	UserID     string              `json:"user_id" bson:"user_id"`
+	KeystoreID string              `json:"keystore_id" bson:"keystore_id"`
+	Key        []byte              `json:"key" bson:"key"`
+	CreatedAt  timestamp.Timestamp `json:"created_at"`
+	UpdatedAt  timestamp.Timestamp `json:"updated_at"`
 }
 
-type Key struct {
-	ID         string `json:"id" bson:"_id"`
-	UserID     string `json:"user_id" bson:"user_id"`
-	KeystoreId string `json:"keystore_id" bson:"keystore_id"`
-	Key        []byte `json:"key" bson:"key"`
-}
-
-type Keystore struct {
-	ID       string `json:"id" bson:"_id"`
-	Keystore []byte `json:"keystore" bson:"keystore"`
-}
-
-// New creates the files of a user's keystore and key from the
-// given payload data
-func New(userId string, key, keystore []byte) *UserKeystore {
-	keystoreId := util.NewUUID()
+// New creates the connection of a user to a keystore with the user's key in
+// encrypted form as sent by the client
+func New(uid, kid string, key []byte) *UserKeystore {
 	return &UserKeystore{
-		Key: Key{
-			ID:         fmt.Sprintf("%s-%s", userId, keystoreId),
-			UserID:     userId,
-			KeystoreId: keystoreId,
-			Key:        key,
-		},
-		Keystore: Keystore{
-			ID:       keystoreId,
-			Keystore: keystore,
-		},
+		ID:         "",
+		UserID:     uid,
+		KeystoreID: kid,
+		Key:        key,
 	}
 }
 
-func (uk *UserKeystore) Save() {
-	res, err := mongo.DB().Collection("user_keystores").InsertOne(context.Background(), uk.Key)
-	fmt.Println(res, err)
+// Save saves the keystore along with the user key on the database
+func (uk *UserKeystore) Save() error {
+	now := timestamp.New()
+	if uk.ID == "" {
+		uk.ID = fmt.Sprintf("%s-%s", uk.UserID, uk.KeystoreID)
+		uk.CreatedAt = now
+	}
+	uk.UpdatedAt = now
 
-	res, err = mongo.DB().Collection("keystores").InsertOne(context.Background(), uk.Keystore)
-	fmt.Println(res, err)
+	_, err := mongo.DB().Collection("user_keystores").InsertOne(context.Background(), uk)
+	if err != nil {
+		return err
+	}
 
-	//fmt.Println("save", litter.Sdump(uk))
+	return nil
 }

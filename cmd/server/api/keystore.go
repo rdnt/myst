@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"myst/cmd/server/internal/keystore"
 	"myst/userkeystore"
 )
 
@@ -18,7 +19,15 @@ func CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	uk := userkeystore.New(uid, data.Key, data.Keystore)
+	store := keystore.New(data.Keystore)
+	err = store.Save()
+	if err != nil {
+		panic(err)
+	}
 
-	uk.Save()
+	uk := userkeystore.New(uid, store.ID, data.Key)
+	err = uk.Save()
+	if err != nil {
+		panic(err)
+	}
 }

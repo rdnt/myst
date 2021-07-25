@@ -1,9 +1,11 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"myst/crypto"
+	"myst/mongo"
 	"myst/storage"
 	"myst/timestamp"
 	"myst/util"
@@ -33,11 +35,8 @@ func (u *User) Save() error {
 		u.Keystores = make(map[string]string)
 	}
 	u.UpdatedAt = now
-	b, err := json.Marshal(u)
-	if err != nil {
-		return err
-	}
-	err = storage.Save(fmt.Sprintf("data/users/%s.json", u.Username), b)
+
+	_, err := mongo.DB().Collection("users").InsertOne(context.Background(), u)
 	if err != nil {
 		return err
 	}

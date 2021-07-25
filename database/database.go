@@ -1,4 +1,4 @@
-package mongo
+package database
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	log         = logger.New("mongo", logger.BlueFg)
+	log         = logger.New("database", logger.BlueFg)
 	client      *mongo.Client
 	db          *mongo.Database
 	ErrNotReady = fmt.Errorf("not ready")

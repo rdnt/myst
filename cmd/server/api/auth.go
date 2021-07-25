@@ -52,7 +52,7 @@ func LoginHandler(c *gin.Context) {
 
 	//debugHash
 
-	u, err := user.Get(data.Username)
+	u, err := user.Get("username", data.Username)
 	if err == user.ErrNotFound {
 		Error(c, 404, nil)
 		return
@@ -92,7 +92,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	_, err = user.Get(data.Username)
+	_, err = user.Get("username", data.Username)
 	if err == nil {
 		Error(c, http.StatusForbidden, nil)
 		return
@@ -213,7 +213,7 @@ func VerifyLogin(c *gin.Context) (bool, error) {
 		return false, fmt.Errorf("invalid usr data")
 	}
 
-	u, err := user.Get(id)
+	u, err := user.Get("username", id)
 	if err != nil {
 		return false, fmt.Errorf("user not found")
 	}

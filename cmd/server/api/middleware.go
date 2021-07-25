@@ -86,7 +86,7 @@ func TokenAuthentication(c *gin.Context) error {
 		return ErrAuthenticationFailed
 	}
 
-	u, err := user.Get(username)
+	u, err := user.Get("username", username)
 	if err == user.ErrNotFound {
 		return ErrAuthenticationFailed
 	} else if err != nil {

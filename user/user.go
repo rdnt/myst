@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"myst/crypto"
-	"myst/mongo"
-	"myst/storage"
+	"myst/database"
 	"myst/timestamp"
 	"myst/util"
 )
@@ -16,12 +16,11 @@ var (
 )
 
 type User struct {
-	ID           string              `json:"id"`
-	Username     string              `json:"username"`
-	PasswordHash string              `json:"password_hash"`
-	Keystores    map[string]string   `json:"keystores"`
-	CreatedAt    timestamp.Timestamp `json:"created_at"`
-	UpdatedAt    timestamp.Timestamp `json:"updated_at"`
+	ID           string              `json:"id" bson:"_id"`
+	Username     string              `json:"username" bson:"username"`
+	PasswordHash string              `json:"password_hash" bson:"password_hash"`
+	CreatedAt    timestamp.Timestamp `json:"created_at" bson:"created_at"`
+	UpdatedAt    timestamp.Timestamp `json:"updated_at" bson:"updated_at"`
 }
 
 // Save saves the user on the storage
@@ -31,12 +30,9 @@ func (u *User) Save() error {
 		u.ID = util.NewUUID()
 		u.CreatedAt = now
 	}
-	if u.Keystores == nil {
-		u.Keystores = make(map[string]string)
-	}
 	u.UpdatedAt = now
 
-	_, err := mongo.DB().Collection("users").InsertOne(context.Background(), u)
+	_, err := database.DB().Collection("users").InsertOne(context.Background(), u)
 	if err != nil {
 		return err
 	}
@@ -78,19 +74,27 @@ func New(username, password string) (*User, error) {
 }
 
 // Get loads a user from the storage and returns it
-func Get(username string) (*User, error) {
-	b, err := storage.Load(fmt.Sprintf("data/users/%s.json", username))
-	if err == storage.ErrNotFound {
+//func Get(id string) (*User, error) {
+//	u := &User{
+//		ID: id,
+//	}
+//	err := database.DB().Collection("users").FindOne(context.Background(), &u).Err()
+//	if err == mongo.ErrNoDocuments {
+//		return nil, ErrNotFound
+//	} else if err != nil {
+//		return nil, err
+//	}
+//	return u, err
+//}
+
+// Get returns a user that matches the field/value pairs provided
+func Get(field, value string) (*User, error) {
+	var u *User
+	err := database.DB().Collection("users").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
+	if err == mongo.ErrNoDocuments {
 		return nil, ErrNotFound
 	} else if err != nil {
 		return nil, err
 	}
-
-	var u *User
-	err = json.Unmarshal(b, &u)
-	if err != nil {
-		return nil, err
-	}
-
-	return u, nil
+	return u, err
 }

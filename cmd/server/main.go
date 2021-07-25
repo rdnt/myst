@@ -8,8 +8,8 @@ import (
 
 	"myst/cmd/server/api"
 	"myst/config"
+	"myst/database"
 	"myst/logger"
-	"myst/mongo"
 	"myst/regex"
 	"myst/router"
 	"myst/server"
@@ -41,12 +41,12 @@ func main() {
 		return
 	}
 
-	_, err = mongo.New("mongodb://localhost:27017")
+	_, err = database.New("mongodb://localhost:27017")
 	if err != nil {
 		logger.Errorf("Database initialization failed: %s", err)
 		return
 	}
-	defer mongo.Close()
+	defer database.Close()
 
 	r := router.New(config.Debug)
 
@@ -54,7 +54,6 @@ func main() {
 
 	err = server.Start(r)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 	defer server.Stop()

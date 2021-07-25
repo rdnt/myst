@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"myst/pkg/logger"
+	"myst/logger"
 )
 
 var (

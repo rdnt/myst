@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"myst/pkg/logger"
-	"myst/pkg/rest"
+	"myst/logger"
+	"myst/rest"
 )
 
 var (

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"myst/pkg/crypto"
+	"myst/crypto"
 )
 
 var (

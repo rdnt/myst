@@ -3,10 +3,10 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"myst/pkg/crypto"
-	"myst/pkg/database"
-	"myst/pkg/timestamp"
-	"myst/pkg/util"
+	"myst/crypto"
+	"myst/storage"
+	"myst/timestamp"
+	"myst/util"
 )
 
 var (
@@ -22,7 +22,7 @@ type User struct {
 	UpdatedAt    timestamp.Timestamp `json:"updated_at"`
 }
 
-// Save saves the user on the database
+// Save saves the user on the storage
 func (u *User) Save() error {
 	now := timestamp.New()
 	if u.ID == "" {
@@ -37,7 +37,7 @@ func (u *User) Save() error {
 	if err != nil {
 		return err
 	}
-	err = database.Save(fmt.Sprintf("data/users/%s.json", u.Username), b)
+	err = storage.Save(fmt.Sprintf("data/users/%s.json", u.Username), b)
 	if err != nil {
 		return err
 	}
@@ -78,10 +78,10 @@ func New(username, password string) (*User, error) {
 	return u, nil
 }
 
-// Get loads a user from the database and returns it
+// Get loads a user from the storage and returns it
 func Get(username string) (*User, error) {
-	b, err := database.Load(fmt.Sprintf("data/users/%s.json", username))
-	if err == database.ErrNotFound {
+	b, err := storage.Load(fmt.Sprintf("data/users/%s.json", username))
+	if err == storage.ErrNotFound {
 		return nil, ErrNotFound
 	} else if err != nil {
 		return nil, err

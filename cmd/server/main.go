@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"myst/pkg/mongo"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"myst/cmd/server/api"
-	"myst/pkg/config"
-	"myst/pkg/database"
-	"myst/pkg/logger"
-	"myst/pkg/regex"
-	"myst/pkg/router"
-	"myst/pkg/server"
+	"myst/config"
+	"myst/logger"
+	"myst/mongo"
+	"myst/regex"
+	"myst/router"
+	"myst/server"
+	"myst/storage"
 )
 
 func main() {
@@ -35,9 +35,9 @@ func main() {
 		return
 	}
 
-	err = database.Init()
+	err = storage.Init()
 	if err != nil {
-		logger.Errorf("Database initialization failed: %s", err)
+		logger.Errorf("Storage initialization failed: %s", err)
 		return
 	}
 

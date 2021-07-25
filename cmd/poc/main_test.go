@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-playground/assert/v2"
-	"myst/pkg/crypto"
+	"myst/crypto"
 	"testing"
 )
 

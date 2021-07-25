@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"myst/pkg/config"
+	"myst/config"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"

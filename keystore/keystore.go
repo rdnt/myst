@@ -3,7 +3,7 @@ package keystore
 import (
 	"fmt"
 	"github.com/sanity-io/litter"
-	"myst/pkg/crypto"
+	"myst/crypto"
 )
 
 type Keystore struct {

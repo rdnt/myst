@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 
-	"myst/pkg/rest"
+	"myst/rest"
 )
 
 var (

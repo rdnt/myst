@@ -2,40 +2,50 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"myst/pkg/logger"
+	"myst/logger"
 )
 
 var (
-	log = logger.New("mongo", logger.BlueFg)
-	db  *mongo.Client
+	log         = logger.New("mongo", logger.BlueFg)
+	client      *mongo.Client
+	db          *mongo.Database
+	ErrNotReady = fmt.Errorf("not ready")
 )
 
-func New(uri string) (*mongo.Client, error) {
+func New(uri string) (*mongo.Database, error) {
 	ctx := context.Background()
 	var err error
-	db, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
 	go func() {
-		err = db.Ping(ctx, readpref.Primary())
+		err = client.Ping(ctx, readpref.Primary())
 		if err != nil {
 			log.Error(err)
 		} else {
 			log.Print("MongoDB connected.")
 		}
 	}()
+	db = client.Database("myst")
 	return db, nil
 }
 
 // NewWithClient creates a new mongodb connection with the given mongodb client
-func NewWithClient(mdb *mongo.Client) {
-	db = mdb
+func NewWithClient(c *mongo.Client) *mongo.Database {
+	client = c
+	db = client.Database("myst")
+	return db
+}
+
+func DB() *mongo.Database {
+	return db
 }
 
 func Close() {
@@ -43,7 +53,7 @@ func Close() {
 		return
 	}
 	ctx := context.Background()
-	err := db.Disconnect(ctx)
+	err := client.Disconnect(ctx)
 	if err != nil {
 		log.Error(err)
 	}

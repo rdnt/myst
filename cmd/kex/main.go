@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/curve25519"
 
-	"myst/pkg/crypto"
+	"myst/crypto"
 )
 
 var eccKeySize = uint(32)

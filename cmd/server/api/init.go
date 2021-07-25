@@ -25,7 +25,7 @@ func InitData(c *gin.Context) {
 		panic(err)
 	}
 
-	s1, err := keystore.New(testKeystore)
+	s1, err := keystore.New("default", testKeystore)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func InitData(c *gin.Context) {
 		panic(err)
 	}
 
-	s2, err := keystore.New(testKeystore)
+	s2, err := keystore.New("secondary", testKeystore)
 	if err != nil {
 		panic(err)
 	}

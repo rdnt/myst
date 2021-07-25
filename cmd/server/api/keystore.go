@@ -16,6 +16,7 @@ func CreateKeystore(c *gin.Context) {
 	uid := GetCurrentUser(c)
 
 	var data struct {
+		Name     string `form:"name" binding:"required"`
 		Key      []byte `form:"key" binding:"required"`
 		Keystore []byte `form:"keystore" binding:"required"`
 	}
@@ -25,7 +26,7 @@ func CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	store, err := keystore.New(data.Keystore)
+	store, err := keystore.New(data.Name, data.Keystore)
 	if err != nil {
 		panic(err)
 	}

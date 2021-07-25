@@ -17,14 +17,16 @@ var (
 
 type Keystore struct {
 	ID        string              `bson:"_id"`
+	Name      string              `bson:"name"`
 	Keystore  []byte              `bson:"keystore"`
 	CreatedAt timestamp.Timestamp `bson:"created_at"`
 	UpdatedAt timestamp.Timestamp `bson:"updated_at"`
 }
 
 // New creates a keystore entry that holds the binary encrypted keystore data
-func New(b []byte) (*Keystore, error) {
+func New(name string, b []byte) (*Keystore, error) {
 	store := &Keystore{
+		Name:     name,
 		Keystore: b,
 	}
 	err := store.Save()
@@ -53,6 +55,7 @@ func (store *Keystore) Save() error {
 
 type RestKeystore struct {
 	ID        string              `json:"id"`
+	Name      string              `json:"name"`
 	Keystore  []byte              `json:"keystore"`
 	CreatedAt timestamp.Timestamp `json:"created_at"`
 	UpdatedAt timestamp.Timestamp `json:"updated_at"`
@@ -62,6 +65,7 @@ type RestKeystore struct {
 func (store *Keystore) ToRest() *RestKeystore {
 	return &RestKeystore{
 		ID:        store.ID,
+		Name:      store.Name,
 		Keystore:  store.Keystore,
 		CreatedAt: store.CreatedAt,
 		UpdatedAt: store.UpdatedAt,
@@ -73,6 +77,8 @@ func Get(field, value string) (*Keystore, error) {
 	switch field {
 	case "id":
 		field = "_id"
+	case "name":
+		break
 	default:
 		return nil, ErrInvalidField
 	}

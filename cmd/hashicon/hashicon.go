@@ -55,14 +55,16 @@ func main() {
 	//}
 
 	it := 120 // 120
-	sizes := []int{
-		256, /*512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,*/
+	bitSizes := []int{
+		256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
 	}
 
 	for i := 0; i < it; i++ {
-		b, _ := GenerateRandomBytes(sizes[rand.Intn(len(sizes))] / 8)
+		b, _ := GenerateRandomBytes(bitSizes[rand.Intn(len(bitSizes))] / 8)
 		h, _ := hashicon.New(b)
-		h.Save(fmt.Sprintf("test-%d", i))
+		name := fmt.Sprintf("tmp/hashicons/test-%d-%d.svg", i, len(b)*8)
+		h.Export(name)
+		fmt.Println(name)
 	}
 
 	//h128, _ := hashicon.New(k128)

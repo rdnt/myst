@@ -8,24 +8,27 @@ import (
 )
 
 var (
+	// ErrInvalidLen is returned if the passed byte slice is not a power of 2
+	// or is outside of the allowed bounds (256-65536 bits)
 	ErrInvalidLen = fmt.Errorf("invalid len")
 )
 
+// Hashicon represents a hash in image form, and is based on the concepts of
+// identicons and randomart's drunken bishop algorithm.
 type Hashicon struct {
 	Stride int
 	Pix    []float64
 }
 
-// New creates and saves a new user
+// New creates a new hashicon and stores its pix array and stride.
+// The length of the pix slice always equals stride^2.
 func New(b []byte) (*Hashicon, error) {
-	// at least 256-bit, only powers of two
-	bits := len(b) * 8
-	fmt.Println("len", len(b))
-	fmt.Println("bits", bits)
-	if len(b) < 32 || !((len(b) & (len(b) - 1)) == 0) {
+	if len(b) < 32 || len(b) > 8192 || !((len(b) & (len(b) - 1)) == 0) {
 		return nil, ErrInvalidLen
 	}
 
+	// make sure the stride is a power of two (that will also have an integer
+	// logarithm of 2)
 	stride := len(b) * 2
 	i, frac := math.Modf(math.Sqrt(float64(stride)))
 	if frac == 0 {
@@ -35,127 +38,83 @@ func New(b []byte) (*Hashicon, error) {
 		stride = int(i)
 	}
 
-	fmt.Println("stride", stride)
+	pix := make([]float64, stride*stride)
 
-	h := &Hashicon{
-		Stride: stride,
-		Pix:    make([]float64, stride*stride),
-	}
+	// bits per coordinate indicates how many bits should be used to determine
+	// the starting position of the
+	bpc := int(math.Log2(float64(stride)))
 
-	fmt.Println("BEFORE PARSE")
-	h.parse(b)
-
-	return h, nil
-}
-
-func (h *Hashicon) parse(b []byte) {
-	//bpc := h.Stride >> 1
-	//fmt.Println("bpc", bpc)
-
-	//x := int(b[0] & 0b11100000 >> 5)
-	//y := int(b[0] & 0b00011100 >> 2)
-
-	//x := h.Stride / 2
-	//y := h.Stride / 2
-
-	//x := 0
-
-	//stride := int(math.Sqrt(float64(len(b) * 4)))
-	//fmt.Println(x, y)
-
-	bpc := int(math.Log2(float64(h.Stride)))
-	fmt.Println("bpc", bpc)
-
-	fmt.Printf("%08b\n", b[0])
+	// find x pos
 	x := 0
 	for i := 0; i < bpc; i++ {
 		x = x + getBit(b[i/8], i%8)<<(bpc-i-1)
 	}
 
+	// find y pos
 	y := 0
 	for i := 0; i < bpc; i++ {
 		y = y + getBit(b[(i+bpc)/8], (i+bpc)%8)<<(bpc-i-1)
 	}
 
-	fmt.Println(x, y)
+	// perform the drunken bishop algorithm (modified for movements in
+	// top, left, right, bottom instead of diagonally)
+	for i := 0; i < 4; i++ {
+		for j := bpc * 2; j < len(b)*8; j += 2 {
+			b1 := getBit(b[j/8], j%8) * 2
+			b2 := getBit(b[(j+1)/8], (j+1)%8)
 
-	//locating := true
-	for i := bpc * 2; i < len(b)*8; i += 2 { // loop all bits
-		b1 := getBit(b[i/8], i%8) * 2
-		b2 := getBit(b[(i+1)/8], (i+1)%8)
+			// perform the movement but don't exit the bounds of the grid
+			switch b1 + b2 {
+			case 0:
+				if y != 0 {
+					// move top
+					y = y - 1
+				}
+				break
+			case 1:
+				if x != stride-1 {
+					// move right
+					x = x + 1
+				}
+				break
+			case 2:
+				if y != stride-1 {
+					// move bottom
+					y = y + 1
+				}
+				break
+			case 3:
+				if x != 0 {
+					// move left
+					x = x - 1
+				}
+				break
+			}
 
-		switch b1 + b2 {
-		case 0:
-			if y != 0 {
-				// move top
-				y = y - 1
-			}
-			break
-		case 1:
-			if x != h.Stride-1 {
-				// move right
-				x = x + 1
-			}
-			break
-		case 2:
-			if y != h.Stride-1 {
-				// move bottom
-				y = y + 1
-			}
-			break
-		case 3:
-			if x != 0 {
-				// move left
-				x = x - 1
-			}
-			break
+			pix[x*stride+y] += 1
 		}
-
-		h.Pix[x*h.Stride+y] += 1
 	}
 
+	// find max pixel and normalize all pixels in range 0..1
 	max := 0.0
-	for _, p := range h.Pix {
+	for _, p := range pix {
 		if p > max {
 			max = p
 		}
 	}
-	for i, p := range h.Pix {
-		h.Pix[i] = p / max
+	for i, p := range pix {
+		pix[i] = p / max
 	}
 
-	//fmt.Println(h.Pix)
-
+	return &Hashicon{
+		Stride: stride,
+		Pix:    pix,
+	}, nil
 }
 
-//func (h *Hashicon) parseOld(b []byte) {
-//	for i := 0; i < len(b)*8; i++ { // loop all bits
-//		byt := b[i/8]
-//		bit := getBit(byt, i%8)
-//		h.Pix[i/h.BitsPerPixel] += bit / float64(h.BitsPerPixel)
-//	}
-//}
-
-//func weightToColor(w float64, step float64) color.RGBA {
-//	switch {
-//	case w > .75:
-//		return color.RGBA{
-//			R: 32,
-//			G: 233,
-//			B: 183,
-//			A: uint8(w * 255),
-//		}
-//	default:
-//		return color.RGBA{
-//			R: 58,
-//			G: 141,
-//			B: 153,
-//			A: uint8(w * 255),
-//		}
-//	}
-//}
-
-func weightToColor(w float64) color.RGBA {
+// WeightToColor converts a normalized weight (in the range 0..1) to a color.
+// Can be overwritten to allow for custom visualizations.
+func WeightToColor(w float64) color.RGBA {
 	switch {
 	case w > .66:
 		return color.RGBA{
@@ -174,14 +133,18 @@ func weightToColor(w float64) color.RGBA {
 	}
 }
 
+// ToSVG returns an SVG based on the hashicon pixel data.
+// TODO: use a string builder?
 func (h *Hashicon) ToSVG() string {
 	mult := 256 / h.Stride
-	svg := fmt.Sprintf(`<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult)
+	svg := fmt.Sprintf(
+		`<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult,
+	)
 	svg += `<rect width="100%" height="100%" fill="#181b21"/>`
 	for i, p := range h.Pix {
 		x := i % h.Stride
 		y := i / h.Stride
-		clr := weightToColor(p)
+		clr := WeightToColor(p)
 
 		svg += fmt.Sprintf(
 			`<rect x="%d" y="%d" width="%d" height="%d" fill="%s" opacity="%f" />`,
@@ -197,39 +160,9 @@ func (h *Hashicon) ToSVG() string {
 	return svg
 }
 
-func (h *Hashicon) SaveSVGIncremental(name string) error {
-
-	f, err := os.Create(fmt.Sprintf("./tmp/hashicons/hashicon-%s.svg", name))
-	if err != nil {
-		return err
-	}
-
-	mult := 256 / h.Stride
-	f.Write([]byte(fmt.Sprintf(`<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult)))
-	f.Write([]byte(`<rect width="100%" height="100%" fill="#181b21"/>`))
-	for i, p := range h.Pix {
-		x := i % h.Stride
-		y := i / h.Stride
-		clr := weightToColor(p)
-
-		f.Write([]byte(fmt.Sprintf(
-			`<rect x="%d" y="%d" width="%d" height="%d" fill="%s" opacity="%f" />`,
-			x*mult,
-			y*mult,
-			mult,
-			mult,
-			fmt.Sprintf("#%X%X%X", clr.R, clr.G, clr.B),
-			float64(clr.A)/255,
-		)))
-	}
-	f.Write([]byte(`</svg>`))
-
-	return f.Close()
-
-}
-
-func (h *Hashicon) Save(name string) error {
-	f, err := os.Create(fmt.Sprintf("./tmp/hashicons/hashicon-%s.svg", name))
+// Export converts the hashicon to SVG and saves it in the specified path.
+func (h *Hashicon) Export(path string) error {
+	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
@@ -240,16 +173,10 @@ func (h *Hashicon) Save(name string) error {
 	return f.Close()
 }
 
+// Returns 1 or 0 depending on the bit specified in the given byte's position.
 func getBit(b byte, i int) int {
 	if i < 0 || i > 7 {
 		return 0
 	}
 	return int(b >> (8 - i - 1) & 1)
-}
-
-func getBitOld(b byte, i int) float64 {
-	if i < 0 || i > 7 {
-		return 0
-	}
-	return float64(b >> (8 - i - 1) & 1)
 }

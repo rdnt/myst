@@ -13,7 +13,7 @@ type Writer struct {
 	writer io.Writer
 }
 
-func newWriter(w io.Writer) *Writer {
+func NewWriter(w io.Writer) *Writer {
 	return &Writer{writer: w}
 }
 
@@ -21,6 +21,9 @@ func newWriter(w io.Writer) *Writer {
 func (w *Writer) Write(p []byte) (int, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+	if w.writer == nil {
+		return 0, nil
+	}
 	return w.writer.Write(p)
 }
 

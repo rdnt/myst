@@ -24,7 +24,8 @@ require (
 	github.com/prometheus/procfs v0.7.1 // indirect
 	github.com/sanity-io/litter v1.5.1
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.6.1
+	//github.com/stretchr/testify v1.7.0
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -34,4 +35,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 )
 
-replace github.com/stretchr/testify => C:\Users\Tasos\Projects\testify
+replace github.com/stretchr/testify => github.com/rdnt/testify v0.0.0-20210728214825-ee34c8d66904

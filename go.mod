@@ -35,3 +35,4 @@ require (
 )
 
 replace github.com/stretchr/testify => github.com/rdnt/testify v0.0.0-20210728214825-ee34c8d66904
+//replace github.com/stretchr/testify => C:\Users\Tasos\Projects\testify

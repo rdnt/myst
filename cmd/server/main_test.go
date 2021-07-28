@@ -10,14 +10,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mattn/go-colorable"
-	"github.com/sanity-io/litter"
-
-	"myst/cmd/server/api"
-
 	"github.com/gin-gonic/gin"
+	"github.com/mattn/go-colorable"
 	"github.com/stretchr/testify/suite"
 
+	"myst/cmd/server/api"
 	"myst/config"
 	"myst/logger"
 	"myst/rest"
@@ -71,7 +68,6 @@ func (s *IntegrationSuite) stopCapture() (string, error) {
 
 func (s *IntegrationSuite) HandleStats(name string, stats *suite.SuiteInformation) {
 	var status string
-	litter.Dump(stats)
 	if stats.Passed() {
 		status = logger.Colorize("passed", logger.GreenFg)
 	} else {
@@ -119,7 +115,6 @@ func (s *IntegrationSuite) TearDownSuite() {
 func (s *IntegrationSuite) TearDownTest() {
 	if !testing.Verbose() {
 		// show progress
-		s.T().Fail()
 		if s.T().Failed() {
 			fmt.Print(logger.Colorize("•", logger.RedFg))
 		} else if s.T().Skipped() {
@@ -131,12 +126,10 @@ func (s *IntegrationSuite) TearDownTest() {
 }
 
 func (s *IntegrationSuite) TestPing() {
-	panic("oops in tear down test")
-
 	s.ping()
 }
 
-func (s *IntegrationSuite) TestFatal() {
+func (s *IntegrationSuite) TestWWWW() {
 	panic("test")
 }
 

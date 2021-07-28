@@ -9,7 +9,7 @@ import (
 
 var (
 	// ErrInvalidLen is returned if the passed byte slice is not a power of 2
-	// or is outside of the allowed bounds (256-65536 bits)
+	// or is outside of the allowed bounds (256-65536 bits inclusive)
 	ErrInvalidLen = fmt.Errorf("invalid len")
 )
 
@@ -58,41 +58,39 @@ func New(b []byte) (*Hashicon, error) {
 
 	// perform the drunken bishop algorithm (modified for movements in
 	// top, left, right, bottom instead of diagonally)
-	for i := 0; i < 4; i++ {
-		for j := bpc * 2; j < len(b)*8; j += 2 {
-			b1 := getBit(b[j/8], j%8) * 2
-			b2 := getBit(b[(j+1)/8], (j+1)%8)
+	for i := bpc * 2; i < len(b)*8; i += 2 {
+		b1 := getBit(b[i/8], i%8) * 2
+		b2 := getBit(b[(i+1)/8], (i+1)%8)
 
-			// perform the movement but don't exit the bounds of the grid
-			switch b1 + b2 {
-			case 0:
-				if y != 0 {
-					// move top
-					y = y - 1
-				}
-				break
-			case 1:
-				if x != stride-1 {
-					// move right
-					x = x + 1
-				}
-				break
-			case 2:
-				if y != stride-1 {
-					// move bottom
-					y = y + 1
-				}
-				break
-			case 3:
-				if x != 0 {
-					// move left
-					x = x - 1
-				}
-				break
+		// perform the movement but don't exit the bounds of the grid
+		switch b1 + b2 {
+		case 0:
+			if y != 0 {
+				// move top
+				y = y - 1
 			}
-
-			pix[x*stride+y] += 1
+			break
+		case 1:
+			if x != stride-1 {
+				// move right
+				x = x + 1
+			}
+			break
+		case 2:
+			if y != stride-1 {
+				// move bottom
+				y = y + 1
+			}
+			break
+		case 3:
+			if x != 0 {
+				// move left
+				x = x - 1
+			}
+			break
 		}
+
+		pix[x*stride+y] += 1
 	}
 
 	// find max pixel and normalize all pixels in range 0..1
@@ -116,7 +114,7 @@ func New(b []byte) (*Hashicon, error) {
 // Can be overwritten to allow for custom visualizations.
 func WeightToColor(w float64) color.RGBA {
 	switch {
-	case w > .66:
+	case w > .5:
 		return color.RGBA{
 			R: 32,
 			G: 233,
@@ -136,7 +134,9 @@ func WeightToColor(w float64) color.RGBA {
 // ToSVG returns an SVG based on the hashicon pixel data.
 // TODO: use a string builder?
 func (h *Hashicon) ToSVG() string {
+	// try to be the same size in the resulting SVG regardless of stride
 	mult := 256 / h.Stride
+
 	svg := fmt.Sprintf(
 		`<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult,
 	)
@@ -144,6 +144,7 @@ func (h *Hashicon) ToSVG() string {
 	for i, p := range h.Pix {
 		x := i % h.Stride
 		y := i / h.Stride
+
 		clr := WeightToColor(p)
 
 		svg += fmt.Sprintf(
@@ -157,6 +158,7 @@ func (h *Hashicon) ToSVG() string {
 		)
 	}
 	svg += `</svg>`
+
 	return svg
 }
 

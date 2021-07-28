@@ -15,5 +15,5 @@ require (
 	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gopkg.in/go-playground/validator.v9 v9.31.0
-	vitess.io/vitess v0.9.0
+	vitess.io/vitess v0.11.0
 )

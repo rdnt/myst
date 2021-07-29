@@ -75,7 +75,7 @@ func (s *IntegrationSuite) HandleStats(name string, stats *suite.SuiteInformatio
 	}
 
 	fmt.Printf(
-		"\n%s tests %s in %s\n\n",
+		"%s tests %s in %s\n\n",
 		name,
 		status,
 		stats.End.Sub(stats.Start),
@@ -109,6 +109,7 @@ func (s *IntegrationSuite) TearDownSuite() {
 		fmt.Printf("\n%s\n", output)
 	} else {
 		fmt.Println()
+		fmt.Println()
 	}
 }
 
@@ -127,10 +128,6 @@ func (s *IntegrationSuite) TearDownTest() {
 
 func (s *IntegrationSuite) TestPing() {
 	s.ping()
-}
-
-func (s *IntegrationSuite) TestWWWW() {
-	panic("test")
 }
 
 func (s *IntegrationSuite) ping() {

@@ -1,9 +1,5 @@
 name: go
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 jobs:
   build:
     name: build
@@ -20,11 +16,10 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Get dependencies
       id: get-dependencies
-      run: |
-        go get -v -t -d ./server/...
+      run: go get -v -t -d ./cmd/server/...
     - name: Build
       id: build
-      run: go build -o main -v ./server
+      run: go build ./cmd/server/main.go
     - name: Test
       id: test
-      run: go test ./server/...
+      run: go test -test.v ./cmd/server

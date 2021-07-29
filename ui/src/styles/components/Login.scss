@@ -1,7 +1,10 @@
 // main: main.less
 #login {
-    display: block;
-    position: absolute;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     margin: 0;
     height: 100%;
@@ -16,13 +19,11 @@
         pointer-events: all;
     }
     .form {
-        position: absolute;
-        width: 400px;
+        display: flex;
+        flex-direction: column;
+        width: 600px;
+        max-width: 100%;
         height: auto;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding-bottom: 40px;
         .logo {
             display: block;
             width: 100px;
@@ -31,6 +32,7 @@
             transition: transform 1s cubic-bezier(0, 0, 0, 1), opacity 1s cubic-bezier(0, 0, 0, 1);
             pointer-events: none;
             padding-bottom: 20px;
+            opacity: .95;
             &.submitting {
                 animation: submitting 1s ease;
             }
@@ -47,76 +49,71 @@
             }
         }
         .label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 40px;
-            color: #fff;
-            opacity: .9;
-            line-height: 40px;
-            font-size: 1.4em;
+            color: #cacbcf;
+            font-size: 1.8rem;
             text-transform: uppercase;
-            font-family: 'Assistant', sans-serif;
             font-weight: 600;
             letter-spacing: 1px;
-            margin-bottom: 80px;
         }
         .master-password {
             position: relative;
+            margin-top: 60px;
+
             .field {
                 display: block;
                 width: 100%;
-                height: 30px;
-                padding: 10px 13px;
+                height: 50px;
+                padding: 10px 120px 10px 16px;
                 margin: 0;
                 border: 0;
-                background-color: rgba(#def, .05);
+                background-color: rgba(#ddf, .05);
                 font-weight: 400;
                 border-radius: 2px;
-                caret-color: rgba(225,225,255,.5);
-                font-size: 1em;
-                letter-spacing: .1rem;
-                color: #cacbcc;
+                caret-color: rgba(#fff, .5);
+                line-height: 1.4;
+                font-size: 1.1rem;
+                color: #cacbcf;
                 transition: background-color .15s ease;
-                font-family: 'Hack', monospace;
                 &::placeholder {
-                    font-size: 1rem;
-                    font-family: 'Hack', monospace;
-                }
-                &:focus {
-                    background-color: rgba(#def, .075);
+                    font-size: 1.1rem;
+                    color: rgba(#cacbcf, .33);
                 }
                 &::selection {
-                    background: rgba(#fff, .05);
+                    background: rgba(#aad, .05);
                     color: #fff;
                 }
             }
         }
 
         .prompt {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
             pointer-events: none;
-            height: 50px;
-            color: #dadbdc;
-            text-align: right;
-            width: 100%;
-            line-height: 50px;
-            font-family: 'Assistant', sans-serif;
-            font-size: .8rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-            padding-top: 0px;
-            font-size: 1em;
+            height: 36px;
+            margin: 7px;
+            padding: 0 16px;
+            border-radius: 2px;
+            background-color: rgba(#acf, .06);
             &.enter-pressed {
-                .code {
-                    background-color: rgba(#fff, .1);
+                background-color: rgba(#acf, .05);
+                span {
+                    transform: translateY(1px);
                 }
             }
-            .code {
-                background-color: rgba(#fff, .05);
-                color: #cacbcc;
-                padding: 4px 8px;
-                border-radius: 2px;
-                margin: 0 1px;
-                font-family: 'Hack', monospace;
-                font-size: 1em;
+            span {
                 text-transform: uppercase;
+                color: #cacbcf;
+                font-weight: 700;
+                font-size: .9sdarem;
+                letter-spacing: 1px;
             }
         }
     }

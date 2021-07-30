@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"myst/cmd/server/api"
 	"myst/config"
 	"myst/database"
 	"myst/logger"
@@ -49,7 +50,7 @@ func main() {
 
 	r := router.New(config.Debug)
 
-	//api.Init(r)
+	api.Init(r)
 
 	err = server.Start(r)
 	if err != nil {

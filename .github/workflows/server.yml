@@ -1,8 +1,9 @@
 name: go
 on:
   push:
+    branches: [ main ]
   pull_request:
-    types: [ synchronize ]
+    types: [ synchronize, edited ]
 jobs:
   build:
     name: build

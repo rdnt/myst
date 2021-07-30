@@ -155,3 +155,5 @@ func (s *IntegrationSuite) parseResponse(resp *httptest.ResponseRecorder, r inte
 	err = json.Unmarshal(b, &r)
 	s.Require().Nil(err)
 }
+
+// 5

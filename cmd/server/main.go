@@ -61,5 +61,3 @@ func main() {
 	<-quit
 	logger.Debugf("Server shutting down...")
 }
-
-// 4asdasdasd

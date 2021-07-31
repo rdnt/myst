@@ -20,8 +20,7 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          restore-keys: ${{ runner.os }}-go-
       - name: Set up Go ${{ matrix.go-version }}
         id: setup-go
         uses: actions/setup-go@v1

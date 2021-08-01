@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"myst/rest"
+	"myst/pkg/rest"
 )
 
 var (

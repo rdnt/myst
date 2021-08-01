@@ -1,11 +1,9 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
-	"myst/logger"
+	"myst/pkg/logger"
 )
 
 var (
@@ -17,7 +15,7 @@ func Init(r *gin.Engine) {
 	api := r.Group("/api")
 
 	api.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "Pong!")
+		Success(c, "Pong!")
 	})
 
 	auth := api.Group("/auth")
@@ -33,7 +31,7 @@ func Init(r *gin.Engine) {
 
 func AuthenticatedAPI(api gin.IRoutes) {
 	api.GET("/pong", func(c *gin.Context) {
-		c.String(http.StatusOK, "PING!")
+		Success(c, "PING!")
 	})
 
 	api.POST("/keystores", CreateKeystore)

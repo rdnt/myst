@@ -3,9 +3,9 @@ package keystore
 import (
 	"fmt"
 
-	"github.com/sanity-io/litter"
+	crypto2 "myst/pkg/crypto"
 
-	"myst/crypto"
+	"github.com/sanity-io/litter"
 )
 
 type Keystore struct {
@@ -28,7 +28,7 @@ type EncryptedKeystore struct {
 
 // NewEncrypted creates and saves an encrypted keystore from the given payload
 func NewEncrypted(store, password string) (*EncryptedKeystore, error) {
-	key, err := crypto.GenerateRandomBytes(32)
+	key, err := crypto2.GenerateRandomBytes(32)
 	if err != nil {
 		return nil, err
 	}

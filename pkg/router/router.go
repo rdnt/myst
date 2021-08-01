@@ -2,18 +2,19 @@ package router
 
 import (
 	"fmt"
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
-	"github.com/go-errors/errors"
-	"github.com/zsais/go-gin-prometheus"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
 
-	"myst/logger"
-	"myst/rest"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	"github.com/go-errors/errors"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
+
+	"myst/pkg/logger"
+	"myst/pkg/rest"
 )
 
 var (
@@ -29,11 +30,6 @@ func init() {
 
 func New(debug bool) *gin.Engine {
 	// Set gin mode
-	if debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
 	// Create gin router instance
 	r := gin.New()
 	// Do not redirect folders to trailing slash

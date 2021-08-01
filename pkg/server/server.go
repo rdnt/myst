@@ -3,19 +3,20 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
-	"myst/logger"
+	"github.com/gin-gonic/gin"
+
+	logger2 "myst/pkg/logger"
 )
 
 var (
 	httpSrv *http.Server
-	log     = logger.New("server", logger.DefaultColor)
+	log     = logger2.New("server", logger2.DefaultColor)
 
 	ErrInvalidServerNetwork = fmt.Errorf("invalid server network")
 )

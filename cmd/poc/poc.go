@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"myst/crypto"
+	crypto2 "myst/pkg/crypto"
 )
 
 var (
@@ -16,25 +16,25 @@ func main() {
 
 func encryptKeystore(b, key []byte) ([]byte, []byte, error) {
 	// Encrypt keystore
-	b, err := crypto.AES256CBC_Encrypt(key, b)
+	b, err := crypto2.AES256CBC_Encrypt(key, b)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Authenticate ciphertext
-	mac := crypto.HMAC_SHA256(key, b)
+	mac := crypto2.HMAC_SHA256(key, b)
 
 	return b, mac, nil
 }
 
 func decryptKeystore(b, key, mac []byte) ([]byte, error) {
-	valid := crypto.VerifyHMAC_SHA256(key, mac, b)
+	valid := crypto2.VerifyHMAC_SHA256(key, mac, b)
 	if !valid {
 		return nil, ErrAuthenticationFailed
 	}
 
 	// Decrypt keystore
-	b, err := crypto.AES256CBC_Decrypt(key, b)
+	b, err := crypto2.AES256CBC_Decrypt(key, b)
 	if err != nil {
 		return nil, err
 	}
@@ -44,25 +44,25 @@ func decryptKeystore(b, key, mac []byte) ([]byte, error) {
 
 func encryptKey(b, key []byte) ([]byte, []byte, error) {
 	// Encrypt keystore
-	b, err := crypto.AES256CBC_Encrypt(key, b)
+	b, err := crypto2.AES256CBC_Encrypt(key, b)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Authenticate ciphertext
-	mac := crypto.HMAC_SHA256(key, b)
+	mac := crypto2.HMAC_SHA256(key, b)
 
 	return b, mac, nil
 }
 
 func decryptKey(b, key, mac []byte) ([]byte, error) {
-	valid := crypto.VerifyHMAC_SHA256(key, mac, b)
+	valid := crypto2.VerifyHMAC_SHA256(key, mac, b)
 	if !valid {
 		return nil, ErrAuthenticationFailed
 	}
 
 	// Decrypt keystore
-	b, err := crypto.AES256CBC_Decrypt(key, b)
+	b, err := crypto2.AES256CBC_Decrypt(key, b)
 	if err != nil {
 		return nil, err
 	}

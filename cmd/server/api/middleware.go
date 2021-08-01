@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 
-	"myst/regex"
-	"myst/user"
+	"myst/pkg/regex"
+	"myst/pkg/user"
 )
 
 var (

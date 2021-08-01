@@ -3,15 +3,15 @@ package database
 import (
 	"context"
 
+	logger2 "myst/pkg/logger"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-
-	"myst/logger"
 )
 
 var (
-	log    = logger.New("database", logger.BlueFg)
+	log    = logger2.New("database", logger2.BlueFg)
 	client *mongo.Client
 	db     *mongo.Database
 )

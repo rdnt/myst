@@ -6,14 +6,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gin-gonic/gin"
+
 	"myst/cmd/server/api"
-	"myst/config"
-	"myst/database"
-	"myst/logger"
-	"myst/regex"
-	"myst/router"
-	"myst/server"
-	"myst/storage"
+	"myst/pkg/config"
+	"myst/pkg/database"
+	"myst/pkg/logger"
+	"myst/pkg/regex"
+	"myst/pkg/router"
+	"myst/pkg/server"
+	"myst/pkg/storage"
 )
 
 func main() {
@@ -47,6 +49,12 @@ func main() {
 		return
 	}
 	defer database.Close()
+
+	if config.Debug {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	r := router.New(config.Debug)
 

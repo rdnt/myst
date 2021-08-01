@@ -3,13 +3,12 @@ package api
 import (
 	"encoding/base64"
 
-	keystore2 "myst/cmd/server/keystore"
-
-	"myst/user"
-	"myst/userkey"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
+
+	"myst/cmd/server/keystore"
+	"myst/pkg/user"
+	"myst/pkg/userkey"
 )
 
 var (
@@ -28,7 +27,7 @@ func InitData(c *gin.Context) {
 		panic(err)
 	}
 
-	s1, err := keystore2.New("default", testKeystore)
+	s1, err := keystore.New("default", testKeystore)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +37,7 @@ func InitData(c *gin.Context) {
 		panic(err)
 	}
 
-	s2, err := keystore2.New("secondary", testKeystore)
+	s2, err := keystore.New("secondary", testKeystore)
 	if err != nil {
 		panic(err)
 	}

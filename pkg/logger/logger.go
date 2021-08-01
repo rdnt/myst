@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"myst/config"
+	config2 "myst/pkg/config"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
@@ -85,6 +85,23 @@ func New(name string, color Color) *Logger {
 	}
 }
 
+//func WithDebugLog(path string) func(*Logger) error {
+//	return func(l *Logger) error {
+//
+//		f, err := os.OpenFile(
+//			"logs/debug.log",
+//			os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666,
+//		)
+//		if err != nil {
+//			return err
+//		}
+//
+//		DebugLogWriter.SetWriter(colorable.NewNonColorable(f))]
+//
+//		return nil
+//	}
+//}
+
 var cwd *string
 
 func init() {
@@ -120,7 +137,7 @@ func (l *Logger) print(s string) {
 func (l *Logger) debugPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	_ = l.debugLog.Output(3, l.prefix(false)+s)
-	if config.Debug {
+	if config2.Debug {
 		_ = l.stdout.Output(3, l.prefix(false)+s)
 	}
 }
@@ -129,7 +146,7 @@ func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	s = Colorize(s, RedFg)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config.Debug {
+	if config2.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }
@@ -138,7 +155,7 @@ func (l *Logger) tracePrint() {
 	stack := debug.Stack()
 	s := Colorize(string(stack), RedFg)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config.Debug {
+	if config2.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }

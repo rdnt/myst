@@ -7,9 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"myst/database"
-	"myst/timestamp"
-	"myst/util"
+	"myst/pkg/database"
+	"myst/pkg/timestamp"
+	"myst/pkg/util"
 )
 
 var (

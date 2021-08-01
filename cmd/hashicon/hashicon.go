@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"myst/hashicon"
+	hashicon2 "myst/pkg/hashicon"
 )
 
 var k256, _ = base64.StdEncoding.DecodeString("TN8aNobbU/IOUWcA3Z7W1jyhjB97QcKfFnctG212vHk=")
@@ -33,7 +33,7 @@ func testBulk() {
 
 	for i := 0; i < count; i++ {
 		b, _ := GenerateRandomBytes(bitSizes[rand.Intn(len(bitSizes))] / 8)
-		h, _ := hashicon.New(b)
+		h, _ := hashicon2.New(b)
 		name := fmt.Sprintf("tmp/hashicons/test-%d-%d.svg", i, len(b)*8)
 		h.Export(name)
 		fmt.Println(name)
@@ -42,7 +42,7 @@ func testBulk() {
 
 func test256() {
 	name := "tmp/hashicons/test.svg"
-	h, _ := hashicon.New(k256)
+	h, _ := hashicon2.New(k256)
 	h.Export(name)
 	fmt.Println(name)
 }

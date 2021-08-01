@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	crypto2 "myst/pkg/crypto"
 
-	"myst/crypto"
+	"github.com/go-playground/assert/v2"
 )
 
 func TestKeystore(t *testing.T) {
@@ -41,7 +41,7 @@ func TestKey(t *testing.T) {
 	salt := []byte("7dY4fnrxUfpZM6LH")
 
 	// generated on the client
-	masterKey := crypto.Argon2Id(masterPassword, salt)
+	masterKey := crypto2.Argon2Id(masterPassword, salt)
 
 	// generated first time on the client then stored on server
 	key := []byte("uKR6dCFtqBbj22mMCCTr1LioReGeBq6W") // 32 bytes

@@ -3,14 +3,12 @@ package api
 import (
 	"net/http"
 
-	"myst/cmd/server/keystoreinvitation"
-
-	"myst/user"
-
 	"github.com/gin-gonic/gin"
 
 	"myst/cmd/server/keystore"
-	"myst/userkey"
+	"myst/cmd/server/keystoreinvitation"
+	"myst/pkg/user"
+	"myst/pkg/userkey"
 )
 
 type RestUserKeystoreKey struct {

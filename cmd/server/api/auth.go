@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 
-	"myst/crypto"
-	"myst/regex"
-	"myst/user"
+	"myst/pkg/crypto"
+	"myst/pkg/regex"
+	"myst/pkg/user"
 )
 
 // "$argon2id$v=19$m=262144,t=10,p=2$ny7MyNZJ5OMSWyWBIOGV4g$U32rqke4W3y3uBlM+bF/2MfBYZC3dm9Z8F6YquPoUtY"

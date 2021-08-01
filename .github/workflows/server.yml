@@ -31,7 +31,7 @@ jobs:
         run: go mod download
       - name: Build server
         id: build
-        run: go build ./cmd/server/main.go
+        run: go build ./...
       - name: Test server
         id: test
-        run: go test -test.v ./cmd/server
+        run: go test ./...

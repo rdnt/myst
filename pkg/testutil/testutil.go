@@ -25,12 +25,16 @@ type Suite struct {
 }
 
 var (
-	verbose bool
-	log     = logger.New("testing", logger.DefaultColor)
+	debug bool
+	log   = logger.New("testing", logger.DefaultColor)
 )
 
+func Debug() bool {
+	return debug
+}
+
 func init() {
-	flag.BoolVar(&verbose, "verbose", false, "prints verbose progress messages")
+	flag.BoolVar(&debug, "debug", false, "prints verbose debug messages")
 	flag.Parse()
 }
 
@@ -61,7 +65,6 @@ func (s *Suite) Router() http.Handler {
 }
 
 func (s *Suite) SetupSuite() {
-	fmt.Println()
 	log.Printf("Running %s suite ...", s.name)
 	fmt.Println()
 
@@ -99,14 +102,15 @@ func (s *Suite) HandleStats(name string, stats *suite.SuiteInformation) {
 	}
 
 	fmt.Println("-----------------")
-	fmt.Println()
 
+	fmt.Println()
 	log.Printf(
 		"%s suite %s in %s",
 		s.name,
 		status,
 		stats.End.Sub(stats.Start),
 	)
+	fmt.Println()
 }
 
 func (s *Suite) GET(path string, body interface{}, dst interface{}) {

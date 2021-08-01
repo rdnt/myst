@@ -28,17 +28,37 @@ func init() {
 	gin.DebugPrintRouteFunc = PrintRoutes
 }
 
-func New(debug bool) *gin.Engine {
+var debug bool
+
+func WithDebug(d bool) func() {
+	return func() {
+		debug = d
+	}
+}
+
+func New(opts ...func()) *gin.Engine {
+	for _, opt := range opts {
+		opt()
+	}
+
+	if debug {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	// Set gin mode
 	// Create gin router instance
 	r := gin.New()
+
 	// Do not redirect folders to trailing slash
 	r.RedirectTrailingSlash = true
 	r.RedirectFixedPath = true
-	// always use recovery middleware
+
+	// middleware
 	r.Use(Recovery(RecoveryHandler))
-	// custom logging middleware
 	r.Use(LoggerMiddleware)
+
 	// metrics (only enable if debugging)
 	if debug {
 		p := ginprometheus.NewPrometheus("gin")

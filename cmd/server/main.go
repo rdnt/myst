@@ -56,7 +56,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	r := router.New(config.Debug)
+	r := router.New(router.WithDebug(config.Debug))
 
 	api.Init(r)
 

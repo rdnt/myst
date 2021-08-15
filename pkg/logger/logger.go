@@ -10,7 +10,9 @@ import (
 	"runtime/debug"
 	"strings"
 
-	config2 "myst/pkg/config"
+	"github.com/mattn/go-isatty"
+
+	"myst/pkg/config"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
@@ -69,6 +71,9 @@ func init() {
 }
 
 func Colorize(s string, c Color) string {
+	if !(isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())) {
+		return s
+	}
 	return aurora.Colorize(s, aurora.Color(c)).String()
 }
 
@@ -137,7 +142,7 @@ func (l *Logger) print(s string) {
 func (l *Logger) debugPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	_ = l.debugLog.Output(3, l.prefix(false)+s)
-	if config2.Debug {
+	if config.Debug {
 		_ = l.stdout.Output(3, l.prefix(false)+s)
 	}
 }
@@ -146,7 +151,7 @@ func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	s = Colorize(s, RedFg)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config2.Debug {
+	if config.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }
@@ -155,7 +160,7 @@ func (l *Logger) tracePrint() {
 	stack := debug.Stack()
 	s := Colorize(string(stack), RedFg)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config2.Debug {
+	if config.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
 }

@@ -44,7 +44,8 @@ func New(opts ...func()) *gin.Engine {
 	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
-		gin.SetMode(gin.ReleaseMode)
+		//gin.SetMode(gin.ReleaseMode)
+		gin.SetMode(gin.DebugMode)
 	}
 
 	// Set gin mode
@@ -123,7 +124,7 @@ func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
 	if handlerName == "" {
 		return
 	}
-	log.Debugf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
+	log.Printf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
 }
 
 func LoggerMiddleware(c *gin.Context) {

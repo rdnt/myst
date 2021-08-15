@@ -4,6 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"myst/pkg/config"
+	"myst/pkg/logger"
+	"myst/pkg/mongo"
+
 	"github.com/stretchr/testify/suite"
 
 	"myst/cmd/server/api"
@@ -16,8 +20,20 @@ type IntegrationSuite struct {
 }
 
 func TestIntegration(t *testing.T) {
+	config.Debug = testing.Verbose()
+
+	db, err := mongo.New(
+		mongo.WithURI("mongodb://localhost:27017"),
+		mongo.WithName("myst-test"),
+	)
+	if err != nil {
+		logger.Errorf("Database initialization failed: %s", err)
+		return
+	}
+	defer db.Close()
+
 	r := router.New(
-		router.WithDebug(testutil.Debug()),
+		router.WithDebug(config.Debug),
 	)
 
 	api.Init(r)

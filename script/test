@@ -3,5 +3,4 @@ if ! go test -count=1 -c -o ./tmp/server.test ./cmd/server; then
     exit
 fi
 
-#./tmp/server.test -verbose
-./tmp/server.test
+./tmp/server.test -test.v

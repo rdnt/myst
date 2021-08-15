@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"myst/pkg/database"
 	"myst/pkg/timestamp"
 	"myst/pkg/util"
 )
@@ -47,7 +46,7 @@ func (store *Keystore) Save() error {
 	}
 	store.UpdatedAt = now
 
-	_, err := database.DB().Collection("keystores").InsertOne(context.Background(), store)
+	_, err := mongo.DB().Collection("keystores").InsertOne(context.Background(), store)
 	if err != nil {
 		return err
 	}
@@ -85,7 +84,7 @@ func Get(field, value string) (*Keystore, error) {
 		return nil, ErrInvalidField
 	}
 	var u *Keystore
-	err := database.DB().Collection("keystores").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
+	err := mongo.DB().Collection("keystores").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
 	if err == mongo.ErrNoDocuments {
 		return nil, ErrNotFound
 	} else if err != nil {

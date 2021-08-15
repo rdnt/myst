@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"myst/pkg/mongo"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,7 +11,6 @@ import (
 
 	"myst/cmd/server/api"
 	"myst/pkg/config"
-	"myst/pkg/database"
 	"myst/pkg/logger"
 	"myst/pkg/regex"
 	"myst/pkg/router"
@@ -43,12 +43,12 @@ func main() {
 		return
 	}
 
-	_, err = database.New("mongodb://localhost:27017")
+	_, err = mongo.New("mongodb://localhost:27017")
 	if err != nil {
 		logger.Errorf("Database initialization failed: %s", err)
 		return
 	}
-	defer database.Close()
+	defer mongo.Close()
 
 	if config.Debug {
 		gin.SetMode(gin.DebugMode)

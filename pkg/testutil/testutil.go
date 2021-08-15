@@ -3,8 +3,6 @@ package testutil
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -25,18 +23,8 @@ type Suite struct {
 }
 
 var (
-	debug bool
-	log   = logger.New("testing", logger.DefaultColor)
+	log = logger.New("test", logger.DefaultColor)
 )
-
-func Debug() bool {
-	return debug
-}
-
-func init() {
-	flag.BoolVar(&debug, "debug", false, "prints verbose debug messages")
-	flag.Parse()
-}
 
 func NewSuite(opts ...func(*Suite)) *Suite {
 	s := new(Suite)
@@ -66,7 +54,6 @@ func (s *Suite) Router() http.Handler {
 
 func (s *Suite) SetupSuite() {
 	log.Printf("Running %s suite ...", s.name)
-	fmt.Println()
 
 	enable := true
 	colorable.EnableColorsStdout(&enable)
@@ -88,7 +75,6 @@ func (s *Suite) TearDownTest() {
 		status = logger.Colorize("passed", logger.GreenFg)
 	}
 	log.Printf("%s %s\n", s.T().Name(), status)
-	fmt.Println()
 }
 
 func (s *Suite) HandleStats(name string, stats *suite.SuiteInformation) {
@@ -101,16 +87,12 @@ func (s *Suite) HandleStats(name string, stats *suite.SuiteInformation) {
 		status = logger.Colorize("passed", logger.GreenFg)
 	}
 
-	fmt.Println("-----------------")
-
-	fmt.Println()
 	log.Printf(
 		"%s suite %s in %s",
 		s.name,
 		status,
 		stats.End.Sub(stats.Start),
 	)
-	fmt.Println()
 }
 
 func (s *Suite) GET(path string, body interface{}, dst interface{}) {

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"myst/app/server/domain/invitation"
+
 	"myst/app/server/domain/keystore"
 	"myst/app/server/domain/user"
 	"myst/pkg/logger"
@@ -16,10 +18,12 @@ var (
 )
 
 type Application struct {
-	keystorerepo    keystore.Repository
-	userrepo        user.Repository
-	userService     user.Service
-	keystoreService keystore.Service
+	userService       user.Service
+	keystoreService   keystore.Service
+	invitationService invitation.Service
+	invitationRepo    invitation.Repository
+	userRepo          user.Repository
+	keystoreRepo      keystore.Repository
 }
 
 func (app *Application) Start() {
@@ -31,14 +35,61 @@ func (app *Application) Start() {
 		panic(err)
 	}
 
+	u2, err := app.userService.Register(
+		user.WithUsername("abcd"),
+		user.WithPassword("5678"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	k, err := app.keystoreService.Create(
 		keystore.WithName("my-keystore"),
 		keystore.WithKeystore([]byte("payload")),
-		keystore.WithOwner(u),aewe
+		keystore.WithOwner(u),
 	)
 
+	inv, err := app.invitationService.Create(
+		invitation.WithInviter(u),
+		invitation.WithKeystore(k),
+		invitation.WithInvitee(u2),
+		invitation.WithInviterKey([]byte("inviter-key")),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(u)
+	fmt.Println(u2)
 	fmt.Println(k)
+	fmt.Println("created")
+	fmt.Println(inv)
+
+	err = inv.Accept([]byte("invitee-key"))
+	if err != nil {
+		panic(err)
+	}
+
+	err = app.invitationRepo.Update(inv)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("accepted")
+	fmt.Println(inv)
+
+	err = inv.Finalize([]byte("keystore-key"))
+	if err != nil {
+		panic(err)
+	}
+
+	err = app.invitationRepo.Update(inv)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("finalized")
+	fmt.Println(inv)
 }
 
 func New(opts ...Option) (*Application, error) {
@@ -52,17 +103,21 @@ func New(opts ...Option) (*Application, error) {
 		}
 	}
 
-	if app.keystorerepo == nil {
-		return nil, ErrInvalidKeystoreRepository
-	}
-
-	if app.userrepo == nil {
-		return nil, ErrInvalidUserRepository
-	}
-
-	if app.userService == nil {
-		return nil, ErrInvalidUserService
-	}
+	//if app.keystoreRepo == nil {
+	//	return nil, ErrInvalidKeystoreRepository
+	//}
+	//
+	//if app.userRepo == nil {
+	//	return nil, ErrInvalidUserRepository
+	//}
+	//
+	//if app.invitationRepo == nil {
+	//	return nil, ErrInvalidUserRepository
+	//}
+	//
+	//if app.userService == nil {
+	//	return nil, ErrInvalidUserService
+	//}
 
 	return app, nil
 }

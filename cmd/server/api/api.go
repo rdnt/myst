@@ -34,9 +34,9 @@ func AuthenticatedAPI(api gin.IRoutes) {
 		Success(c, "PING!")
 	})
 
-	api.POST("/keystores", CreateKeystore)
-	api.GET("/keystore/:keystore", GetKeystore)
+	api.POST("/keystorerepo", CreateKeystore)
+	api.GET("/domain/:domain", GetKeystore)
 
-	// keystore invitations
-	api.POST("/keystore/:keystore/invitations", CreateKeystoreInvitation)
+	// domain invitations
+	api.POST("/domain/:domain/invitations", CreateKeystoreInvitation)
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"golang.org/x/crypto/curve25519"
 
-	crypto2 "myst/pkg/crypto"
+	"myst/pkg/crypto"
 )
 
 var eccKeySize = uint(32)
@@ -16,7 +16,7 @@ func NewKeypair() ([]byte, []byte, error) {
 	var pub [32]byte
 	var key [32]byte
 
-	b, err := crypto2.GenerateRandomBytes(eccKeySize)
+	b, err := crypto.GenerateRandomBytes(eccKeySize)
 	if err != nil {
 		return nil, nil, err
 	}

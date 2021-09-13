@@ -145,7 +145,7 @@ func loginUser(c *gin.Context, userID string) error {
 		enc,
 		jwtCookieLifetime,
 		"/",
-		".localhost", // TODO: set to domain name on prod, .localhost on devel
+		".localhost", // TODO: set to keystore name on prod, .localhost on devel
 		false,        // TODO: true on production, false on development
 		true,
 	)

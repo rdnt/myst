@@ -5,26 +5,26 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 
+	"myst/pkg/mongo"
 	"myst/pkg/timestamp"
 	"myst/pkg/util"
 )
 
 var (
-	ErrNotFound     = fmt.Errorf("keystore not found")
+	ErrNotFound     = fmt.Errorf("domain not found")
 	ErrInvalidField = fmt.Errorf("invalid field")
 )
 
 type Keystore struct {
 	ID        string              `bson:"_id"`
 	Name      string              `bson:"name"`
-	Keystore  []byte              `bson:"keystore"`
+	Keystore  []byte              `bson:"domain"`
 	CreatedAt timestamp.Timestamp `bson:"created_at"`
 	UpdatedAt timestamp.Timestamp `bson:"updated_at"`
 }
 
-// New creates a keystore entry that holds the binary encrypted keystore data
+// New creates a domain entry that holds the binary encrypted domain data
 func New(name string, b []byte) (*Keystore, error) {
 	store := &Keystore{
 		Name:     name,
@@ -37,7 +37,7 @@ func New(name string, b []byte) (*Keystore, error) {
 	return store, nil
 }
 
-// Save saves the keystore along with the user key on the database
+// Save saves the domain along with the user key on the database
 func (store *Keystore) Save() error {
 	now := timestamp.New()
 	if store.ID == "" {
@@ -46,7 +46,7 @@ func (store *Keystore) Save() error {
 	}
 	store.UpdatedAt = now
 
-	_, err := mongo.DB().Collection("keystores").InsertOne(context.Background(), store)
+	_, err := mongo.DB().Collection("keystorerepo").InsertOne(context.Background(), store)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (store *Keystore) Save() error {
 type RestKeystore struct {
 	ID        string              `json:"id"`
 	Name      string              `json:"name"`
-	Keystore  []byte              `json:"keystore"`
+	Keystore  []byte              `json:"domain"`
 	CreatedAt timestamp.Timestamp `json:"created_at"`
 	UpdatedAt timestamp.Timestamp `json:"updated_at"`
 }
@@ -73,7 +73,7 @@ func (store *Keystore) ToRest() *RestKeystore {
 	}
 }
 
-// Get returns a keystore that matches the field/value pairs provided
+// Get returns a domain that matches the field/value pairs provided
 func Get(field, value string) (*Keystore, error) {
 	switch field {
 	case "id":
@@ -84,7 +84,7 @@ func Get(field, value string) (*Keystore, error) {
 		return nil, ErrInvalidField
 	}
 	var u *Keystore
-	err := mongo.DB().Collection("keystores").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
+	err := mongo.DB().Collection("keystorerepo").FindOne(context.Background(), bson.M{field: value}).Decode(&u)
 	if err == mongo.ErrNoDocuments {
 		return nil, ErrNotFound
 	} else if err != nil {

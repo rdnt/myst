@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
-
-	hashicon2 "myst/pkg/hashicon"
 )
 
 var k256, _ = base64.StdEncoding.DecodeString("TN8aNobbU/IOUWcA3Z7W1jyhjB97QcKfFnctG212vHk=")

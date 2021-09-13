@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	crypto2 "myst/pkg/crypto"
-
 	"github.com/go-playground/assert/v2"
 )
 

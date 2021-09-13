@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	log = logger.New("mongo", logger.BlueFg)
+	log            = logger.New("mongo", logger.BlueFg)
+	ErrNoDocuments = mongo.ErrNoDocuments
 )
 
 type Database struct {
@@ -67,4 +68,8 @@ func (db *Database) Close() {
 	if err != nil {
 		log.Error(err)
 	}
+}
+
+func DB() *mongo.Database {
+	return nil
 }

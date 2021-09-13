@@ -12,7 +12,7 @@ import (
 )
 
 type RestUserKeystoreKey struct {
-	Keystore *keystore.RestKeystore `json:"keystore"`
+	Keystore *keystore.RestKeystore `json:"domain"`
 	Key      *userkey.RestUserKey   `json:"key"`
 }
 
@@ -22,7 +22,7 @@ func CreateKeystore(c *gin.Context) {
 	var data struct {
 		Name     string `json:"name" binding:"required"`
 		Key      []byte `json:"key" binding:"required"`
-		Keystore []byte `json:"keystore" binding:"required"`
+		Keystore []byte `json:"domain" binding:"required"`
 	}
 	err := c.ShouldBind(&data)
 	if err != nil {
@@ -50,7 +50,7 @@ func CreateKeystore(c *gin.Context) {
 
 func GetKeystore(c *gin.Context) {
 	uid := GetCurrentUserID(c)
-	keystoreName := c.Param("keystore")
+	keystoreName := c.Param("domain")
 
 	store, err := keystore.Get("name", keystoreName)
 	if err == keystore.ErrNotFound {
@@ -87,7 +87,7 @@ func GetKeystore(c *gin.Context) {
 
 func CreateKeystoreInvitation(c *gin.Context) {
 	inviterID := GetCurrentUserID(c)
-	keystoreName := c.Param("keystore")
+	keystoreName := c.Param("domain")
 
 	var data struct {
 		Username  string `json:"username" binding:"required"`

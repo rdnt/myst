@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 
+	"myst/pkg/mongo"
 	"myst/pkg/timestamp"
 	"myst/pkg/util"
 )
 
 var (
-	ErrNotFound     = fmt.Errorf("keystore not found")
+	ErrNotFound     = fmt.Errorf("domain not found")
 	ErrInvalidField = fmt.Errorf("invalid field")
 )
 
@@ -28,7 +28,7 @@ type KeystoreInvitation struct {
 	UpdatedAt             timestamp.Timestamp `bson:"updated_at"`
 }
 
-// New creates a keystore entry that holds the binary encrypted keystore data
+// New creates a domain entry that holds the binary encrypted domain data
 func New(inviterID, keystoreID, inviteeID string, inviterPublicKey []byte) (*KeystoreInvitation, error) {
 	inv := &KeystoreInvitation{
 		InviterID:        inviterID,
@@ -43,7 +43,7 @@ func New(inviterID, keystoreID, inviteeID string, inviterPublicKey []byte) (*Key
 	return inv, nil
 }
 
-// Save saves the keystore along with the user key on the database
+// Save saves the domain along with the user key on the database
 func (inv *KeystoreInvitation) Save() error {
 	now := timestamp.New()
 	if inv.ID == "" {
@@ -81,7 +81,7 @@ func (inv *KeystoreInvitation) ToRest() *RestKeystoreInvitation {
 	}
 }
 
-// Get returns a keystore that matches the field/value pairs provided
+// Get returns a domain that matches the field/value pairs provided
 func Get(field, value string) (*KeystoreInvitation, error) {
 	switch field {
 	case "id":

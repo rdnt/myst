@@ -9,14 +9,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"myst/pkg/logger"
 
-	logger2 "myst/pkg/logger"
+	"github.com/gin-gonic/gin"
 )
 
 var (
 	httpSrv *http.Server
-	log     = logger2.New("server", logger2.DefaultColor)
+	log     = logger.New("server", logger.DefaultColor)
 
 	ErrInvalidServerNetwork = fmt.Errorf("invalid server network")
 )

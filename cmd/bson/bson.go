@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	timestamp2 "myst/pkg/timestamp"
+	"myst/pkg/timestamp"
 
 	"github.com/sanity-io/litter"
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,13 +12,13 @@ import (
 
 func main() {
 	type a struct {
-		ID     string               `bson:"id"`
-		Number timestamp2.Timestamp `bson:"number"`
+		ID     string              `bson:"id"`
+		Number timestamp.Timestamp `bson:"number"`
 	}
 
 	b := a{
 		ID:     "asd",
-		Number: timestamp2.Timestamp{Time: time.Now()},
+		Number: timestamp.Timestamp{Time: time.Now()},
 	}
 	var d a
 

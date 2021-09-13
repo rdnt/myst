@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"myst/pkg/mongo"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"myst/pkg/mongo"
 
 	"github.com/gin-gonic/gin"
 
@@ -43,12 +44,12 @@ func main() {
 		return
 	}
 
-	_, err = mongo.New("mongodb://localhost:27017")
+	db, err := mongo.New(mongo.WithURI("mongodb://localhost:27017"))
 	if err != nil {
 		logger.Errorf("Database initialization failed: %s", err)
 		return
 	}
-	defer mongo.Close()
+	defer db.Close()
 
 	if config.Debug {
 		gin.SetMode(gin.DebugMode)

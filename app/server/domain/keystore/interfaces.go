@@ -1,9 +1,21 @@
 package keystore
 
+import (
+	"errors"
+)
+
+var (
+	ErrNotFound = errors.New("keystore not found")
+)
+
 type Repository interface {
-	CreateKeystore(opts ...Option) (*Keystore, error)
+	Create(opts ...Option) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)
-	UpdateKeystore(*Keystore) error
+	Update(k *Keystore) error
 	Keystores() ([]*Keystore, error)
-	DeleteKeystore(id string) error
+	Delete(id string) error
+}
+
+type Service interface {
+	Create(opts ...Option) (*Keystore, error)
 }

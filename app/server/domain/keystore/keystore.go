@@ -1,21 +1,17 @@
 package keystore
 
 import (
-	"errors"
-
+	"myst/app/server/domain/user"
 	"myst/pkg/logger"
 	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
-)
-
-var (
-	ErrNotFound = errors.New("keystore not found")
 )
 
 type Keystore struct {
 	id        string
 	name      string
 	keystore  []byte
+	owner     *user.User
 	createdAt timestamp.Timestamp
 	updatedAt timestamp.Timestamp
 }
@@ -26,6 +22,14 @@ func (k *Keystore) Id() string {
 
 func (k *Keystore) Name() string {
 	return k.name
+}
+
+func (k *Keystore) Owner() string {
+	return k.name
+}
+
+func (k *Keystore) SetOwner(u *user.User) {
+	k.owner = u
 }
 
 func (k *Keystore) SetName(name string) {

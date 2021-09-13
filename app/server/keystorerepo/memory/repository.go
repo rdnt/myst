@@ -12,49 +12,50 @@ type Repository struct {
 	keystores map[string]keystore.Keystore
 }
 
-func (r *Repository) CreateKeystore(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	s, err := keystore.New(opts...)
+	k, err := keystore.New(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	_, ok := r.keystores[s.Id()]
+	_, ok := r.keystores[k.Id()]
 	if ok {
 		return nil, fmt.Errorf("already exists")
 	}
 
-	r.keystores[s.Id()] = *s
-	return s, nil
+	r.keystores[k.Id()] = *k
+
+	return k, nil
 }
 
 func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	s, ok := r.keystores[id]
+	k, ok := r.keystores[id]
 	if !ok {
 		return nil, keystore.ErrNotFound
 	}
 
-	return &s, nil
+	return &k, nil
 }
 
 func (r *Repository) Keystores() ([]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	sessions := make([]*keystore.Keystore, 0, len(r.keystores))
-	for _, s := range r.keystores {
-		sessions = append(sessions, &s)
+	keystores := make([]*keystore.Keystore, 0, len(r.keystores))
+	for _, k := range r.keystores {
+		keystores = append(keystores, &k)
 	}
 
-	return sessions, nil
+	return keystores, nil
 }
 
-func (r *Repository) UpdateKeystore(s *keystore.Keystore) error {
+func (r *Repository) Update(s *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -67,7 +68,7 @@ func (r *Repository) UpdateKeystore(s *keystore.Keystore) error {
 	return nil
 }
 
-func (r *Repository) DeleteKeystore(id string) error {
+func (r *Repository) Delete(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

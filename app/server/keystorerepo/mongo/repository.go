@@ -10,7 +10,7 @@ type Repository struct {
 	db *mongo.Database
 }
 
-func (r *Repository) CreateKeystore(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *Repository) Create(k *keystore.Keystore) error {
 	panic("implement me")
 }
 
@@ -18,7 +18,7 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 	panic("implement me")
 }
 
-func (r *Repository) UpdateKeystore(k *keystore.Keystore) error {
+func (r *Repository) Update(k *keystore.Keystore) error {
 	panic("implement me")
 }
 
@@ -26,7 +26,7 @@ func (r *Repository) Keystores() ([]*keystore.Keystore, error) {
 	panic("implement me")
 }
 
-func (r *Repository) DeleteKeystore(id string) error {
+func (r *Repository) Delete(id string) error {
 	panic("implement me")
 }
 

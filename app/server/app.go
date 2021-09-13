@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 
 	"myst/app/server/domain/keystore"
 	"myst/app/server/domain/user"
@@ -15,23 +16,29 @@ var (
 )
 
 type Application struct {
-	keystorerepo keystore.Repository
-	userrepo     user.Repository
-	userService  user.Service
+	keystorerepo    keystore.Repository
+	userrepo        user.Repository
+	userService     user.Service
+	keystoreService keystore.Service
 }
 
 func (app *Application) Start() {
-	u, err := user.New(
+	u, err := app.userService.Register(
 		user.WithUsername("rdnt"),
+		user.WithPassword("1234"),
 	)
-	if err != nil {
-		panic("err")
-	}
-
-	err = app.userService.RegisterUser(u, "1234")
 	if err != nil {
 		panic(err)
 	}
+
+	k, err := app.keystoreService.Create(
+		keystore.WithName("my-keystore"),
+		keystore.WithKeystore([]byte("payload")),
+		keystore.WithOwner(u),aewe
+	)
+
+	fmt.Println(u)
+	fmt.Println(k)
 }
 
 func New(opts ...Option) (*Application, error) {

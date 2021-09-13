@@ -27,3 +27,10 @@ func WithUserService(service user.Service) Option {
 		return nil
 	}
 }
+
+func WithKeystoreService(service keystore.Service) Option {
+	return func(app *Application) error {
+		app.keystoreService = service
+		return nil
+	}
+}

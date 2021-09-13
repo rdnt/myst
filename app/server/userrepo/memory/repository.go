@@ -1,19 +1,23 @@
-package keystorerepo
+package userrepo
 
 import (
 	"fmt"
 	"sync"
 
-	"myst/app/server/domain/keystore"
 	"myst/app/server/domain/user"
 )
 
 type Repository struct {
 	mux   sync.Mutex
-	users map[string]user.User
+	users map[string]User
 }
 
-func (r *Repository) CreateUser(opts ...user.Option) (*user.User, error) {
+type User struct {
+	user.User
+	passwordHash string
+}
+
+func (r *Repository) Create(opts ...user.Option) (*user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -27,20 +31,26 @@ func (r *Repository) CreateUser(opts ...user.Option) (*user.User, error) {
 		return nil, fmt.Errorf("already exists")
 	}
 
-	r.users[u.Id()] = *u
-	return u, nil
+	ru := User{
+		User:         *u,
+		passwordHash: "asd", // todo: generate hash
+	}
+
+	r.users[ru.Id()] = ru
+
+	return &ru.User, nil
 }
 
 func (r *Repository) User(id string) (*user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	s, ok := r.users[id]
+	u, ok := r.users[id]
 	if !ok {
-		return nil, keystore.ErrNotFound
+		return nil, user.ErrNotFound
 	}
 
-	return &s, nil
+	return &u.User, nil
 }
 
 func (r *Repository) Users() ([]*user.User, error) {
@@ -49,26 +59,32 @@ func (r *Repository) Users() ([]*user.User, error) {
 
 	users := make([]*user.User, 0, len(r.users))
 	for _, u := range r.users {
-		users = append(users, &u)
+		users = append(users, &u.User)
 	}
 
 	return users, nil
 }
 
-func (r *Repository) UpdateUser(u *user.User) error {
+func (r *Repository) Update(u *user.User) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.users[u.Id()]
+	ru, ok := r.users[u.Id()]
 	if !ok {
 		return fmt.Errorf("not found")
 	}
 
-	r.users[u.Id()] = *u
+	ru2 := User{
+		User:         *u,
+		passwordHash: ru.passwordHash,
+	}
+
+	r.users[ru2.Id()] = ru2
+
 	return nil
 }
 
-func (r *Repository) DeleteUser(id string) error {
+func (r *Repository) Delete(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -78,6 +94,6 @@ func (r *Repository) DeleteUser(id string) error {
 
 func New() user.Repository {
 	return &Repository{
-		users: make(map[string]user.User),
+		users: make(map[string]User),
 	}
 }

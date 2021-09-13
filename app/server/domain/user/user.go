@@ -14,11 +14,11 @@ var (
 )
 
 type User struct {
-	id           string
-	username     string
-	passwordHash string
-	createdAt    timestamp.Timestamp
-	updatedAt    timestamp.Timestamp
+	id        string
+	username  string
+	password  string
+	createdAt timestamp.Timestamp
+	updatedAt timestamp.Timestamp
 }
 
 func (u *User) Id() string {
@@ -29,8 +29,8 @@ func (u *User) Username() string {
 	return u.username
 }
 
-func (u *User) PasswordHash() string {
-	return u.passwordHash
+func (u *User) Password() string {
+	return u.password
 }
 
 func (u *User) CreatedAt() timestamp.Timestamp {

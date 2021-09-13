@@ -1,14 +1,20 @@
 package user
 
+import "errors"
+
+var (
+	ErrNotFound = errors.New("user not found")
+)
+
 type Repository interface {
-	CreateUser(opts ...Option) (*User, error)
+	Create(opts ...Option) (*User, error)
 	User(id string) (*User, error)
-	UpdateUser(*User) error
+	Update(*User) error
 	Users() ([]*User, error)
-	DeleteUser(id string) error
+	Delete(id string) error
 }
 
 type Service interface {
-	RegisterUser(u *User, password string) error
-	CreateKeystore(u *User, keystore []byte) error
+	Register(opts ...Option) (*User, error)
+	Authorize(u *User, password string) error
 }

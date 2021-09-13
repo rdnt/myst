@@ -8,3 +8,10 @@ func WithUsername(username string) Option {
 		return nil
 	}
 }
+
+func WithPassword(password string) Option {
+	return func(u *User) error {
+		u.password = password
+		return nil
+	}
+}

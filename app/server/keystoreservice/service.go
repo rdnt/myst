@@ -1,4 +1,4 @@
-package userservice
+package keystoreservice
 
 import (
 	"errors"
@@ -18,20 +18,16 @@ type service struct {
 	keystoreRepo keystore.Repository
 }
 
-func (s *service) Register(opts ...user.Option) (*user.User, error) {
-	u, err := s.userRepo.Create(opts...)
+func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+	k, err := s.keystoreRepo.Create(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return u, nil
+	return k, nil
 }
 
-func (s *service) Authorize(u *user.User, password string) error {
-	panic("implement me")
-}
-
-func New(opts ...Option) (user.Service, error) {
+func New(opts ...Option) (keystore.Service, error) {
 	s := &service{}
 
 	for _, opt := range opts {

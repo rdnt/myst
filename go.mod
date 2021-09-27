@@ -17,7 +17,7 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/mattn/go-colorable v0.1.8
+	github.com/mattn/go-colorable v0.1.10
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/natefinch/atomic v1.0.1
 	github.com/prometheus/common v0.30.0 // indirect

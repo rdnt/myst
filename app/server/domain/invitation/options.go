@@ -34,17 +34,3 @@ func WithInviterKey(key []byte) Option {
 		return nil
 	}
 }
-
-func WithInviteeKey(key []byte) Option {
-	return func(i *Invitation) error {
-		i.inviteeKey = key
-		return nil
-	}
-}
-
-func WithKeystoreKey(key []byte) Option {
-	return func(i *Invitation) error {
-		i.keystoreKey = key
-		return nil
-	}
-}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"myst/app/server/api"
+
 	"myst/app/server"
 	invitationrepo "myst/app/server/invitationrepo/memory"
 	"myst/app/server/invitationservice"
@@ -48,6 +50,13 @@ func main() {
 		server.WithKeystoreService(keystoreService),
 		server.WithInvitationService(invitationService),
 	)
+	if err != nil {
+		panic(err)
+	}
+
+	restAPI := api.New()
+
+	err = restAPI.Run(":8080")
 	if err != nil {
 		panic(err)
 	}

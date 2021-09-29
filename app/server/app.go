@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"myst/app/server/api/generated"
+
 	"myst/app/server/domain/invitation"
 
 	"myst/app/server/domain/keystore"
@@ -18,6 +20,7 @@ var (
 )
 
 type Application struct {
+	api               generated.ServerInterface
 	userService       user.Service
 	keystoreService   keystore.Service
 	invitationService invitation.Service
@@ -62,6 +65,7 @@ func (app *Application) Start() {
 	fmt.Println(u)
 	fmt.Println(u2)
 	fmt.Println(k)
+
 	fmt.Println("created")
 	fmt.Println(inv)
 

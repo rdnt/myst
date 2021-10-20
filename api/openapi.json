@@ -55,7 +55,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CreateKeystoreInvitationRequest"
+                    "$ref": "#/components/schemas/Invitation"
                   }
                 }
               }
@@ -92,7 +92,7 @@
           }
         }
       },
-      "CreateKeystoreInvitationResponse": {
+      "Invitation": {
         "type": "object",
         "required": [
           "id"

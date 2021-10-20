@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"myst/app/server/api/generated"
-
 	"myst/app/server/domain/invitation"
 
 	"myst/app/server/domain/keystore"
@@ -20,7 +18,6 @@ var (
 )
 
 type Application struct {
-	api               generated.ServerInterface
 	userService       user.Service
 	keystoreService   keystore.Service
 	invitationService invitation.Service
@@ -107,21 +104,29 @@ func New(opts ...Option) (*Application, error) {
 		}
 	}
 
-	//if app.keystoreRepo == nil {
-	//	return nil, ErrInvalidKeystoreRepository
-	//}
-	//
-	//if app.userRepo == nil {
-	//	return nil, ErrInvalidUserRepository
-	//}
-	//
-	//if app.invitationRepo == nil {
-	//	return nil, ErrInvalidUserRepository
-	//}
-	//
-	//if app.userService == nil {
-	//	return nil, ErrInvalidUserService
-	//}
+	if app.keystoreRepo == nil {
+		return nil, ErrInvalidKeystoreRepository
+	}
+
+	if app.userRepo == nil {
+		return nil, ErrInvalidUserRepository
+	}
+
+	if app.invitationRepo == nil {
+		return nil, ErrInvalidUserRepository
+	}
+
+	if app.userService == nil {
+		return nil, ErrInvalidUserService
+	}
+
+	if app.keystoreService == nil {
+		return nil, ErrInvalidUserService
+	}
+
+	if app.invitationService == nil {
+		return nil, ErrInvalidUserService
+	}
 
 	return app, nil
 }

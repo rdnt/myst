@@ -23,6 +23,7 @@ require (
 	github.com/natefinch/atomic v1.0.1
 	github.com/prometheus/common v0.30.0 // indirect
 	github.com/prometheus/procfs v0.7.1 // indirect
+	github.com/rs/cors v1.8.0
 	github.com/sanity-io/litter v1.5.1
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0

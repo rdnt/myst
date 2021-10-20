@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"myst/app/server/api"
 
 	"myst/app/server"
@@ -54,12 +56,14 @@ func main() {
 		panic(err)
 	}
 
-	restAPI := api.New()
+	fmt.Printf("%#v\n", app)
+	restAPI := api.New(app)
+
+	app.Start()
 
 	err = restAPI.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
 
-	app.Start()
 }

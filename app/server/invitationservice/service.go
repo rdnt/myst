@@ -2,6 +2,7 @@ package invitationservice
 
 import (
 	"errors"
+	"fmt"
 
 	"myst/app/server/domain/invitation"
 
@@ -22,12 +23,18 @@ type service struct {
 }
 
 func (s *service) Create(opts ...invitation.Option) (*invitation.Invitation, error) {
-	k, err := s.invitationRepo.Create(opts...)
+	// TODO
+
+	fmt.Println("CreateKeystoreInvitation", opts)
+
+	inv, err := s.invitationRepo.Create(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return k, nil
+	fmt.Println(inv)
+
+	return inv, nil
 }
 
 func New(opts ...Option) (invitation.Service, error) {

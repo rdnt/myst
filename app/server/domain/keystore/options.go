@@ -6,6 +6,7 @@ type Option func(*Keystore) error
 
 func WithName(name string) Option {
 	return func(k *Keystore) error {
+		k.id = name // TODO: remove
 		k.name = name
 		return nil
 	}

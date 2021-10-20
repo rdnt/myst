@@ -219,7 +219,7 @@ type ClientWithResponsesInterface interface {
 type CreateKeystoreInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]CreateKeystoreInvitationRequest
+	JSON200      *[]Invitation
 	JSONDefault  *Error
 }
 
@@ -271,7 +271,7 @@ func ParseCreateKeystoreInvitationResponse(rsp *http.Response) (*CreateKeystoreI
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []CreateKeystoreInvitationRequest
+		var dest []Invitation
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

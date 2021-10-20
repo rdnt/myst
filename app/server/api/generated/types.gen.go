@@ -15,6 +15,11 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Invitation defines model for Invitation.
+type Invitation struct {
+	Id string `json:"id"`
+}
+
 // CreateKeystoreInvitationJSONBody defines parameters for CreateKeystoreInvitation.
 type CreateKeystoreInvitationJSONBody CreateKeystoreInvitationRequest
 

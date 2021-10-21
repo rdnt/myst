@@ -3,7 +3,7 @@ package main
 import (
 	"golang.org/x/crypto/curve25519"
 
-	"myst/crypto"
+	"myst/pkg/crypto"
 )
 
 var eccKeySize = uint(32)

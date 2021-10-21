@@ -6,12 +6,13 @@ package main
 
 import (
 	"encoding/hex"
-	"myst/tmp"
 	"syscall/js"
+
+	"myst/tmp"
 )
 
 func main() {
-	js.Global().Set("keystore", js.ValueOf(map[string]interface{}{
+	js.Global().Set("domain", js.ValueOf(map[string]interface{}{
 		"_decrypt": js.FuncOf(Decrypt),
 		"_encrypt": js.FuncOf(Encrypt),
 	}))

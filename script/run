@@ -4,7 +4,7 @@ if ! go fmt ./cmd/server/...; then
     exit
 fi
 
-if ! go build -o ./tmp/server ./cmd/server/main.go; then
+if ! go build -o ./tmp/server ./cmd/server/server.go; then
     exit
 fi
 

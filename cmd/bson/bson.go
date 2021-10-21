@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"myst/pkg/timestamp"
+
 	"github.com/sanity-io/litter"
 	"go.mongodb.org/mongo-driver/bson"
-
-	"myst/timestamp"
 )
 
 func main() {

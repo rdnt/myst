@@ -20,7 +20,7 @@ type Hashicon struct {
 	Pix    []float64
 }
 
-// New creates a new hashicon and stores its pix array and stride.
+// New creates a new _hashicon and stores its pix array and stride.
 // The length of the pix slice always equals stride^2.
 func New(b []byte) (*Hashicon, error) {
 	if len(b) < 32 || len(b) > 8192 || !((len(b) & (len(b) - 1)) == 0) {
@@ -131,7 +131,7 @@ func WeightToColor(w float64) color.RGBA {
 	}
 }
 
-// ToSVG returns an SVG based on the hashicon pixel data.
+// ToSVG returns an SVG based on the _hashicon pixel data.
 // TODO: use a string builder?
 func (h *Hashicon) ToSVG() string {
 	// try to be the same size in the resulting SVG regardless of stride
@@ -162,7 +162,7 @@ func (h *Hashicon) ToSVG() string {
 	return svg
 }
 
-// Export converts the hashicon to SVG and saves it in the specified path.
+// Export converts the _hashicon to SVG and saves it in the specified path.
 func (h *Hashicon) Export(path string) error {
 	f, err := os.Create(path)
 	if err != nil {

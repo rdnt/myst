@@ -18,7 +18,7 @@ func NoRoute(c *gin.Context) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
 		// serve a json 404 error if it's an API call
 		resp := generated.Error{
-			Code:    http.StatusNotFound,
+			Code:    "not-found",
 			Message: http.StatusText(http.StatusNotFound),
 		}
 
@@ -52,7 +52,7 @@ func recoveryHandler(c *gin.Context, err interface{}) {
 		log.Error(err)
 
 		resp := generated.Error{
-			Code:    http.StatusInternalServerError,
+			Code:    "internal-error",
 			Message: http.StatusText(http.StatusInternalServerError),
 		}
 

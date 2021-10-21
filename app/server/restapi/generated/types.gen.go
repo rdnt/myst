@@ -11,7 +11,7 @@ type CreateKeystoreInvitationRequest struct {
 
 // Error defines model for Error.
 type Error struct {
-	Code    int32  `json:"code"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 

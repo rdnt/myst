@@ -2,6 +2,7 @@ package invitation
 
 import (
 	"errors"
+	"fmt"
 
 	"myst/app/server/domain/keystore"
 	"myst/app/server/domain/user"
@@ -28,6 +29,10 @@ type Invitation struct {
 	finalized   bool
 	createdAt   timestamp.Timestamp
 	updatedAt   timestamp.Timestamp
+}
+
+func (i *Invitation) String() string {
+	return fmt.Sprintln(i.id, i.inviter.Id(), i.keystore.Id(), i.invitee.Id(), i.accepted, i.finalized)
 }
 
 func (i *Invitation) InviterKey() []byte {

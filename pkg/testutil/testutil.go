@@ -68,11 +68,11 @@ func (s *Suite) SetupTest() {
 func (s *Suite) TearDownTest() {
 	var status string
 	if s.T().Failed() {
-		status = logger.Colorize("failed", logger.RedFg)
+		status = logger.Colorize("failed", logger.Red)
 	} else if s.T().Skipped() {
-		status = logger.Colorize("skipped", logger.RedFg)
+		status = logger.Colorize("skipped", logger.Red)
 	} else {
-		status = logger.Colorize("passed", logger.GreenFg)
+		status = logger.Colorize("passed", logger.Green)
 	}
 	log.Printf("%s %s\n", s.T().Name(), status)
 }
@@ -80,11 +80,11 @@ func (s *Suite) TearDownTest() {
 func (s *Suite) HandleStats(name string, stats *suite.SuiteInformation) {
 	var status string
 	if s.T().Failed() {
-		status = logger.Colorize("failed", logger.RedFg)
+		status = logger.Colorize("failed", logger.Red)
 	} else if s.T().Skipped() {
-		status = logger.Colorize("skipped", logger.RedFg)
+		status = logger.Colorize("skipped", logger.Red)
 	} else {
-		status = logger.Colorize("passed", logger.GreenFg)
+		status = logger.Colorize("passed", logger.Green)
 	}
 
 	log.Printf(

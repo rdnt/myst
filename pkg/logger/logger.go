@@ -10,25 +10,24 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/logrusorgru/aurora"
+	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 
 	"myst/pkg/config"
-
-	"github.com/logrusorgru/aurora"
-	"github.com/mattn/go-colorable"
 )
 
 const (
 	DefaultColor = Color(0)
 
-	BlackFg   = Color(aurora.BlackFg)
-	RedFg     = Color(aurora.RedFg)
-	GreenFg   = Color(aurora.GreenFg)
-	YellowFg  = Color(aurora.YellowFg)
-	BlueFg    = Color(aurora.BlueFg)
-	MagentaFg = Color(aurora.MagentaFg)
-	CyanFg    = Color(aurora.CyanFg)
-	WhiteFg   = Color(aurora.WhiteFg)
+	Black   = Color(aurora.BlackFg)
+	Red     = Color(aurora.RedFg)
+	Green   = Color(aurora.GreenFg)
+	Yellow  = Color(aurora.YellowFg)
+	Blue    = Color(aurora.BlueFg)
+	Magenta = Color(aurora.MagentaFg)
+	Cyan    = Color(aurora.CyanFg)
+	White   = Color(aurora.WhiteFg)
 
 	BlackBg   = Color(aurora.BlackBg)
 	RedBg     = Color(aurora.RedBg)
@@ -107,7 +106,7 @@ func New(name string, color Color) *Logger {
 //	}
 //}
 
-var cwd *string
+var cwd string
 
 func init() {
 	wd, err := os.Getwd()
@@ -115,7 +114,7 @@ func init() {
 		return
 	}
 	wd = filepath.ToSlash(wd + "/")
-	cwd = &wd
+	cwd = wd
 }
 
 func (l *Logger) prefix(caller bool) string {
@@ -126,8 +125,8 @@ func (l *Logger) prefix(caller bool) string {
 			file = "???"
 			line = 0
 		}
-		if cwd != nil {
-			file = strings.Replace(file, *cwd, "", 1)
+		if cwd != "" {
+			file = strings.Replace(file, cwd, "", 1)
 		}
 		prefix = fmt.Sprintf("%s%s:%d ", prefix, file, line)
 	}
@@ -149,7 +148,7 @@ func (l *Logger) debugPrint(s string) {
 
 func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
-	s = Colorize(s, RedFg)
+	s = Colorize(s, Red)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if config.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
@@ -158,7 +157,7 @@ func (l *Logger) errorPrint(s string) {
 
 func (l *Logger) tracePrint() {
 	stack := debug.Stack()
-	s := Colorize(string(stack), RedFg)
+	s := Colorize(string(stack), Red)
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if config.Debug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)

@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Myst REST API",
-    "description": "A sample API that uses a petstore as an example to demonstrate features in the OpenAPI 3.0 specification",
+    "description": "",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "name": "Swagger API Team",
@@ -49,7 +49,7 @@
         ],
         "responses": {
           "200": {
-            "description": "pet response",
+            "description": "Invitation response",
             "content": {
               "application/json": {
                 "schema": {

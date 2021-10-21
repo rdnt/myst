@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	log = logger.New("router", logger.GreenFg)
+	log = logger.New("router", logger.Green)
 )
 
 func init() {
@@ -158,28 +158,28 @@ func LoggerMiddleware(c *gin.Context) {
 func StatusColor(status int) logger.Color {
 	switch {
 	case status >= http.StatusOK && status < http.StatusMultipleChoices:
-		return logger.GreenBg | logger.BlackFg
+		return logger.GreenBg | logger.Black
 	case status >= http.StatusMultipleChoices && status < http.StatusBadRequest:
-		return logger.WhiteBg | logger.BlackFg
+		return logger.WhiteBg | logger.Black
 	case status >= http.StatusBadRequest && status < http.StatusInternalServerError:
-		return logger.YellowBg | logger.BlackFg
+		return logger.YellowBg | logger.Black
 	default:
-		return logger.RedBg | logger.BlackFg
+		return logger.RedBg | logger.Black
 	}
 }
 
 func MethodColor(method string) logger.Color {
 	switch method {
 	case http.MethodGet:
-		return logger.GreenBg | logger.BlackFg
+		return logger.GreenBg | logger.Black
 	case http.MethodPost:
-		return logger.YellowBg | logger.BlackFg
+		return logger.YellowBg | logger.Black
 	case http.MethodPut:
-		return logger.BlueBg | logger.BlackFg
+		return logger.BlueBg | logger.Black
 	case http.MethodPatch:
-		return logger.CyanBg | logger.BlackFg
+		return logger.CyanBg | logger.Black
 	case http.MethodDelete:
-		return logger.RedBg | logger.BlackFg
+		return logger.RedBg | logger.Black
 	default:
 		return logger.BlackBg
 	}

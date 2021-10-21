@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 
 	"myst/pkg/logger"
 	"myst/pkg/timestamp"
@@ -23,6 +24,10 @@ type User struct {
 
 func (u *User) Id() string {
 	return u.id
+}
+
+func (u *User) String() string {
+	return fmt.Sprintln(u.id, u.username, u.password)
 }
 
 func (u *User) Username() string {

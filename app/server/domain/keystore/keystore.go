@@ -1,6 +1,8 @@
 package keystore
 
 import (
+	"fmt"
+
 	"myst/app/server/domain/user"
 	"myst/pkg/logger"
 	"myst/pkg/timestamp"
@@ -18,6 +20,10 @@ type Keystore struct {
 
 func (k *Keystore) Id() string {
 	return k.id
+}
+
+func (k *Keystore) String() string {
+	return fmt.Sprintln(k.id, k.name, k.owner.Id())
 }
 
 func (k *Keystore) Name() string {

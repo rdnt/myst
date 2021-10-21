@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	log = logger.New("router", logger.GreenFg)
+	log = logger.New("router", logger.Green)
 )
 
 // Init creates all the API endpoints for the server

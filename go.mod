@@ -3,7 +3,6 @@ module myst
 go 1.14
 
 require (
-	github.com/deepmap/oapi-codegen v1.8.2
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-errors/errors v1.4.0
@@ -21,6 +20,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.13
 	github.com/natefinch/atomic v1.0.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.30.0 // indirect
 	github.com/prometheus/procfs v0.7.1 // indirect
 	github.com/rs/cors v1.8.0
@@ -35,9 +35,3 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
-
-replace github.com/stretchr/testify => github.com/rdnt/testify v0.0.0-20210728214825-ee34c8d66904
-
-replace github.com/deepmap/oapi-codegen => c:/Users/tasos/Projects/oapi-codegen
-
-//replace github.com/stretchr/testify => C:\Users\Tasos\Projects\testify

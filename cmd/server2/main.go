@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"myst/pkg/logger"
 
 	"myst/app/server/api"
 
@@ -13,6 +13,8 @@ import (
 	userrepo "myst/app/server/userrepo/memory"
 	"myst/app/server/userservice"
 )
+
+var log = logger.New("app", logger.Red)
 
 func main() {
 	keystoreRepo := keystorerepo.New()
@@ -56,7 +58,8 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("%#v\n", app)
+	log.Debug(app)
+
 	restAPI := api.New(app)
 
 	app.Start()

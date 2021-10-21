@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	log            = logger.New("mongo", logger.BlueFg)
+	log            = logger.New("mongo", logger.Blue)
 	ErrNoDocuments = mongo.ErrNoDocuments
 )
 

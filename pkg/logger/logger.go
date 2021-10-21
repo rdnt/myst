@@ -66,7 +66,7 @@ func init() {
 	DebugLogWriter = NewWriter(ioutil.Discard)
 	ErrorLogWriter = NewWriter(ioutil.Discard)
 	// create default logger
-	defaultLogger = New("SERVER", DefaultColor)
+	defaultLogger = New("server", DefaultColor)
 }
 
 func Colorize(s string, c Color) string {
@@ -77,7 +77,6 @@ func Colorize(s string, c Color) string {
 }
 
 func New(name string, color Color) *Logger {
-	name = strings.ToUpper(name)
 	name = fmt.Sprintf("[%s] ", name)
 	name = Colorize(name, color)
 	return &Logger{
@@ -135,7 +134,7 @@ func (l *Logger) prefix(caller bool) string {
 
 func (l *Logger) print(s string) {
 	s = strings.TrimRight(s, "\n")
-	_ = l.stdout.Output(3, l.prefix(false)+s)
+	_ = l.stdout.Output(3, fmt.Sprint(l.prefix(false), s))
 }
 
 func (l *Logger) debugPrint(s string) {

@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"myst/app/client"
+	keystorerepo "myst/app/server/core/keystorerepo/memory"
 
-	keystorerepo "myst/app/server/keystorerepo/memory"
+	"myst/app/client"
 )
 
 func main() {

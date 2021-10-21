@@ -1,17 +1,16 @@
 package main
 
 import (
+	"myst/app/server/core"
+	invitationrepo "myst/app/server/core/invitationrepo/memory"
+	"myst/app/server/core/invitationservice"
+	keystorerepo "myst/app/server/core/keystorerepo/memory"
+	"myst/app/server/core/keystoreservice"
+	userrepo "myst/app/server/core/userrepo/memory"
+	"myst/app/server/core/userservice"
 	"myst/pkg/logger"
 
-	"myst/app/server/api"
-
-	"myst/app/server"
-	invitationrepo "myst/app/server/invitationrepo/memory"
-	"myst/app/server/invitationservice"
-	keystorerepo "myst/app/server/keystorerepo/memory"
-	"myst/app/server/keystoreservice"
-	userrepo "myst/app/server/userrepo/memory"
-	"myst/app/server/userservice"
+	"myst/app/server/restapi"
 )
 
 var log = logger.New("app", logger.Red)
@@ -46,27 +45,22 @@ func main() {
 		panic(err)
 	}
 
-	app, err := server.New(
-		server.WithKeystoreRepository(keystoreRepo),
-		server.WithUserRepository(userRepo),
-		server.WithInvitationRepository(invitationRepo),
-		server.WithUserService(userService),
-		server.WithKeystoreService(keystoreService),
-		server.WithInvitationService(invitationService),
+	app, err := core.New(
+		core.WithKeystoreRepository(keystoreRepo),
+		core.WithUserRepository(userRepo),
+		core.WithInvitationRepository(invitationRepo),
+		core.WithUserService(userService),
+		core.WithKeystoreService(keystoreService),
+		core.WithInvitationService(invitationService),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Debug(app)
+	api := restapi.New(app)
 
-	restAPI := api.New(app)
-
-	app.Start()
-
-	err = restAPI.Run(":8080")
+	err = api.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
-
 }

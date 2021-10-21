@@ -1,63 +1,66 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
+	"myst/app/server/core"
+	invitationrepo "myst/app/server/core/invitationrepo/memory"
+	"myst/app/server/core/invitationservice"
+	keystorerepo "myst/app/server/core/keystorerepo/memory"
+	"myst/app/server/core/keystoreservice"
+	userrepo "myst/app/server/core/userrepo/memory"
+	"myst/app/server/core/userservice"
+	"myst/pkg/logger"
 
-	"myst/cmd/server/api"
-	"myst/config"
-	"myst/database"
-	"myst/logger"
-	"myst/regex"
-	"myst/router"
-	"myst/server"
-	"myst/storage"
+	"myst/app/server/restapi"
 )
 
+var log = logger.New("app", logger.Red)
+
 func main() {
-	logger.Debugf("Starting server...")
+	keystoreRepo := keystorerepo.New()
+	userRepo := userrepo.New()
+	invitationRepo := invitationrepo.New()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-	err := logger.Init()
+	userService, err := userservice.New(
+		userservice.WithUserRepository(userRepo),
+		userservice.WithKeystoreRepository(keystoreRepo),
+	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	defer logger.Close()
-
-	err = regex.Load()
-	if err != nil {
-		logger.Errorf("Regex initialization failed: %s", err)
-		return
+		panic(err)
 	}
 
-	err = storage.Init()
+	keystoreService, err := keystoreservice.New(
+		keystoreservice.WithUserRepository(userRepo),
+		keystoreservice.WithKeystoreRepository(keystoreRepo),
+	)
 	if err != nil {
-		logger.Errorf("Storage initialization failed: %s", err)
-		return
+		panic(err)
 	}
 
-	_, err = database.New("mongodb://localhost:27017")
+	invitationService, err := invitationservice.New(
+		invitationservice.WithUserRepository(userRepo),
+		invitationservice.WithKeystoreRepository(keystoreRepo),
+		invitationservice.WithInvitationRepository(invitationRepo),
+	)
 	if err != nil {
-		logger.Errorf("Database initialization failed: %s", err)
-		return
+		panic(err)
 	}
-	defer database.Close()
 
-	r := router.New(config.Debug)
-
-	api.Init(r)
-
-	err = server.Start(r)
+	app, err := core.New(
+		core.WithKeystoreRepository(keystoreRepo),
+		core.WithUserRepository(userRepo),
+		core.WithInvitationRepository(invitationRepo),
+		core.WithUserService(userService),
+		core.WithKeystoreService(keystoreService),
+		core.WithInvitationService(invitationService),
+	)
 	if err != nil {
-		return
+		panic(err)
 	}
-	defer server.Stop()
 
-	<-quit
-	logger.Debugf("Server shutting down...")
+	api := restapi.New(app)
+
+	err = api.Run(":8080")
+	if err != nil {
+		panic(err)
+	}
 }

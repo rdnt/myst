@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/gin-contrib/static v0.0.1
-	github.com/gin-gonic/gin v1.7.4
+	github.com/gin-gonic/gin v1.7.6
 	github.com/go-errors/errors v1.4.1
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect

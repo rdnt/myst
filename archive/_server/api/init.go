@@ -3,10 +3,11 @@ package api
 import (
 	"encoding/base64"
 
+	"myst/archive/_server/keystore"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
 
-	"myst/cmd/_server/keystore"
 	"myst/pkg/user"
 	"myst/pkg/userkey"
 )

@@ -6,11 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"myst/archive/_server/api"
+
 	"myst/pkg/mongo"
 
 	"github.com/gin-gonic/gin"
 
-	"myst/cmd/_server/api"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/regex"

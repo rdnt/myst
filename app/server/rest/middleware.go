@@ -1,4 +1,4 @@
-package restapi
+package rest
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
 
-	"myst/app/server/restapi/generated"
+	"myst/app/server/rest/generated"
 	"myst/pkg/logger"
 )
 

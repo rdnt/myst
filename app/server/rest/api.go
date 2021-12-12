@@ -1,4 +1,4 @@
-package restapi
+package rest
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go ../../../api/openapi.json
 
@@ -7,13 +7,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"myst/app/server"
+
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
-	"myst/app/server/core"
-	"myst/app/server/restapi/generated"
+	"myst/app/server/rest/generated"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -22,7 +23,7 @@ var log = logger.New("router", logger.Cyan)
 
 type API struct {
 	*gin.Engine
-	app *core.Application
+	app *server.Application
 }
 
 func (api *API) CreateKeystoreInvitation(c *gin.Context) {
@@ -65,7 +66,7 @@ func (api *API) Run(addr string) error {
 	return api.Engine.Run(addr)
 }
 
-func New(app *core.Application) *API {
+func New(app *server.Application) *API {
 	api := new(API)
 
 	api.app = app

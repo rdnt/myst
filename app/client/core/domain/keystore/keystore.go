@@ -3,7 +3,8 @@ package keystore
 import (
 	"errors"
 
-	"myst/app/client/domain/keystore/entry"
+	"myst/app/client/core/domain/keystore/entry"
+
 	"myst/pkg/logger"
 	"myst/pkg/uuid"
 )
@@ -71,7 +72,7 @@ func New(opts ...Option) (*Keystore, error) {
 	k := &Keystore{
 		id:      uuid.New().String(),
 		version: 1,
-		entries: make([]*entry.Entry, 0),
+		entries: []*entry.Entry{},
 	}
 
 	for _, opt := range opts {

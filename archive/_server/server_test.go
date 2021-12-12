@@ -4,13 +4,14 @@ import (
 	"testing"
 	"time"
 
+	"myst/archive/_server/api"
+
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/mongo"
 
 	"github.com/stretchr/testify/suite"
 
-	"myst/cmd/_server/api"
 	"myst/pkg/router"
 	"myst/pkg/testutil"
 )

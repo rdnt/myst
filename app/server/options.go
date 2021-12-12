@@ -1,4 +1,4 @@
-package core
+package server
 
 import (
 	"myst/app/server/core/domain/invitation"

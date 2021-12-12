@@ -1,6 +1,8 @@
 package keystore
 
-import "myst/app/client/domain/keystore/entry"
+import (
+	"myst/app/client/core/domain/keystore/entry"
+)
 
 type Option func(*Keystore) error
 

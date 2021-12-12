@@ -3,10 +3,11 @@ package api
 import (
 	"net/http"
 
+	"myst/archive/_server/keystore"
+	"myst/archive/_server/keystoreinvitation"
+
 	"github.com/gin-gonic/gin"
 
-	"myst/cmd/_server/keystore"
-	"myst/cmd/_server/keystoreinvitation"
 	"myst/pkg/user"
 	"myst/pkg/userkey"
 )

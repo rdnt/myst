@@ -27,7 +27,6 @@
         "description": "Creates a new encrypted keystore with the given passphrase",
         "operationId": "CreateKeystore",
         "requestBody": {
-          "description": "Keystore request",
           "required": true,
           "content": {
             "application/json": {
@@ -39,7 +38,7 @@
         },
         "responses": {
           "200": {
-            "description": "Keystore response",
+            "description": "Keystore",
             "content": {
               "application/json": {
                 "schema": {
@@ -52,7 +51,97 @@
             }
           },
           "default": {
-            "description": "unexpected error",
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/keystore/{keystoreId}": {
+      "post": {
+        "description": "Unlocks a keystore if it exists and returns it",
+        "operationId": "UnlockKeystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "description": "unique identifier for a keystore",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockKeystoreRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Keystore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Keystore"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Get a keystore if it exists and returns it",
+        "operationId": "GetKeystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "description": "unique identifier for a keystore",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Keystore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Keystore"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -82,13 +171,58 @@
           }
         }
       },
+      "UnlockKeystoreRequest": {
+        "type": "object",
+        "required": [
+          "passphrase"
+        ],
+        "properties": {
+          "passphrase": {
+            "type": "string"
+          }
+        }
+      },
       "Keystore": {
         "type": "object",
         "required": [
-          "id"
+          "id",
+          "name",
+          "entries"
         ],
         "properties": {
           "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          }
+        }
+      },
+      "Entry": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
             "type": "string"
           }
         }

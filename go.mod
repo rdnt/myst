@@ -3,6 +3,7 @@ module myst
 go 1.14
 
 require (
+	github.com/awnumar/memguard v0.22.2
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.4

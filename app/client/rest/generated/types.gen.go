@@ -9,6 +9,14 @@ type CreateKeystoreRequest struct {
 	Passphrase string `json:"passphrase"`
 }
 
+// Entry defines model for Entry.
+type Entry struct {
+	Id       string `json:"id"`
+	Label    string `json:"label"`
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	Code    string `json:"code"`
@@ -17,11 +25,24 @@ type Error struct {
 
 // Keystore defines model for Keystore.
 type Keystore struct {
-	Id string `json:"id"`
+	Entries []Entry `json:"entries"`
+	Id      string  `json:"id"`
+	Name    string  `json:"name"`
 }
+
+// UnlockKeystoreRequest defines model for UnlockKeystoreRequest.
+type UnlockKeystoreRequest struct {
+	Passphrase string `json:"passphrase"`
+}
+
+// UnlockKeystoreJSONBody defines parameters for UnlockKeystore.
+type UnlockKeystoreJSONBody UnlockKeystoreRequest
 
 // CreateKeystoreJSONBody defines parameters for CreateKeystore.
 type CreateKeystoreJSONBody CreateKeystoreRequest
+
+// UnlockKeystoreJSONRequestBody defines body for UnlockKeystore for application/json ContentType.
+type UnlockKeystoreJSONRequestBody UnlockKeystoreJSONBody
 
 // CreateKeystoreJSONRequestBody defines body for CreateKeystore for application/json ContentType.
 type CreateKeystoreJSONRequestBody CreateKeystoreJSONBody

@@ -1,12 +1,12 @@
 package keystoreservice
 
 import (
-	"myst/app/client/core/domain/keystore"
+	"myst/app/client"
 )
 
 type Option func(s *service) error
 
-func WithKeystoreRepository(repo keystore.Repository) Option {
+func WithKeystoreRepository(repo client.KeystoreRepository) Option {
 	return func(s *service) error {
 		s.keystoreRepo = repo
 		return nil

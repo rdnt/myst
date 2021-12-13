@@ -2,6 +2,13 @@ package entry
 
 type Option func(*Entry) error
 
+func WithId(id string) Option {
+	return func(e *Entry) error {
+		e.id = id
+		return nil
+	}
+}
+
 func WithLabel(label string) Option {
 	return func(e *Entry) error {
 		e.label = label

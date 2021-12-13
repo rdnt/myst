@@ -27,6 +27,7 @@ type API struct {
 
 func (api *API) CreateKeystore(c *gin.Context) {
 	var req generated.CreateKeystoreRequest
+
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		panic(err)
@@ -34,14 +35,86 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	k, err := api.app.CreateKeystore(
 		req.Name,
-		[]byte(req.Passphrase),
+		req.Passphrase,
 	)
 	if err != nil {
 		panic(err)
 	}
 
+	entries := make([]generated.Entry, len(k.Entries()))
+
+	for i, e := range k.Entries() {
+		entries[i] = generated.Entry{
+			Id:       e.Id(),
+			Label:    e.Label(),
+			Username: e.Username(),
+			Password: e.Password(),
+		}
+	}
+
 	c.JSON(http.StatusOK, generated.Keystore{
-		Id: k.Id(),
+		Id:      k.Id(),
+		Name:    k.Name(),
+		Entries: entries,
+	})
+}
+
+func (api *API) UnlockKeystore(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	var req generated.UnlockKeystoreRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		panic(err)
+	}
+
+	k, err := api.app.UnlockKeystore(keystoreId, req.Passphrase)
+	if err != nil {
+		panic(err)
+	}
+
+	entries := make([]generated.Entry, len(k.Entries()))
+
+	for i, e := range k.Entries() {
+		entries[i] = generated.Entry{
+			Id:       e.Id(),
+			Label:    e.Label(),
+			Username: e.Username(),
+			Password: e.Password(),
+		}
+	}
+
+	c.JSON(http.StatusOK, generated.Keystore{
+		Id:      k.Id(),
+		Name:    k.Name(),
+		Entries: entries,
+	})
+}
+
+func (api *API) Keystore(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	k, err := api.app.Keystore(keystoreId)
+	if err != nil {
+		panic(err)
+	}
+
+	entries := make([]generated.Entry, len(k.Entries()))
+
+	for i, e := range k.Entries() {
+		entries[i] = generated.Entry{
+			Id:       e.Id(),
+			Label:    e.Label(),
+			Username: e.Username(),
+			Password: e.Password(),
+		}
+	}
+
+	c.JSON(http.StatusOK, generated.Keystore{
+		Id:      k.Id(),
+		Name:    k.Name(),
+		Entries: entries,
 	})
 }
 

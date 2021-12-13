@@ -17,12 +17,19 @@ var (
 
 type Application interface {
 	Start()
-	CreateKeystore(name string, passphrase []byte) (*keystore.Keystore, error)
+	CreateKeystore(name string, passphrase string) (*keystore.Keystore, error)
+	UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error)
+	Keystore(id string) (*keystore.Keystore, error)
 }
 
 type application struct {
 	keystoreService keystore.Service
-	keystoreRepo    keystore.Repository
+	keystoreRepo    KeystoreRepository
+}
+
+type KeystoreRepository interface {
+	keystore.Repository
+	Unlock(keystoreId string, passphrase string) (*keystore.Keystore, error)
 }
 
 func (app *application) Start() {
@@ -54,7 +61,11 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	k, err := app.keystoreService.Create()
+	k, err := app.keystoreService.Create(
+		keystore.WithName("my-keystore"),
+		keystore.WithPassphrase("my-passphrase"),
+	)
+
 	if err != nil {
 		panic(err)
 	}

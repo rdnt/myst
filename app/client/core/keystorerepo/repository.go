@@ -1,22 +1,23 @@
 package keystorerepo
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
+
+	"myst/app/client/core/keyrepo"
 
 	"myst/pkg/crypto"
 
 	"myst/app/client/core/domain/keystore"
 )
 
-type Repository struct {
+type repository struct {
 	mux       sync.Mutex
 	keystores map[string][]byte
-	keys      map[string][]byte
+	keyRepo   *keyrepo.Repository
 }
 
-func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -30,7 +31,7 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, fmt.Errorf("already exists")
 	}
 
-	b, err := json.Marshal(k)
+	b, err := KeystoreToJSON(k)
 	if err != nil {
 		return nil, err
 	}
@@ -42,37 +43,21 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	key := crypto.Argon2Id(k.Passphrase(), salt)
+	key := crypto.Argon2Id([]byte(k.Passphrase()), salt)
 
-	b, err = Encrypt(b, key)
+	b, err = Encrypt(b, key, salt)
 	if err != nil {
 		return nil, err
 	}
 
 	r.keystores[k.Id()] = b
-	r.keys[k.Id()] = key
+
+	r.keyRepo.Set(k.Id(), key)
 
 	return k, nil
 }
 
-func (r *Repository) Authenticate(id string, passphrase []byte) error {
-	b, ok := r.keystores[id]
-	if !ok {
-		return keystore.ErrNotFound
-	}
-
-	salt, err := GetSaltFromData(b)
-	if err != nil {
-		return err
-	}
-
-	key := crypto.Argon2Id(passphrase, salt)
-
-	r.keys[id] = key
-	return nil
-}
-
-func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
+func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -81,19 +66,42 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 		return nil, keystore.ErrNotFound
 	}
 
-	key, ok := r.keys[id]
-	if !ok {
-		return nil, fmt.Errorf("authentication required")
-	}
-
-	b, err := Decrypt(b, key)
+	salt, err := GetSaltFromData(b)
 	if err != nil {
 		return nil, err
 	}
 
-	k := &keystore.Keystore{}
+	key := crypto.Argon2Id([]byte(passphrase), salt)
 
-	err = json.Unmarshal(b, &k)
+	r.keyRepo.Set(id, key)
+
+	return r.keystore(id)
+}
+
+func (r *repository) Keystore(id string) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	return r.keystore(id)
+}
+
+func (r *repository) keystore(id string) (*keystore.Keystore, error) {
+	b, ok := r.keystores[id]
+	if !ok {
+		return nil, keystore.ErrNotFound
+	}
+
+	key, err := r.keyRepo.Key(id)
+	if err != nil {
+		return nil, fmt.Errorf("authentication required")
+	}
+
+	b, err = Decrypt(b, key)
+	if err != nil {
+		return nil, err
+	}
+
+	k, err := KeystoreFromJSON(b)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +109,7 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 	return k, nil
 }
 
-func (r *Repository) Keystores() ([]*keystore.Keystore, error) {
+func (r *repository) Keystores() ([]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -115,7 +123,7 @@ func (r *Repository) Keystores() ([]*keystore.Keystore, error) {
 	//return keystores, nil
 }
 
-func (r *Repository) Update(s *keystore.Keystore) error {
+func (r *repository) Update(s *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -128,19 +136,20 @@ func (r *Repository) Update(s *keystore.Keystore) error {
 	return nil
 }
 
-func (r *Repository) Delete(id string) error {
+func (r *repository) Delete(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	delete(r.keystores, id)
-	delete(r.keys, id)
+
+	r.keyRepo.Delete(id)
 
 	return nil
 }
 
-func New() keystore.Repository {
-	return &Repository{
-		keystores: make(map[string][]byte),
-		keys:      make(map[string][]byte),
+func New() *repository {
+	return &repository{
+		keystores: map[string][]byte{},
+		keyRepo:   keyrepo.New(),
 	}
 }

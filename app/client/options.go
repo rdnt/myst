@@ -6,7 +6,7 @@ import (
 
 type Option func(app *application) error
 
-func WithKeystoreRepository(repo keystore.Repository) Option {
+func WithKeystoreRepository(repo KeystoreRepository) Option {
 	return func(app *application) error {
 		app.keystoreRepo = repo
 		return nil

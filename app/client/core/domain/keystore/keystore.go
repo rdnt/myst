@@ -20,7 +20,7 @@ type Keystore struct {
 	name       string
 	version    int
 	entries    []*entry.Entry
-	passphrase []byte
+	passphrase string
 }
 
 func (k *Keystore) Id() string {
@@ -68,11 +68,11 @@ func (k *Keystore) RemoveEntry(id string) error {
 	return ErrEntryNotFound
 }
 
-func (k *Keystore) Passphrase() []byte {
+func (k *Keystore) Passphrase() string {
 	return k.passphrase
 }
 
-func (k *Keystore) SetPassphrase(passphrase []byte) {
+func (k *Keystore) SetPassphrase(passphrase string) {
 	k.passphrase = passphrase
 }
 
@@ -90,6 +90,9 @@ func New(opts ...Option) (*Keystore, error) {
 			return nil, err
 		}
 	}
+
+	// TODO: remove this
+	k.id = "0000000000000000000000"
 
 	return k, nil
 }

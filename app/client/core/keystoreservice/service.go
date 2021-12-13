@@ -3,6 +3,8 @@ package keystoreservice
 import (
 	"errors"
 
+	"myst/app/client"
+
 	"myst/app/client/core/domain/keystore"
 	"myst/pkg/logger"
 )
@@ -12,20 +14,19 @@ var (
 )
 
 type service struct {
-	keystoreRepo keystore.Repository
+	keystoreRepo client.KeystoreRepository
 }
 
 func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
-	k, err := s.keystoreRepo.Create(opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return k, nil
+	return s.keystoreRepo.Create(opts...)
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 	return s.keystoreRepo.Keystore(id)
+}
+
+func (s *service) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
+	return s.keystoreRepo.Unlock(id, passphrase)
 }
 
 func (s *service) Update(k *keystore.Keystore) error {

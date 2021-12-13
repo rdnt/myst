@@ -2,28 +2,14 @@ package keystorerepo
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 
 	"myst/pkg/crypto"
 )
 
-func Encrypt(b []byte, key []byte) ([]byte, error) {
-	// Encode to json
-	b, err := json.Marshal(b)
-	if err != nil {
-		return nil, err
-	}
-
-	p := crypto.DefaultArgon2IdParams
-
-	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
-	if err != nil {
-		return nil, err
-	}
-
+func Encrypt(b []byte, key []byte, salt []byte) ([]byte, error) {
 	// Encrypt keystore
-	b, err = crypto.AES256CBC_Encrypt(key, b)
+	b, err := crypto.AES256CBC_Encrypt(key, b)
 	if err != nil {
 		return nil, err
 	}

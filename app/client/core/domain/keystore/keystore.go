@@ -10,41 +10,41 @@ import (
 )
 
 var (
-	ErrNotFound       = errors.New("keystore not found")
-	ErrEntryNotFound  = errors.New("entry not found")
-	ErrEntryExists    = errors.New("entry already exists")
-	ErrInvalidEntries = errors.New("invalid entries")
+	ErrNotFound      = errors.New("keystore not found")
+	ErrEntryNotFound = errors.New("entry not found")
+	ErrEntryExists   = errors.New("entry already exists")
 )
 
 type Keystore struct {
-	id      string
-	version int
-	entries []*entry.Entry
+	id         string
+	name       string
+	version    int
+	entries    []*entry.Entry
+	passphrase []byte
 }
 
 func (k *Keystore) Id() string {
 	return k.id
 }
 
+func (k *Keystore) Name() string {
+	return k.name
+}
+
+func (k *Keystore) SetName(name string) {
+	k.name = name
+}
+
 func (k *Keystore) Version() int {
 	return k.version
 }
 
-func (k *Keystore) SetVersion(version int) {
-	k.version = version
+func (k *Keystore) IncrementVersion() {
+	k.version++
 }
 
 func (k *Keystore) Entries() []*entry.Entry {
 	return k.entries
-}
-
-func (k *Keystore) SetEntries(entries []*entry.Entry) error {
-	if entries == nil {
-		return ErrInvalidEntries
-	}
-
-	k.entries = entries
-	return nil
 }
 
 func (k *Keystore) AddEntry(entry *entry.Entry) error {
@@ -66,6 +66,14 @@ func (k *Keystore) RemoveEntry(id string) error {
 		}
 	}
 	return ErrEntryNotFound
+}
+
+func (k *Keystore) Passphrase() []byte {
+	return k.passphrase
+}
+
+func (k *Keystore) SetPassphrase(passphrase []byte) {
+	k.passphrase = passphrase
 }
 
 func New(opts ...Option) (*Keystore, error) {

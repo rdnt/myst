@@ -1,21 +1,17 @@
 package keystore
 
-import (
-	"myst/app/client/core/domain/keystore/entry"
-)
-
 type Option func(*Keystore) error
 
-func WithVersion(version int) Option {
+func WithName(name string) Option {
 	return func(k *Keystore) error {
-		k.version = version
+		k.name = name
 		return nil
 	}
 }
 
-func WithEntries(entries []*entry.Entry) Option {
+func WithPassphrase(passphrase []byte) Option {
 	return func(k *Keystore) error {
-		k.entries = entries
+		k.passphrase = passphrase
 		return nil
 	}
 }

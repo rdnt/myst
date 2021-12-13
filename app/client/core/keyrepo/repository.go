@@ -48,7 +48,7 @@ func (r *Repository) HealthCheck() {
 }
 
 func (r *Repository) startHealthCheck() {
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -90,14 +90,13 @@ func New() *Repository {
 
 	go r.startHealthCheck()
 
-	r.HealthCheck()
 	// TODO: remove simulated health check
-	//go func() {
-	//	for {
-	//		time.Sleep(10 * time.Second)
-	//		r.HealthCheck()
-	//	}
-	//}()
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			r.HealthCheck()
+		}
+	}()
 
 	return r
 }

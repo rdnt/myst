@@ -20,6 +20,7 @@ type Application interface {
 	CreateKeystore(name string, passphrase string) (*keystore.Keystore, error)
 	UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error)
 	Keystore(id string) (*keystore.Keystore, error)
+	HealthCheck()
 }
 
 type application struct {
@@ -30,6 +31,7 @@ type application struct {
 type KeystoreRepository interface {
 	keystore.Repository
 	Unlock(keystoreId string, passphrase string) (*keystore.Keystore, error)
+	HealthCheck()
 }
 
 func (app *application) Start() {

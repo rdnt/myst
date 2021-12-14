@@ -78,6 +78,10 @@ func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, e
 	return r.keystore(id)
 }
 
+func (r *repository) HealthCheck() {
+	r.keyRepo.HealthCheck()
+}
+
 func (r *repository) Keystore(id string) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()

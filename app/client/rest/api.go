@@ -118,6 +118,10 @@ func (api *API) Keystore(c *gin.Context) {
 	})
 }
 
+func (api *API) HealthCheck(_ *gin.Context) {
+	api.app.HealthCheck()
+}
+
 func (api *API) Run(addr string) error {
 	log.Println("starting app on port :8080")
 

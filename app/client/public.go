@@ -18,3 +18,7 @@ func (app *application) UnlockKeystore(keystoreId string, passphrase string) (*k
 func (app *application) Keystore(id string) (*keystore.Keystore, error) {
 	return app.keystoreRepo.Keystore(id)
 }
+
+func (app *application) HealthCheck() {
+	app.keystoreRepo.HealthCheck()
+}

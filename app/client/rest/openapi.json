@@ -152,6 +152,93 @@
           }
         }
       }
+    },
+    "/keystore/{keystoreId}/entries": {
+      "post": {
+        "description": "Creates a new entry and adds it to the keystore",
+        "operationId": "CreateEntry",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "description": "unique identifier for a keystore",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Get a keystore if it exists and returns it",
+        "operationId": "GetKeystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "description": "unique identifier for a keystore",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Keystore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Keystore"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -178,6 +265,25 @@
         ],
         "properties": {
           "passphrase": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateEntryRequest": {
+        "type": "object",
+        "required": [
+          "label",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
             "type": "string"
           }
         }

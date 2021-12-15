@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"myst/app/client/core/domain/keystore/entry"
+
 	"myst/app/client"
 
 	"github.com/gin-contrib/static"
@@ -90,6 +92,59 @@ func (api *API) UnlockKeystore(c *gin.Context) {
 		Name:    k.Name(),
 		Entries: entries,
 	})
+}
+
+func (api *API) CreateEntry(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	var req generated.CreateEntryRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		panic(err)
+	}
+
+	k, err := api.app.Keystore(keystoreId)
+	if err != nil {
+		panic(err)
+	}
+
+	e, err := entry.New(
+		entry.WithLabel(req.Label),
+		entry.WithUsername(req.Username),
+		entry.WithPassword(req.Password),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.AddEntry(e)
+	if err != nil {
+		panic(err)
+	}
+
+	err = api.app.UpdateKeystore(k)
+	if err != nil {
+		panic(err)
+	}
+
+	entries := make([]generated.Entry, len(k.Entries()))
+
+	for i, e := range k.Entries() {
+		entries[i] = generated.Entry{
+			Id:       e.Id(),
+			Label:    e.Label(),
+			Username: e.Username(),
+			Password: e.Password(),
+		}
+	}
+
+	c.JSON(http.StatusOK, generated.Keystore{
+		Id:      k.Id(),
+		Name:    k.Name(),
+		Entries: entries,
+	})
+
 }
 
 func (api *API) Keystore(c *gin.Context) {

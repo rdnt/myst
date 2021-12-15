@@ -1,6 +1,6 @@
 package rest
 
-//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go ../../../api/openapi.json
+//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 
 import (
 	"encoding/hex"

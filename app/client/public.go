@@ -19,6 +19,10 @@ func (app *application) Keystore(id string) (*keystore.Keystore, error) {
 	return app.keystoreRepo.Keystore(id)
 }
 
+func (app *application) UpdateKeystore(k *keystore.Keystore) error {
+	return app.keystoreRepo.Update(k)
+}
+
 func (app *application) HealthCheck() {
 	app.keystoreRepo.HealthCheck()
 }

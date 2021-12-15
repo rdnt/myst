@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 
 	"myst/app/client/core/domain/keystore"
 	"myst/pkg/logger"
@@ -19,6 +20,7 @@ type Application interface {
 	Start()
 	CreateKeystore(name string, passphrase string) (*keystore.Keystore, error)
 	UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error)
+	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
 	HealthCheck()
 }
@@ -69,7 +71,7 @@ func (app *application) setup() {
 	)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	log.Debug(k)

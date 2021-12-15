@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"sync"
 
-	"myst/app/client/core/keyrepo"
-
-	"myst/pkg/crypto"
-
 	"myst/app/client/core/domain/keystore"
+	"myst/app/client/core/keyrepo"
+	jsonkeystore "myst/app/client/core/keystorerepo/keystore"
+	"myst/pkg/crypto"
+	"myst/pkg/enclave"
 )
 
 type repository struct {
@@ -31,7 +31,7 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, fmt.Errorf("already exists")
 	}
 
-	b, err := KeystoreToJSON(k)
+	b, err := jsonkeystore.Marshal(k)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 
 	key := crypto.Argon2Id([]byte(k.Passphrase()), salt)
 
-	b, err = Encrypt(b, key, salt)
+	b, err = enclave.Encrypt(b, key, salt)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, e
 		return nil, keystore.ErrNotFound
 	}
 
-	salt, err := GetSaltFromData(b)
+	salt, err := enclave.GetSaltFromData(b)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +100,12 @@ func (r *repository) keystore(id string) (*keystore.Keystore, error) {
 		return nil, fmt.Errorf("authentication required")
 	}
 
-	b, err = Decrypt(b, key)
+	b, err = enclave.Decrypt(b, key)
 	if err != nil {
 		return nil, err
 	}
 
-	k, err := KeystoreFromJSON(b)
+	k, err := jsonkeystore.Unmarshal(b)
 	if err != nil {
 		return nil, err
 	}
@@ -127,16 +127,37 @@ func (r *repository) Keystores() ([]*keystore.Keystore, error) {
 	//return keystores, nil
 }
 
-func (r *repository) Update(s *keystore.Keystore) error {
+func (r *repository) Update(k *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	//_, ok := r.keystores[s.Id()]
-	//if !ok {
-	//	return fmt.Errorf("not found")
-	//}
-	//
-	//r.keystores[s.Id()] = *s
+	key, err := r.keyRepo.Key(k.Id())
+	if err != nil {
+		return fmt.Errorf("authentication required")
+	}
+
+	b, ok := r.keystores[k.Id()]
+	if !ok {
+		return fmt.Errorf("not found")
+	}
+
+	salt, err := enclave.GetSaltFromData(b)
+	if err != nil {
+		return err
+	}
+
+	b, err = jsonkeystore.Marshal(k)
+	if err != nil {
+		return err
+	}
+
+	b, err = enclave.Encrypt(b, key, salt)
+	if err != nil {
+		return err
+	}
+
+	r.keystores[k.Id()] = b
+
 	return nil
 }
 

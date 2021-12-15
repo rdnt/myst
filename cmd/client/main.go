@@ -2,7 +2,7 @@ package main
 
 import (
 	"myst/app/client"
-	"myst/app/client/core/keystorerepo"
+	keystorerepo "myst/app/client/core/keystorerepo/memory"
 	"myst/app/client/core/keystoreservice"
 	"myst/app/client/rest"
 	"myst/pkg/logger"

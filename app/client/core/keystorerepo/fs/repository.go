@@ -1,0 +1,229 @@
+package keystorerepo
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"sync"
+
+	"myst/app/client/core/domain/keystore"
+	"myst/app/client/core/keyrepo"
+	jsonkeystore "myst/app/client/core/keystorerepo/keystore"
+	"myst/pkg/crypto"
+	"myst/pkg/enclave"
+)
+
+type repository struct {
+	mux     sync.Mutex
+	keyRepo *keyrepo.Repository
+}
+
+func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	k, err := keystore.New(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	kpath := "data/keystores/" + k.Id() + ".mst"
+
+	if _, err := os.Stat(kpath); err == nil {
+		return nil, fmt.Errorf("already exists")
+
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return nil, err
+	}
+
+	b, err := jsonkeystore.Marshal(k)
+	if err != nil {
+		return nil, err
+	}
+
+	p := crypto.DefaultArgon2IdParams
+
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return nil, err
+	}
+
+	key := crypto.Argon2Id([]byte(k.Passphrase()), salt)
+
+	b, err = enclave.Encrypt(b, key, salt)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.WriteFile(kpath, b, 0600)
+	if err != nil {
+		return nil, err
+	}
+
+	r.keyRepo.Set(k.Id(), key)
+
+	return k, nil
+}
+
+func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	kpath := "data/keystores/" + id + ".mst"
+
+	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
+		return nil, keystore.ErrNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	b, err := os.ReadFile(kpath)
+	if err != nil {
+		return nil, err
+	}
+
+	salt, err := enclave.GetSaltFromData(b)
+	if err != nil {
+		return nil, err
+	}
+
+	key := crypto.Argon2Id([]byte(passphrase), salt)
+
+	fmt.Printf("@@@@@@@@@@@ %x\n", key)
+
+	r.keyRepo.Set(id, key)
+
+	return r.keystore(id)
+}
+
+func (r *repository) HealthCheck() {
+	r.keyRepo.HealthCheck()
+}
+
+func (r *repository) Keystore(id string) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	return r.keystore(id)
+}
+
+func (r *repository) keystore(id string) (*keystore.Keystore, error) {
+	kpath := "data/keystores/" + id + ".mst"
+
+	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
+		return nil, keystore.ErrNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	b, err := os.ReadFile(kpath)
+	if err != nil {
+		return nil, err
+	}
+
+	key, err := r.keyRepo.Key(id)
+	if err != nil {
+		return nil, fmt.Errorf("authentication required")
+	}
+
+	b, err = enclave.Decrypt(b, key)
+	if err != nil {
+		return nil, err
+	}
+
+	k, err := jsonkeystore.Unmarshal(b)
+	if err != nil {
+		return nil, err
+	}
+
+	return k, nil
+}
+
+func (r *repository) Keystores() ([]*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	return nil, nil
+
+	//keystores := make([]*keystore.Keystore, 0, len(r.keystores))
+	//for _, k := range r.keystores {
+	//	keystores = append(keystores, &k)
+	//}
+	//
+	//return keystores, nil
+}
+
+func (r *repository) Update(k *keystore.Keystore) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	key, err := r.keyRepo.Key(k.Id())
+	if err != nil {
+		return fmt.Errorf("authentication required")
+	}
+
+	kpath := "data/keystores/" + k.Id() + ".mst"
+
+	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
+		return keystore.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
+	// read the existing keystore and get the salt; we will reuse the salt so that we don't have to re-generate the
+	// encryption key
+	b, err := os.ReadFile(kpath)
+	if err != nil {
+		return err
+	}
+
+	salt, err := enclave.GetSaltFromData(b)
+	if err != nil {
+		return err
+	}
+
+	b, err = jsonkeystore.Marshal(k)
+	if err != nil {
+		return err
+	}
+
+	b, err = enclave.Encrypt(b, key, salt)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(kpath, b, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) Delete(id string) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	kpath := "data/keystores/" + id + ".mst"
+
+	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
+		return keystore.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
+	err := os.Remove(kpath)
+	if err != nil {
+		return err
+	}
+
+	r.keyRepo.Delete(id)
+
+	return nil
+}
+
+func New() *repository {
+	return &repository{
+		keyRepo: keyrepo.New(),
+	}
+}

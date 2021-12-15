@@ -1,4 +1,4 @@
-package keystorerepo
+package enclave
 
 import (
 	"crypto/sha256"

@@ -1,11 +1,10 @@
-package keystorerepo
+package jsonkeystore
 
 import (
 	"encoding/json"
 
-	"myst/app/client/core/domain/keystore/entry"
-
 	"myst/app/client/core/domain/keystore"
+	"myst/app/client/core/domain/keystore/entry"
 )
 
 type Keystore struct {
@@ -22,7 +21,7 @@ type Entry struct {
 	Password string `json:"password"`
 }
 
-func KeystoreToJSON(k *keystore.Keystore) ([]byte, error) {
+func Marshal(k *keystore.Keystore) ([]byte, error) {
 	entries := make([]Entry, len(k.Entries()))
 
 	for i, e := range k.Entries() {
@@ -44,7 +43,7 @@ func KeystoreToJSON(k *keystore.Keystore) ([]byte, error) {
 	)
 }
 
-func KeystoreFromJSON(b []byte) (*keystore.Keystore, error) {
+func Unmarshal(b []byte) (*keystore.Keystore, error) {
 	var k Keystore
 
 	if err := json.Unmarshal(b, &k); err != nil {

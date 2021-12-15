@@ -2,9 +2,14 @@ package jsonkeystore
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"myst/app/client/core/domain/keystore"
 	"myst/app/client/core/domain/keystore/entry"
+)
+
+var (
+	ErrAuthenticationRequired = fmt.Errorf("authentication required")
 )
 
 type Keystore struct {

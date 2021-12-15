@@ -123,7 +123,7 @@ func (r *repository) keystore(id string) (*keystore.Keystore, error) {
 
 	key, err := r.keyRepo.Key(id)
 	if err != nil {
-		return nil, fmt.Errorf("authentication required")
+		return nil, jsonkeystore.ErrAuthenticationRequired
 	}
 
 	b, err = enclave.Decrypt(b, key)
@@ -159,7 +159,7 @@ func (r *repository) Update(k *keystore.Keystore) error {
 
 	key, err := r.keyRepo.Key(k.Id())
 	if err != nil {
-		return fmt.Errorf("authentication required")
+		return jsonkeystore.ErrAuthenticationRequired
 	}
 
 	kpath := "data/keystores/" + k.Id() + ".mst"

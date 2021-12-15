@@ -3,8 +3,11 @@ package rest
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
+
+	"myst/app/client/core/keystoreservice"
 
 	"myst/app/client/core/domain/keystore/entry"
 
@@ -32,7 +35,8 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusBadRequest, err)
+		return
 	}
 
 	k, err := api.app.CreateKeystore(
@@ -40,7 +44,8 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		req.Passphrase,
 	)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))
@@ -68,12 +73,14 @@ func (api *API) UnlockKeystore(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusBadRequest, err)
+		return
 	}
 
 	k, err := api.app.UnlockKeystore(keystoreId, req.Passphrase)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))
@@ -101,12 +108,17 @@ func (api *API) CreateEntry(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusBadRequest, err)
+		return
 	}
 
 	k, err := api.app.Keystore(keystoreId)
-	if err != nil {
-		panic(err)
+	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+		Error(c, http.StatusForbidden, err)
+		return
+	} else if err != nil {
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	e, err := entry.New(
@@ -115,17 +127,20 @@ func (api *API) CreateEntry(c *gin.Context) {
 		entry.WithPassword(req.Password),
 	)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	err = k.AddEntry(e)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	err = api.app.UpdateKeystore(k)
 	if err != nil {
-		panic(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))
@@ -151,8 +166,12 @@ func (api *API) Keystore(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	k, err := api.app.Keystore(keystoreId)
-	if err != nil {
-		panic(err)
+	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+		Error(c, http.StatusForbidden, err)
+		return
+	} else if err != nil {
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))

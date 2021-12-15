@@ -15,6 +15,8 @@ type Repository struct {
 }
 
 func (r *Repository) Set(id string, key []byte) {
+	fmt.Printf("set key %s %x\n", id, key)
+
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -22,6 +24,7 @@ func (r *Repository) Set(id string, key []byte) {
 }
 
 func (r *Repository) Key(id string) ([]byte, error) {
+
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -29,6 +32,8 @@ func (r *Repository) Key(id string) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("key not found")
 	}
+
+	fmt.Printf("get key %s %x\n", id, key)
 
 	return key, nil
 }

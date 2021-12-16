@@ -10,9 +10,10 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
-	"golang.org/x/crypto/argon2"
 	"reflect"
 	"strings"
+
+	"golang.org/x/crypto/argon2"
 )
 
 var (

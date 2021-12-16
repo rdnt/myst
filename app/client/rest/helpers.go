@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,16 +10,21 @@ import (
 	"myst/app/client/rest/generated"
 )
 
-func Error(c *gin.Context, code int, message interface{}) {
+func Error(c *gin.Context, code int, v interface{}) {
 	msg := "unknown error"
 
-	switch message.(type) {
+	switch v.(type) {
 	case string:
-		msg = message.(string)
+		msg = v.(string)
 	case fmt.Stringer:
-		msg = message.(fmt.Stringer).String()
+		msg = v.(fmt.Stringer).String()
 	case error:
-		msg = message.(error).Error()
+		msg = v.(error).Error()
+	default:
+		b, err := json.Marshal(v)
+		if err == nil {
+			msg = string(b)
+		}
 	}
 
 	c.JSON(
@@ -27,4 +33,8 @@ func Error(c *gin.Context, code int, message interface{}) {
 			Message: msg,
 		},
 	)
+}
+
+func Success(c *gin.Context, v interface{}) {
+	c.JSON(http.StatusOK, v)
 }

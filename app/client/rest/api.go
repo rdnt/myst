@@ -59,7 +59,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, generated.Keystore{
+	Success(c, generated.Keystore{
 		Id:      k.Id(),
 		Name:    k.Name(),
 		Entries: entries,
@@ -94,7 +94,7 @@ func (api *API) UnlockKeystore(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, generated.Keystore{
+	Success(c, generated.Keystore{
 		Id:      k.Id(),
 		Name:    k.Name(),
 		Entries: entries,
@@ -154,7 +154,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, generated.Keystore{
+	Success(c, generated.Keystore{
 		Id:      k.Id(),
 		Name:    k.Name(),
 		Entries: entries,
@@ -185,7 +185,7 @@ func (api *API) Keystore(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, generated.Keystore{
+	Success(c, generated.Keystore{
 		Id:      k.Id(),
 		Name:    k.Name(),
 		Entries: entries,

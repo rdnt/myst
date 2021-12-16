@@ -1,7 +1,7 @@
 package main
 
 import (
-	"myst/app/server/core"
+	"myst/app/server"
 	invitationrepo "myst/app/server/core/invitationrepo/memory"
 	"myst/app/server/core/invitationservice"
 	keystorerepo "myst/app/server/core/keystorerepo/memory"
@@ -10,7 +10,7 @@ import (
 	"myst/app/server/core/userservice"
 	"myst/pkg/logger"
 
-	"myst/app/server/restapi"
+	"myst/app/server/rest"
 )
 
 var log = logger.New("app", logger.Red)
@@ -45,19 +45,19 @@ func main() {
 		panic(err)
 	}
 
-	app, err := core.New(
-		core.WithKeystoreRepository(keystoreRepo),
-		core.WithUserRepository(userRepo),
-		core.WithInvitationRepository(invitationRepo),
-		core.WithUserService(userService),
-		core.WithKeystoreService(keystoreService),
-		core.WithInvitationService(invitationService),
+	app, err := server.New(
+		server.WithKeystoreRepository(keystoreRepo),
+		server.WithUserRepository(userRepo),
+		server.WithInvitationRepository(invitationRepo),
+		server.WithUserService(userService),
+		server.WithKeystoreService(keystoreService),
+		server.WithInvitationService(invitationService),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	api := restapi.New(app)
+	api := rest.New(app)
 
 	err = api.Run(":8080")
 	if err != nil {

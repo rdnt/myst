@@ -27,7 +27,7 @@ func (w *Writer) Write(p []byte) (int, error) {
 	return w.writer.Write(p)
 }
 
-// Sync flushes the writer's buffer to the disk
+// Sync flushes the writer's buffer to the fs
 func (w *Writer) Sync() error {
 	w.mu.Lock()
 	defer w.mu.Unlock()

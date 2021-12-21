@@ -1,5 +1,11 @@
 package keystore
 
+import "fmt"
+
+var (
+	ErrAuthenticationRequired = fmt.Errorf("authentication required")
+)
+
 type Repository interface {
 	Create(opts ...Option) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)

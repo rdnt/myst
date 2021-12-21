@@ -32,10 +32,10 @@
         </div>
       </div>
       <!-- <simplebar class="entries" data-simplebar-auto-hide="false"> -->
-      <div class="entries scroll-view">
-        <div class="scroll-overlay" v-on:scroll="scrollView">
-          <div v-for="(entry, i) in entries" :key="i" class="dummy"></div>
-        </div>
+      <div class="entries scroll-view" v-if="keystore">
+        <!--        <div class="scroll-overlay" v-on:scroll="scrollView">-->
+        <!--          <div v-for="(entry, i) in entries" :key="i" class="dummy"></div>-->
+        <!--        </div>-->
         <!-- <div
           class="scroll-area"
           v-on:scroll="scrollView"
@@ -44,22 +44,22 @@
         > -->
         <div class="scroll-area">
           <router-link
-            v-for="(entry, i) in entries"
-            :key="i"
+            v-for="entry in keystore.entries"
+            :key="entry.id"
             class="row entry card"
-            :to="{ path: '/site/' + i + '/edit' }"
+            :to="{ path: '/entry/' + entry.id + '/edit' }"
           >
             <div class="col icon">
               <img src="/assets/images/logos/medium-logo.png" />
             </div>
             <div class="col name">
-              <div class="label">Medium</div>
+              <div class="label">{{ entry.label }}</div>
             </div>
             <div class="col user">
-              <div class="label">tasos@sht.gr</div>
+              <div class="label">{{ entry.username }}</div>
             </div>
             <div class="col pass">
-              <div class="label">Ex4mplePassw0rd</div>
+              <div class="label">{{ entry.password }}</div>
             </div>
           </router-link>
         </div>
@@ -79,6 +79,8 @@
 // @ is an alias to /src
 // import simplebar from "simplebar-vue";
 
+import { mapState } from "vuex";
+
 export default {
   name: "Sites",
   components: {
@@ -87,43 +89,46 @@ export default {
   data() {
     return {
       over: false,
-      showEditModal: false,
-      entries: [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {}
-      ]
+      showEditModal: false
+      // entries: [
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {},
+      //   {}
+      // ]
     };
   },
+  computed: mapState({
+    keystore: state => state.keystore.keystore
+  }),
   watch: {
     $route: function() {
       if (this.$route.name == "EditSite") {

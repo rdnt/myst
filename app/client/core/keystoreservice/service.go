@@ -3,7 +3,7 @@ package keystoreservice
 import (
 	"errors"
 
-	jsonkeystore "myst/app/client/core/keystorerepo/keystore"
+	keystorerepo "myst/app/client/core/keystorerepo/fs"
 
 	"myst/app/client"
 
@@ -13,7 +13,8 @@ import (
 
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
-	ErrAuthenticationRequired    = errors.New("authentication required")
+	ErrAuthenticationRequired    = keystore.ErrAuthenticationRequired
+	ErrAuthenticationFailed      = keystorerepo.ErrAuthenticationFailed
 )
 
 type service struct {
@@ -26,7 +27,7 @@ func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 	k, err := s.keystoreRepo.Keystore(id)
-	if errors.Is(err, jsonkeystore.ErrAuthenticationRequired) {
+	if errors.Is(err, keystore.ErrAuthenticationRequired) {
 		return nil, ErrAuthenticationRequired
 	}
 
@@ -34,12 +35,17 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (s *service) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
-	return s.keystoreRepo.Unlock(id, passphrase)
+	k, err := s.keystoreRepo.Unlock(id, passphrase)
+	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {
+		return nil, ErrAuthenticationFailed
+	}
+
+	return k, err
 }
 
 func (s *service) Update(k *keystore.Keystore) error {
 	err := s.keystoreRepo.Update(k)
-	if errors.Is(err, jsonkeystore.ErrAuthenticationRequired) {
+	if errors.Is(err, keystore.ErrAuthenticationRequired) {
 		return ErrAuthenticationRequired
 	}
 

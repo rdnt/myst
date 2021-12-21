@@ -94,7 +94,7 @@ export default {
   //     sites: state => state.sites.all
   // }),
   computed: mapState({
-    sites: state => state.sites.all
+    sites: state => state.keystore.keystore.entries
   }),
   // computed: {
   //     sites: {

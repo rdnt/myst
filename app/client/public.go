@@ -16,11 +16,11 @@ func (app *application) UnlockKeystore(keystoreId string, passphrase string) (*k
 }
 
 func (app *application) Keystore(id string) (*keystore.Keystore, error) {
-	return app.keystoreRepo.Keystore(id)
+	return app.keystoreService.Keystore(id)
 }
 
 func (app *application) UpdateKeystore(k *keystore.Keystore) error {
-	return app.keystoreRepo.Update(k)
+	return app.keystoreService.Update(k)
 }
 
 func (app *application) HealthCheck() {

@@ -13,6 +13,10 @@ import (
 	"myst/pkg/enclave"
 )
 
+var (
+	ErrAuthenticationFailed = enclave.ErrAuthenticationFailed
+)
+
 type repository struct {
 	mux     sync.Mutex
 	keyRepo *keyrepo.Repository
@@ -123,11 +127,13 @@ func (r *repository) keystore(id string) (*keystore.Keystore, error) {
 
 	key, err := r.keyRepo.Key(id)
 	if err != nil {
-		return nil, jsonkeystore.ErrAuthenticationRequired
+		return nil, keystore.ErrAuthenticationRequired
 	}
 
 	b, err = enclave.Decrypt(b, key)
-	if err != nil {
+	if errors.Is(err, enclave.ErrAuthenticationFailed) {
+		return nil, ErrAuthenticationFailed
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -159,7 +165,7 @@ func (r *repository) Update(k *keystore.Keystore) error {
 
 	key, err := r.keyRepo.Key(k.Id())
 	if err != nil {
-		return jsonkeystore.ErrAuthenticationRequired
+		return keystore.ErrAuthenticationRequired
 	}
 
 	kpath := "data/keystores/" + k.Id() + ".mst"

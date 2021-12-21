@@ -12,8 +12,7 @@ var log = logger.New("app", logger.Blue)
 
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
-	ErrInvalidUserRepository     = errors.New("invalid user repository")
-	ErrInvalidUserService        = errors.New("invalid user service")
+	ErrInvalidKeystoreService    = errors.New("invalid keystore service")
 )
 
 type Application interface {
@@ -58,7 +57,7 @@ func New(opts ...Option) (*application, error) {
 	}
 
 	if app.keystoreService == nil {
-		return nil, ErrInvalidUserService
+		return nil, ErrInvalidKeystoreService
 	}
 
 	return app, nil

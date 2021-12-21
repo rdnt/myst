@@ -43,7 +43,7 @@ export default {
     };
   },
   computed: mapState({
-    loggedIn: state => state.loggedIn
+    loggedIn: state => state.keystore.keystore !== null
   }),
   created() {},
   mounted() {}

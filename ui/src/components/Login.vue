@@ -63,6 +63,11 @@ export default {
             keystoreId: "0000000000000000000000",
             passphrase: this.passphrase
           })
+          .then(() => {
+            this.$router.push(
+              "/keystore/" + this.$store.state.keystore.keystore.id
+            );
+          })
           .finally(() => {
             this.loggingIn = false;
           });

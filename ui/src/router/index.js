@@ -13,12 +13,12 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    name: "Home",
-    redirect: "/sites"
+    name: "Home"
+    // redirect: "/sites"
   },
   {
-    path: "/sites",
-    name: "Sites",
+    path: "/keystore/:id",
+    name: "Keystore",
     component: Sites,
     props: {
       sidebar: true,
@@ -27,7 +27,7 @@ const routes = [
     }
   },
   {
-    path: "/site/:id(\\d+)/edit",
+    path: "/entry/:id(\\d+)/edit",
     name: "EditSite",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route

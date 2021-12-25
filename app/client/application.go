@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"myst/app/client/core/domain/keystore/entry"
+
 	"myst/app/client/core/domain/keystore"
 	"myst/pkg/logger"
 )
@@ -66,11 +68,65 @@ func New(opts ...Option) (*application, error) {
 func (app *application) setup() {
 	k, err := app.keystoreService.Create(
 		keystore.WithName("my-keystore"),
-		keystore.WithPassphrase("my-passphrase"),
+		keystore.WithPassphrase("pass"),
 	)
-
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+
+	e1, err := entry.New(
+		entry.WithLabel("google.com"),
+		entry.WithUsername("someuser@google.com"),
+		entry.WithPassword("12345678"),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	e2, err := entry.New(
+		entry.WithLabel("stackoverflow.com"),
+		entry.WithUsername("someotheruser@google.com"),
+		entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	e3, err := entry.New(
+		entry.WithLabel("reddit.com"),
+		entry.WithUsername("somethirduser@yahoo.com"),
+		entry.WithPassword("!@*#&$^!@*#&$^!"),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = k.AddEntry(e1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = k.AddEntry(e2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = k.AddEntry(e3)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = app.keystoreService.Update(k)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
 	log.Debug(k)

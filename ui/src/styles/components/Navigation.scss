@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+$bg: #1f2023;
 
 #navigation {
     position: absolute;
@@ -50,7 +51,7 @@
         background: #fff;
         background: #0a0b0c;
         background: #fff;
-        background: #efeff7;
+        background: $bg;
         box-shadow: 2px 0 0 0 #edeeef;
         // border-right: 1px solid #f2f3f5;
         // background: #fff;
@@ -203,7 +204,7 @@
                 color: #747f8d;
                 line-height: 61px;
                 font-size: 1.1rem;
-                font-weight: 600;
+                //font-weight: 600;
                 font-family: 'Assistant', sans-serif;
                 will-change: opacity;
                 transition: opacity .3s cubic-bezier(.32,.46,.19,1);

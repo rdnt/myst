@@ -1,4 +1,4 @@
-package keyrepo
+package sessionrepo
 
 import (
 	"fmt"

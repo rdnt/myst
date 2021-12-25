@@ -18,53 +18,47 @@
         />
       </div>
     </div> -->
-    <div id="sites-list">
-      <div class="row header">
-        <div class="col icon"></div>
-        <div class="col name">
-          <div class="label">Site</div>
+    <div id="header">
+      <router-link :to="{ path: '' }" class="breadcrumb">Passwords</router-link>
+      <router-link :to="{ path: '' }" class="breadcrumb">All</router-link>
+    </div>
+    <div id="entries">
+      <div class="entry header">
+        <div class="name">
+          Domain
         </div>
-        <div class="col user">
-          <div class="label">Username</div>
+        <div class="user">
+          Username
         </div>
-        <div class="col pass">
-          <div class="label">Password</div>
+        <div class="pass">
+          Password
         </div>
       </div>
-      <!-- <simplebar class="entries" data-simplebar-auto-hide="false"> -->
-      <div class="entries scroll-view" v-if="keystore">
-        <!--        <div class="scroll-overlay" v-on:scroll="scrollView">-->
-        <!--          <div v-for="(entry, i) in entries" :key="i" class="dummy"></div>-->
+      <!--      <div class="entries" v-if="keystore">-->
+      <router-link
+        v-for="entry in keystore.entries"
+        :key="entry.id"
+        class="entry"
+        :to="{ path: '/entry/' + entry.id + '/edit' }"
+      >
+        <!--        <div class="icon">-->
+        <!--          <img src="/assets/images/favicon.ico" />-->
         <!--        </div>-->
-        <!-- <div
-          class="scroll-area"
-          v-on:scroll="scrollView"
-          v-on:mouseover="mouseover"
-          v-on:mouseleave="mouseleave"
-        > -->
-        <div class="scroll-area">
-          <router-link
-            v-for="entry in keystore.entries"
-            :key="entry.id"
-            class="row entry card"
-            :to="{ path: '/entry/' + entry.id + '/edit' }"
-          >
-            <div class="col icon">
-              <img src="/assets/images/logos/medium-logo.png" />
-            </div>
-            <div class="col name">
-              <div class="label">{{ entry.label }}</div>
-            </div>
-            <div class="col user">
-              <div class="label">{{ entry.username }}</div>
-            </div>
-            <div class="col pass">
-              <div class="label">{{ entry.password }}</div>
-            </div>
-          </router-link>
-        </div>
-        <!-- </simplebar> -->
-      </div>
+        <span class="icon">
+          <!--<img src="/assets/images/favicon.ico" alt="" />-->
+          <img :src="`http://${entry.label}/favicon.ico`" alt="" />
+        </span>
+        <span class="name">
+          {{ entry.label }}
+        </span>
+        <span class="user">
+          {{ entry.username }}
+        </span>
+        <span class="pass">
+          {{ entry.password }}
+        </span>
+      </router-link>
+      <!--      </div>-->
     </div>
     <!-- <div id="edit-site" :class="{ show: showEditModal }">
       <div class="modal">

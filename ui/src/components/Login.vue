@@ -37,7 +37,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-      passphrase: "",
+      passphrase: "pass",
       enter: false,
       loggingIn: false
     };

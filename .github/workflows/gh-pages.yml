@@ -1,11 +1,6 @@
 name: gh-pages
 
-on:
-  release:
-    types: [created]
-  push:
-    branches:
-      - master
+on: push
 
 # Environment variables available to all jobs and steps in this workflow
 env:

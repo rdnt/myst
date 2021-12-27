@@ -75,52 +75,54 @@ func (app *application) setup() {
 		return
 	}
 
-	e1, err := entry.New(
-		entry.WithLabel("google.com"),
-		entry.WithUsername("someuser@google.com"),
-		entry.WithPassword("12345678"),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	for i := 0; i < 128; i++ {
+		e1, err := entry.New(
+			entry.WithLabel("google.com"),
+			entry.WithUsername("someuser@google.com"),
+			entry.WithPassword("12345678"),
+		)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	e2, err := entry.New(
-		entry.WithLabel("stackoverflow.com"),
-		entry.WithUsername("someotheruser@google.com"),
-		entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+		e2, err := entry.New(
+			entry.WithLabel("stackoverflow.com"),
+			entry.WithUsername("someotheruser@google.com"),
+			entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
+		)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	e3, err := entry.New(
-		entry.WithLabel("reddit.com"),
-		entry.WithUsername("somethirduser@yahoo.com"),
-		entry.WithPassword("!@*#&$^!@*#&$^!"),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+		e3, err := entry.New(
+			entry.WithLabel("reddit.com"),
+			entry.WithUsername("somethirduser@yahoo.com"),
+			entry.WithPassword("!@*#&$^!@*#&$^!"),
+		)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	err = k.AddEntry(e1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+		err = k.AddEntry(e1)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	err = k.AddEntry(e2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+		err = k.AddEntry(e2)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	err = k.AddEntry(e3)
-	if err != nil {
-		fmt.Println(err)
-		return
+		err = k.AddEntry(e3)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	err = app.keystoreService.Update(k)

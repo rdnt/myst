@@ -1,5 +1,5 @@
 <template>
-  <div id="sites-page">
+  <div id="container" class="entries-container">
     <!-- <div id="header">
       <div id="search">
         <input
@@ -18,54 +18,62 @@
         />
       </div>
     </div> -->
-    <div id="header">
-      <router-link :to="{ path: '' }" class="breadcrumb">Passwords</router-link>
-      <router-link :to="{ path: '' }" class="breadcrumb">All</router-link>
-    </div>
-    <div id="entries">
-      <div class="entry header">
-        <div class="name">
-          Domain
-        </div>
-        <div class="user">
-          Username
-        </div>
-        <div class="pass">
-          Password
-        </div>
+
+    <div id="entries-list" :class="{ expanded: !showEditModal }">
+      <div id="header">
+        <router-link :to="{ path: '' }" class="breadcrumb"
+          >Keystore</router-link
+        >
+        <!--      <router-link :to="{ path: '' }" class="breadcrumb">Passwords</router-link>-->
+        <div class="create-entry-icon">Create New</div>
       </div>
-      <!--      <div class="entries" v-if="keystore">-->
-      <router-link
-        v-for="entry in keystore.entries"
-        :key="entry.id"
-        class="entry"
-        :to="{ path: '/entry/' + entry.id + '/edit' }"
-      >
-        <!--        <div class="icon">-->
-        <!--          <img src="/assets/images/favicon.ico" />-->
-        <!--        </div>-->
-        <span class="icon">
-          <!--<img src="/assets/images/favicon.ico" alt="" />-->
-          <img :src="`http://${entry.label}/favicon.ico`" alt="" />
-        </span>
-        <span class="name">
-          {{ entry.label }}
-        </span>
-        <span class="user">
-          {{ entry.username }}
-        </span>
-        <span class="pass">
-          {{ entry.password }}
-        </span>
-      </router-link>
-      <!--      </div>-->
-    </div>
-    <!-- <div id="edit-site" :class="{ show: showEditModal }">
-      <div class="modal">
-        <router-view></router-view>
+      <div id="entries" v-if="keystore">
+        <div class="entry header">
+          <div class="name">
+            Domain
+          </div>
+          <div class="user">
+            Username
+          </div>
+          <div class="pass">
+            Password
+          </div>
+        </div>
+        <!--      <div class="entries" v-if="keystore">-->
+        <router-link
+          v-for="entry in keystore.entries"
+          :key="entry.id"
+          class="entry"
+          :to="{
+            name: 'entry',
+            params: { entryId: entry.id, entry: entry }
+          }"
+        >
+          <span class="icon">
+            <img :src="`http://${entry.label}/favicon.ico`" alt="" />
+          </span>
+          <span class="name">
+            {{ entry.label }}
+          </span>
+          <span class="user">
+            {{ entry.username }}
+          </span>
+          <span class="pass">
+            {{ entry.password }}
+          </span>
+        </router-link>
+        <!--      </div>-->
       </div>
-      <router-link :to="{ path: '/sites' }" class="overlay"> </router-link>
-    </div> -->
+      <!-- <div id="edit-site" :class="{ show: showEditModal }">
+        <div class="modal">
+          <router-view></router-view>
+        </div>
+        <router-link :to="{ path: '/sites' }" class="overlay"> </router-link>
+      </div> -->
+    </div>
+    <div id="entry-container" :class="{ show: showEditModal }">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -125,7 +133,7 @@ export default {
   }),
   watch: {
     $route: function() {
-      if (this.$route.name == "EditSite") {
+      if (this.$route.name == "entry") {
         this.showEditModal = true;
       } else {
         this.showEditModal = false;

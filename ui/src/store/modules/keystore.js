@@ -19,6 +19,7 @@ export default {
   },
   mutations: {
     setKeystore(state, keystore) {
+      keystore.entries = keystore.entries.slice(0, 40);
       state.keystore = keystore;
     }
   }

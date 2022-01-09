@@ -1,7 +1,7 @@
 package main
 
 import (
-	"myst/internal/server"
+	application "myst/internal/server"
 	"myst/internal/server/api/http"
 	invitationrepo "myst/internal/server/core/invitationrepo/memory"
 	"myst/internal/server/core/invitationservice"
@@ -44,13 +44,13 @@ func main() {
 		panic(err)
 	}
 
-	app, err := server.New(
-		server.WithKeystoreRepository(keystoreRepo),
-		server.WithUserRepository(userRepo),
-		server.WithInvitationRepository(invitationRepo),
-		server.WithUserService(userService),
-		server.WithKeystoreService(keystoreService),
-		server.WithInvitationService(invitationService),
+	app, err := application.New(
+		application.WithKeystoreRepository(keystoreRepo),
+		application.WithUserRepository(userRepo),
+		application.WithInvitationRepository(invitationRepo),
+		application.WithUserService(userService),
+		application.WithKeystoreService(keystoreService),
+		application.WithInvitationService(invitationService),
 	)
 	if err != nil {
 		panic(err)

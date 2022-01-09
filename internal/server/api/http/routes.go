@@ -5,5 +5,9 @@ import (
 )
 
 func (api *API) initRoutes(r *gin.RouterGroup) {
-	r.POST("/keystore/:keystoreId/invitations", api.CreateKeystoreInvitation)
+	r.POST("/auth/login", api.Login)
+
+	sec := r.Group("")
+	sec.Use(Authentication())
+	sec.POST("/keystore/:keystoreId/invitations", api.CreateKeystoreInvitation)
 }

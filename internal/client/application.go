@@ -1,4 +1,4 @@
-package client
+package application
 
 import (
 	"errors"
@@ -24,11 +24,14 @@ type Application interface {
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
 	HealthCheck()
+	SignIn(username, password string) error
+	SignOut() error
 }
 
 type application struct {
 	keystoreService keystore.Service
 	keystoreRepo    KeystoreRepository
+	//serverHttpClient TODO
 }
 
 type KeystoreRepository interface {

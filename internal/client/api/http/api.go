@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"myst/internal/client"
+	application "myst/internal/client"
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
 	"myst/internal/client/core/keystoreservice"
@@ -25,7 +25,7 @@ var log = logger.New("router", logger.Cyan)
 
 type API struct {
 	*gin.Engine
-	app client.Application
+	app application.Application
 }
 
 func (api *API) CreateKeystore(c *gin.Context) {
@@ -218,7 +218,7 @@ func (api *API) Run(addr string) error {
 	return api.Engine.Run(addr)
 }
 
-func New(app client.Application) *API {
+func New(app application.Application) *API {
 	api := new(API)
 
 	api.app = app

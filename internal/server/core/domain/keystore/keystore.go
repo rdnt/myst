@@ -76,5 +76,8 @@ func New(opts ...Option) (*Keystore, error) {
 		}
 	}
 
+	// TODO: remove this
+	k.id = "0000000000000000000000"
+
 	return k, nil
 }

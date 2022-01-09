@@ -1,11 +1,16 @@
 package http
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"myst/pkg/regex"
 
 	"myst/internal/server/api/http/generated"
 
@@ -131,4 +136,82 @@ func MethodColor(method string) logger.Color {
 	default:
 		return logger.MagentaBg | logger.Black
 	}
+}
+
+func Authentication() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := TokenAuthentication(c)
+		if err != nil {
+			c.JSON(403, gin.H{"error": "Forbidden"})
+			c.Abort()
+
+			return
+		}
+	}
+}
+
+func TokenAuthentication(c *gin.Context) error {
+	auth := c.GetHeader("Authorization")
+	if auth == "" {
+		return fmt.Errorf("authentication required")
+	}
+
+	parts := strings.Split(auth, "Bearer")
+	if len(parts) != 2 {
+		return fmt.Errorf("authentication failed")
+	}
+	auth = strings.TrimSpace(parts[1])
+
+	if auth == "" {
+		return fmt.Errorf("authentication required")
+	}
+
+	// Validate token format
+	match := regex.Match("jwt", auth)
+	if !match {
+		return fmt.Errorf("authentication failed")
+	}
+
+	// Check if authentication token is in the valid format
+	token, err := jwt.Parse(
+		auth, func(token *jwt.Token) (interface{}, error) {
+			// Verify signing method
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected token signing method: %v", token.Header["alg"])
+			}
+			key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
+			if err != nil {
+				return nil, fmt.Errorf("jwt secret decode failed")
+			}
+			// return the secret when token is valid format
+			return key, nil
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("authentication failed")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return fmt.Errorf("authentication failed")
+	}
+
+	err = claims.Valid()
+	if err != nil {
+		return fmt.Errorf("authentication failed")
+	}
+
+	username, ok := claims["usr"].(string)
+	if !ok {
+		return fmt.Errorf("authentication failed")
+	}
+
+	if username != "rdnt" {
+		return fmt.Errorf("authentication failed")
+	}
+
+	c.Set("userId", username)
+
+	return nil
 }

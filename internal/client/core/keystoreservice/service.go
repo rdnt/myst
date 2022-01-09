@@ -3,7 +3,7 @@ package keystoreservice
 import (
 	"errors"
 
-	"myst/internal/client"
+	application "myst/internal/client"
 	"myst/internal/client/core/domain/keystore"
 	keystorerepo "myst/internal/client/core/keystorerepo/fs"
 
@@ -17,7 +17,7 @@ var (
 )
 
 type service struct {
-	keystoreRepo client.KeystoreRepository
+	keystoreRepo application.KeystoreRepository
 }
 
 func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {

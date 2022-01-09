@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"myst/internal/client"
+	application "myst/internal/client"
 	keystorerepo "myst/internal/server/core/keystorerepo/memory"
 )
 
@@ -16,7 +16,7 @@ func main() {
 		keystores.CreateKeystore(),
 	)
 
-	client.New()
+	application.New()
 
 	fmt.Println(keystores.Keystores())
 }

@@ -1,13 +1,18 @@
 package http
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
+//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"io/ioutil"
 	"net/http"
+	"time"
 
-	"myst/internal/server"
+	"github.com/dgrijalva/jwt-go"
+
+	application "myst/internal/server"
 	"myst/internal/server/api/http/generated"
 
 	"github.com/gin-contrib/static"
@@ -23,7 +28,7 @@ var log = logger.New("router", logger.Cyan)
 
 type API struct {
 	*gin.Engine
-	app *server.Application
+	app *application.Application
 }
 
 func (api *API) CreateKeystoreInvitation(c *gin.Context) {
@@ -59,6 +64,54 @@ func (api *API) CreateKeystoreInvitation(c *gin.Context) {
 	)
 }
 
+func (api *API) Login(c *gin.Context) {
+	var params generated.LoginRequest
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		panic(err)
+	}
+
+	if params.Username == "rdnt" && params.Password != "1234" {
+		panic(err)
+	}
+
+	key, err := api.loginUser(params.Username)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(http.StatusOK, generated.AuthToken(key))
+}
+
+var jwtCookieLifetime = 604800
+
+//var jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+var jwtSecretKey = "dzl6JEMmRilKQE1jUWZUalduWnI0dTd4IUElRCpHLUs="
+
+func (api *API) loginUser(username string) (string, error) {
+	now := time.Now()
+
+	exp := now.Unix() + int64(jwtCookieLifetime)
+	iat := now.Unix()
+	nbf := now.Unix()
+
+	// if password matches hash
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256, jwt.MapClaims{
+			"exp": exp,
+			"iat": iat,
+			"nbf": nbf,
+			"usr": username,
+		},
+	)
+	key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return token.SignedString(key)
+}
+
 func (api *API) Run(addr string) error {
 	log.Println("starting app on port :8080")
 
@@ -68,7 +121,7 @@ func (api *API) Run(addr string) error {
 	return api.Engine.Run(addr)
 }
 
-func New(app *server.Application) *API {
+func New(app *application.Application) *API {
 	api := new(API)
 
 	api.app = app

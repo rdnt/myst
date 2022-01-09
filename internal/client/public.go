@@ -1,4 +1,4 @@
-package client
+package application
 
 import (
 	"myst/internal/client/core/domain/keystore"
@@ -25,4 +25,12 @@ func (app *application) UpdateKeystore(k *keystore.Keystore) error {
 
 func (app *application) HealthCheck() {
 	app.keystoreRepo.HealthCheck()
+}
+
+func (app *application) SignIn(username, password string) error {
+	panic("implement me")
+}
+
+func (app *application) SignOut() error {
+	panic("implement me")
 }

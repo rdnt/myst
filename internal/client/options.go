@@ -1,4 +1,4 @@
-package client
+package application
 
 import (
 	"myst/internal/client/core/domain/keystore"

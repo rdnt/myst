@@ -22,6 +22,48 @@
     }
   ],
   "paths": {
+    "/auth/login": {
+      "post": {
+        "description": "Authenticates a user",
+        "operationId": "Login",
+        "requestBody": {
+          "description": "Credentials",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuthToken"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/keystore/{keystoreId}/invitations": {
       "post": {
         "description": "Creates an invitation from a user (inviter) to another user (invitee), which, once accepted, will grant the invitee read/write access to the keystore",
@@ -77,6 +119,24 @@
   },
   "components": {
     "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthToken": {
+        "type": "string"
+      },
       "CreateKeystoreInvitationRequest": {
         "type": "object",
         "required": [

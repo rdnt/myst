@@ -169,7 +169,7 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/auth/login")
+	operationPath := fmt.Sprintf("/api/auth/login")
 	if operationPath[0] == '/' {
 		operationPath = operationPath[1:]
 	}
@@ -216,7 +216,7 @@ func NewCreateKeystoreInvitationRequestWithBody(server string, keystoreId string
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/keystore/%s/invitations", pathParam0)
+	operationPath := fmt.Sprintf("/api/keystore/%s/invitations", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = operationPath[1:]
 	}

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"myst/internal/client/core/remote"
+
 	"myst/internal/client/core/domain/keystore"
 	"myst/internal/client/core/domain/keystore/entry"
 
@@ -31,7 +33,7 @@ type Application interface {
 type application struct {
 	keystoreService keystore.Service
 	keystoreRepo    KeystoreRepository
-	//serverHttpClient TODO
+	remote          remote.Client
 }
 
 type KeystoreRepository interface {
@@ -65,6 +67,13 @@ func New(opts ...Option) (*application, error) {
 		return nil, ErrInvalidKeystoreService
 	}
 
+	rc, err := remote.New()
+	if err != nil {
+		return nil, err
+	}
+
+	app.remote = rc
+
 	return app, nil
 }
 
@@ -73,7 +82,13 @@ func (app *application) setup() {
 		keystore.WithName("my-keystore"),
 		keystore.WithPassphrase("pass"),
 	)
-	if err != nil {
+	if err != nil && err.Error() == "already exists" {
+		k, err = app.keystoreService.Unlock("0000000000000000000000", "pass")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -129,6 +144,20 @@ func (app *application) setup() {
 	}
 
 	err = app.keystoreService.Update(k)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = app.remote.SignIn("rdnt", "1234")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = app.remote.CreateKeystoreInvitation(
+		"0000000000000000000000", "abcd", "782F413F4428472B4B6250655368566D5971337436763979244226452948404D",
+	)
 	if err != nil {
 		fmt.Println(err)
 		return

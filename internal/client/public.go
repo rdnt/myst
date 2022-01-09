@@ -28,7 +28,7 @@ func (app *application) HealthCheck() {
 }
 
 func (app *application) SignIn(username, password string) error {
-	panic("implement me")
+	return app.remote.SignIn(username, password)
 }
 
 func (app *application) SignOut() error {

@@ -22,7 +22,7 @@
     }
   ],
   "paths": {
-    "/auth/login": {
+    "/api/auth/login": {
       "post": {
         "description": "Authenticates a user",
         "operationId": "Login",
@@ -64,7 +64,7 @@
         }
       }
     },
-    "/keystore/{keystoreId}/invitations": {
+    "/api/keystore/{keystoreId}/invitations": {
       "post": {
         "description": "Creates an invitation from a user (inviter) to another user (invitee), which, once accepted, will grant the invitee read/write access to the keystore",
         "operationId": "CreateKeystoreInvitation",

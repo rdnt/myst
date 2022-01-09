@@ -98,7 +98,6 @@ $bg: #1f2023;
             right: 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
             pointer-events: none;
             height: 36px;
             margin: 7px;
@@ -112,11 +111,11 @@ $bg: #1f2023;
                 }
             }
             span {
+                display: block;
                 text-transform: uppercase;
                 color: #cacbcf;
                 //font-weight: 700;
-                font-size: .9sdarem;
-                letter-spacing: 1px;
+                font-size: 1rem;
             }
         }
     }

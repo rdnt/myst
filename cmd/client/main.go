@@ -1,10 +1,10 @@
 package main
 
 import (
-	"myst/app/client"
-	keystorerepo "myst/app/client/core/keystorerepo/fs"
-	"myst/app/client/core/keystoreservice"
-	"myst/app/client/rest"
+	"myst/internal/client"
+	"myst/internal/client/api/http"
+	keystorerepo "myst/internal/client/core/keystorerepo/fs"
+	"myst/internal/client/core/keystoreservice"
 	"myst/pkg/logger"
 )
 
@@ -28,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	api := rest.New(app)
+	api := http.New(app)
 
 	err = api.Run(":8080")
 	if err != nil {

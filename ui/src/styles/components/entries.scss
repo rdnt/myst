@@ -461,6 +461,20 @@ $bg: #1f2023;
             .name {
                 flex-basis: calc(30% + 34px);
             }
+
+            button {
+                background-color: transparent;
+                border: none;
+                padding: 0;
+                margin: 0;
+
+                img {
+                    width: 10px;
+                    height: 10px;
+                    margin-right: 10px;
+                    opacity: .5;
+                }
+            }
         }
 
         .icon {

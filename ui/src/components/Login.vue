@@ -24,7 +24,7 @@
           @keydown.enter="setEnter(true)"
         />
         <div class="prompt" :class="{ 'enter-pressed': enter }">
-          <span>↵ enter</span>
+          <span>enter</span>
         </div>
       </div>
     </div>

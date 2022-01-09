@@ -1,16 +1,15 @@
 package main
 
 import (
-	"myst/app/server"
-	invitationrepo "myst/app/server/core/invitationrepo/memory"
-	"myst/app/server/core/invitationservice"
-	keystorerepo "myst/app/server/core/keystorerepo/memory"
-	"myst/app/server/core/keystoreservice"
-	userrepo "myst/app/server/core/userrepo/memory"
-	"myst/app/server/core/userservice"
+	"myst/internal/server"
+	"myst/internal/server/api/http"
+	invitationrepo "myst/internal/server/core/invitationrepo/memory"
+	"myst/internal/server/core/invitationservice"
+	keystorerepo "myst/internal/server/core/keystorerepo/memory"
+	"myst/internal/server/core/keystoreservice"
+	userrepo "myst/internal/server/core/userrepo/memory"
+	"myst/internal/server/core/userservice"
 	"myst/pkg/logger"
-
-	"myst/app/server/rest"
 )
 
 var log = logger.New("app", logger.Red)
@@ -57,9 +56,9 @@ func main() {
 		panic(err)
 	}
 
-	api := rest.New(app)
+	api := http.New(app)
 
-	err = api.Run(":8080")
+	err = api.Run(":8081")
 	if err != nil {
 		panic(err)
 	}

@@ -15,6 +15,16 @@ export default {
             commit("setKeystore", response.data);
           }
         });
+    },
+    createEntry({ commit }, { keystoreId, entry }) {
+      return api
+        .post(`/keystore/${keystoreId}/entries`, entry)
+        .then(response => {
+          console.log(response);
+          if (response.status === 200) {
+            commit("setKeystore", response.data);
+          }
+        });
     }
   },
   mutations: {

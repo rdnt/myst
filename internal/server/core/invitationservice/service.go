@@ -23,17 +23,64 @@ type service struct {
 	invitationRepo invitation.Repository
 }
 
-func (s *service) Create(opts ...invitation.Option) (*invitation.Invitation, error) {
-	// TODO
-
-	log.Debug("CreateKeystoreInvitation", opts)
-
-	inv, err := s.invitationRepo.Create(opts...)
+func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error) {
+	store, err := s.keystoreRepo.Keystore(keystoreId)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debug(inv)
+	inviter, err := s.userRepo.User(inviterId)
+	if err != nil {
+		return nil, err
+	}
+
+	invitee, err := s.userRepo.User(inviteeId)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.invitationRepo.Create(
+		invitation.WithKeystore(store),
+		invitation.WithInviter(inviter),
+		invitation.WithInvitee(invitee),
+		invitation.WithInviterKey(inviterKey),
+	)
+}
+
+func (s *service) Accept(invitationId string, inviteeKey []byte) (*invitation.Invitation, error) {
+	inv, err := s.invitationRepo.Invitation(invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = inv.Accept(inviteeKey)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.invitationRepo.Update(inv)
+	if err != nil {
+		return nil, err
+	}
+
+	return inv, nil
+}
+
+func (s *service) Finalize(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
+	inv, err := s.invitationRepo.Invitation(invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = inv.Finalize(keystoreKey)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.invitationRepo.Update(inv)
+	if err != nil {
+		return nil, err
+	}
 
 	return inv, nil
 }

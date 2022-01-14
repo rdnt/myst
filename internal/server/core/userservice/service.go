@@ -20,16 +20,15 @@ type service struct {
 }
 
 func (s *service) Register(opts ...user.Option) (*user.User, error) {
-	u, err := s.userRepo.Create(opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return u, nil
+	return s.userRepo.Create(opts...)
 }
 
 func (s *service) Authorize(u *user.User, password string) error {
 	panic("implement me")
+}
+
+func (s *service) User(id string) (*user.User, error) {
+	return s.userRepo.User(id)
 }
 
 func New(opts ...Option) (user.Service, error) {

@@ -5,32 +5,19 @@ import (
 )
 
 func (app *Application) CreateKeystoreInvitation(
-	inviterId, inviteeId, keystoreId string, inviterKey []byte,
+	keystoreId, inviterId, inviteeId string, inviterKey []byte,
 ) (*invitation.Invitation, error) {
-	inviter, err := app.userRepo.User(inviterId)
-	if err != nil {
-		return nil, err
-	}
+	return app.Invitations.Create(keystoreId, inviterId, inviteeId, inviterKey)
+}
 
-	invitee, err := app.userRepo.User(inviteeId)
-	if err != nil {
-		return nil, err
-	}
+func (app *Application) AcceptKeystoreInvitation(
+	invitationId string, inviteeKey []byte,
+) (*invitation.Invitation, error) {
+	return app.Invitations.Accept(invitationId, inviteeKey)
+}
 
-	ks, err := app.keystoreRepo.Keystore(keystoreId)
-	if err != nil {
-		return nil, err
-	}
-
-	inv, err := app.invitationService.Create(
-		invitation.WithKeystore(ks),
-		invitation.WithInviter(inviter),
-		invitation.WithInvitee(invitee),
-		invitation.WithInviterKey(inviterKey),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return inv, nil
+func (app *Application) FinalizeKeystoreInvitation(
+	invitationId string, keystoreKey []byte,
+) (*invitation.Invitation, error) {
+	return app.Invitations.Finalize(invitationId, keystoreKey)
 }

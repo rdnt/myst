@@ -94,8 +94,6 @@ func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, e
 
 	key := crypto.Argon2Id([]byte(passphrase), salt)
 
-	fmt.Printf("@@@@@@@@@@@ %x\n", key)
-
 	r.keyRepo.Set(id, key)
 
 	return r.keystore(id)

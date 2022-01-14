@@ -210,7 +210,7 @@ func (api *API) HealthCheck(_ *gin.Context) {
 }
 
 func (api *API) Run(addr string) error {
-	log.Println("starting app on port :8080")
+	log.Println("starting app on port :8081")
 
 	api.app.Start()
 

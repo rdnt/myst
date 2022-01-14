@@ -17,5 +17,7 @@ type Repository interface {
 }
 
 type Service interface {
-	Create(opts ...Option) (*Invitation, error)
+	Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*Invitation, error)
+	Accept(invitationId string, inviteeKey []byte) (*Invitation, error)
+	Finalize(invitationId string, keystoreKey []byte) (*Invitation, error)
 }

@@ -1,6 +1,8 @@
 package user
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrNotFound = errors.New("user not found")
@@ -17,4 +19,5 @@ type Repository interface {
 type Service interface {
 	Register(opts ...Option) (*User, error)
 	Authorize(u *User, password string) error
+	User(id string) (*User, error)
 }

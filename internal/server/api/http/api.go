@@ -113,7 +113,7 @@ func (api *API) loginUser(username string) (string, error) {
 }
 
 func (api *API) Run(addr string) error {
-	log.Println("starting app on port :8081")
+	log.Println("starting app on port :8080")
 
 	api.app.Start()
 

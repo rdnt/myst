@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 
+	"myst/internal/client/core/domain/invitation"
+
 	"myst/internal/server/api/http/generated"
 
 	"myst/internal/client/core/domain/keystore"
@@ -21,19 +23,17 @@ type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
 	Keystores() ([]*keystore.Keystore, error)
-	CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) error
+	CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error)
 }
 
 type remote struct {
 	client *generated.Client
 
-	apiKey string
+	bearerToken string
 }
 
 func (r *remote) SignIn(username, password string) error {
-	if r.apiKey != "" {
-		return fmt.Errorf("already signed in")
-	}
+	fmt.Println("SignIn", username, password)
 
 	resp, err := r.client.Login(
 		context.Background(), generated.LoginJSONRequestBody{
@@ -52,8 +52,6 @@ func (r *remote) SignIn(username, password string) error {
 		return err
 	}
 
-	fmt.Println("received", string(b))
-
 	var token generated.AuthToken
 	err = json.Unmarshal(b, &token)
 	if err != nil {
@@ -64,17 +62,14 @@ func (r *remote) SignIn(username, password string) error {
 		return fmt.Errorf("invalid token")
 	}
 
-	r.apiKey = string(token)
+	r.bearerToken = string(token)
+	fmt.Println("Signed in.")
 
 	return nil
 }
 
 func (r *remote) SignOut() error {
-	if r.apiKey == "" {
-		return fmt.Errorf("already signed out")
-	}
-
-	r.apiKey = ""
+	r.bearerToken = ""
 
 	return nil
 }
@@ -83,9 +78,11 @@ func (r *remote) Keystores() ([]*keystore.Keystore, error) {
 	return nil, nil
 }
 
-func (r *remote) CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) error {
-	if r.apiKey == "" {
-		return fmt.Errorf("not signed in")
+func (r *remote) CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error) {
+	fmt.Println("CreateKeystoreInvitation", keystoreId, inviteeId, publicKey)
+
+	if r.bearerToken == "" {
+		return nil, fmt.Errorf("not signed in")
 	}
 
 	resp, err := r.client.CreateKeystoreInvitation(
@@ -93,39 +90,39 @@ func (r *remote) CreateKeystoreInvitation(keystoreId, inviteeId, publicKey strin
 			InviteeId: inviteeId,
 			PublicKey: publicKey,
 		},
-		func(ctx context.Context, req *http.Request) error {
-			req.Header.Set("Authorization", "Bearer "+r.apiKey)
-
-			return nil
-		},
+		r.authenticate(),
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	fmt.Println("received", string(b))
-
-	var inv generated.Invitation
-	err = json.Unmarshal(b, &inv)
+	var jinv generated.Invitation
+	err = json.Unmarshal(b, &jinv)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	fmt.Println("@@@@@@@@@@@@@@@@@")
-	fmt.Println(inv)
+	fmt.Println("Invitation created", jinv)
 
-	return nil
+	inv, err := invitation.New(
+		invitation.WithId(jinv.Id),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return inv, nil
 }
 
 func New() (*remote, error) {
-	c, err := generated.NewClient("http://localhost:8081")
+	c, err := generated.NewClient("http://localhost:8080")
 	if err != nil {
 		return nil, err
 	}
@@ -133,4 +130,11 @@ func New() (*remote, error) {
 	return &remote{
 		client: c,
 	}, nil
+}
+
+func (r *remote) authenticate() generated.RequestEditorFn {
+	return func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer "+r.bearerToken)
+		return nil
+	}
 }

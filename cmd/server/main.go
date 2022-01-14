@@ -4,11 +4,8 @@ import (
 	application "myst/internal/server"
 	"myst/internal/server/api/http"
 	invitationrepo "myst/internal/server/core/invitationrepo/memory"
-	"myst/internal/server/core/invitationservice"
 	keystorerepo "myst/internal/server/core/keystorerepo/memory"
-	"myst/internal/server/core/keystoreservice"
 	userrepo "myst/internal/server/core/userrepo/memory"
-	"myst/internal/server/core/userservice"
 	"myst/pkg/logger"
 )
 
@@ -19,38 +16,10 @@ func main() {
 	userRepo := userrepo.New()
 	invitationRepo := invitationrepo.New()
 
-	userService, err := userservice.New(
-		userservice.WithUserRepository(userRepo),
-		userservice.WithKeystoreRepository(keystoreRepo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	keystoreService, err := keystoreservice.New(
-		keystoreservice.WithUserRepository(userRepo),
-		keystoreservice.WithKeystoreRepository(keystoreRepo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	invitationService, err := invitationservice.New(
-		invitationservice.WithUserRepository(userRepo),
-		invitationservice.WithKeystoreRepository(keystoreRepo),
-		invitationservice.WithInvitationRepository(invitationRepo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
 	app, err := application.New(
 		application.WithKeystoreRepository(keystoreRepo),
 		application.WithUserRepository(userRepo),
 		application.WithInvitationRepository(invitationRepo),
-		application.WithUserService(userService),
-		application.WithKeystoreService(keystoreService),
-		application.WithInvitationService(invitationService),
 	)
 	if err != nil {
 		panic(err)
@@ -58,7 +27,7 @@ func main() {
 
 	api := http.New(app)
 
-	err = api.Run(":8081")
+	err = api.Run(":8080")
 	if err != nil {
 		panic(err)
 	}

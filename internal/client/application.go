@@ -155,7 +155,9 @@ func (app *application) setup() {
 		return
 	}
 
-	err = app.remote.CreateKeystoreInvitation(
+	log.Debug(k)
+
+	inv, err := app.remote.CreateKeystoreInvitation(
 		"0000000000000000000000", "abcd", "782F413F4428472B4B6250655368566D5971337436763979244226452948404D",
 	)
 	if err != nil {
@@ -163,5 +165,5 @@ func (app *application) setup() {
 		return
 	}
 
-	log.Debug(k)
+	log.Debug(inv)
 }

@@ -36,7 +36,7 @@ module.exports = {
     // publicPath: "./assets/",
     proxy: {
       "/api": {
-        target: "http://0.0.0.0:8080",
+        target: "http://0.0.0.0:8081",
         ws: true,
         changeOrigin: true,
         hostRewrite: true

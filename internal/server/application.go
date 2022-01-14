@@ -3,6 +3,10 @@ package application
 import (
 	"errors"
 
+	"myst/internal/server/core/invitationservice"
+	"myst/internal/server/core/keystoreservice"
+	"myst/internal/server/core/userservice"
+
 	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/keystore"
 	"myst/internal/server/core/domain/user"
@@ -19,12 +23,13 @@ var (
 )
 
 type Application struct {
-	userService       user.Service
-	keystoreService   keystore.Service
-	invitationService invitation.Service
-	invitationRepo    invitation.Repository
-	userRepo          user.Repository
-	keystoreRepo      keystore.Repository
+	invitationRepo invitation.Repository
+	userRepo       user.Repository
+	keystoreRepo   keystore.Repository
+
+	Users       user.Service
+	Keystores   keystore.Service
+	Invitations invitation.Service
 }
 
 func (app *Application) Start() {
@@ -44,35 +49,38 @@ func New(opts ...Option) (*Application, error) {
 		}
 	}
 
-	if app.keystoreRepo == nil {
-		return nil, ErrInvalidKeystoreRepository
+	var err error
+
+	app.Users, err = userservice.New(
+		userservice.WithUserRepository(app.userRepo),
+		userservice.WithKeystoreRepository(app.keystoreRepo),
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	if app.userRepo == nil {
-		return nil, ErrInvalidUserRepository
+	app.Keystores, err = keystoreservice.New(
+		keystoreservice.WithUserRepository(app.userRepo),
+		keystoreservice.WithKeystoreRepository(app.keystoreRepo),
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	if app.invitationRepo == nil {
-		return nil, ErrInvalidUserRepository
-	}
-
-	if app.userService == nil {
-		return nil, ErrInvalidUserService
-	}
-
-	if app.keystoreService == nil {
-		return nil, ErrInvalidUserService
-	}
-
-	if app.invitationService == nil {
-		return nil, ErrInvalidUserService
+	app.Invitations, err = invitationservice.New(
+		invitationservice.WithUserRepository(app.userRepo),
+		invitationservice.WithKeystoreRepository(app.keystoreRepo),
+		invitationservice.WithInvitationRepository(app.invitationRepo),
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return app, nil
 }
 
 func (app *Application) setup() {
-	u, err := app.userService.Register(
+	u, err := app.Users.Register(
 		user.WithUsername("rdnt"),
 		user.WithPassword("1234"),
 	)
@@ -82,7 +90,7 @@ func (app *Application) setup() {
 
 	log.Debug(u)
 
-	u2, err := app.userService.Register(
+	u2, err := app.Users.Register(
 		user.WithUsername("abcd"),
 		user.WithPassword("5678"),
 	)
@@ -92,7 +100,7 @@ func (app *Application) setup() {
 
 	log.Debug(u2)
 
-	k, err := app.keystoreService.Create(
+	k, err := app.Keystores.Create(
 		keystore.WithName("my-keystore"),
 		keystore.WithKeystore([]byte("payload")),
 		keystore.WithOwner(u),
@@ -100,11 +108,8 @@ func (app *Application) setup() {
 
 	log.Debug(k)
 
-	inv, err := app.invitationService.Create(
-		invitation.WithInviter(u),
-		invitation.WithKeystore(k),
-		invitation.WithInvitee(u2),
-		invitation.WithInviterKey([]byte("inviter-key")),
+	inv, err := app.Invitations.Create(
+		k.Id(), u.Id(), u2.Id(), []byte("inviter-key"),
 	)
 	if err != nil {
 		panic(err)

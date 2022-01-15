@@ -103,7 +103,7 @@ func (app *Application) setup() {
 	k, err := app.Keystores.Create(
 		keystore.WithName("my-keystore"),
 		keystore.WithKeystore([]byte("payload")),
-		keystore.WithOwner(u),
+		keystore.WithOwner(*u),
 	)
 
 	log.Debug(k)

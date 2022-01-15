@@ -20,9 +20,9 @@ var (
 
 type Invitation struct {
 	id          string
-	inviter     *user.User
-	keystore    *keystore.Keystore
-	invitee     *user.User
+	inviter     user.User
+	keystore    keystore.Keystore
+	invitee     user.User
 	inviterKey  []byte
 	inviteeKey  []byte
 	keystoreKey []byte // encrypted
@@ -36,15 +36,15 @@ func (i *Invitation) Id() string {
 	return i.id
 }
 
-func (i *Invitation) Inviter() *user.User {
+func (i *Invitation) Inviter() user.User {
 	return i.inviter
 }
 
-func (i *Invitation) Keystore() *keystore.Keystore {
+func (i *Invitation) Keystore() keystore.Keystore {
 	return i.keystore
 }
 
-func (i *Invitation) Invitee() *user.User {
+func (i *Invitation) Invitee() user.User {
 	return i.invitee
 }
 

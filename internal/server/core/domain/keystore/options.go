@@ -21,7 +21,7 @@ func WithKeystore(keystore []byte) Option {
 	}
 }
 
-func WithOwner(owner *user.User) Option {
+func WithOwner(owner user.User) Option {
 	return func(k *Keystore) error {
 		k.owner = owner
 		return nil

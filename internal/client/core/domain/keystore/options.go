@@ -34,7 +34,7 @@ func WithPassphrase(passphrase string) Option {
 	}
 }
 
-func WithEntries(entries []*entry.Entry) Option {
+func WithEntries(entries []entry.Entry) Option {
 	return func(k *Keystore) error {
 		k.entries = entries
 		return nil

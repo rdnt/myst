@@ -50,7 +50,7 @@ func Unmarshal(b []byte) (*keystore.Keystore, error) {
 		return nil, err
 	}
 
-	entries := make([]*entry.Entry, len(k.Entries))
+	entries := make([]entry.Entry, len(k.Entries))
 
 	for i, e := range k.Entries {
 		e, err := entry.New(
@@ -63,7 +63,7 @@ func Unmarshal(b []byte) (*keystore.Keystore, error) {
 			return nil, err
 		}
 
-		entries[i] = e
+		entries[i] = *e
 	}
 
 	return keystore.New(

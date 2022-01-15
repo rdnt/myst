@@ -128,19 +128,19 @@ func (app *application) setup() {
 			return
 		}
 
-		err = k.AddEntry(e1)
+		err = k.AddEntry(*e1)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		err = k.AddEntry(e2)
+		err = k.AddEntry(*e2)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		err = k.AddEntry(e3)
+		err = k.AddEntry(*e3)
 		if err != nil {
 			fmt.Println(err)
 			return

@@ -19,7 +19,7 @@ type Keystore struct {
 	id         string
 	name       string
 	version    int
-	entries    []*entry.Entry
+	entries    []entry.Entry
 	passphrase string
 }
 
@@ -43,11 +43,11 @@ func (k *Keystore) IncrementVersion() {
 	k.version++
 }
 
-func (k *Keystore) Entries() []*entry.Entry {
+func (k *Keystore) Entries() []entry.Entry {
 	return k.entries
 }
 
-func (k *Keystore) AddEntry(entry *entry.Entry) error {
+func (k *Keystore) AddEntry(entry entry.Entry) error {
 	for _, e := range k.entries {
 		if e.Id() == entry.Id() {
 			return ErrEntryExists
@@ -80,7 +80,7 @@ func New(opts ...Option) (*Keystore, error) {
 	k := &Keystore{
 		id:      uuid.New().String(),
 		version: 1,
-		entries: []*entry.Entry{},
+		entries: []entry.Entry{},
 	}
 
 	for _, opt := range opts {

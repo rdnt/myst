@@ -137,7 +137,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	err = k.AddEntry(e)
+	err = k.AddEntry(*e)
 	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
 		return

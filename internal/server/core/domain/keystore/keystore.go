@@ -14,7 +14,7 @@ type Keystore struct {
 	id        string
 	name      string
 	keystore  []byte
-	owner     *user.User
+	owner     user.User
 	createdAt timestamp.Timestamp
 	updatedAt timestamp.Timestamp
 }
@@ -35,7 +35,7 @@ func (k *Keystore) Owner() string {
 	return k.name
 }
 
-func (k *Keystore) SetOwner(u *user.User) {
+func (k *Keystore) SetOwner(u user.User) {
 	k.owner = u
 }
 

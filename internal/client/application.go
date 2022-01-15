@@ -4,6 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"golang.org/x/crypto/curve25519"
+
+	"myst/pkg/crypto"
+
 	"myst/internal/client/core/remote"
 
 	"myst/internal/client/core/domain/keystore"
@@ -157,13 +161,58 @@ func (app *application) setup() {
 
 	log.Debug(k)
 
-	inv, err := app.remote.CreateKeystoreInvitation(
-		"0000000000000000000000", "abcd", "782F413F4428472B4B6250655368566D5971337436763979244226452948404D",
+	u1pub, u1key, err := newKeypair()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	u2pub, u2key, err := newKeypair()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	inv, err := app.remote.CreateInvitation(
+		"0000000000000000000000", "abcd", u1pub,
 	)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	inv, err = app.remote.AcceptInvitation(
+		"0000000000000000000000", inv.Id(), u2pub,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	inv, err = app.remote.FinalizeInvitation(
+		"0000000000000000000000", inv.Id(), u2pub,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(u1key, u2key)
+
 	log.Debug(inv)
+}
+
+func newKeypair() ([]byte, []byte, error) {
+	var pub [32]byte
+	var key [32]byte
+
+	b, err := crypto.GenerateRandomBytes(32)
+	if err != nil {
+		return nil, nil, err
+	}
+	copy(key[:], b)
+
+	curve25519.ScalarBaseMult(&pub, &key)
+
+	return pub[:], key[:], nil
 }

@@ -46,9 +46,9 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	}
 
 	inv, err := api.app.CreateInvitation(
+		keystoreId,
 		"rdnt",
 		params.InviteeId,
-		keystoreId,
 		inviterKey,
 	)
 	if err != nil {

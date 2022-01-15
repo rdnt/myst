@@ -11,15 +11,13 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-
-	application "myst/internal/server"
-	"myst/internal/server/api/http/generated"
-
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
+	application "myst/internal/server"
+	"myst/internal/server/api/http/generated"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -31,12 +29,12 @@ type API struct {
 	app *application.Application
 }
 
-func (api *API) CreateKeystoreInvitation(c *gin.Context) {
+func (api *API) CreateInvitation(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	//log.Debug(keystoreId)
 
-	var params generated.CreateKeystoreInvitationRequest
+	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		panic(err)
@@ -47,11 +45,73 @@ func (api *API) CreateKeystoreInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	inv, err := api.app.CreateKeystoreInvitation(
+	inv, err := api.app.CreateInvitation(
 		"rdnt",
 		params.InviteeId,
 		keystoreId,
 		inviterKey,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(
+		http.StatusOK, generated.Invitation{
+			Id: inv.Id(),
+		},
+	)
+}
+
+func (api *API) AcceptInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	// TODO: verify client is allowed to accept invitation for that keystore
+
+	var params generated.AcceptInvitationRequest
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		panic(err)
+	}
+
+	inviteeKey, err := hex.DecodeString(params.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	inv, err := api.app.AcceptInvitation(
+		invitationId,
+		inviteeKey,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(
+		http.StatusOK, generated.Invitation{
+			Id: inv.Id(),
+		},
+	)
+}
+
+func (api *API) FinalizeInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	// TODO: verify client is allowed to accept invitation for that keystore
+
+	var params generated.FinalizeInvitationRequest
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		panic(err)
+	}
+
+	keystoreKey, err := hex.DecodeString(params.KeystoreKey)
+	if err != nil {
+		panic(err)
+	}
+
+	inv, err := api.app.FinalizeInvitation(
+		invitationId,
+		keystoreKey,
 	)
 	if err != nil {
 		panic(err)

@@ -8,26 +8,27 @@ import (
 	"net/http"
 
 	"myst/internal/client/core/domain/invitation"
-
-	"myst/internal/server/api/http/generated"
-
 	"myst/internal/client/core/domain/keystore"
+	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
 )
 
 var (
 	ErrAuthenticationFailed = enclave.ErrAuthenticationFailed
+	ErrInvalidResponse      = fmt.Errorf("invalid response")
 )
 
 type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
 	Keystores() ([]*keystore.Keystore, error)
-	CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error)
+	CreateInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error)
+	AcceptInvitation(invitationId string, publicKey []byte) (*invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error)
 }
 
 type remote struct {
-	client *generated.Client
+	client *generated.ClientWithResponses
 
 	bearerToken string
 }
@@ -78,15 +79,15 @@ func (r *remote) Keystores() ([]*keystore.Keystore, error) {
 	return nil, nil
 }
 
-func (r *remote) CreateKeystoreInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error) {
-	fmt.Println("CreateKeystoreInvitation", keystoreId, inviteeId, publicKey)
+func (r *remote) CreateInvitation(keystoreId, inviteeId, publicKey string) (*invitation.Invitation, error) {
+	fmt.Println("CreateInvitation", keystoreId, inviteeId, publicKey)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
 
-	resp, err := r.client.CreateKeystoreInvitation(
-		context.Background(), keystoreId, generated.CreateKeystoreInvitationJSONRequestBody{
+	res, err := r.client.CreateInvitationWithResponse(
+		context.Background(), keystoreId, generated.CreateInvitationJSONRequestBody{
 			InviteeId: inviteeId,
 			PublicKey: publicKey,
 		},
@@ -96,33 +97,27 @@ func (r *remote) CreateKeystoreInvitation(keystoreId, inviteeId, publicKey strin
 		return nil, err
 	}
 
-	defer resp.Body.Close()
-
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if res.JSON200 == nil {
+		return nil, ErrInvalidResponse
 	}
 
-	var jinv generated.Invitation
-	err = json.Unmarshal(b, &jinv)
-	if err != nil {
-		return nil, err
-	}
+	inv := *res.JSON200
 
-	fmt.Println("Invitation created", jinv)
-
-	inv, err := invitation.New(
-		invitation.WithId(jinv.Id),
+	return invitation.New(
+		invitation.WithId(inv.Id),
 	)
-	if err != nil {
-		return nil, err
-	}
+}
 
-	return inv, nil
+func (r *remote) AcceptInvitation(invitationId string, publicKey []byte) (*invitation.Invitation, error) {
+	panic("implement me")
+}
+
+func (r *remote) FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
+	panic("implement me")
 }
 
 func New() (*remote, error) {
-	c, err := generated.NewClient("http://localhost:8080")
+	c, err := generated.NewClientWithResponses("http://localhost:8080")
 	if err != nil {
 		return nil, err
 	}

@@ -9,5 +9,7 @@ func (api *API) initRoutes(r *gin.RouterGroup) {
 
 	sec := r.Group("")
 	sec.Use(Authentication())
-	sec.POST("/keystore/:keystoreId/invitations", api.CreateKeystoreInvitation)
+	sec.POST("/keystore/:keystoreId/invitations", api.CreateInvitation)
+	sec.PATCH("/keystore/:keystoreId/invitation/:invitationId", api.AcceptInvitation)
+	sec.POST("/keystore/:keystoreId/invitation/:invitationId", api.FinalizeInvitation)
 }

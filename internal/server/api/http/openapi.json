@@ -27,7 +27,6 @@
         "description": "Authenticates a user",
         "operationId": "Login",
         "requestBody": {
-          "description": "Credentials",
           "required": true,
           "content": {
             "application/json": {
@@ -52,7 +51,7 @@
             }
           },
           "default": {
-            "description": "unexpected error",
+            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,14 +66,13 @@
     "/api/keystore/{keystoreId}/invitations": {
       "post": {
         "description": "Creates an invitation from a user (inviter) to another user (invitee), which, once accepted, will grant the invitee read/write access to the keystore",
-        "operationId": "CreateKeystoreInvitation",
+        "operationId": "CreateInvitation",
         "requestBody": {
-          "description": "Invitation parameters",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateKeystoreInvitationRequest"
+                "$ref": "#/components/schemas/CreateInvitationRequest"
               }
             }
           }
@@ -83,7 +81,6 @@
           {
             "name": "keystoreId",
             "in": "path",
-            "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
             }
@@ -91,20 +88,123 @@
         ],
         "responses": {
           "200": {
-            "description": "Invitation response",
+            "description": "Invitation",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Invitation"
-                  }
+                  "$ref": "#/components/schemas/Invitation"
                 }
               }
             }
           },
           "default": {
-            "description": "unexpected error",
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/keystore/{keystoreId}/invitation/{invitationId}": {
+      "patch": {
+        "description": "Accepts an invitation",
+        "operationId": "AcceptInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "invitationId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Finalizes an invitation",
+        "operationId": "FinalizeInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeInvitationRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "invitationId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -137,7 +237,7 @@
       "AuthToken": {
         "type": "string"
       },
-      "CreateKeystoreInvitationRequest": {
+      "CreateInvitationRequest": {
         "type": "object",
         "required": [
           "inviteeId",
@@ -148,6 +248,28 @@
             "type": "string"
           },
           "publicKey": {
+            "type": "string"
+          }
+        }
+      },
+      "AcceptInvitationRequest": {
+        "type": "object",
+        "required": [
+          "publicKey"
+        ],
+        "properties": {
+          "publicKey": {
+            "type": "string"
+          }
+        }
+      },
+      "FinalizeInvitationRequest": {
+        "type": "object",
+        "required": [
+          "keystoreKey"
+        ],
+        "properties": {
+          "keystoreKey": {
             "type": "string"
           }
         }

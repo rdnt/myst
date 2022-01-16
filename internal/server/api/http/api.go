@@ -29,6 +29,35 @@ type API struct {
 	app *application.Application
 }
 
+func (api *API) CreateKeystore(c *gin.Context) {
+	var req generated.CreateKeystoreRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		panic(err)
+	}
+
+	payload, err := hex.DecodeString(req.Payload)
+	if err != nil {
+		panic(err)
+	}
+
+	k, err := api.app.CreateKeystore(req.Name, "rdnt", payload)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(
+		http.StatusOK, generated.Keystore{
+			Id:        k.Id(),
+			Name:      k.Name(),
+			OwnerId:   k.OwnerId(),
+			Payload:   hex.EncodeToString(k.Payload()),
+			CreatedAt: int(k.CreatedAt().Unix()),
+			UpdatedAt: int(k.UpdatedAt().Unix()),
+		},
+	)
+}
+
 func (api *API) CreateInvitation(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
@@ -51,6 +80,23 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		params.InviteeId,
 		inviterKey,
 	)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(
+		http.StatusOK, generated.Invitation{
+			Id: inv.Id(),
+		},
+	)
+}
+
+func (api *API) GetInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	// TODO: verify client is allowed to accept invitation for that keystore
+
+	inv, err := api.app.GetInvitation(invitationId)
 	if err != nil {
 		panic(err)
 	}

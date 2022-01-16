@@ -3,8 +3,6 @@ package keystore
 import (
 	"fmt"
 
-	"myst/internal/server/core/domain/user"
-
 	"myst/pkg/logger"
 	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
@@ -13,8 +11,8 @@ import (
 type Keystore struct {
 	id        string
 	name      string
-	keystore  []byte
-	owner     user.User
+	payload   []byte
+	ownerId   string
 	createdAt timestamp.Timestamp
 	updatedAt timestamp.Timestamp
 }
@@ -24,19 +22,19 @@ func (k *Keystore) Id() string {
 }
 
 func (k *Keystore) String() string {
-	return fmt.Sprintln(k.id, k.name, k.owner.Id())
+	return fmt.Sprintln(k.id, k.name, k.ownerId)
 }
 
 func (k *Keystore) Name() string {
 	return k.name
 }
 
-func (k *Keystore) Owner() string {
+func (k *Keystore) OwnerId() string {
 	return k.name
 }
 
-func (k *Keystore) SetOwner(u user.User) {
-	k.owner = u
+func (k *Keystore) SetOwnerId(id string) {
+	k.ownerId = id
 }
 
 func (k *Keystore) SetName(name string) {
@@ -44,12 +42,12 @@ func (k *Keystore) SetName(name string) {
 	k.updatedAt = timestamp.New()
 }
 
-func (k *Keystore) Keystore() []byte {
-	return k.keystore
+func (k *Keystore) Payload() []byte {
+	return k.payload
 }
 
-func (k *Keystore) SetKeystore(keystore []byte) {
-	k.keystore = keystore
+func (k *Keystore) SetPayload(payload []byte) {
+	k.payload = payload
 	k.updatedAt = timestamp.New()
 }
 

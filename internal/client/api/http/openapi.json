@@ -114,8 +114,8 @@
         }
       },
       "get": {
-        "description": "Get a keystore if it exists and returns it",
-        "operationId": "GetKeystore",
+        "description": "Get a keystore if it exists and return it",
+        "operationId": "Keystore",
         "parameters": [
           {
             "name": "keystoreId",

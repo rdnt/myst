@@ -22,6 +22,7 @@ type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
 	Keystores() ([]*keystore.Keystore, error)
+	CreateKeystore(name string, payload []byte) error
 	CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*invitation.Invitation, error)
 	AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*invitation.Invitation, error)
 	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*invitation.Invitation, error)
@@ -73,10 +74,6 @@ func (r *remote) SignOut() error {
 	r.bearerToken = ""
 
 	return nil
-}
-
-func (r *remote) Keystores() ([]*keystore.Keystore, error) {
-	return nil, nil
 }
 
 func New() (Client, error) {

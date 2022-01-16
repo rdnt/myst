@@ -11,15 +11,27 @@ import (
 
 var (
 	ErrInvalidUsername = errors.New("invalid username")
-	ErrInvalidPassword = errors.New("invalid username")
 )
 
 type User struct {
-	id        string
-	username  string
-	password  string
-	createdAt timestamp.Timestamp
-	updatedAt timestamp.Timestamp
+	id          string
+	username    string
+	password    string
+	keystoreIds []string
+	createdAt   timestamp.Timestamp
+	updatedAt   timestamp.Timestamp
+}
+
+func (u *User) KeystoreIds() []string {
+	return u.keystoreIds
+}
+
+func (u *User) SetKeystoreIds(ids []string) {
+	u.keystoreIds = ids
+}
+
+func (u *User) OwnKeystore(id string) {
+	u.keystoreIds = append(u.keystoreIds, id)
 }
 
 func (u *User) Id() string {
@@ -27,7 +39,7 @@ func (u *User) Id() string {
 }
 
 func (u *User) String() string {
-	return fmt.Sprintln(u.id, u.username, u.password)
+	return fmt.Sprintln(u.id, u.username, u.password, u.keystoreIds)
 }
 
 func (u *User) Username() string {

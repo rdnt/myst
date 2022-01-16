@@ -19,13 +19,17 @@ type service struct {
 	keystoreRepo keystore.Repository
 }
 
-func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
-	k, err := s.keystoreRepo.Create(opts...)
+func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keystore, error) {
+	u, err := s.userRepo.User(ownerId)
 	if err != nil {
 		return nil, err
 	}
 
-	return k, nil
+	return s.keystoreRepo.Create(
+		keystore.WithName(name),
+		keystore.WithOwnerId(u.Id()),
+		keystore.WithPayload(payload),
+	)
 }
 
 func New(opts ...Option) (keystore.Service, error) {

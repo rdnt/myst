@@ -17,5 +17,5 @@ type Repository interface {
 }
 
 type Service interface {
-	Create(opts ...Option) (*Keystore, error)
+	Create(name, ownerId string, payload []byte) (*Keystore, error)
 }

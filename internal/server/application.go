@@ -100,47 +100,55 @@ func (app *Application) setup() {
 
 	log.Debug(u2)
 
-	k, err := app.Keystores.Create(
-		keystore.WithName("my-keystore"),
-		keystore.WithKeystore([]byte("payload")),
-		keystore.WithOwner(*u),
-	)
+	//k, err := app.Keystores.Create("my-keystore", u.Id(), []byte("payload"))
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	log.Debug(k)
+	//log.Debug(k)
+	//
+	//u.OwnKeystore(k.Id())
 
-	inv, err := app.Invitations.Create(
-		k.Id(), u.Id(), u2.Id(), []byte("inviter-key"),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug("created invitation")
-	log.Debug(inv)
-
-	err = inv.Accept([]byte("invitee-key"))
-	if err != nil {
-		panic(err)
-	}
-
-	err = app.invitationRepo.Update(inv)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug("accepted invitation")
-	log.Debug(inv)
-
-	err = inv.Finalize([]byte("keystore-key"))
-	if err != nil {
-		panic(err)
-	}
-
-	err = app.invitationRepo.Update(inv)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug("finalized invitation")
-	log.Debug(inv)
+	//err = app.userRepo.Update(u)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//log.Debug(u)
+	//
+	//inv, err := app.Invitations.Create(
+	//	k.Id(), u.Id(), u2.Id(), []byte("inviter-key"),
+	//)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//log.Debug("created invitation")
+	//log.Debug(inv)
+	//
+	//err = inv.Accept([]byte("invitee-key"))
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//err = app.invitationRepo.Update(inv)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//log.Debug("accepted invitation")
+	//log.Debug(inv)
+	//
+	//err = inv.Finalize([]byte("keystore-key"))
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//err = app.invitationRepo.Update(inv)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//log.Debug("finalized invitation")
+	//log.Debug(inv)
 }

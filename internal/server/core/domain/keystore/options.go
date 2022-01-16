@@ -1,9 +1,5 @@
 package keystore
 
-import (
-	"myst/internal/server/core/domain/user"
-)
-
 type Option func(*Keystore) error
 
 func WithName(name string) Option {
@@ -14,16 +10,16 @@ func WithName(name string) Option {
 	}
 }
 
-func WithKeystore(keystore []byte) Option {
+func WithPayload(payload []byte) Option {
 	return func(k *Keystore) error {
-		k.keystore = keystore
+		k.payload = payload
 		return nil
 	}
 }
 
-func WithOwner(owner user.User) Option {
+func WithOwnerId(id string) Option {
 	return func(k *Keystore) error {
-		k.owner = owner
+		k.ownerId = id
 		return nil
 	}
 }

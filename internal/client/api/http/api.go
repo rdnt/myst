@@ -1,6 +1,7 @@
 package http
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
+//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 
 import (
 	"errors"

@@ -58,12 +58,12 @@ func (r *Repository) startHealthCheck() {
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Println("health check!")
+			//fmt.Println("health check!")
 			r.mux.Lock()
 			elapsed := time.Since(r.lastHealthCheck)
 
 			if elapsed < time.Minute {
-				fmt.Println("healthy...")
+				//fmt.Println("healthy...")
 
 				r.mux.Unlock()
 				continue

@@ -94,6 +94,6 @@ func (r *Repository) Delete(id string) error {
 
 func New() user.Repository {
 	return &Repository{
-		users: make(map[string]User),
+		users: map[string]User{},
 	}
 }

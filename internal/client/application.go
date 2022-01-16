@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"golang.org/x/crypto/curve25519"
 
@@ -153,13 +154,29 @@ func (app *application) setup() {
 		return
 	}
 
+	log.Debug(k)
+
 	err = app.remote.SignIn("rdnt", "1234")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	log.Debug(k)
+	kpath := "data/keystores/" + k.Id() + ".mst"
+
+	b, err := os.ReadFile(kpath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = app.remote.CreateKeystore(
+		"my-keystore", b,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	u1pub, u1key, err := newKeypair()
 	if err != nil {

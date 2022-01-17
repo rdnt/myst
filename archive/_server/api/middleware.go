@@ -16,9 +16,6 @@ import (
 
 var (
 	jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-
-	ErrAuthenticationRequired = fmt.Errorf("authentication required")
-	ErrAuthenticationFailed   = fmt.Errorf("authentication failed")
 )
 
 func Authentication() gin.HandlerFunc {

@@ -98,7 +98,7 @@ func (app *application) setup() {
 		return
 	}
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 0; i++ {
 		e1, err := entry.New(
 			entry.WithLabel("google.com"),
 			entry.WithUsername("someuser@google.com"),
@@ -170,13 +170,33 @@ func (app *application) setup() {
 		return
 	}
 
-	err = app.remote.CreateKeystore(
+	sk, err := app.remote.CreateKeystore(
 		"my-keystore", b,
 	)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	log.Debug(sk)
+
+	sk2, err := app.remote.Keystore(
+		sk.Id(),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	log.Debug(sk2)
+
+	sks, err := app.remote.Keystores()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	log.Debug(sks)
 
 	u1pub, u1key, err := newKeypair()
 	if err != nil {

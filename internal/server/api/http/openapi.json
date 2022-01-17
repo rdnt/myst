@@ -96,6 +96,72 @@
             }
           }
         }
+      },
+      "get": {
+        "description": "Returns all the keystores",
+        "operationId": "Keystores",
+        "responses": {
+          "200": {
+            "description": "Keystores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Keystore"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/keystore/{keystoreId}": {
+      "get": {
+        "description": "Returns a keystore",
+        "operationId": "Keystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Keystore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Keystore"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/keystore/{keystoreId}/invitations": {
@@ -252,7 +318,7 @@
       },
       "get": {
         "description": "Returns an invitation",
-        "operationId": "GetInvitation",
+        "operationId": "Invitation",
         "parameters": [
           {
             "name": "keystoreId",

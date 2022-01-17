@@ -9,14 +9,14 @@ import (
 	"myst/internal/server/api/http/generated"
 )
 
-func (r *remote) CreateKeystore(name string, payload []byte) error {
+func (r *remote) CreateKeystore(name string, payload []byte) (*keystore.Keystore, error) {
 	fmt.Println("CreateKeystore", name, payload)
 
 	if r.bearerToken == "" {
-		return fmt.Errorf("not signed in")
+		return nil, fmt.Errorf("not signed in")
 	}
 
-	_, err := r.client.CreateKeystoreWithResponse(
+	res, err := r.client.CreateKeystoreWithResponse(
 		context.Background(), generated.CreateKeystoreJSONRequestBody{
 			Name:    name,
 			Payload: hex.EncodeToString(payload),
@@ -24,14 +24,61 @@ func (r *remote) CreateKeystore(name string, payload []byte) error {
 		r.authenticate(),
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return r.parseKeystore(res.JSON200)
+}
+
+func (r *remote) Keystore(id string) (*keystore.Keystore, error) {
+	fmt.Println("Keystore", id)
+
+	if r.bearerToken == "" {
+		return nil, fmt.Errorf("not signed in")
+	}
+
+	res, err := r.client.KeystoreWithResponse(
+		context.Background(), id,
+		r.authenticate(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.parseKeystore(res.JSON200)
 }
 
 func (r *remote) Keystores() ([]*keystore.Keystore, error) {
-	return nil, nil
+	fmt.Println("Keystores")
+
+	if r.bearerToken == "" {
+		return nil, fmt.Errorf("not signed in")
+	}
+
+	res, err := r.client.KeystoresWithResponse(
+		context.Background(),
+		r.authenticate(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.JSON200 == nil {
+		return nil, ErrInvalidResponse
+	}
+
+	ks := []*keystore.Keystore{}
+
+	for _, k := range *res.JSON200 {
+		gen, err := r.parseKeystore(&k)
+		if err != nil {
+			return nil, err
+		}
+
+		ks = append(ks, gen)
+	}
+
+	return ks, nil
 }
 
 func (r *remote) parseKeystore(gen *generated.Keystore) (*keystore.Keystore, error) {

@@ -32,6 +32,14 @@ func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keysto
 	)
 }
 
+func (s *service) Keystore(id string) (*keystore.Keystore, error) {
+	return s.keystoreRepo.Keystore(id)
+}
+
+func (s *service) Keystores() ([]*keystore.Keystore, error) {
+	return s.keystoreRepo.Keystores()
+}
+
 func New(opts ...Option) (keystore.Service, error) {
 	s := &service{}
 

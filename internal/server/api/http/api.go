@@ -58,6 +58,52 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	)
 }
 
+func (api *API) Keystore(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	k, err := api.app.Keystores.Keystore(keystoreId)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(
+		http.StatusOK, generated.Keystore{
+			Id:        k.Id(),
+			Name:      k.Name(),
+			OwnerId:   k.OwnerId(),
+			Payload:   hex.EncodeToString(k.Payload()),
+			CreatedAt: int(k.CreatedAt().Unix()),
+			UpdatedAt: int(k.UpdatedAt().Unix()),
+		},
+	)
+}
+
+func (api *API) Keystores(c *gin.Context) {
+	ks, err := api.app.Keystores.Keystores()
+	if err != nil {
+		panic(err)
+	}
+
+	gen := []generated.Keystore{}
+
+	for _, k := range ks {
+		gen = append(
+			gen, generated.Keystore{
+				Id:        k.Id(),
+				Name:      k.Name(),
+				OwnerId:   k.OwnerId(),
+				Payload:   hex.EncodeToString(k.Payload()),
+				CreatedAt: int(k.CreatedAt().Unix()),
+				UpdatedAt: int(k.UpdatedAt().Unix()),
+			},
+		)
+	}
+
+	c.JSON(
+		http.StatusOK, gen,
+	)
+}
+
 func (api *API) CreateInvitation(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
@@ -91,7 +137,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	)
 }
 
-func (api *API) GetInvitation(c *gin.Context) {
+func (api *API) Invitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	// TODO: verify client is allowed to accept invitation for that keystore

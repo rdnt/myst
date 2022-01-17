@@ -95,8 +95,11 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetInvitation request
-	GetInvitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// Keystore request
+	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// Invitation request
+	Invitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// AcceptInvitation request  with any body
 	AcceptInvitationWithBody(ctx context.Context, keystoreId string, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -112,6 +115,9 @@ type ClientInterface interface {
 	CreateInvitationWithBody(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateInvitation(ctx context.Context, keystoreId string, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// Keystores request
+	Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -143,8 +149,20 @@ func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetInvitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetInvitationRequest(c.Server, keystoreId, invitationId)
+func (c *Client) Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewKeystoreRequest(c.Server, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Invitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInvitationRequest(c.Server, keystoreId, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -227,6 +245,18 @@ func (c *Client) CreateInvitation(ctx context.Context, keystoreId string, body C
 	return c.Client.Do(req)
 }
 
+func (c *Client) Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewKeystoresRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateKeystoreRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -291,8 +321,42 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	return req, nil
 }
 
-// NewGetInvitationRequest generates requests for GetInvitation
-func NewGetInvitationRequest(server string, keystoreId string, invitationId string) (*http.Request, error) {
+// NewKeystoreRequest generates requests for Keystore
+func NewKeystoreRequest(server string, keystoreId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/keystore/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = operationPath[1:]
+	}
+	operationURL := url.URL{
+		Path: operationPath,
+	}
+
+	queryURL := serverURL.ResolveReference(&operationURL)
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInvitationRequest generates requests for Invitation
+func NewInvitationRequest(server string, keystoreId string, invitationId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -487,6 +551,33 @@ func NewCreateInvitationRequestWithBody(server string, keystoreId string, conten
 	return req, nil
 }
 
+// NewKeystoresRequest generates requests for Keystores
+func NewKeystoresRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/keystores")
+	if operationPath[0] == '/' {
+		operationPath = operationPath[1:]
+	}
+	operationURL := url.URL{
+		Path: operationPath,
+	}
+
+	queryURL := serverURL.ResolveReference(&operationURL)
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCreateKeystoreRequest calls the generic CreateKeystore builder with application/json body
 func NewCreateKeystoreRequest(server string, body CreateKeystoreJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -575,8 +666,11 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
-	// GetInvitation request
-	GetInvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error)
+	// Keystore request
+	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
+
+	// Invitation request
+	InvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error)
 
 	// AcceptInvitation request  with any body
 	AcceptInvitationWithBodyWithResponse(ctx context.Context, keystoreId string, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
@@ -592,6 +686,9 @@ type ClientWithResponsesInterface interface {
 	CreateInvitationWithBodyWithResponse(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateInvitationResponse, error)
 
 	CreateInvitationWithResponse(ctx context.Context, keystoreId string, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateInvitationResponse, error)
+
+	// Keystores request
+	KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
@@ -622,15 +719,15 @@ func (r LoginResponse) StatusCode() int {
 	return 0
 }
 
-type GetInvitationResponse struct {
+type KeystoreResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Invitation
+	JSON200      *Keystore
 	JSONDefault  *Error
 }
 
 // Status returns HTTPResponse.Status
-func (r GetInvitationResponse) Status() string {
+func (r KeystoreResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -638,7 +735,30 @@ func (r GetInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetInvitationResponse) StatusCode() int {
+func (r KeystoreResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type InvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r InvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -714,6 +834,29 @@ func (r CreateInvitationResponse) StatusCode() int {
 	return 0
 }
 
+type KeystoresResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Keystore
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r KeystoresResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r KeystoresResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateKeystoreResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -754,13 +897,22 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
-// GetInvitationWithResponse request returning *GetInvitationResponse
-func (c *ClientWithResponses) GetInvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error) {
-	rsp, err := c.GetInvitation(ctx, keystoreId, invitationId, reqEditors...)
+// KeystoreWithResponse request returning *KeystoreResponse
+func (c *ClientWithResponses) KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error) {
+	rsp, err := c.Keystore(ctx, keystoreId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetInvitationResponse(rsp)
+	return ParseKeystoreResponse(rsp)
+}
+
+// InvitationWithResponse request returning *InvitationResponse
+func (c *ClientWithResponses) InvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error) {
+	rsp, err := c.Invitation(ctx, keystoreId, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInvitationResponse(rsp)
 }
 
 // AcceptInvitationWithBodyWithResponse request with arbitrary body returning *AcceptInvitationResponse
@@ -814,6 +966,15 @@ func (c *ClientWithResponses) CreateInvitationWithResponse(ctx context.Context, 
 	return ParseCreateInvitationResponse(rsp)
 }
 
+// KeystoresWithResponse request returning *KeystoresResponse
+func (c *ClientWithResponses) KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error) {
+	rsp, err := c.Keystores(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseKeystoresResponse(rsp)
+}
+
 // CreateKeystoreWithBodyWithResponse request with arbitrary body returning *CreateKeystoreResponse
 func (c *ClientWithResponses) CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error) {
 	rsp, err := c.CreateKeystoreWithBody(ctx, contentType, body, reqEditors...)
@@ -864,15 +1025,48 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 	return response, nil
 }
 
-// ParseGetInvitationResponse parses an HTTP response from a GetInvitationWithResponse call
-func ParseGetInvitationResponse(rsp *http.Response) (*GetInvitationResponse, error) {
+// ParseKeystoreResponse parses an HTTP response from a KeystoreWithResponse call
+func ParseKeystoreResponse(rsp *http.Response) (*KeystoreResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetInvitationResponse{
+	response := &KeystoreResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Keystore
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInvitationResponse parses an HTTP response from a InvitationWithResponse call
+func ParseInvitationResponse(rsp *http.Response) (*InvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -979,6 +1173,39 @@ func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseKeystoresResponse parses an HTTP response from a KeystoresWithResponse call
+func ParseKeystoresResponse(rsp *http.Response) (*KeystoresResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &KeystoresResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Keystore
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

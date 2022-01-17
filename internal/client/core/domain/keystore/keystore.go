@@ -65,6 +65,7 @@ func (k *Keystore) RemoveEntry(id string) error {
 			return nil
 		}
 	}
+
 	return ErrEntryNotFound
 }
 

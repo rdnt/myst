@@ -48,7 +48,7 @@ jobs:
       id: assets-deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
-        deploy_key: ${{ secrets.ASSETS_DEPLOY_KEY }}
+        deploy_key: ${{ secrets.ACCESS_TOKEN }}
         publish_dir: ./assets
         external_repository: SHT/assets
         publish_branch: master

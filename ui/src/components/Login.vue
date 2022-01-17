@@ -11,20 +11,20 @@
       <div class="label">Myst</div>
       <div class="master-password">
         <input
-          class="field"
-          type="password"
-          autocomplete="off"
+          v-model="passphrase"
+          :placeholder="'keystore passphrase'"
           autocapitalize="off"
-          spellcheck="false"
+          autocomplete="off"
           autofocus
-          v-model="password"
-          :placeholder="'master password'"
-          @keydown.enter="setEnter(true)"
-          @keyup="setEnter(false)"
+          class="field"
+          spellcheck="false"
+          type="password"
           @focusout="setEnter(false)"
+          @keyup="setEnter(false)"
+          @keydown.enter="setEnter(true)"
         />
         <div class="prompt" :class="{ 'enter-pressed': enter }">
-          <span>↵ enter</span>
+          <span>enter</span>
         </div>
       </div>
     </div>
@@ -33,39 +33,44 @@
 
 <script>
 import { mapState } from "vuex";
+
 export default {
   data() {
     return {
-      password: "",
+      passphrase: "pass",
       enter: false,
       loggingIn: false
     };
   },
   computed: mapState({
-    loggedIn: state => state.loggedIn
+    loggedIn: state => state.keystore.keystore !== null
   }),
   mounted() {},
   watch: {
-    password: function() {
-      this.placeholder = "•".repeat(this.password.length);
+    passphrase: function() {
+      this.placeholder = "•".repeat(this.passphrase.length);
     }
   },
   methods: {
-    setPassword(event) {
-      this.password = event.target.value;
-    },
     setEnter(pressed) {
       this.enter = pressed;
-      if (pressed) {
+      if (pressed && !this.loggingIn) {
         // calculate hash and login
-        // this.loggingIn = true;
-        // setTimeout(() => {
-        //   this.loggingIn = false;
-        // }, 1000);
+        this.loggingIn = true;
 
-        setTimeout(() => {
-          this.$store.commit("login");
-        }, 1000);
+        this.$store
+          .dispatch("keystore/authenticate", {
+            keystoreId: "0000000000000000000000",
+            passphrase: this.passphrase
+          })
+          .then(() => {
+            this.$router.push(
+              "/keystore/" + this.$store.state.keystore.keystore.id
+            );
+          })
+          .finally(() => {
+            this.loggingIn = false;
+          });
       }
     }
   }

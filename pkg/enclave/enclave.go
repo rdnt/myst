@@ -7,6 +7,8 @@ import (
 	"myst/pkg/crypto"
 )
 
+var ErrAuthenticationFailed = fmt.Errorf("authentication failed")
+
 func Encrypt(b []byte, key []byte, salt []byte) ([]byte, error) {
 	// Encrypt keystore
 	b, err := crypto.AES256CBC_Encrypt(key, b)
@@ -35,7 +37,7 @@ func Decrypt(b []byte, key []byte) ([]byte, error) {
 
 	valid := crypto.VerifyHMAC_SHA256(key, mac, b)
 	if !valid {
-		return nil, fmt.Errorf("authentication failed")
+		return nil, ErrAuthenticationFailed
 	}
 
 	// Decrypt keystore

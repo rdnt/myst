@@ -20,7 +20,7 @@ func (app *Application) FinalizeInvitation(invitationId string, keystoreKey []by
 }
 
 func (app *Application) GetInvitation(invitationId string) (*invitation.Invitation, error) {
-	return app.invitationRepo.Invitation(invitationId)
+	return app.Invitations.Invitation(invitationId)
 }
 
 func (app *Application) CreateKeystore(name, ownerId string, payload []byte) (*keystore.Keystore, error) {

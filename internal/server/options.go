@@ -10,21 +10,21 @@ type Option func(app *Application) error
 
 func WithKeystoreRepository(repo keystore.Repository) Option {
 	return func(app *Application) error {
-		app.keystoreRepo = repo
+		app.repositories.keystoreRepo = repo
 		return nil
 	}
 }
 
 func WithUserRepository(repo user.Repository) Option {
 	return func(app *Application) error {
-		app.userRepo = repo
+		app.repositories.userRepo = repo
 		return nil
 	}
 }
 
 func WithInvitationRepository(repo invitation.Repository) Option {
 	return func(app *Application) error {
-		app.invitationRepo = repo
+		app.repositories.invitationRepo = repo
 		return nil
 	}
 }

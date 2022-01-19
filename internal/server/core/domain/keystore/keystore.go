@@ -13,6 +13,7 @@ type Keystore struct {
 	name      string
 	payload   []byte
 	ownerId   string
+	viewerIds []string
 	createdAt timestamp.Timestamp
 	updatedAt timestamp.Timestamp
 }
@@ -25,12 +26,16 @@ func (k *Keystore) String() string {
 	return fmt.Sprintln(k.id, k.name, k.ownerId)
 }
 
+func (k *Keystore) ViewerIds() []string {
+	return k.viewerIds
+}
+
 func (k *Keystore) Name() string {
 	return k.name
 }
 
 func (k *Keystore) OwnerId() string {
-	return k.name
+	return k.ownerId
 }
 
 func (k *Keystore) SetOwnerId(id string) {

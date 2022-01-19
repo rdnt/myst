@@ -12,6 +12,22 @@ type Repository struct {
 	invitations map[string]invitation.Invitation
 }
 
+func (r *Repository) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+	invs := []*invitation.Invitation{}
+
+	for _, inv := range r.invitations {
+		if inv.InviterId() == userId {
+			invs = append(invs, &inv)
+		}
+
+		if inv.InviteeId() == userId {
+			invs = append(invs, &inv)
+		}
+	}
+
+	return invs, nil
+}
+
 func (r *Repository) Create(opts ...invitation.Option) (*invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()

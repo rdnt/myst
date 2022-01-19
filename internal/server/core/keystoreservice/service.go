@@ -25,11 +25,20 @@ func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keysto
 		return nil, err
 	}
 
-	return s.keystoreRepo.Create(
+	k, err := s.keystoreRepo.Create(
 		keystore.WithName(name),
 		keystore.WithOwnerId(u.Id()),
 		keystore.WithPayload(payload),
 	)
+
+	u.OwnKeystore(k.Id())
+
+	err = s.userRepo.Update(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return k, nil
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
@@ -38,6 +47,46 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 
 func (s *service) Keystores() ([]*keystore.Keystore, error) {
 	return s.keystoreRepo.Keystores()
+}
+
+func (s *service) UserKeystore(userId, keystoreId string) (*keystore.Keystore, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var exists bool
+	for _, kid := range u.KeystoreIds() {
+		if kid == keystoreId {
+			exists = true
+			break
+		}
+	}
+
+	if !exists {
+		return nil, keystore.ErrNotFound
+	}
+
+	return s.keystoreRepo.Keystore(keystoreId)
+}
+
+func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	ks := []*keystore.Keystore{}
+	for _, kid := range u.KeystoreIds() {
+		k, err := s.keystoreRepo.Keystore(kid)
+		if err != nil {
+			return nil, err
+		}
+
+		ks = append(ks, k)
+	}
+
+	return ks, nil
 }
 
 func New(opts ...Option) (keystore.Service, error) {

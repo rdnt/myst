@@ -14,10 +14,14 @@ type Repository interface {
 	Update(k *Invitation) error
 	Invitations() ([]*Invitation, error)
 	Delete(id string) error
+
+	UserInvitations(userId string) ([]*Invitation, error)
 }
 
 type Service interface {
 	Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*Invitation, error)
 	Accept(invitationId string, inviteeKey []byte) (*Invitation, error)
 	Finalize(invitationId string, keystoreKey []byte) (*Invitation, error)
+
+	UserInvitations(userId string) ([]*Invitation, error)
 }

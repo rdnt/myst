@@ -14,12 +14,13 @@ var (
 )
 
 type User struct {
-	id          string
-	username    string
-	password    string
-	keystoreIds []string
-	createdAt   timestamp.Timestamp
-	updatedAt   timestamp.Timestamp
+	id            string
+	username      string
+	password      string
+	keystoreIds   []string
+	invitationIds []string
+	createdAt     timestamp.Timestamp
+	updatedAt     timestamp.Timestamp
 }
 
 func (u *User) KeystoreIds() []string {
@@ -32,6 +33,14 @@ func (u *User) SetKeystoreIds(ids []string) {
 
 func (u *User) OwnKeystore(id string) {
 	u.keystoreIds = append(u.keystoreIds, id)
+}
+
+func (u *User) InvitationIds() []string {
+	return u.invitationIds
+}
+
+func (u *User) SetInvitationIds(ids []string) {
+	u.invitationIds = ids
 }
 
 func (u *User) Id() string {

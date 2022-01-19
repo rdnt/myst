@@ -2,28 +2,27 @@ package invitation
 
 import (
 	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
 )
 
 type Option func(i *Invitation) error
 
-func WithInviter(u user.User) Option {
+func WithInviterId(id string) Option {
 	return func(i *Invitation) error {
-		i.inviter = u
+		i.inviterId = id
 		return nil
 	}
 }
 
-func WithKeystore(k keystore.Keystore) Option {
+func WithKeystore(k *keystore.Keystore) Option {
 	return func(i *Invitation) error {
 		i.keystore = k
 		return nil
 	}
 }
 
-func WithInvitee(u user.User) Option {
+func WithInviteeId(id string) Option {
 	return func(i *Invitation) error {
-		i.invitee = u
+		i.inviteeId = id
 		return nil
 	}
 }

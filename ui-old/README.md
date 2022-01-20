@@ -1,4 +1,4 @@
-# myst
+# vue
 
 ## Project setup
 ```

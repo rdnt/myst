@@ -1,14 +1,17 @@
 <template>
   <div class="home">
-    Home
+    <InitializeKeystoreFullscreenModal :show="true"/>
   </div>
 </template>
 
-<script>
-// @ is an alias to /src
+<script lang="ts">
+import { defineComponent } from 'vue'
+import InitializeKeystoreFullscreenModal from '@/components/InitializeKeystoreFullscreenModal.vue'
 
-export default {
-  name: "Home",
-  components: {}
-};
+export default defineComponent({
+  name: 'Home',
+  components: {
+    InitializeKeystoreFullscreenModal
+  }
+})
 </script>

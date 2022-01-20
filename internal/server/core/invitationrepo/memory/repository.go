@@ -12,6 +12,42 @@ type Repository struct {
 	invitations map[string]invitation.Invitation
 }
 
+func (r *Repository) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+	
+	invs := []*invitation.Invitation{}
+
+	for _, inv := range r.invitations {
+		if inv.InviterId() == userId {
+			invs = append(invs, &inv)
+		}
+
+		if inv.InviteeId() == userId {
+			invs = append(invs, &inv)
+		}
+	}
+
+	return invs, nil
+}
+
+func (r *Repository) UserInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	for _, inv := range r.invitations {
+		if inv.InviterId() == userId && inv.Id() == invitationId {
+			return &inv, nil
+		}
+
+		if inv.InviteeId() == userId && inv.Id() == invitationId {
+			return &inv, nil
+		}
+	}
+
+	return nil, invitation.ErrNotFound
+}
+
 func (r *Repository) Create(opts ...invitation.Option) (*invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()

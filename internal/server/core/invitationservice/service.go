@@ -40,11 +40,15 @@ func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []b
 	}
 
 	return s.invitationRepo.Create(
-		invitation.WithKeystore(*store),
-		invitation.WithInviter(*inviter),
-		invitation.WithInvitee(*invitee),
+		invitation.WithKeystore(store),
+		invitation.WithInviterId(inviter.Id()),
+		invitation.WithInviteeId(invitee.Id()),
 		invitation.WithInviterKey(inviterKey),
 	)
+}
+
+func (s *service) Invitation(id string) (*invitation.Invitation, error) {
+	return s.invitationRepo.Invitation(id)
 }
 
 func (s *service) Accept(invitationId string, inviteeKey []byte) (*invitation.Invitation, error) {
@@ -83,6 +87,28 @@ func (s *service) Finalize(invitationId string, keystoreKey []byte) (*invitation
 	}
 
 	return inv, nil
+}
+
+// UserInvitations returns all the invitations this user has access to. These include:
+// - invitations where the user is the inviter
+// - invitations where the user is the invitee
+func (s *service) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.invitationRepo.UserInvitations(u.Id())
+}
+
+// UserInvitation returns an invitation that a user has access to.
+func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.invitationRepo.UserInvitation(u.Id(), invitationId)
 }
 
 func New(opts ...Option) (invitation.Service, error) {

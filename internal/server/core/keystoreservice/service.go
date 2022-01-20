@@ -25,11 +25,13 @@ func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keysto
 		return nil, err
 	}
 
-	return s.keystoreRepo.Create(
+	k, err := s.keystoreRepo.Create(
 		keystore.WithName(name),
 		keystore.WithOwnerId(u.Id()),
 		keystore.WithPayload(payload),
 	)
+
+	return k, nil
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
@@ -38,6 +40,24 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 
 func (s *service) Keystores() ([]*keystore.Keystore, error) {
 	return s.keystoreRepo.Keystores()
+}
+
+func (s *service) UserKeystore(userId, keystoreId string) (*keystore.Keystore, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.keystoreRepo.UserKeystore(u.Id(), keystoreId)
+}
+
+func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.keystoreRepo.UserKeystores(u.Id())
 }
 
 func New(opts ...Option) (keystore.Service, error) {

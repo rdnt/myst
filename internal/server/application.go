@@ -23,9 +23,11 @@ var (
 )
 
 type Application struct {
-	invitationRepo invitation.Repository
-	userRepo       user.Repository
-	keystoreRepo   keystore.Repository
+	repositories struct {
+		invitationRepo invitation.Repository
+		userRepo       user.Repository
+		keystoreRepo   keystore.Repository
+	}
 
 	Users       user.Service
 	Keystores   keystore.Service
@@ -52,25 +54,25 @@ func New(opts ...Option) (*Application, error) {
 	var err error
 
 	app.Users, err = userservice.New(
-		userservice.WithUserRepository(app.userRepo),
-		userservice.WithKeystoreRepository(app.keystoreRepo),
+		userservice.WithUserRepository(app.repositories.userRepo),
+		userservice.WithKeystoreRepository(app.repositories.keystoreRepo),
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	app.Keystores, err = keystoreservice.New(
-		keystoreservice.WithUserRepository(app.userRepo),
-		keystoreservice.WithKeystoreRepository(app.keystoreRepo),
+		keystoreservice.WithUserRepository(app.repositories.userRepo),
+		keystoreservice.WithKeystoreRepository(app.repositories.keystoreRepo),
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	app.Invitations, err = invitationservice.New(
-		invitationservice.WithUserRepository(app.userRepo),
-		invitationservice.WithKeystoreRepository(app.keystoreRepo),
-		invitationservice.WithInvitationRepository(app.invitationRepo),
+		invitationservice.WithUserRepository(app.repositories.userRepo),
+		invitationservice.WithKeystoreRepository(app.repositories.keystoreRepo),
+		invitationservice.WithInvitationRepository(app.repositories.invitationRepo),
 	)
 	if err != nil {
 		return nil, err

@@ -233,7 +233,7 @@ export default {
     position: relative;
     font-weight: 400;
     transition: 0.1s ease;
-    color: rgba(215, 216, 219, 0.75);
+    color: #fff;
     order: 2;
 
     &::placeholder {
@@ -241,10 +241,10 @@ export default {
     }
 
     &:focus {
-      color: rgba(215, 216, 219, 1);
+      color: #fff;
 
       & + label {
-        color: rgba(215, 216, 219, 0.9);
+        //color: #fff;
 
         &:after {
           box-shadow: inset 0 0 0 1px lighten(rgba(48, 50, 54, 1), 5%);
@@ -258,7 +258,7 @@ export default {
     pointer-events: none;
     transition: 0.1s ease;
     padding: 0 8px;
-    color: rgba(215, 216, 219, 0.75);
+    color: #fff;
     order: 1;
 
     &:after {
@@ -282,27 +282,29 @@ export default {
   height: 36px;
   display: flex;
   align-items: center;
-  color: #d7d8db;
+  color: #fff;
   padding: 8px 16px;
   border-radius: 4px;
   margin: 0;
   border: none;
   font-weight: normal;
   font-size: 1rem;
-  background-color: rgba(#393c49, 0.25);
+  background-color: transparent;
+  text-transform: uppercase;
 
   &:hover {
-    background-color: rgba(#393c49, 0.2);
+    background-color: rgba(#393c49, 0.5);
     color: #fff;
   }
 }
 
 .create-entry-button {
   margin-left: 12px;
-  background-color: #393c49;
+  background-color: #fff;
+  color: #000;
 
   &:hover {
-    background-color: rgba(#393c49, 0.75);
+    background-color: rgba(#fff, 0.5);
   }
 }
 </style>

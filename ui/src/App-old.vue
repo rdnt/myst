@@ -12,10 +12,29 @@
 
 <script>
 import { mapState } from "vuex";
+import SystemBar from "./components/SystemBar.vue";
+import Preloader from "./components/Preloader.vue";
+// import Navigation from "./components/Navigation.vue";
+import Login from "./components/Login.vue";
+// import Keystore from "@/domain";
+// import Search from "./components/Search.vue";
+// import Authenticator from "./components/Authenticator.vue";
+// import PasswordGenerator from "./components/Generator.vue";
+// import Sites from "./components/Sites.vue";
 
 export default {
   name: "App",
-  components: {},
+  components: {
+    SystemBar,
+    Preloader,
+    // Navigation,
+    Login
+    // Search,
+    // Sites,
+    // Authenticator,
+    // PasswordGenerator,
+    // Tabs
+  },
   data() {
     return {
       client: "browser"

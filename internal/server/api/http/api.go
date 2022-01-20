@@ -4,273 +4,27 @@ package http
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 
 import (
-	"encoding/base64"
-	"encoding/hex"
 	"io/ioutil"
-	"net/http"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
 	application "myst/internal/server"
-	"myst/internal/server/api/http/generated"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
 
-var log = logger.New("router", logger.Cyan)
+var (
+	log               = logger.New("router", logger.Cyan)
+	jwtCookieLifetime = 604800
+	jwtSecretKey      = "dzl6JEMmRilKQE1jUWZUalduWnI0dTd4IUElRCpHLUs=" //  TODO: os.Getenv("JWT_SECRET_KEY")
+)
 
 type API struct {
 	*gin.Engine
 	app *application.Application
-}
-
-func (api *API) CreateKeystore(c *gin.Context) {
-	var req generated.CreateKeystoreRequest
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		panic(err)
-	}
-
-	payload, err := hex.DecodeString(req.Payload)
-	if err != nil {
-		panic(err)
-	}
-
-	k, err := api.app.CreateKeystore(req.Name, "rdnt", payload)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Keystore{
-			Id:        k.Id(),
-			Name:      k.Name(),
-			OwnerId:   k.OwnerId(),
-			Payload:   hex.EncodeToString(k.Payload()),
-			CreatedAt: int(k.CreatedAt().Unix()),
-			UpdatedAt: int(k.UpdatedAt().Unix()),
-		},
-	)
-}
-
-func (api *API) Keystore(c *gin.Context) {
-	keystoreId := c.Param("keystoreId")
-
-	k, err := api.app.Keystores.Keystore(keystoreId)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Keystore{
-			Id:        k.Id(),
-			Name:      k.Name(),
-			OwnerId:   k.OwnerId(),
-			Payload:   hex.EncodeToString(k.Payload()),
-			CreatedAt: int(k.CreatedAt().Unix()),
-			UpdatedAt: int(k.UpdatedAt().Unix()),
-		},
-	)
-}
-
-func (api *API) Keystores(c *gin.Context) {
-	ks, err := api.app.Keystores.Keystores()
-	if err != nil {
-		panic(err)
-	}
-
-	gen := []generated.Keystore{}
-
-	for _, k := range ks {
-		gen = append(
-			gen, generated.Keystore{
-				Id:        k.Id(),
-				Name:      k.Name(),
-				OwnerId:   k.OwnerId(),
-				Payload:   hex.EncodeToString(k.Payload()),
-				CreatedAt: int(k.CreatedAt().Unix()),
-				UpdatedAt: int(k.UpdatedAt().Unix()),
-			},
-		)
-	}
-
-	c.JSON(
-		http.StatusOK, gen,
-	)
-}
-
-func (api *API) CreateInvitation(c *gin.Context) {
-	keystoreId := c.Param("keystoreId")
-
-	//log.Debug(keystoreId)
-
-	var params generated.CreateInvitationRequest
-	err := c.ShouldBindJSON(&params)
-	if err != nil {
-		panic(err)
-	}
-
-	inviterKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
-
-	inv, err := api.app.CreateInvitation(
-		keystoreId,
-		"rdnt",
-		params.InviteeId,
-		inviterKey,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
-}
-
-func (api *API) Invitation(c *gin.Context) {
-	invitationId := c.Param("invitationId")
-
-	// TODO: verify client is allowed to accept invitation for that keystore
-
-	inv, err := api.app.GetInvitation(invitationId)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
-}
-
-func (api *API) AcceptInvitation(c *gin.Context) {
-	invitationId := c.Param("invitationId")
-
-	// TODO: verify client is allowed to accept invitation for that keystore
-
-	var params generated.AcceptInvitationRequest
-	err := c.ShouldBindJSON(&params)
-	if err != nil {
-		panic(err)
-	}
-
-	inviteeKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
-
-	inv, err := api.app.AcceptInvitation(
-		invitationId,
-		inviteeKey,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
-}
-
-func (api *API) FinalizeInvitation(c *gin.Context) {
-	invitationId := c.Param("invitationId")
-
-	// TODO: verify client is allowed to accept invitation for that keystore
-
-	var params generated.FinalizeInvitationRequest
-	err := c.ShouldBindJSON(&params)
-	if err != nil {
-		panic(err)
-	}
-
-	keystoreKey, err := hex.DecodeString(params.KeystoreKey)
-	if err != nil {
-		panic(err)
-	}
-
-	inv, err := api.app.FinalizeInvitation(
-		invitationId,
-		keystoreKey,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
-}
-
-func (api *API) Login(c *gin.Context) {
-	var params generated.LoginRequest
-	err := c.ShouldBindJSON(&params)
-	if err != nil {
-		panic(err)
-	}
-
-	if params.Username == "rdnt" && params.Password != "1234" {
-		panic(err)
-	}
-
-	key, err := api.loginUser(params.Username)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(http.StatusOK, generated.AuthToken(key))
-}
-
-var jwtCookieLifetime = 604800
-
-//var jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-var jwtSecretKey = "dzl6JEMmRilKQE1jUWZUalduWnI0dTd4IUElRCpHLUs="
-
-func (api *API) loginUser(username string) (string, error) {
-	now := time.Now()
-
-	exp := now.Unix() + int64(jwtCookieLifetime)
-	iat := now.Unix()
-	nbf := now.Unix()
-
-	// if password matches hash
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodHS256, jwt.MapClaims{
-			"exp": exp,
-			"iat": iat,
-			"nbf": nbf,
-			"usr": username,
-		},
-	)
-	key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return token.SignedString(key)
-}
-
-func (api *API) Run(addr string) error {
-	log.Println("starting app on port :8080")
-
-	api.app.Start()
-
-	log.Println("app started")
-	return api.Engine.Run(addr)
 }
 
 func New(app *application.Application) *API {
@@ -343,4 +97,32 @@ func New(app *application.Application) *API {
 	api.initRoutes(r.Group("api"))
 
 	return api
+}
+
+func (api *API) initRoutes(r *gin.RouterGroup) {
+	r.POST("/auth/login", api.Login)
+
+	sec := r.Group("")
+	sec.Use(Authentication())
+
+	// keystore
+	sec.POST("/keystores", api.CreateKeystore)
+	sec.GET("/keystore/:keystoreId", api.Keystore)
+	sec.GET("/keystores", api.Keystores)
+
+	// invitation
+	sec.POST("/keystore/:keystoreId/invitations", api.CreateInvitation)
+	sec.GET("/keystore/:keystoreId/invitation/:invitationId", api.Invitation)
+	sec.PATCH("/keystore/:keystoreId/invitation/:invitationId", api.AcceptInvitation)
+	sec.POST("/keystore/:keystoreId/invitation/:invitationId", api.FinalizeInvitation)
+	sec.GET("/invitations", api.Invitations)
+}
+
+func (api *API) Run(addr string) error {
+	log.Println("starting app on port :8080")
+
+	api.app.Start()
+
+	log.Println("app started")
+	return api.Engine.Run(addr)
 }

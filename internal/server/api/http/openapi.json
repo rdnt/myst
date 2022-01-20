@@ -127,6 +127,37 @@
         }
       }
     },
+    "/api/invitations": {
+      "get": {
+        "description": "Returns all the invitations that concern this user",
+        "operationId": "Invitations",
+        "responses": {
+          "200": {
+            "description": "Invitations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/keystore/{keystoreId}": {
       "get": {
         "description": "Returns a keystore",
@@ -466,11 +497,44 @@
       "Invitation": {
         "type": "object",
         "required": [
-          "id"
+          "id",
+          "keystoreId",
+          "inviterId",
+          "inviteeId",
+          "status",
+          "createdAt",
+          "updatedAt"
         ],
         "properties": {
           "id": {
             "type": "string"
+          },
+          "keystoreId": {
+            "type": "string"
+          },
+          "inviterId": {
+            "type": "string"
+          },
+          "inviteeId": {
+            "type": "string"
+          },
+          "inviterKey": {
+            "type": "string"
+          },
+          "inviteeKey": {
+            "type": "string"
+          },
+          "keystoreKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "integer"
           }
         }
       },

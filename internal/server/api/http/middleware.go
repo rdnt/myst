@@ -42,7 +42,7 @@ func Recovery(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			httprequest, _ := httputil.DumpRequest(c.Request, false)
-			goErr := errors.Wrap(err, 2)
+			goErr := errors.Wrap(err, 0)
 			log.Errorf("Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
 			recoveryHandler(c, err)
 		}
@@ -214,4 +214,14 @@ func TokenAuthentication(c *gin.Context) error {
 	c.Set("userId", username)
 
 	return nil
+}
+
+func CurrentUser(c *gin.Context) string {
+	// GetCurrentUserID returns the username of the currently logged-in user
+	userId, ok := c.Get("userId")
+	if !ok {
+		panic("userId not set for authenticated route")
+	}
+
+	return userId.(string)
 }

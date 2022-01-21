@@ -8,7 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.7
-	github.com/go-errors/errors v1.4.1
+	github.com/go-errors/errors v1.4.2
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect

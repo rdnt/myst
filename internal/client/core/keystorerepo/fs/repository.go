@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"myst/internal/client/core/domain/keystore"
@@ -148,14 +150,33 @@ func (r *repository) Keystores() ([]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	return nil, nil
+	fis, err := os.ReadDir("data/keystores")
+	if err != nil {
+		return nil, err
+	}
 
-	//keystores := make([]*keystore.Keystore, 0, len(r.keystores))
-	//for _, k := range r.keystores {
-	//	keystores = append(keystores, &k)
-	//}
-	//
-	//return keystores, nil
+	ks := []*keystore.Keystore{}
+
+	for _, fi := range fis {
+		if fi.IsDir() {
+			continue
+		}
+
+		if filepath.Ext(fi.Name()) != ".mst" {
+			continue
+		}
+
+		id := strings.TrimSuffix(filepath.Base(fi.Name()), filepath.Ext(".mst"))
+
+		k, err := r.keystore(id)
+		if err != nil {
+			return nil, err
+		}
+
+		ks = append(ks, k)
+	}
+
+	return ks, nil
 }
 
 func (r *repository) Update(k *keystore.Keystore) error {

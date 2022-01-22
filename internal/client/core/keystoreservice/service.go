@@ -33,6 +33,15 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 	return k, err
 }
 
+func (s *service) Keystores() ([]*keystore.Keystore, error) {
+	ks, err := s.keystoreRepo.Keystores()
+	if errors.Is(err, keystore.ErrAuthenticationRequired) {
+		return nil, ErrAuthenticationRequired
+	}
+
+	return ks, err
+}
+
 func (s *service) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
 	k, err := s.keystoreRepo.Unlock(id, passphrase)
 	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {

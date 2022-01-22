@@ -1,26 +1,14 @@
+<script lang="ts" setup>
+// This starter template is using Vue 3 <script setup> SFCs
+// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
+import InitializeKeystoreFullscreenModal from './components/InitializeKeystoreFullscreenModal.vue'</script>
+
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view/>
+	<InitializeKeystoreFullscreenModal :show="true"/>
 </template>
 
-<!--<style lang="scss">-->
-<!--#app {-->
-<!--  //color: #f00;-->
-<!--}-->
-
-<!--#nav {-->
-<!--  padding: 30px;-->
-
-<!--  a {-->
-<!--    font-weight: bold;-->
-<!--    color: #2c3e50;-->
-
-<!--    &.router-link-exact-active {-->
-<!--      color: #42b983;-->
-<!--    }-->
-<!--  }-->
-<!--}-->
-<!--</style>-->
+<style>
+body {
+	margin: 0;
+}
+</style>

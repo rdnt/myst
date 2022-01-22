@@ -17,6 +17,7 @@ type Repository interface {
 type Service interface {
 	Create(opts ...Option) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)
+	Keystores() ([]*Keystore, error)
 	Unlock(id string, pass string) (*Keystore, error)
 	Update(k *Keystore) error
 }

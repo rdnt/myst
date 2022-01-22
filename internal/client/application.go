@@ -30,6 +30,7 @@ type Application interface {
 	UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
+	Keystores() ([]*keystore.Keystore, error)
 	HealthCheck()
 	SignIn(username, password string) error
 	SignOut() error

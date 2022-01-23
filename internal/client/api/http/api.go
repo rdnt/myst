@@ -12,14 +12,13 @@ import (
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
 	"myst/internal/client/core/keystoreservice"
+	"myst/pkg/config"
+	"myst/pkg/logger"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
-
-	"myst/pkg/config"
-	"myst/pkg/logger"
 )
 
 var log = logger.New("router", logger.Cyan)
@@ -206,43 +205,14 @@ func (api *API) Keystore(c *gin.Context) {
 	)
 }
 
-func (api *API) Keystores(c *gin.Context) {
-	ks, err := api.app.Keystores()
-	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if err != nil {
+func (api *API) KeystoreIds(c *gin.Context) {
+	kids, err := api.app.KeystoreIds()
+	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	ksgen := []generated.Keystore{}
-
-	for _, k := range ks {
-		entries := make([]generated.Entry, len(k.Entries()))
-
-		for i, e := range k.Entries() {
-			entries[i] = generated.Entry{
-				Id:       e.Id(),
-				Label:    e.Label(),
-				Username: e.Username(),
-				Password: e.Password(),
-			}
-		}
-
-		ksgen = append(
-			ksgen, generated.Keystore{
-				Id:      k.Id(),
-				Name:    k.Name(),
-				Entries: entries,
-			},
-		)
-	}
-
-	Success(c, ksgen)
+	Success(c, kids)
 }
 
 func (api *API) HealthCheck(_ *gin.Context) {

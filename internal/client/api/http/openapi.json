@@ -63,17 +63,17 @@
         }
       },
       "get": {
-        "description": "Returns all keystores",
-        "operationId": "Keystores",
+        "description": "Returns all keystore ids",
+        "operationId": "KeystoreIds",
         "responses": {
           "200": {
-            "description": "Keystores",
+            "description": "KeystoreIds",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Keystore"
+                    "type": "string"
                   }
                 }
               }

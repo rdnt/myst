@@ -30,6 +30,7 @@ type Application interface {
 	UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
+	KeystoreIds() ([]string, error)
 	Keystores() ([]*keystore.Keystore, error)
 	HealthCheck()
 	SignIn(username, password string) error
@@ -51,7 +52,7 @@ type KeystoreRepository interface {
 func (app *application) Start() {
 	log.Print("App started")
 
-	app.setup()
+	//app.setup()
 }
 
 func New(opts ...Option) (*application, error) {

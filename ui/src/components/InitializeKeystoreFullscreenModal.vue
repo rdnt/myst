@@ -1,5 +1,5 @@
 <template>
-	<div class="modal">
+	<div class="modal" v-if="show">
 		<div class="modal-overlay" v-on:click="hide"/>
 		<div class="modal-content">
 			<form class="setup" @submit.prevent="submit">
@@ -13,9 +13,9 @@
 					<br/><br>
 				</h6>
 				<h6 v-else>Selected keystore name:<br></h6>
-				<div :class="{invalid: !keystoreNameValid && warnings}" class="input">
+				<div :class="{invalid: !nameValid && warnings}" class="input">
 					<label>Keystore name</label>
-					<input v-model="keystoreName" :class="{selected: step === 2}" :readonly="step !== 1"
+					<input v-model="name" :class="{selected: step === 2}" :readonly="step !== 1"
 						   :tabindex="step === 1 ? 0 : -1" autofocus class="input keystore-name"
 						   placeholder="Keystore name"
 						   @focusout="warnings = true" @input="warnings = true"/>
@@ -29,9 +29,9 @@
 							its
 							complexity. Choose one wisely and make sure you remember it.</h6>
 						<br/>
-						<div :class="{invalid: !masterPasswordValid && warnings}" class="input">
+						<div :class="{invalid: !passwordValid && warnings}" class="input">
 							<label>Master password</label>
-							<expanding-textarea ref="masterPassword" v-model="masterPassword" class="password-input"
+							<expanding-textarea ref="password" v-model="password" class="password-input"
 												placeholder="Master password"
 												@keydown.enter.prevent="submit"/>
 							<span>too weak</span>
@@ -46,8 +46,6 @@
 					</button>
 					<button v-else :class="{disabled: !valid}" class="step-button green" type="submit">Create</button>
 				</div>
-
-
 			</form>
 		</div>
 	</div>
@@ -60,74 +58,70 @@ import ExpandingTextarea from './ExpandingTextarea.vue'
 export default defineComponent({
 	name: 'InitializeKeystoreFullscreenModal',
 	components: {ExpandingTextarea},
-	// props: ['show'],
+	props: ['show'],
 	data: () => ({
-		keystoreName: '',
-		masterPassword: '',
+		name: '',
+		password: '',
 		step: 1,
-		keystoreNameRegex: /^[a-z0-9-]+$/,
+		nameRegex: /^[a-z0-9-]+$/,
 		warnings: false,
 	}),
 	computed: {
 		valid() {
-			if (!this.keystoreNameValid) {
+			if (!this.nameValid) {
 				return false
 			}
 
-			if (this.step === 2 && !this.masterPasswordValid) {
-				return false
-			}
-
-			return true
-		},
-		keystoreNameValid() {
-			if (this.keystoreName.length == 0) {
-				return false
-			} else if (!this.keystoreNameRegex.test(this.keystoreName)) {
+			if (this.step === 2 && !this.passwordValid) {
 				return false
 			}
 
 			return true
 		},
-		masterPasswordValid() {
-			if (this.masterPassword.length == 0) {
+		nameValid() {
+			if (this.name.length == 0) {
 				return false
-			} else if (this.masterPassword.length < 8) {
+			} else if (!this.nameRegex.test(this.name)) {
+				return false
+			}
+
+			return true
+		},
+		passwordValid() {
+			if (this.password.length == 0) {
+				return false
+			} else if (this.password.length < 8) {
 				return false
 			}
 
 			return true
 		}
-	},
-	mounted() {
-		this.$nextTick(() => {
-			console.log('mounted')
-			this.$store.dispatch("keystore/getKeystores")
-		})
 	},
 	methods: {
 		hide() {
 			this.$emit('hide')
 		},
 		submit() {
-			if (this.step === 1 && this.keystoreNameValid) {
+			if (this.step === 1 && this.nameValid) {
 				this.step = 2
 				this.warnings = true
 				this.$nextTick(() => {
-					const textarea = this.$refs.masterPassword as ExpandingTextarea;
+					const textarea = this.$refs.password as ExpandingTextarea;
 					textarea.$el.focus();
 				})
-			} else if (this.keystoreNameValid && this.masterPasswordValid) {
-				console.log('access granted!')
+			} else if (this.nameValid && this.passwordValid) {
+				this.$store.dispatch("keystore/createKeystore", {
+					name: this.name,
+					password: this.password,
+				}).then(() => {
+					// TODO: do not use vuex or switch back
+					// to vue 2 where everything works as expected
+					// this.$emit('hide')
+
+					this.$store.commit("setReady", true)
+				})
 			}
 		}
-
-		// keystoreNameChanged (name: string) {
-		//   this.keystoreName = name
-		// },
-		// masterPasswordChanged (password: string) {
-		//   this.masterPassword = password
-		// }
 	}
 })
 </script>

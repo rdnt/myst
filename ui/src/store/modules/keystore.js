@@ -4,8 +4,10 @@ export default {
     namespaced: true,
     state: {
         keystore: null,
+        keystoreIds: [],
         keystores: [],
         currentKeystore: null,
+        onboarding: false,
     },
     actions: {
         // authenticate({ commit }, { keystoreId, password }) {
@@ -28,13 +30,23 @@ export default {
                     }
                 });
         },
-        getKeystores({commit}) {
+        createKeystore({commit}, {name, password}) {
+            return api
+                .post(`/keystores`, {name, password})
+                .then(response => {
+                    console.log(response);
+                    if (response.status === 200) {
+                        commit("setKeystore", response.data);
+                    }
+                });
+        },
+        getKeystoreIds({commit}) {
             return api
                 .get(`/keystores`)
                 .then(response => {
                     console.log(response);
                     if (response.status === 200) {
-                        commit("setKeystores", response.data);
+                        commit("setKeystoreIds", response.data);
                     }
                 });
         }
@@ -43,6 +55,9 @@ export default {
         setKeystore(state, keystore) {
             keystore.entries = keystore.entries.slice(0, 40);
             state.keystore = keystore;
+        },
+        setKeystoreIds(state, ids) {
+            state.keystoreIds = ids;
         },
         setKeystores(state, keystores) {
             state.keystores = keystores;

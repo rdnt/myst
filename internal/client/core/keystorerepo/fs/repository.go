@@ -63,12 +63,6 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 
 	key := crypto.Argon2Id([]byte(k.Password()), salt)
 
-	// TODO: also save encryption parameters used to create the key
-	err = os.WriteFile("data/key.hash", append(key, salt...), 0600)
-	if err != nil {
-		return nil, err
-	}
-
 	b, err = enclave.Create(b, key, salt)
 	if err != nil {
 		return nil, err

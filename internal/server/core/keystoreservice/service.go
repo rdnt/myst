@@ -25,13 +25,11 @@ func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keysto
 		return nil, err
 	}
 
-	k, err := s.keystoreRepo.Create(
+	return s.keystoreRepo.Create(
 		keystore.WithName(name),
 		keystore.WithOwnerId(u.Id()),
 		keystore.WithPayload(payload),
 	)
-
-	return k, nil
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {

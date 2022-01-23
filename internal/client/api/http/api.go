@@ -40,7 +40,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	k, err := api.app.CreateKeystore(
 		req.Name,
-		req.Passphrase,
+		req.Password,
 	)
 	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
@@ -78,7 +78,7 @@ func (api *API) UnlockKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := api.app.UnlockKeystore(keystoreId, req.Passphrase)
+	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
 	if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
 		Error(c, http.StatusForbidden, err)
 		return

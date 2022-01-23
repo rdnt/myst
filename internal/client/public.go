@@ -4,15 +4,15 @@ import (
 	"myst/internal/client/core/domain/keystore"
 )
 
-func (app *application) CreateKeystore(name string, passphrase string) (*keystore.Keystore, error) {
+func (app *application) CreateKeystore(name string, password string) (*keystore.Keystore, error) {
 	return app.keystoreService.Create(
 		keystore.WithName(name),
-		keystore.WithPassphrase(passphrase),
+		keystore.WithPassword(password),
 	)
 }
 
-func (app *application) UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error) {
-	return app.keystoreService.Unlock(keystoreId, passphrase)
+func (app *application) UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error) {
+	return app.keystoreService.Unlock(keystoreId, password)
 }
 
 func (app *application) Keystore(id string) (*keystore.Keystore, error) {
@@ -21,6 +21,10 @@ func (app *application) Keystore(id string) (*keystore.Keystore, error) {
 
 func (app *application) Keystores() ([]*keystore.Keystore, error) {
 	return app.keystoreService.Keystores()
+}
+
+func (app *application) KeystoreIds() ([]string, error) {
+	return app.keystoreService.KeystoreIds()
 }
 
 func (app *application) UpdateKeystore(k *keystore.Keystore) error {

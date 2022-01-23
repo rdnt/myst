@@ -26,8 +26,8 @@ var (
 
 type Application interface {
 	Start()
-	CreateKeystore(name string, passphrase string) (*keystore.Keystore, error)
-	UnlockKeystore(keystoreId string, passphrase string) (*keystore.Keystore, error)
+	CreateKeystore(name string, password string) (*keystore.Keystore, error)
+	UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
 	Keystores() ([]*keystore.Keystore, error)
@@ -44,7 +44,7 @@ type application struct {
 
 type KeystoreRepository interface {
 	keystore.Repository
-	Unlock(keystoreId string, passphrase string) (*keystore.Keystore, error)
+	Unlock(keystoreId string, password string) (*keystore.Keystore, error)
 	HealthCheck()
 }
 
@@ -86,7 +86,7 @@ func New(opts ...Option) (*application, error) {
 func (app *application) setup() {
 	k, err := app.keystoreService.Create(
 		keystore.WithName("my-keystore"),
-		keystore.WithPassphrase("pass"),
+		keystore.WithPassword("pass"),
 	)
 	if err != nil && err.Error() == "already exists" {
 		k, err = app.keystoreService.Unlock("0000000000000000000000", "pass")
@@ -163,7 +163,7 @@ func (app *application) setup() {
 		return
 	}
 
-	kpath := "data/keystores/" + k.Id() + ".mst"
+	kpath := "data/keystores/" + k.Id() + ".myst"
 
 	b, err := os.ReadFile(kpath)
 	if err != nil {

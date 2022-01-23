@@ -10,7 +10,7 @@ import (
 )
 
 func (r *remote) CreateKeystore(name string, payload []byte) (*keystore.Keystore, error) {
-	fmt.Println("CreateKeystore", name, payload)
+	fmt.Printf("CreateKeystore %s %x\n", name, payload)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")

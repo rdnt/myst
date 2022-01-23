@@ -24,7 +24,7 @@
   "paths": {
     "/keystores": {
       "post": {
-        "description": "Creates a new encrypted keystore with the given passphrase",
+        "description": "Creates a new encrypted keystore with the given password",
         "operationId": "CreateKeystore",
         "requestBody": {
           "required": true,
@@ -276,13 +276,13 @@
         "type": "object",
         "required": [
           "name",
-          "passphrase"
+          "password"
         ],
         "properties": {
           "name": {
             "type": "string"
           },
-          "passphrase": {
+          "password": {
             "type": "string"
           }
         }
@@ -290,10 +290,10 @@
       "UnlockKeystoreRequest": {
         "type": "object",
         "required": [
-          "passphrase"
+          "password"
         ],
         "properties": {
-          "passphrase": {
+          "password": {
             "type": "string"
           }
         }

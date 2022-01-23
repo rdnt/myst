@@ -20,6 +20,10 @@ type service struct {
 	keystoreRepo application.KeystoreRepository
 }
 
+func (s *service) KeystoreIds() ([]string, error) {
+	return s.keystoreRepo.KeystoreIds()
+}
+
 func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 	return s.keystoreRepo.Create(opts...)
 }
@@ -42,8 +46,8 @@ func (s *service) Keystores() ([]*keystore.Keystore, error) {
 	return ks, err
 }
 
-func (s *service) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
-	k, err := s.keystoreRepo.Unlock(id, passphrase)
+func (s *service) Unlock(id string, password string) (*keystore.Keystore, error) {
+	k, err := s.keystoreRepo.Unlock(id, password)
 	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {
 		return nil, ErrAuthenticationFailed
 	}

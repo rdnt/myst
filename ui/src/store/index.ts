@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import api from "../api"
 
 export const mainStore = defineStore('main', {
     // a function that returns a fresh state
@@ -17,11 +18,18 @@ export const mainStore = defineStore('main', {
     },
     // optional actions
     actions: {
-        setReady(ready: boolean) {
-            this.ready = ready;
-        },
-        setOnboarding(onboarding: boolean) {
-            this.onboarding = onboarding;
+        // setReady(ready: boolean) {
+        //     this.ready = ready;
+        // },
+        // setOnboarding(onboarding: boolean) {
+        //     this.onboarding = onboarding;
+        // },
+        load() {
+            this.ready = true
+            console.log(api)
+            api.keystoreIds().then((ids) => {
+                console.log(ids)
+            })
         }
     },
 })

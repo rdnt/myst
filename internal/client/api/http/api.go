@@ -2,6 +2,7 @@ package http
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
+//go:generate autorest --typescript --input-file=openapi.json --output-folder=../../../../ui/src/generated --add-credentials=false
 
 import (
 	"errors"
@@ -280,6 +281,7 @@ func New(app application.Application) *API {
 				AllowOriginFunc: func(origin string) bool {
 					return true
 				},
+				AllowedHeaders: []string{"*"},
 				//AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
 				//// TODO allow more methods (DELETE?)
 				//AllowedMethods: []string{http.MethodGet, http.MethodPost},

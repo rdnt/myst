@@ -34,17 +34,17 @@ export default defineComponent({
     }),
   },
   mounted() {
-    api.get(`/keystores`).then((response) => {
-      console.log(response);
-      if (response.status === 200) {
-        if (response.data.length == 0) {
-          this.onboarding = true;
-        }
-
-        this.ready = true;
-        // todo: show login form with just master password
-      }
-    });
+    // api.get(`/keystores`).then((response) => {
+    //   console.log(response);
+    //   if (response.status === 200) {
+    //     if (response.data.length == 0) {
+    //       this.onboarding = true;
+    //     }
+		//
+    //     this.ready = true;
+    //     // todo: show login form with just master password
+    //   }
+    // });
 
     this.getKeystoreIds()
       .then(() => {

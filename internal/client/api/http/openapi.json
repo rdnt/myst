@@ -100,6 +100,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -149,6 +150,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -190,6 +192,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -236,6 +239,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"

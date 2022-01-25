@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Myst REST API
+  description: ''
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Swagger API Team
+    email: apiteam@swagger.io
+    url: http://swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:8081/api
+    description: Local development server
+paths:
+  /keystores:
+    post:
+      description: Creates a new encrypted keystore with the given password
+      operationId: CreateKeystore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKeystoreRequest'
+      responses:
+        '200':
+          description: Keystore
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Keystore'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      description: Returns all keystore ids
+      operationId: KeystoreIds
+      responses:
+        '200':
+          description: KeystoreIds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /keystore/{keystoreId}:
+    post:
+      description: Unlocks a keystore if it exists and returns it
+      operationId: UnlockKeystore
+      parameters:
+        - name: keystoreId
+          in: path
+          required: true
+          description: unique identifier for a keystore
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockKeystoreRequest'
+      responses:
+        '200':
+          description: Keystore
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Keystore'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      description: Get a keystore if it exists and return it
+      operationId: Keystore
+      parameters:
+        - name: keystoreId
+          in: path
+          required: true
+          description: unique identifier for a keystore
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Keystore
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Keystore'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /keystore/{keystoreId}/entries:
+    post:
+      description: Creates a new entry and adds it to the keystore
+      operationId: CreateEntry
+      parameters:
+        - name: keystoreId
+          in: path
+          required: true
+          description: unique identifier for a keystore
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntryRequest'
+      responses:
+        '200':
+          description: Entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      description: Get a keystore if it exists and returns it
+      operationId: GetKeystore
+      parameters:
+        - name: keystoreId
+          in: path
+          required: true
+          description: unique identifier for a keystore
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Keystore
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Keystore'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CreateKeystoreRequest:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+    UnlockKeystoreRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+    CreateEntryRequest:
+      type: object
+      required:
+        - label
+        - username
+        - password
+      properties:
+        label:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    Keystore:
+      type: object
+      required:
+        - id
+        - name
+        - entries
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+    Entry:
+      type: object
+      required:
+        - id
+        - label
+        - username
+        - password
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string

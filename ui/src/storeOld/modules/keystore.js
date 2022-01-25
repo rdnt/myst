@@ -20,7 +20,7 @@ export default {
         //       }
         //     });
         // },
-        createEntry({commit}, {keystoreId, entry}) {
+        createEntry ({ commit }, { keystoreId, entry }) {
             return api
                 .post(`/keystore/${keystoreId}/entries`, entry)
                 .then(response => {
@@ -30,9 +30,9 @@ export default {
                     }
                 });
         },
-        createKeystore({commit}, {name, password}) {
+        createKeystore ({ commit }, { name, password }) {
             return api
-                .post(`/keystores`, {name, password})
+                .post(`/keystores`, { name, password })
                 .then(response => {
                     console.log(response);
                     if (response.status === 200) {
@@ -40,7 +40,7 @@ export default {
                     }
                 });
         },
-        getKeystoreIds({commit}) {
+        getKeystoreIds ({ commit }) {
             return api
                 .get(`/keystores`)
                 .then(response => {
@@ -52,14 +52,14 @@ export default {
         }
     },
     mutations: {
-        setKeystore(state, keystore) {
+        setKeystore (state, keystore) {
             keystore.entries = keystore.entries.slice(0, 40);
             state.keystore = keystore;
         },
-        setKeystoreIds(state, ids) {
+        setKeystoreIds (state, ids) {
             state.keystoreIds = ids;
         },
-        setKeystores(state, keystores) {
+        setKeystores (state, keystores) {
             state.keystores = keystores;
         }
     }

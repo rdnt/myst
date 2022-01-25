@@ -1,21 +1,77 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+  <div>
+    {{ this.keystoreIds.length}}
+    {{ error ? 'Request failed: ' + error : undefined }}
+    <InitializeKeystoreFullscreenModal :show="ready && onboarding" />
+    <div
+      id="entries"
+      v-if="keystores.length > 0 && !onboarding"
+    >
+      ENTRIES CONTAINER
+    </div>
+  </div>
 </template>
 
+<script lang="ts">
+import { defineComponent } from "vue";
+import { mapActions, mapMutations, mapState } from "vuex";
+import api from "./api";
+import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
+
+export default defineComponent({
+  name: "App",
+  components: { InitializeKeystoreFullscreenModal },
+  data: () => ({
+    error: undefined,
+    onboarding: false,
+  }),
+  computed: {
+    ...mapState({
+      keystoreIds: (state) => state.keystoreIds,
+      keystore: (state) => state.keystore.keystore,
+      keystores: (state) => state.keystore.keystores,
+      ready: (state) => state.ready,
+    }),
+  },
+  mounted() {
+    api.get(`/keystores`).then((response) => {
+      console.log(response);
+      if (response.status === 200) {
+        if (response.data.length == 0) {
+          this.onboarding = true;
+        }
+
+        this.ready = true;
+        // todo: show login form with just master password
+      }
+    });
+
+    this.getKeystoreIds()
+      .then(() => {
+        if (this.keystoreIds.length == 0) {
+          this.setOnboarding(true);
+          this.setReady(true);
+        }
+      })
+      .catch((err) => {
+        console.log("err", err);
+        this.error = err;
+      });
+  },
+  methods: {
+    ...mapActions({
+      getKeystoreIds: "keystore/getKeystoreIds",
+    }),
+    ...mapMutations({
+      setOnboarding: "setOnboarding",
+      setReady: "setReady",
+    }),
+  },
+});
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+body {
+  margin: 0;
 }
 </style>

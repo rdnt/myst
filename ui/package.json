@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "axios": "^0.25.0",
-    "vue": "^3.2.25",
-    "vuex": "^4.0.2"
+    "pinia": "^2.0.9",
+    "vue": "^3.2.25"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.0.0",

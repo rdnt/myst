@@ -638,7 +638,7 @@ func (r KeystoreIdsResponse) StatusCode() int {
 type CreateKeystoreResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]Keystore
+	JSON200      *Keystore
 	JSONDefault  *Error
 }
 
@@ -916,7 +916,7 @@ func ParseCreateKeystoreResponse(rsp *http.Response) (*CreateKeystoreResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Keystore
+		var dest Keystore
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

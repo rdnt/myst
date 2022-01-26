@@ -1,82 +1,86 @@
 <template>
   <div>
-    <span>{{ error ? 'Request failed: ' + error : undefined }}</span>
-    <InitializeKeystoreFullscreenModal :show="ready && onboarding" />
-    <div
-      id="entries"
-      v-if="keystores.length > 0 && !onboarding"
-    >
-      ENTRIES CONTAINER
-    </div>
+		<span>{{!ready ? 'Loading...' : ''}}</span>
+		<span>{{ error ? 'Request failed: ' + error : undefined }}</span>
+    <InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
+		<Login v-if="login" @login="console.log($event)" />
+		<div
+			id="entries"
+			v-if="keystores.length > 0"
+		>
+			KEYSTORES
+		</div>
   </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import {mapActions, mapState, mapStores} from "pinia";
-import {mainStore} from "./store";
 import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
+import Login from "./components/LoginForm.vue";
 import api from "./api";
+import {Keystore} from "./api/generated";
 
 export default defineComponent({
 	name: "App",
-	components: {InitializeKeystoreFullscreenModal},
-	data: () => ({
-		error: undefined,
-		onboarding: false,
-		ready: false,
-    keystore: undefined,
-    keystoreIds: [],
-    keystores: [],
-	}),
-	computed: {
-		...mapStores(mainStore),
-		...mapState(mainStore, ["ready", "onboarding"]),
-		// ...mapState({
-		//   // keystoreIds: (state) => state.keystore.keystoreIds,
-		//   // keystore: (state) => state.keystore.keystore,
-		//   ready: (state) => state.ready,
-		// }),
-	},
-	created() {
-		console.log('created')
-		this.load()
+	components: {InitializeKeystoreFullscreenModal, Login},
+	data(): {
+		onboarding: boolean,
+		login: boolean,
+		error: string | undefined,
+		ready: boolean,
+		keystore: Keystore | undefined,
+		keystores: Keystore[],
+	} {
+		return {
+			onboarding: false,
+				login: false,
+				error: undefined,
+				ready: false,
+				keystore: undefined,
+				keystores: [],
+		}
 	},
 	mounted() {
-		console.log(this.mainStore);
-		// api.get(`/keystores`).then((response) => {
-		// 	console.log(response);
-		// 	if (response.status === 200) {
-		// 		if (response.data.length == 0) {
-		// 			this.onboarding = true;
-		// 		}
-		//
-		// 		this.ready = true;
-    //     // todo: show login form with just master password
-    //   }
-    // });
-
-    // this.$store
-    //   .dispatch("keystore/getKeystoreIds")
-    //   .then(() => {
-    //     if (this.$store.state.keystore.keystoreIds.length == 0) {
-    //       this.$store.commit("setOnboarding", true);
-    //       this.$store.commit("setReady", true);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log("err", err);
-    //     this.error = err;
-    //   });
+		this.ready = false
+		this.init()
   },
   methods: {
-		...mapActions(mainStore, ["load"]),
+		init() {
+			api.keystoreIds().then((ids) => {
+				this.onboarding = ids.length == 0;
+				this.login = ids.length > 0;
+			}).catch(error => {
+				this.error = error;
+			}).finally(() => {
+				this.ready = true;
+			});
+		},
+		keystoreCreated(keystore: Keystore) {
+			this.onboarding = false;
+			this.keystore = keystore;
+			this.keystores = [keystore];
+		}
 	},
 });
 </script>
 
-<style>
+<style lang="scss">
+$bg: #0a0e11;
+$accent: #00edb1;
+$text-color: #fff;
+
 body {
   margin: 0;
+	background-color: $bg;
+}
+
+@import url('https://rsms.me/inter/inter.css');
+
+* {
+	font-family: 'Inter', sans-serif;
+	font-weight: 300;
+	font-size: 100%;
+	color: $text-color;
+	line-height: 1.325;
 }
 </style>

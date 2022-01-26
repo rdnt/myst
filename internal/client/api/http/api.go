@@ -1,26 +1,28 @@
 package http
 
-//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
-//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
-//go:generate autorest --typescript --input-file=openapi.json --output-folder=../../../../ui/src/generated --add-credentials=false
-
 import (
 	"errors"
 	"io/ioutil"
 	"net/http"
 
-	application "myst/internal/client"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	prometheus "github.com/zsais/go-gin-prometheus"
+
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
 	"myst/internal/client/core/keystoreservice"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	prometheus "github.com/zsais/go-gin-prometheus"
+
+	application "myst/internal/client"
 )
+
+//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
+//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
+//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 
 var log = logger.New("router", logger.Cyan)
 

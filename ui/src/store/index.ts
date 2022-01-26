@@ -28,7 +28,9 @@ export const mainStore = defineStore('main', {
             this.ready = true
             console.log(api)
             api.keystoreIds().then((ids) => {
-                console.log(ids)
+                this.onboarding = ids.length == 0;
+            }).finally(() => {
+                this.ready = true
             })
         }
     },

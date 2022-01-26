@@ -1,12 +1,12 @@
 <template>
-	<div class="modal" v-if="show">
+	<div class="modal">
 		<div class="modal-overlay" v-on:click="hide"/>
 		<div class="modal-content">
 			<form class="setup" @submit.prevent="submit">
-				<h4>First time setup</h4>
-				<br/>
+				<h4>Myst</h4>
+				<h5>First time setup</h5>
 				<div class="separator"/>
-				<br/><br/><br/><br/><br/>
+				<br/><br/><br/>
 				<h6 v-if="step === 1">Let's choose a name for your first keystore. Keystores help organize your secrets
 					into
 					groups.
@@ -54,11 +54,11 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import ExpandingTextarea from './ExpandingTextarea.vue'
+import api from "../api";
 
 export default defineComponent({
 	name: 'InitializeKeystoreFullscreenModal',
 	components: {ExpandingTextarea},
-	props: ['show'],
 	data: () => ({
 		name: '',
 		password: '',
@@ -98,9 +98,6 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		hide() {
-			this.$emit('hide')
-		},
 		submit() {
 			if (this.step === 1 && this.nameValid) {
 				this.step = 2
@@ -110,15 +107,16 @@ export default defineComponent({
 					textarea.$el.focus();
 				})
 			} else if (this.nameValid && this.passwordValid) {
-				this.$store.dispatch("keystore/createKeystore", {
-					name: this.name,
-					password: this.password,
-				}).then(() => {
-					// TODO: do not use vuex or switch back
-					// to vue 2 where everything works as expected
-					// this.$emit('hide')
 
-					this.$store.commit("setReady", true)
+				api.createKeystore({
+					createKeystoreRequest: {
+						name: this.name,
+						password: this.password
+					}
+				}).then((keystore) => {
+					this.$emit('created', keystore)
+				}).catch((err) => {
+					console.error(err)
 				})
 			}
 		}
@@ -201,10 +199,10 @@ textarea {
 }
 
 .separator {
-	width: 100px;
+	width: 50px;
 	height: 2px;
 	background-color: #31363d;
-	margin: 0 auto;
+	margin: 30px auto;
 }
 
 //TODO focus
@@ -231,6 +229,12 @@ input {
 h4 {
 	font-weight: 700;
 	font-size: 1.8rem;
+	margin: 0;
+}
+
+h5 {
+	font-weight: 600;
+	font-size: 1.4rem;
 	margin: 0;
 }
 
@@ -302,14 +306,19 @@ button {
 	}
 
 	h4 {
-		font-size: 1.8rem;
-		margin-bottom: 12px;
+		font-size: 2.4rem;
+		margin-bottom: 10px;
+		text-align: center;
+	}
+
+	h5 {
+		font-weight: 400;
+		font-size: 1.4rem;
 		text-align: center;
 	}
 
 	h6 {
 		font-size: 1.1rem;
-		margin-bottom: 6px;
 		font-weight: 300;
 	}
 }

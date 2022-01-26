@@ -16,11 +16,11 @@ var (
 )
 
 type Keystore struct {
-	id         string
-	name       string
-	version    int
-	entries    []entry.Entry
-	passphrase string
+	id       string
+	name     string
+	version  int
+	entries  []entry.Entry
+	password string
 }
 
 func (k *Keystore) Id() string {
@@ -69,12 +69,12 @@ func (k *Keystore) RemoveEntry(id string) error {
 	return ErrEntryNotFound
 }
 
-func (k *Keystore) Passphrase() string {
-	return k.passphrase
+func (k *Keystore) Password() string {
+	return k.password
 }
 
-func (k *Keystore) SetPassphrase(passphrase string) {
-	k.passphrase = passphrase
+func (k *Keystore) SetPassword(password string) {
+	k.password = password
 }
 
 func New(opts ...Option) (*Keystore, error) {

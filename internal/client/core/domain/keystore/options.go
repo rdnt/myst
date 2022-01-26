@@ -27,9 +27,9 @@ func WithVersion(version int) Option {
 	}
 }
 
-func WithPassphrase(passphrase string) Option {
+func WithPassword(password string) Option {
 	return func(k *Keystore) error {
-		k.passphrase = passphrase
+		k.password = password
 		return nil
 	}
 }

@@ -1,55 +1,86 @@
 <template>
-  <div id="app" class="show" :class="{ electron: client == 'electron' }">
-    <system-bar v-if="client == 'electron'"></system-bar>
-    <preloader></preloader>
-    <login></login>
-    <main class="transition" :class="{ show: loggedIn }">
-      <!--      <navigation></navigation>-->
-      <router-view></router-view>
-    </main>
+  <div>
+		<span>{{!ready ? 'Loading...' : ''}}</span>
+		<span>{{ error ? 'Request failed: ' + error : undefined }}</span>
+    <InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
+		<Login v-if="login" @login="console.log($event)" />
+		<div
+			id="entries"
+			v-if="keystores.length > 0"
+		>
+			KEYSTORES
+		</div>
   </div>
 </template>
 
-<script>
-import { mapState } from "vuex";
-import SystemBar from "./components/SystemBar.vue";
-import Preloader from "./components/Preloader.vue";
-// import Navigation from "./components/Navigation.vue";
-import Login from "./components/Login.vue";
-// import Keystore from "@/domain";
-// import Search from "./components/Search.vue";
-// import Authenticator from "./components/Authenticator.vue";
-// import PasswordGenerator from "./components/Generator.vue";
-// import Sites from "./components/Sites.vue";
+<script lang="ts">
+import {defineComponent} from "vue";
+import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
+import Login from "./components/LoginForm.vue";
+import api from "./api";
+import {Keystore} from "./api/generated";
 
-export default {
-  name: "App",
-  components: {
-    SystemBar,
-    Preloader,
-    // Navigation,
-    Login
-    // Search,
-    // Sites,
-    // Authenticator,
-    // PasswordGenerator,
-    // Tabs
+export default defineComponent({
+	name: "App",
+	components: {InitializeKeystoreFullscreenModal, Login},
+	data(): {
+		onboarding: boolean,
+		login: boolean,
+		error: string | undefined,
+		ready: boolean,
+		keystore: Keystore | undefined,
+		keystores: Keystore[],
+	} {
+		return {
+			onboarding: false,
+				login: false,
+				error: undefined,
+				ready: false,
+				keystore: undefined,
+				keystores: [],
+		}
+	},
+	mounted() {
+		this.ready = false
+		this.init()
   },
-  data() {
-    return {
-      client: "browser"
-    };
-  },
-  computed: mapState({
-    loggedIn: state => state.keystore.keystore !== null
-  }),
-  created() {},
-  mounted() {}
-};
-
-// eslint-disable-next-line no-unused-vars
+  methods: {
+		init() {
+			api.keystoreIds().then((ids) => {
+				this.onboarding = ids.length == 0;
+				this.login = ids.length > 0;
+			}).catch(error => {
+				this.error = error;
+			}).finally(() => {
+				this.ready = true;
+			});
+		},
+		keystoreCreated(keystore: Keystore) {
+			this.onboarding = false;
+			this.keystore = keystore;
+			this.keystores = [keystore];
+		}
+	},
+});
 </script>
 
 <style lang="scss">
-@use "@/styles/App";
+$bg: #0a0e11;
+$accent: #00edb1;
+$text-color: #fff;
+
+body {
+  margin: 0;
+	background-color: $bg;
+}
+
+@import url('https://rsms.me/inter/inter.css');
+
+* {
+	font-family: 'Inter', sans-serif;
+	font-weight: 300;
+	font-size: 100%;
+	color: $text-color;
+	line-height: 1.325;
+}
 </style>

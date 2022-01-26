@@ -49,9 +49,9 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	key := crypto.Argon2Id([]byte(k.Passphrase()), salt)
+	key := crypto.Argon2Id([]byte(k.Password()), salt)
 
-	b, err = enclave.Encrypt(b, key, salt)
+	b, err = enclave.Create(b, key, salt)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 	return k, nil
 }
 
-func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
+func (r *repository) Unlock(id string, password string) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -77,7 +77,7 @@ func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, e
 		return nil, err
 	}
 
-	key := crypto.Argon2Id([]byte(passphrase), salt)
+	key := crypto.Argon2Id([]byte(password), salt)
 
 	r.keyRepo.Set(id, key)
 
@@ -106,7 +106,7 @@ func (r *repository) keystore(id string) (*keystore.Keystore, error) {
 		return nil, keystore.ErrAuthenticationRequired
 	}
 
-	b, err = enclave.Decrypt(b, key)
+	b, err = enclave.Unlock(b, key)
 	if errors.Is(err, enclave.ErrAuthenticationFailed) {
 		return nil, ErrAuthenticationFailed
 	} else if err != nil {
@@ -159,7 +159,7 @@ func (r *repository) Update(k *keystore.Keystore) error {
 		return err
 	}
 
-	b, err = enclave.Encrypt(b, key, salt)
+	b, err = enclave.Create(b, key, salt)
 	if err != nil {
 		return err
 	}

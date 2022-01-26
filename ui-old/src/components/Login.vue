@@ -11,8 +11,8 @@
       <div class="label">Myst</div>
       <div class="master-password">
         <input
-          v-model="passphrase"
-          :placeholder="'keystore passphrase'"
+          v-model="password"
+          :placeholder="'keystore password'"
           autocapitalize="off"
           autocomplete="off"
           autofocus
@@ -37,7 +37,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-      passphrase: "pass",
+		password: "pass",
       enter: false,
       loggingIn: false
     };
@@ -47,8 +47,8 @@ export default {
   }),
   mounted() {},
   watch: {
-    passphrase: function() {
-      this.placeholder = "•".repeat(this.passphrase.length);
+	  password: function() {
+      this.placeholder = "•".repeat(this.password.length);
     }
   },
   methods: {
@@ -61,7 +61,7 @@ export default {
         this.$store
           .dispatch("keystore/authenticate", {
             keystoreId: "0000000000000000000000",
-            passphrase: this.passphrase
+			  password: this.password
           })
           .then(() => {
             this.$router.push(

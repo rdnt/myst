@@ -6,9 +6,9 @@ export default {
     keystore: null
   },
   actions: {
-    authenticate({ commit }, { keystoreId, passphrase }) {
+    authenticate({ commit }, { keystoreId, password }) {
       return api
-        .post(`/keystore/${keystoreId}`, { passphrase })
+        .post(`/keystore/${keystoreId}`, { password })
         .then(response => {
           console.log(response);
           if (response.status === 200) {

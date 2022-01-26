@@ -21,11 +21,6 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	_, ok := r.keystores[k.Id()]
-	if ok {
-		return nil, fmt.Errorf("already exists")
-	}
-
 	r.keystores[k.Id()] = *k
 
 	return k, nil

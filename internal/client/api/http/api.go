@@ -1,26 +1,28 @@
 package http
 
-//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
-//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
-
 import (
 	"errors"
 	"io/ioutil"
 	"net/http"
 
-	application "myst/internal/client"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	prometheus "github.com/zsais/go-gin-prometheus"
+
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
 	"myst/internal/client/core/keystoreservice"
-
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
-	prometheus "github.com/zsais/go-gin-prometheus"
-
 	"myst/pkg/config"
 	"myst/pkg/logger"
+
+	cors "github.com/rs/cors/wrapper/gin"
+
+	application "myst/internal/client"
 )
+
+//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
+//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
+//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 
 var log = logger.New("router", logger.Cyan)
 
@@ -40,7 +42,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	k, err := api.app.CreateKeystore(
 		req.Name,
-		req.Passphrase,
+		req.Password,
 	)
 	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
@@ -78,7 +80,7 @@ func (api *API) UnlockKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := api.app.UnlockKeystore(keystoreId, req.Passphrase)
+	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
 	if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
 		Error(c, http.StatusForbidden, err)
 		return
@@ -206,6 +208,16 @@ func (api *API) Keystore(c *gin.Context) {
 	)
 }
 
+func (api *API) KeystoreIds(c *gin.Context) {
+	kids, err := api.app.KeystoreIds()
+	if err != nil {
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, kids)
+}
+
 func (api *API) HealthCheck(_ *gin.Context) {
 	api.app.HealthCheck()
 }
@@ -271,6 +283,7 @@ func New(app application.Application) *API {
 				AllowOriginFunc: func(origin string) bool {
 					return true
 				},
+				AllowedHeaders: []string{"*"},
 				//AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
 				//// TODO allow more methods (DELETE?)
 				//AllowedMethods: []string{http.MethodGet, http.MethodPost},

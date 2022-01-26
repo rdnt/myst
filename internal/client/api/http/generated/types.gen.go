@@ -12,8 +12,8 @@ type CreateEntryRequest struct {
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
 type CreateKeystoreRequest struct {
-	Name       string `json:"name"`
-	Passphrase string `json:"passphrase"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 // Entry defines model for Entry.
@@ -39,7 +39,7 @@ type Keystore struct {
 
 // UnlockKeystoreRequest defines model for UnlockKeystoreRequest.
 type UnlockKeystoreRequest struct {
-	Passphrase string `json:"passphrase"`
+	Password string `json:"password"`
 }
 
 // UnlockKeystoreJSONBody defines parameters for UnlockKeystore.

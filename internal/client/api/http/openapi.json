@@ -24,7 +24,7 @@
   "paths": {
     "/keystores": {
       "post": {
-        "description": "Creates a new encrypted keystore with the given passphrase",
+        "description": "Creates a new encrypted keystore with the given password",
         "operationId": "CreateKeystore",
         "requestBody": {
           "required": true,
@@ -42,9 +42,35 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/Keystore"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Returns all keystore ids",
+        "operationId": "KeystoreIds",
+        "responses": {
+          "200": {
+            "description": "KeystoreIds",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Keystore"
+                    "type": "string"
                   }
                 }
               }
@@ -71,6 +97,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -120,6 +147,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -161,6 +189,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -207,6 +236,7 @@
           {
             "name": "keystoreId",
             "in": "path",
+            "required": true,
             "description": "unique identifier for a keystore",
             "schema": {
               "type": "string"
@@ -247,13 +277,13 @@
         "type": "object",
         "required": [
           "name",
-          "passphrase"
+          "password"
         ],
         "properties": {
           "name": {
             "type": "string"
           },
-          "passphrase": {
+          "password": {
             "type": "string"
           }
         }
@@ -261,10 +291,10 @@
       "UnlockKeystoreRequest": {
         "type": "object",
         "required": [
-          "passphrase"
+          "password"
         ],
         "properties": {
-          "passphrase": {
+          "password": {
             "type": "string"
           }
         }

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"myst/internal/client/core/domain/keystore"
@@ -13,6 +15,8 @@ import (
 	"myst/pkg/crypto"
 	"myst/pkg/enclave"
 )
+
+const Extention = ".myst"
 
 var (
 	ErrAuthenticationFailed = enclave.ErrAuthenticationFailed
@@ -32,11 +36,15 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	kpath := "data/keystores/" + k.Id() + ".mst"
+	//err = r.verifyOrCreateKey(k.password())
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	kpath := "data/keystores/" + k.Id() + Extention
 
 	if _, err := os.Stat(kpath); err == nil {
 		return nil, fmt.Errorf("already exists")
-
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
@@ -53,9 +61,9 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	key := crypto.Argon2Id([]byte(k.Passphrase()), salt)
+	key := crypto.Argon2Id([]byte(k.Password()), salt)
 
-	b, err = enclave.Encrypt(b, key, salt)
+	b, err = enclave.Create(b, key, salt)
 	if err != nil {
 		return nil, err
 	}
@@ -70,11 +78,11 @@ func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 	return k, nil
 }
 
-func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, error) {
+func (r *repository) Unlock(id string, password string) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	kpath := "data/keystores/" + id + ".mst"
+	kpath := "data/keystores/" + id + Extention
 
 	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
 		return nil, keystore.ErrNotFound
@@ -92,7 +100,7 @@ func (r *repository) Unlock(id string, passphrase string) (*keystore.Keystore, e
 		return nil, err
 	}
 
-	key := crypto.Argon2Id([]byte(passphrase), salt)
+	key := crypto.Argon2Id([]byte(password), salt)
 
 	r.keyRepo.Set(id, key)
 
@@ -111,7 +119,7 @@ func (r *repository) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (r *repository) keystore(id string) (*keystore.Keystore, error) {
-	kpath := "data/keystores/" + id + ".mst"
+	kpath := "data/keystores/" + id + Extention
 
 	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
 		return nil, keystore.ErrNotFound
@@ -129,7 +137,7 @@ func (r *repository) keystore(id string) (*keystore.Keystore, error) {
 		return nil, keystore.ErrAuthenticationRequired
 	}
 
-	b, err = enclave.Decrypt(b, key)
+	b, err = enclave.Unlock(b, key)
 	if errors.Is(err, enclave.ErrAuthenticationFailed) {
 		return nil, ErrAuthenticationFailed
 	} else if err != nil {
@@ -148,14 +156,23 @@ func (r *repository) Keystores() ([]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	return nil, nil
+	ids, err := r.KeystoreIds()
+	if err != nil {
+		return nil, err
+	}
 
-	//keystores := make([]*keystore.Keystore, 0, len(r.keystores))
-	//for _, k := range r.keystores {
-	//	keystores = append(keystores, &k)
-	//}
-	//
-	//return keystores, nil
+	ks := []*keystore.Keystore{}
+
+	for _, id := range ids {
+		k, err := r.keystore(id)
+		if err != nil {
+			return nil, err
+		}
+
+		ks = append(ks, k)
+	}
+
+	return ks, nil
 }
 
 func (r *repository) Update(k *keystore.Keystore) error {
@@ -167,7 +184,7 @@ func (r *repository) Update(k *keystore.Keystore) error {
 		return keystore.ErrAuthenticationRequired
 	}
 
-	kpath := "data/keystores/" + k.Id() + ".mst"
+	kpath := "data/keystores/" + k.Id() + Extention
 
 	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
 		return keystore.ErrNotFound
@@ -192,7 +209,7 @@ func (r *repository) Update(k *keystore.Keystore) error {
 		return err
 	}
 
-	b, err = enclave.Encrypt(b, key, salt)
+	b, err = enclave.Create(b, key, salt)
 	if err != nil {
 		return err
 	}
@@ -205,11 +222,36 @@ func (r *repository) Update(k *keystore.Keystore) error {
 	return nil
 }
 
+func (r *repository) KeystoreIds() ([]string, error) {
+	fis, err := os.ReadDir("data/keystores")
+	if err != nil {
+		return nil, err
+	}
+
+	ids := []string{}
+
+	for _, fi := range fis {
+		if fi.IsDir() {
+			continue
+		}
+
+		if filepath.Ext(fi.Name()) != Extention {
+			continue
+		}
+
+		id := strings.TrimSuffix(filepath.Base(fi.Name()), filepath.Ext(Extention))
+
+		ids = append(ids, id)
+	}
+
+	return ids, nil
+}
+
 func (r *repository) Delete(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	kpath := "data/keystores/" + id + ".mst"
+	kpath := "data/keystores/" + id + Extention
 
 	if _, err := os.Stat(kpath); errors.Is(err, os.ErrNotExist) {
 		return keystore.ErrNotFound

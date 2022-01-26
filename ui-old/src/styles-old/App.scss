@@ -27,6 +27,9 @@ html, body {
     ////height: -webkit-fill-available;
     //background-color: #f9fafc;
     //user-select: none;
+    //-webkit-font-smoothing: antialiased;
+    //-moz-font-smoothing: antialiased;
+    //-o-font-smoothing: antialiased;
 }
 .hidden {
     display: none;
@@ -36,7 +39,6 @@ html, body {
 * {
     //font-family: 'Hack', monospace;
     font-family: 'Inter', sans-serif;
-
 }
 
 :root {

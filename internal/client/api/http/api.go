@@ -7,17 +7,15 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
+	application "myst/internal/client"
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
 	"myst/internal/client/core/keystoreservice"
 	"myst/pkg/config"
 	"myst/pkg/logger"
-
-	cors "github.com/rs/cors/wrapper/gin"
-
-	application "myst/internal/client"
 )
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json

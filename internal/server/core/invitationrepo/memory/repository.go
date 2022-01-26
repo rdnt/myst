@@ -15,7 +15,7 @@ type Repository struct {
 func (r *Repository) UserInvitations(userId string) ([]*invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-	
+
 	invs := []*invitation.Invitation{}
 
 	for _, inv := range r.invitations {

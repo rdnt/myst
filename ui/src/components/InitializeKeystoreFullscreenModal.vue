@@ -292,7 +292,7 @@ button {
 	width: 500px;
 
 	.footer {
-		margin-top: 100px;
+		margin-top: 70px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;

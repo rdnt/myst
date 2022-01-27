@@ -22,16 +22,18 @@ var log = logger.New("app", logger.Blue)
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
 	ErrInvalidKeystoreService    = errors.New("invalid keystore service")
+	ErrAuthenticationFailed      = errors.New("authentiation failed")
 )
 
 type Application interface {
 	Start()
+	Authenticate(password string) error
 	CreateKeystore(name string, password string) (*keystore.Keystore, error)
-	UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error)
+	//UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
 	KeystoreIds() ([]string, error)
-	Keystores() ([]*keystore.Keystore, error)
+	Keystores() (map[string]*keystore.Keystore, error)
 	HealthCheck()
 	SignIn(username, password string) error
 	SignOut() error
@@ -45,8 +47,10 @@ type application struct {
 
 type KeystoreRepository interface {
 	keystore.Repository
-	Unlock(keystoreId string, password string) (*keystore.Keystore, error)
-	HealthCheck()
+	Authenticate(password string) error
+	Initialize(password string) error
+	//Unlock(keystoreId string, password string) (*keystore.Keystore, error)
+	//HealthCheck()
 }
 
 func (app *application) Start() {
@@ -89,12 +93,17 @@ func (app *application) setup() {
 		keystore.WithName("my-keystore"),
 		keystore.WithPassword("pass"),
 	)
+
+	k, err = app.keystoreService.Create(
+		keystore.WithName("my-keystore"),
+		keystore.WithPassword("pass"),
+	)
 	if err != nil && err.Error() == "already exists" {
-		k, err = app.keystoreService.Unlock("0000000000000000000000", "pass")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		//k, err = app.keystoreService.Keystore("0000000000000000000000", "pass")
+		//if err != nil {
+		//	fmt.Println(err)
+		//	return
+		//}
 	} else if err != nil {
 		fmt.Println(err)
 		return

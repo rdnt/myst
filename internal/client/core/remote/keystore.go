@@ -88,5 +88,5 @@ func (r *remote) parseKeystore(gen *generated.Keystore) (*keystore.Keystore, err
 
 	return keystore.New(
 		keystore.WithId(gen.Id),
-	)
+	), nil
 }

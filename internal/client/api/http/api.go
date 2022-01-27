@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -13,7 +12,6 @@ import (
 	application "myst/internal/client"
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/core/domain/keystore/entry"
-	"myst/internal/client/core/keystoreservice"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -27,6 +25,26 @@ var log = logger.New("router", logger.Cyan)
 type API struct {
 	*gin.Engine
 	app application.Application
+}
+
+func (api *API) Authenticate(c *gin.Context) {
+	var req generated.AuthenticateRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if err := api.app.Authenticate(req.Password); err == application.ErrAuthenticationFailed {
+		c.Status(http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (api *API) CreateKeystore(c *gin.Context) {
@@ -67,46 +85,46 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	)
 }
 
-func (api *API) UnlockKeystore(c *gin.Context) {
-	keystoreId := c.Param("keystoreId")
-
-	var req generated.UnlockKeystoreRequest
-
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		Error(c, http.StatusBadRequest, err)
-		return
-	}
-
-	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
-	if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-		Error(c, http.StatusForbidden, err)
-		return
-	}
-	if err != nil {
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	entries := make([]generated.Entry, len(k.Entries()))
-
-	for i, e := range k.Entries() {
-		entries[i] = generated.Entry{
-			Id:       e.Id(),
-			Label:    e.Label(),
-			Username: e.Username(),
-			Password: e.Password(),
-		}
-	}
-
-	Success(
-		c, generated.Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
-			Entries: entries,
-		},
-	)
-}
+//func (api *API) UnlockKeystore(c *gin.Context) {
+//	keystoreId := c.Param("keystoreId")
+//
+//	var req generated.UnlockKeystoreRequest
+//
+//	err := c.ShouldBindJSON(&req)
+//	if err != nil {
+//		Error(c, http.StatusBadRequest, err)
+//		return
+//	}
+//
+//	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
+//	//if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+//	//	Error(c, http.StatusForbidden, err)
+//	//	return
+//	//}
+//	if err != nil {
+//		Error(c, http.StatusInternalServerError, err)
+//		return
+//	}
+//
+//	entries := make([]generated.Entry, len(k.Entries()))
+//
+//	for i, e := range k.Entries() {
+//		entries[i] = generated.Entry{
+//			Id:       e.Id(),
+//			Label:    e.Label(),
+//			Username: e.Username(),
+//			Password: e.Password(),
+//		}
+//	}
+//
+//	Success(
+//		c, generated.Keystore{
+//			Id:      k.Id(),
+//			Name:    k.Name(),
+//			Entries: entries,
+//		},
+//	)
+//}
 
 func (api *API) CreateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
@@ -120,10 +138,11 @@ func (api *API) CreateEntry(c *gin.Context) {
 	}
 
 	k, err := api.app.Keystore(keystoreId)
-	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if err != nil {
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -175,13 +194,14 @@ func (api *API) Keystore(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	k, err := api.app.Keystore(keystoreId)
-	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if err != nil {
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}

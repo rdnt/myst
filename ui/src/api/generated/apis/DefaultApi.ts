@@ -15,6 +15,9 @@
 
 import * as runtime from '../runtime';
 import {
+    AuthenticateRequest,
+    AuthenticateRequestFromJSON,
+    AuthenticateRequestToJSON,
     CreateEntryRequest,
     CreateEntryRequestFromJSON,
     CreateEntryRequestToJSON,
@@ -31,6 +34,10 @@ import {
     UnlockKeystoreRequestFromJSON,
     UnlockKeystoreRequestToJSON,
 } from '../models';
+
+export interface AuthenticateOperationRequest {
+    authenticateRequest: AuthenticateRequest;
+}
 
 export interface CreateEntryOperationRequest {
     keystoreId: string;
@@ -58,6 +65,38 @@ export interface UnlockKeystoreOperationRequest {
  * 
  */
 export class DefaultApi extends runtime.BaseAPI {
+
+    /**
+     * Attempts to authenticate the user
+     */
+    async authenticateRaw(requestParameters: AuthenticateOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters.authenticateRequest === null || requestParameters.authenticateRequest === undefined) {
+            throw new runtime.RequiredError('authenticateRequest','Required parameter requestParameters.authenticateRequest was null or undefined when calling authenticate.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/authenticate`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AuthenticateRequestToJSON(requestParameters.authenticateRequest),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Attempts to authenticate the user
+     */
+    async authenticate(requestParameters: AuthenticateOperationRequest, initOverrides?: RequestInit): Promise<void> {
+        await this.authenticateRaw(requestParameters, initOverrides);
+    }
 
     /**
      * Creates a new entry and adds it to the keystore

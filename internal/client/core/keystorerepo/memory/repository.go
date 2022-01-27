@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/core/keyrepo"
 	jsonkeystore "myst/internal/client/core/keystorerepo/keystore"
-	"myst/internal/client/core/sessionrepo"
 
 	"myst/pkg/crypto"
 	"myst/pkg/enclave"
@@ -20,7 +20,7 @@ var (
 type repository struct {
 	mux       sync.Mutex
 	keystores map[string][]byte
-	keyRepo   *sessionrepo.Repository
+	keyRepo   *keyrepo.Repository
 }
 
 func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
@@ -183,6 +183,6 @@ func (r *repository) Delete(id string) error {
 func New() *repository {
 	return &repository{
 		keystores: map[string][]byte{},
-		keyRepo:   sessionrepo.New(),
+		keyRepo:   keyrepo.New(),
 	}
 }

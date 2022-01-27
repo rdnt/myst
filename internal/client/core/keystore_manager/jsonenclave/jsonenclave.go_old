@@ -1,0 +1,53 @@
+package jsonenclave
+
+import (
+	"encoding/json"
+
+	"myst/internal/client/core/keystore_manager/enclave"
+)
+
+type Enclave struct {
+	Keystores []Keystore `json:"keystores"`
+}
+
+type Keystore struct {
+	Id      string  `json:"id"`
+	Name    string  `json:"name"`
+	Version int     `json:"version"`
+	Entries []Entry `json:"entries"`
+}
+
+type Entry struct {
+	Id       string `json:"id"`
+	Label    string `json:"label"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func Marshal(e *enclave.Enclave) ([]byte, error) {
+	je := Enclave{}
+
+	keystores := e.Keystores()
+	je.Keystores = make([]Keystore, len(keystores))
+
+	for i, k := range e.Keystores() {
+		entries := k.Entries()
+		je.Keystores[i] = Keystore{
+			Id:      k.Id(),
+			Name:    k.Name(),
+			Version: k.Version(),
+			Entries: make([]Entry, len(entries)),
+		}
+
+		for j, e := range entries {
+			je.Keystores[i].Entries[j] = Entry{
+				Id:       e.Id(),
+				Label:    e.Label(),
+				Username: e.Username(),
+				Password: e.Password(),
+			}
+		}
+	}
+
+	return json.Marshal(je)
+}

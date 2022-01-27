@@ -5,15 +5,16 @@ import (
 
 	application "myst/internal/client"
 	"myst/internal/client/core/domain/keystore"
-	keystorerepo "myst/internal/client/core/keystorerepo/fs"
+
+	//keystorerepo "myst/internal/client/core/keystorerepo/fs"
 
 	"myst/pkg/logger"
 )
 
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
-	ErrAuthenticationRequired    = keystore.ErrAuthenticationRequired
-	ErrAuthenticationFailed      = keystorerepo.ErrAuthenticationFailed
+	//ErrAuthenticationRequired    = keystore.ErrAuthenticationRequired
+	//ErrAuthenticationFailed      = keystorerepo.ErrAuthenticationFailed
 )
 
 type service struct {
@@ -30,36 +31,45 @@ func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 	k, err := s.keystoreRepo.Keystore(id)
-	if errors.Is(err, keystore.ErrAuthenticationRequired) {
-		return nil, ErrAuthenticationRequired
-	}
+	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
+	//	return nil, ErrAuthenticationRequired
+	//}
 
 	return k, err
 }
 
-func (s *service) Keystores() ([]*keystore.Keystore, error) {
+func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
 	ks, err := s.keystoreRepo.Keystores()
-	if errors.Is(err, keystore.ErrAuthenticationRequired) {
-		return nil, ErrAuthenticationRequired
-	}
+	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
+	//	return nil, ErrAuthenticationRequired
+	//}
 
 	return ks, err
 }
 
-func (s *service) Unlock(id string, password string) (*keystore.Keystore, error) {
-	k, err := s.keystoreRepo.Unlock(id, password)
-	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {
-		return nil, ErrAuthenticationFailed
-	}
-
-	return k, err
-}
+//func (s *service) Unlock(id string, password string) (*keystore.Keystore, error) {
+//	k, err := s.keystoreRepo.Unlock(id, password)
+//	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {
+//		return nil, ErrAuthenticationFailed
+//	}
+//
+//	return k, err
+//}
 
 func (s *service) Update(k *keystore.Keystore) error {
 	err := s.keystoreRepo.Update(k)
-	if errors.Is(err, keystore.ErrAuthenticationRequired) {
-		return ErrAuthenticationRequired
-	}
+	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
+	//	return ErrAuthenticationRequired
+	//}
+
+	return err
+}
+
+func (s *service) Authenticate(password string) error {
+	err := s.keystoreRepo.Authenticate(password)
+	//if errors.Is(err, keystore.ErrAuthenticationFailed) {
+	//	return ErrAuthenticationRequired
+	//}
 
 	return err
 }

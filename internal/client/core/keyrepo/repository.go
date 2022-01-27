@@ -1,4 +1,4 @@
-package sessionrepo
+package keyrepo
 
 import (
 	"fmt"
@@ -21,6 +21,12 @@ func (r *Repository) Set(id string, key []byte) {
 	defer r.mux.Unlock()
 
 	r.keys[id] = key
+}
+
+func (r *Repository) Authenticate(password string) error {
+	//r.mux.Lock()
+	//defer r.mux.Unlock()
+	return nil
 }
 
 func (r *Repository) Key(id string) ([]byte, error) {

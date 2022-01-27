@@ -4,39 +4,34 @@ import (
 	"myst/internal/client/core/domain/keystore/entry"
 )
 
-type Option func(*Keystore) error
+type Option func(*Keystore)
 
 func WithId(id string) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.id = id
-		return nil
 	}
 }
 
 func WithName(name string) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.name = name
-		return nil
 	}
 }
 
 func WithVersion(version int) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.version = version
-		return nil
 	}
 }
 
 func WithPassword(password string) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.password = password
-		return nil
 	}
 }
 
 func WithEntries(entries []entry.Entry) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.entries = entries
-		return nil
 	}
 }

@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AuthenticateRequest';
 export * from './CreateEntryRequest';
 export * from './CreateKeystoreRequest';
 export * from './Entry';

@@ -1,0 +1,118 @@
+package keystore_manager
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+
+	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/core/keystore_manager/enclave"
+	"myst/internal/client/core/keystore_manager/jsonenclave"
+	"myst/pkg/crypto"
+	diskenclave "myst/pkg/enclave"
+)
+
+var (
+	ErrAuthenticationFailed = errors.New("authentication failed")
+
+	checkKey = []byte{
+		0x88, 0x80, 0xc1, 0x7e, 0x69, 0xbe, 0xa3, 0x03,
+		0x50, 0x36, 0x5b, 0x52, 0x13, 0x3f, 0x6a, 0xa2,
+		0xb2, 0x7a, 0xc0, 0xa2, 0x24, 0x62, 0x53, 0xa3,
+		0xf2, 0xa4, 0x93, 0xa2, 0x86, 0x31, 0xb0, 0x69,
+	}
+)
+
+type SealedEnclave struct {
+	salt    []byte
+	mac     []byte
+	check   []byte
+	payload []byte
+}
+
+type Enclave struct {
+	salt      []byte
+	keystores []keystore.Keystore
+}
+
+// TODO: rename to EnclaveService, separare repository
+type EnclaveManager struct {
+	payload []byte
+	enclave *enclave.Enclave
+	//keystores    map[string][]byte
+	//keystoreKeys map[string][]byte
+	//checkKey     []byte
+	//password     string
+	//enclave      []byte
+}
+
+func New() *EnclaveManager {
+	return &EnclaveManager{
+		//keystores:    make(map[string][]byte),
+		//keystoreKeys: make(map[string][]byte),
+	}
+}
+
+func (m *EnclaveManager) Create(defaultKeystoreName, password string) (*enclave.Enclave, error) {
+	p := crypto.DefaultArgon2IdParams
+
+	e := enclave.New(
+		enclave.WithKeystores(
+			[]*keystore.Keystore{
+				keystore.New(keystore.WithName(defaultKeystoreName)),
+			},
+		),
+	)
+
+	b, err := jsonenclave.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return nil, err
+	}
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	b, err = diskenclave.Create(b, key, salt)
+	if err != nil {
+		return nil, err
+	}
+
+	m.payload = b
+
+	fmt.Println("created")
+
+	return e, nil
+}
+
+func (m *EnclaveManager) Authenticate(password string) error {
+	if m.payload == nil {
+		return errors.New("enclave not found")
+	}
+
+	salt, err := diskenclave.GetSaltFromData(m.payload)
+	if err != nil {
+		return err
+	}
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	b, err := diskenclave.Unlock(m.payload, key)
+	if errors.Is(err, diskenclave.ErrAuthenticationFailed) {
+		return fmt.Errorf("authentication failed")
+	} else if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(b, &m.enclave)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("authenticated")
+
+	return nil
+}

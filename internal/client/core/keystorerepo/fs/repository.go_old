@@ -1,6 +1,7 @@
 package keystorerepo
 
 import (
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"os"
@@ -8,10 +9,13 @@ import (
 	"strings"
 	"sync"
 
-	"myst/internal/client/core/domain/keystore"
-	jsonkeystore "myst/internal/client/core/keystorerepo/keystore"
-	"myst/internal/client/core/sessionrepo"
+	"myst/internal/client/core/keystore_manager/jsonenclave"
 
+	"myst/internal/client/core/keyrepo"
+
+	"myst/internal/client/core/domain/keystore"
+	enclave2 "myst/internal/client/core/keystore_manager/enclave"
+	"myst/internal/client/core/keystorerepo/jsonkeystore"
 	"myst/pkg/crypto"
 	"myst/pkg/enclave"
 )
@@ -24,58 +28,172 @@ var (
 
 type repository struct {
 	mux     sync.Mutex
-	keyRepo *sessionrepo.Repository
+	keyRepo *keyrepo.Repository
+}
+
+type SealedEnclave struct {
+	Salt    []byte `json:"salt"`
+	MAC     []byte `json:"mac"`
+	Payload []byte `json:"payload"`
+}
+
+type Data struct {
+	Keystores []jsonkeystore.Keystore `json:"keystores"`
+	Keys      map[string][]byte       `json:"keys"`
 }
 
 func (r *repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	k, err := keystore.New(opts...)
+	k := keystore.New(opts...)
+
+	err := r.createEnclave(k.Password(), k)
 	if err != nil {
 		return nil, err
 	}
 
-	//err = r.verifyOrCreateKey(k.password())
+	//kpath := "data/keystores/" + k.Id() + Extention
+	//
+	//if _, err := os.Stat(kpath); err == nil {
+	//	return nil, fmt.Errorf("already exists")
+	//} else if !errors.Is(err, os.ErrNotExist) {
+	//	return nil, err
+	//}
+	//
+	//b, err := jsonkeystore.Marshal(k)
 	//if err != nil {
 	//	return nil, err
 	//}
+	//
+	//p := crypto.DefaultArgon2IdParams
+	//
+	//salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//key := crypto.Argon2Id([]byte(k.Password()), salt)
+	//
+	//b, err = enclave.Create(b, key, salt)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//err = os.WriteFile(kpath, b, 0600)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//err = os.WriteFile("data/key", append(key, salt...), 0600)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//r.keyRepo.Set(k.Id(), key)
 
-	kpath := "data/keystores/" + k.Id() + Extention
+	return k, nil
+}
 
-	if _, err := os.Stat(kpath); err == nil {
-		return nil, fmt.Errorf("already exists")
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return nil, err
+func (r *repository) createEnclave(password string, k *keystore.Keystore) error {
+	p := crypto.DefaultArgon2IdParams
+
+	path := "data/enclave.myst"
+
+	e := enclave2.New(
+		enclave2.WithKeystores(k),
+	)
+
+	//b, err := jsonkeystore.Marshal(k)
+	//if err != nil {
+	//	return err
+	//}
+
+	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	if err != nil {
+		return err
 	}
 
-	b, err := jsonkeystore.Marshal(k)
+	keystoreKey, err := crypto.GenerateRandomBytes(uint(p.KeyLength))
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(key, keystoreKey)
+	if err != nil {
+		return err
+	}
+
+	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(key, keystoreKey)
+	if err != nil {
+		return err
+	}
+
+	enc := Enclave{
+		Salt: salt,
+		Keystores: []Keystore{
+			{
+				Payload: encryptedKeystoreKey,
+				Key:     encryptedKeystoreKey,
+			},
+		},
+	}
+
+	b, err := jsonenclave.Marshal(e)
+	if err != nil {
+		return err
+	}
+
+	b, err = crypto.AES256CBC_Encrypt(keystoreKey, append(encryptedKeystoreKey, b...))
+	if err != nil {
+		return err
+	}
+
+	// authenticate
+	mac := crypto.HMAC_SHA256(key, b)
+
+	// prepend mac to the ciphertext
+	b = append(mac, b...)
+
+	// prepend salt to the mac-ciphertext
+	b = append(salt, b...)
+
+	err = os.WriteFile(path, b, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) Authenticate(password string) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	kpath := "data/key"
+
+	b, err := os.ReadFile(kpath)
+	if err != nil {
+		return err
 	}
 
 	p := crypto.DefaultArgon2IdParams
 
-	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
-	if err != nil {
-		return nil, err
+	if len(b) != int(p.KeyLength+p.SaltLength) {
+		return fmt.Errorf("invalid length")
 	}
 
-	key := crypto.Argon2Id([]byte(k.Password()), salt)
+	expected, salt := b[:p.KeyLength], b[p.KeyLength:]
 
-	b, err = enclave.Create(b, key, salt)
-	if err != nil {
-		return nil, err
+	key := crypto.Argon2Id([]byte(password), salt)
+
+	if subtle.ConstantTimeCompare(key, expected) != 1 {
+		return ErrAuthenticationFailed
 	}
 
-	err = os.WriteFile(kpath, b, 0600)
-	if err != nil {
-		return nil, err
-	}
-
-	r.keyRepo.Set(k.Id(), key)
-
-	return k, nil
+	return nil
 }
 
 func (r *repository) Unlock(id string, password string) (*keystore.Keystore, error) {
@@ -271,6 +389,6 @@ func (r *repository) Delete(id string) error {
 
 func New() *repository {
 	return &repository{
-		keyRepo: sessionrepo.New(),
+		keyRepo: keyrepo.New(),
 	}
 }

@@ -3,7 +3,7 @@ package main
 import (
 	application "myst/internal/client"
 	"myst/internal/client/api/http"
-	keystorerepo "myst/internal/client/core/keystorerepo/fs"
+	"myst/internal/client/core/enclaverepo"
 	"myst/internal/client/core/keystoreservice"
 	"myst/pkg/logger"
 )
@@ -11,7 +11,10 @@ import (
 var log = logger.New("client", logger.Red)
 
 func main() {
-	keystoreRepo := keystorerepo.New()
+	keystoreRepo, err := enclaverepo.New("data")
+	if err != nil {
+		panic(err)
+	}
 
 	keystoreService, err := keystoreservice.New(
 		keystoreservice.WithKeystoreRepository(keystoreRepo),

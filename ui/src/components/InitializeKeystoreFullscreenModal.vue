@@ -1,6 +1,6 @@
 <template>
 	<div class="modal">
-		<div class="modal-overlay" v-on:click="hide"/>
+		<div class="modal-overlay"/>
 		<div class="modal-content">
 			<form class="setup" @submit.prevent="submit">
 				<h4>Myst</h4>
@@ -31,7 +31,7 @@
 						<br/>
 						<div :class="{invalid: !passwordValid && warnings}" class="input">
 							<label>Master password</label>
-							<expanding-textarea ref="password" v-model="password" class="password-input"
+							<expanding-textarea ref="passwordInput" v-model="password" class="password-input"
 												placeholder="Master password"
 												@keydown.enter.prevent="submit"/>
 							<span>too weak</span>
@@ -52,11 +52,17 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, ref} from 'vue'
 import ExpandingTextarea from './ExpandingTextarea.vue'
 import api from "../api";
+import expandingTextarea from "src/components/ExpandingTextarea.vue";
 
 export default defineComponent({
+	setup() {
+		const passwordInput = ref<InstanceType<typeof ExpandingTextarea>>()
+
+		return { passwordInput }
+	},
 	name: 'InitializeKeystoreFullscreenModal',
 	components: {ExpandingTextarea},
 	data: () => ({
@@ -103,8 +109,7 @@ export default defineComponent({
 				this.step = 2
 				this.warnings = true
 				this.$nextTick(() => {
-					const textarea = this.$refs.password as ExpandingTextarea;
-					textarea.$el.focus();
+					this.passwordInput?.$el.focus();
 				})
 			} else if (this.nameValid && this.passwordValid) {
 

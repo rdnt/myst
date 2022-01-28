@@ -1,6 +1,7 @@
 apis/DefaultApi.ts
 apis/index.ts
 index.ts
+models/AuthenticateRequest.ts
 models/CreateEntryRequest.ts
 models/CreateKeystoreRequest.ts
 models/Entry.ts

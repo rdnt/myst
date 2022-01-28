@@ -11,15 +11,17 @@ type Repository interface {
 	Keystore(id string) (*Keystore, error)
 	Update(k *Keystore) error
 	KeystoreIds() ([]string, error)
-	Keystores() ([]*Keystore, error)
+	Keystores() (map[string]*Keystore, error)
 	Delete(id string) error
 }
 
 type Service interface {
-	Create(opts ...Option) (*Keystore, error)
+	Create(name string) (*Keystore, error)
+	Initialize(name, password string) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)
 	KeystoreIds() ([]string, error)
-	Keystores() ([]*Keystore, error)
-	Unlock(id string, pass string) (*Keystore, error)
+	Keystores() (map[string]*Keystore, error)
+	//Unlock(id string, pass string) (*Keystore, error)
 	Update(k *Keystore) error
+	Authenticate(password string) error
 }

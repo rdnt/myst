@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"myst/internal/client/core/domain/invitation"
+	"myst/internal/client/application/domain/invitation"
 	"myst/internal/server/api/http/generated"
 )
 

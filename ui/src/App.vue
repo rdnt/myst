@@ -1,9 +1,9 @@
 <template>
   <div>
 		<span>{{!ready ? 'Loading...' : ''}}</span>
-		<span>{{ error ? 'Request failed: ' + error : undefined }}</span>
+		<span>{{ error ? 'Request failed: ' + JSON.stringify(error) : undefined }}</span>
     <InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
-		<Login v-if="login" @login="console.log($event)" />
+		<Login v-if="login" @login="loggedIn()" />
 		<div
 			id="entries"
 			v-if="keystores.length > 0"
@@ -26,7 +26,7 @@ export default defineComponent({
 	data(): {
 		onboarding: boolean,
 		login: boolean,
-		error: string | undefined,
+		error: any,
 		ready: boolean,
 		keystore: Keystore | undefined,
 		keystores: Keystore[],
@@ -46,19 +46,36 @@ export default defineComponent({
   },
   methods: {
 		init() {
-			api.keystoreIds().then((ids) => {
-				this.onboarding = ids.length == 0;
-				this.login = ids.length > 0;
-			}).catch(error => {
-				this.error = error;
-			}).finally(() => {
-				this.ready = true;
-			});
+			// api.keystoreIds().then((ids) => {
+			// 	this.onboarding = ids.length == 0;
+			// 	this.login = ids.length > 0;
+			// }).catch(error => {
+			// 	this.error = error;
+			// }).finally(() => {
+			// 	this.ready = true;
+			// });
+
+			this.login = true;
+			this.ready = true;
 		},
 		keystoreCreated(keystore: Keystore) {
 			this.onboarding = false;
 			this.keystore = keystore;
 			this.keystores = [keystore];
+		},
+		loggedIn() {
+			console.log("logged in");
+
+			api.keystores().then((keystores) => {
+				this.keystores = keystores;
+				this.login = false
+				// this.onboarding = ids.length == 0;
+				// this.login = ids.length > 0;
+			}).catch(error => {
+				this.error = error;
+			}).finally(() => {
+				this.ready = true;
+			});
 		}
 	},
 });

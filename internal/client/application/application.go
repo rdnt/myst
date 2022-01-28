@@ -7,13 +7,11 @@ import (
 
 	"golang.org/x/crypto/curve25519"
 
+	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/keystore/entry"
+	"myst/internal/client/application/keystoreservice"
+	"myst/internal/client/remote"
 	"myst/pkg/crypto"
-
-	"myst/internal/client/core/remote"
-
-	"myst/internal/client/core/domain/keystore"
-	"myst/internal/client/core/domain/keystore/entry"
-
 	"myst/pkg/logger"
 )
 
@@ -22,16 +20,18 @@ var log = logger.New("app", logger.Blue)
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
 	ErrInvalidKeystoreService    = errors.New("invalid keystore service")
+	ErrAuthenticationFailed      = errors.New("authentiation failed")
 )
 
 type Application interface {
 	Start()
-	CreateKeystore(name string, password string) (*keystore.Keystore, error)
-	UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error)
+	Initialize(name, password string) (*keystore.Keystore, error)
+	Authenticate(password string) error
+	CreateKeystore(name string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
 	KeystoreIds() ([]string, error)
-	Keystores() ([]*keystore.Keystore, error)
+	Keystores() (map[string]*keystore.Keystore, error)
 	HealthCheck()
 	SignIn(username, password string) error
 	SignOut() error
@@ -39,14 +39,10 @@ type Application interface {
 
 type application struct {
 	keystoreService keystore.Service
-	keystoreRepo    KeystoreRepository
-	remote          remote.Client
-}
-
-type KeystoreRepository interface {
-	keystore.Repository
-	Unlock(keystoreId string, password string) (*keystore.Keystore, error)
-	HealthCheck()
+	repositories    struct {
+		keystoreRepo keystoreservice.KeystoreRepository
+		remote       remote.Client
+	}
 }
 
 func (app *application) Start() {
@@ -66,38 +62,33 @@ func New(opts ...Option) (*application, error) {
 		}
 	}
 
-	if app.keystoreRepo == nil {
+	if app.repositories.keystoreRepo == nil {
 		return nil, ErrInvalidKeystoreRepository
 	}
 
-	if app.keystoreService == nil {
-		return nil, ErrInvalidKeystoreService
+	keystoreService, err := keystoreservice.New(
+		keystoreservice.WithKeystoreRepository(app.repositories.keystoreRepo),
+	)
+	if err != nil {
+		panic(err)
 	}
+
+	app.keystoreService = keystoreService
 
 	rc, err := remote.New()
 	if err != nil {
 		return nil, err
 	}
 
-	app.remote = rc
+	app.repositories.remote = rc
 
 	return app, nil
 }
 
 func (app *application) setup() {
-	k, err := app.keystoreService.Create(
-		keystore.WithName("my-keystore"),
-		keystore.WithPassword("pass"),
-	)
-	if err != nil && err.Error() == "already exists" {
-		k, err = app.keystoreService.Unlock("0000000000000000000000", "pass")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	} else if err != nil {
-		fmt.Println(err)
-		return
+	k, err := app.keystoreService.Initialize("my-keystore", "pass")
+	if err != nil {
+		panic(err)
 	}
 
 	for i := 0; i < 0; i++ {
@@ -158,7 +149,7 @@ func (app *application) setup() {
 
 	log.Debug(k)
 
-	err = app.remote.SignIn("rdnt", "1234")
+	err = app.repositories.remote.SignIn("rdnt", "1234")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -172,7 +163,7 @@ func (app *application) setup() {
 		return
 	}
 
-	sk, err := app.remote.CreateKeystore(
+	sk, err := app.repositories.remote.CreateKeystore(
 		"my-keystore", b,
 	)
 	if err != nil {
@@ -182,7 +173,7 @@ func (app *application) setup() {
 
 	log.Debug(sk)
 
-	sk2, err := app.remote.Keystore(
+	sk2, err := app.repositories.remote.Keystore(
 		sk.Id(),
 	)
 	if err != nil {
@@ -192,7 +183,7 @@ func (app *application) setup() {
 
 	log.Debug(sk2)
 
-	sks, err := app.remote.Keystores()
+	sks, err := app.repositories.remote.Keystores()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -212,7 +203,7 @@ func (app *application) setup() {
 		return
 	}
 
-	inv, err := app.remote.CreateInvitation(
+	inv, err := app.repositories.remote.CreateInvitation(
 		"0000000000000000000000", "abcd", u1pub,
 	)
 	if err != nil {
@@ -220,7 +211,7 @@ func (app *application) setup() {
 		return
 	}
 
-	inv, err = app.remote.AcceptInvitation(
+	inv, err = app.repositories.remote.AcceptInvitation(
 		"0000000000000000000000", inv.Id(), u2pub,
 	)
 	if err != nil {
@@ -228,7 +219,7 @@ func (app *application) setup() {
 		return
 	}
 
-	inv, err = app.remote.FinalizeInvitation(
+	inv, err = app.repositories.remote.FinalizeInvitation(
 		"0000000000000000000000", inv.Id(), u2pub,
 	)
 	if err != nil {

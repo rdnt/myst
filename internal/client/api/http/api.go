@@ -1,19 +1,19 @@
 package http
 
 import (
-	"errors"
 	"io/ioutil"
 	"net/http"
+
+	"myst/internal/client/application/domain/keystore"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
-	application "myst/internal/client"
 	"myst/internal/client/api/http/generated"
-	"myst/internal/client/core/domain/keystore/entry"
-	"myst/internal/client/core/keystoreservice"
+	"myst/internal/client/application"
+	"myst/internal/client/application/domain/keystore/entry"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -29,6 +29,26 @@ type API struct {
 	app application.Application
 }
 
+func (api *API) Authenticate(c *gin.Context) {
+	var req generated.AuthenticateRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if err := api.app.Authenticate(req.Password); err == application.ErrAuthenticationFailed {
+		c.Status(http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func (api *API) CreateKeystore(c *gin.Context) {
 	var req generated.CreateKeystoreRequest
 
@@ -38,13 +58,24 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := api.app.CreateKeystore(
-		req.Name,
-		req.Password,
-	)
-	if err != nil {
-		Error(c, http.StatusInternalServerError, err)
-		return
+	var k *keystore.Keystore
+	if req.Password != nil {
+		k, err = api.app.Initialize(
+			req.Name,
+			*req.Password,
+		)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
+	} else {
+		k, err = api.app.CreateKeystore(req.Name)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))
@@ -67,46 +98,46 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	)
 }
 
-func (api *API) UnlockKeystore(c *gin.Context) {
-	keystoreId := c.Param("keystoreId")
-
-	var req generated.UnlockKeystoreRequest
-
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		Error(c, http.StatusBadRequest, err)
-		return
-	}
-
-	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
-	if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-		Error(c, http.StatusForbidden, err)
-		return
-	}
-	if err != nil {
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	entries := make([]generated.Entry, len(k.Entries()))
-
-	for i, e := range k.Entries() {
-		entries[i] = generated.Entry{
-			Id:       e.Id(),
-			Label:    e.Label(),
-			Username: e.Username(),
-			Password: e.Password(),
-		}
-	}
-
-	Success(
-		c, generated.Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
-			Entries: entries,
-		},
-	)
-}
+//func (api *API) UnlockKeystore(c *gin.Context) {
+//	keystoreId := c.Param("keystoreId")
+//
+//	var req generated.UnlockKeystoreRequest
+//
+//	err := c.ShouldBindJSON(&req)
+//	if err != nil {
+//		Error(c, http.StatusBadRequest, err)
+//		return
+//	}
+//
+//	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
+//	//if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+//	//	Error(c, http.StatusForbidden, err)
+//	//	return
+//	//}
+//	if err != nil {
+//		Error(c, http.StatusInternalServerError, err)
+//		return
+//	}
+//
+//	entries := make([]generated.Entry, len(k.Entries()))
+//
+//	for i, e := range k.Entries() {
+//		entries[i] = generated.Entry{
+//			Id:       e.Id(),
+//			Label:    e.Label(),
+//			Username: e.Username(),
+//			Password: e.Password(),
+//		}
+//	}
+//
+//	Success(
+//		c, generated.Keystore{
+//			Id:      k.Id(),
+//			Name:    k.Name(),
+//			Entries: entries,
+//		},
+//	)
+//}
 
 func (api *API) CreateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
@@ -120,10 +151,12 @@ func (api *API) CreateEntry(c *gin.Context) {
 	}
 
 	k, err := api.app.Keystore(keystoreId)
-	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if err != nil {
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -134,18 +167,21 @@ func (api *API) CreateEntry(c *gin.Context) {
 		entry.WithPassword(req.Password),
 	)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = k.AddEntry(*e)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = api.app.UpdateKeystore(k)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -175,13 +211,15 @@ func (api *API) Keystore(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	k, err := api.app.Keystore(keystoreId)
-	if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-		Error(c, http.StatusForbidden, err)
-		return
-	} else if err != nil {
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -206,14 +244,40 @@ func (api *API) Keystore(c *gin.Context) {
 	)
 }
 
-func (api *API) KeystoreIds(c *gin.Context) {
-	kids, err := api.app.KeystoreIds()
+func (api *API) Keystores(c *gin.Context) {
+	ks, err := api.app.Keystores()
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	Success(c, kids)
+	keystores := []generated.Keystore{}
+
+	for _, k := range ks {
+		entries := []generated.Entry{}
+
+		for _, e := range k.Entries() {
+			entries = append(
+				entries, generated.Entry{
+					Id:       e.Id(),
+					Label:    e.Label(),
+					Username: e.Username(),
+					Password: e.Password(),
+				},
+			)
+		}
+
+		keystores = append(
+			keystores, generated.Keystore{
+				Id:      k.Id(),
+				Name:    k.Name(),
+				Entries: entries,
+			},
+		)
+	}
+
+	Success(c, keystores)
 }
 
 func (api *API) HealthCheck(_ *gin.Context) {

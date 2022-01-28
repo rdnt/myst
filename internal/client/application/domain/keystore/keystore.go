@@ -3,9 +3,8 @@ package keystore
 import (
 	"errors"
 
-	"myst/internal/client/core/domain/keystore/entry"
+	"myst/internal/client/application/domain/keystore/entry"
 
-	"myst/pkg/logger"
 	"myst/pkg/uuid"
 )
 
@@ -77,7 +76,7 @@ func (k *Keystore) SetPassword(password string) {
 	k.password = password
 }
 
-func New(opts ...Option) (*Keystore, error) {
+func New(opts ...Option) *Keystore {
 	k := &Keystore{
 		id:      uuid.New().String(),
 		version: 1,
@@ -85,15 +84,11 @@ func New(opts ...Option) (*Keystore, error) {
 	}
 
 	for _, opt := range opts {
-		err := opt(k)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
+		opt(k)
 	}
 
 	// TODO: remove this
 	k.id = "0000000000000000000000"
 
-	return k, nil
+	return k
 }

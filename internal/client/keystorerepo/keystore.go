@@ -1,31 +1,29 @@
-package jsonkeystore
+package keystorerepo
 
 import (
-	"encoding/json"
-
-	"myst/internal/client/core/domain/keystore"
-	"myst/internal/client/core/domain/keystore/entry"
+	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/keystore/entry"
 )
 
-type Keystore struct {
-	Id      string  `json:"id"`
-	Name    string  `json:"name"`
-	Version int     `json:"version"`
-	Entries []Entry `json:"entries"`
+type JSONKeystore struct {
+	Id      string      `json:"id"`
+	Name    string      `json:"name"`
+	Version int         `json:"version"`
+	Entries []JSONEntry `json:"entries"`
 }
 
-type Entry struct {
+type JSONEntry struct {
 	Id       string `json:"id"`
 	Label    string `json:"label"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func Marshal(k *keystore.Keystore) ([]byte, error) {
-	entries := make([]Entry, len(k.Entries()))
+func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
+	entries := make([]JSONEntry, len(k.Entries()))
 
 	for i, e := range k.Entries() {
-		entries[i] = Entry{
+		entries[i] = JSONEntry{
 			Id:       e.Id(),
 			Label:    e.Label(),
 			Username: e.Username(),
@@ -33,23 +31,15 @@ func Marshal(k *keystore.Keystore) ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(
-		Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
-			Version: k.Version(),
-			Entries: entries,
-		},
-	)
+	return JSONKeystore{
+		Id:      k.Id(),
+		Name:    k.Name(),
+		Version: k.Version(),
+		Entries: entries,
+	}
 }
 
-func Unmarshal(b []byte) (*keystore.Keystore, error) {
-	var k Keystore
-
-	if err := json.Unmarshal(b, &k); err != nil {
-		return nil, err
-	}
-
+func ToKeystore(k JSONKeystore) (*keystore.Keystore, error) {
 	entries := make([]entry.Entry, len(k.Entries))
 
 	for i, e := range k.Entries {
@@ -71,5 +61,5 @@ func Unmarshal(b []byte) (*keystore.Keystore, error) {
 		keystore.WithName(k.Name),
 		keystore.WithVersion(k.Version),
 		keystore.WithEntries(entries),
-	)
+	), nil
 }

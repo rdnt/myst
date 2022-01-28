@@ -27,11 +27,11 @@ export const mainStore = defineStore('main', {
         load() {
             this.ready = true
             console.log(api)
-            api.keystoreIds().then((ids) => {
-                this.onboarding = ids.length == 0;
-            }).finally(() => {
-                this.ready = true
-            })
+            // api.keystoreIds().then((ids) => {
+            //     this.onboarding = ids.length == 0;
+            // }).finally(() => {
+            //     this.ready = true
+            // })
         }
     },
 })

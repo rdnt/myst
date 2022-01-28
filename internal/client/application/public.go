@@ -1,14 +1,21 @@
 package application
 
 import (
+	"errors"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/keystoreservice"
+)
+
+var (
+	ErrInitializationRequired = errors.New("initialization required")
+	ErrAuthenticationRequired = errors.New("authentication required")
 )
 
 func (app *application) Authenticate(password string) error {
 	err := app.keystoreService.Authenticate(password)
-	//if err == keystorerepo.ErrAuthenticationFailed {
-	//	return ErrAuthenticationFailed
-	//}
+	if err == keystoreservice.ErrAuthenticationFailed {
+		return ErrAuthenticationFailed
+	}
 
 	return err
 }
@@ -26,11 +33,14 @@ func (app *application) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (app *application) Keystores() (map[string]*keystore.Keystore, error) {
-	return app.keystoreService.Keystores()
-}
+	ks, err := app.keystoreService.Keystores()
+	if err == keystoreservice.ErrInitializationRequired {
+		return nil, ErrInitializationRequired
+	} else if err == keystoreservice.ErrAuthenticationRequired {
+		return nil, ErrAuthenticationRequired
+	}
 
-func (app *application) KeystoreIds() ([]string, error) {
-	return app.keystoreService.KeystoreIds()
+	return ks, err
 }
 
 func (app *application) UpdateKeystore(k *keystore.Keystore) error {
@@ -38,8 +48,7 @@ func (app *application) UpdateKeystore(k *keystore.Keystore) error {
 }
 
 func (app *application) HealthCheck() {
-	// TODO: add health check to enclavekeystorerepo
-	//app.keystoreRepo.HealthCheck()
+	app.keystoreService.HealthCheck()
 }
 
 func (app *application) SignIn(username, password string) error {

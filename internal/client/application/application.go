@@ -30,7 +30,6 @@ type Application interface {
 	CreateKeystore(name string) (*keystore.Keystore, error)
 	UpdateKeystore(k *keystore.Keystore) error
 	Keystore(id string) (*keystore.Keystore, error)
-	KeystoreIds() ([]string, error)
 	Keystores() (map[string]*keystore.Keystore, error)
 	HealthCheck()
 	SignIn(username, password string) error

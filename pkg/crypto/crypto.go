@@ -19,9 +19,9 @@ import (
 var (
 	debug                 = false
 	DefaultArgon2IdParams = Argon2IdParams{
-		Memory:      256 * 1024,
-		Time:        10,
-		Parallelism: 2,
+		Memory:      64 * 1024,
+		Time:        1,
+		Parallelism: 1,
 		SaltLength:  16,
 		KeyLength:   32,
 	}

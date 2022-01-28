@@ -8,16 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-
-	"myst/pkg/regex"
-
-	"myst/internal/server/api/http/generated"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
+	"github.com/golang-jwt/jwt"
 
+	"myst/internal/server/api/http/generated"
 	"myst/pkg/logger"
+	"myst/pkg/regex"
 )
 
 func NoRoute(c *gin.Context) {

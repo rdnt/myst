@@ -47,7 +47,6 @@ export default defineComponent({
 	methods: {
 		submit() {
 			if (this.passwordValid) {
-
 				// TODO: unlock all keystores at once
 				api.authenticate({
 					authenticateRequest: {

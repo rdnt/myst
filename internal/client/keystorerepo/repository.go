@@ -3,7 +3,9 @@ package keystorerepo
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"myst/internal/client/application/keystoreservice"
 	"os"
 	"path"
 	"sync"
@@ -27,7 +29,6 @@ type Repository struct {
 }
 
 func New(path string) (*Repository, error) {
-
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		return nil, err
@@ -78,28 +79,19 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 	return k, nil
 }
 
-func (r *Repository) KeystoreIds() ([]string, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
-	}
-
-	e, err := r.enclave()
-	if err != nil {
-		return nil, err
-	}
-
-	return e.KeystoreIds(), nil
-}
-
 func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	_, err := os.ReadFile(r.enclavePath())
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, keystoreservice.ErrInitializationRequired
+	} else if err != nil {
+		return nil, err
+	}
+
 	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
+		return nil, keystoreservice.ErrAuthenticationRequired
 	}
 
 	e, err := r.enclave()
@@ -235,7 +227,7 @@ func (r *Repository) Authenticate(password string) error {
 
 	valid := crypto.VerifyHMAC_SHA256(key, mac, b)
 	if !valid {
-		return fmt.Errorf("authentication failed")
+		return keystoreservice.ErrAuthenticationFailed
 	}
 
 	r.mux.Lock()

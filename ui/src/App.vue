@@ -8,7 +8,7 @@
 			id="entries"
 			v-if="keystores.length > 0"
 		>
-			KEYSTORES
+			KEYSTORES {{JSON.stringify(keystores)}}
 		</div>
   </div>
 </template>
@@ -46,14 +46,22 @@ export default defineComponent({
   },
   methods: {
 		init() {
-			// api.keystoreIds().then((ids) => {
-			// 	this.onboarding = ids.length == 0;
-			// 	this.login = ids.length > 0;
-			// }).catch(error => {
-			// 	this.error = error;
-			// }).finally(() => {
-			// 	this.ready = true;
-			// });
+			api.keystoresRaw().then((resp) => {
+				if (resp.raw.status === 200) {
+					resp.value().then(keystores => {
+						this.onboarding = keystores.length == 0;
+						this.login = keystores.length > 0;
+					})
+				} else if (resp.raw.status === 401) {
+					this.ready = true;
+				} else {
+					return Promise.reject(resp)
+				}
+			}).catch(error => {
+				this.error = error;
+			}).finally(() => {
+				this.ready = true;
+			});
 
 			this.login = true;
 			this.ready = true;
@@ -67,14 +75,11 @@ export default defineComponent({
 			console.log("logged in");
 
 			api.keystores().then((keystores) => {
-				this.keystores = keystores;
-				this.login = false
-				// this.onboarding = ids.length == 0;
-				// this.login = ids.length > 0;
+				this.keystores = keystores
 			}).catch(error => {
 				this.error = error;
 			}).finally(() => {
-				this.ready = true;
+				this.login = false;
 			});
 		}
 	},

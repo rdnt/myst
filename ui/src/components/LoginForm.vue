@@ -56,6 +56,9 @@ export default defineComponent({
 				}).then(() => {
 					this.$emit('login')
 				}).catch((err) => {
+					if (err.status == 401) {
+						alert('invalid password')
+					}
 					console.error(err)
 				})
 			}

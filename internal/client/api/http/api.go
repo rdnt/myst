@@ -246,7 +246,13 @@ func (api *API) Keystore(c *gin.Context) {
 
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
-	if err != nil {
+	if err == application.ErrInitializationRequired {
+		Success(c, []generated.Keystore{})
+		return
+	} else if err == application.ErrAuthenticationRequired {
+		Error(c, http.StatusUnauthorized, err)
+		return
+	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return

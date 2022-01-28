@@ -30,7 +30,7 @@ export interface CreateKeystoreRequest {
      * @type {string}
      * @memberof CreateKeystoreRequest
      */
-    password: string;
+    password?: string;
 }
 
 export function CreateKeystoreRequestFromJSON(json: any): CreateKeystoreRequest {
@@ -44,7 +44,7 @@ export function CreateKeystoreRequestFromJSONTyped(json: any, ignoreDiscriminato
     return {
         
         'name': json['name'],
-        'password': json['password'],
+        'password': !exists(json, 'password') ? undefined : json['password'],
     };
 }
 

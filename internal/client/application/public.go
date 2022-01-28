@@ -1,7 +1,7 @@
 package application
 
 import (
-	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/application/domain/keystore"
 )
 
 func (app *application) Authenticate(password string) error {
@@ -13,16 +13,13 @@ func (app *application) Authenticate(password string) error {
 	return err
 }
 
-func (app *application) CreateKeystore(name string, password string) (*keystore.Keystore, error) {
-	return app.keystoreService.Create(
-		keystore.WithName(name),
-		keystore.WithPassword(password),
-	)
+func (app *application) CreateKeystore(name string) (*keystore.Keystore, error) {
+	return app.keystoreService.Create(name)
 }
 
-//func (app *application) UnlockKeystore(keystoreId string, password string) (*keystore.Keystore, error) {
-//	return app.keystoreService.Unlock(keystoreId, password)
-//}
+func (app *application) Initialize(name, password string) (*keystore.Keystore, error) {
+	return app.keystoreService.Initialize(name, password)
+}
 
 func (app *application) Keystore(id string) (*keystore.Keystore, error) {
 	return app.keystoreService.Keystore(id)
@@ -46,7 +43,7 @@ func (app *application) HealthCheck() {
 }
 
 func (app *application) SignIn(username, password string) error {
-	return app.remote.SignIn(username, password)
+	return app.repositories.remote.SignIn(username, password)
 }
 
 func (app *application) SignOut() error {

@@ -111,8 +111,8 @@ type ClientInterface interface {
 
 	CreateEntry(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// KeystoreIds request
-	KeystoreIds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// Keystores request
+	Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -216,8 +216,8 @@ func (c *Client) CreateEntry(ctx context.Context, keystoreId string, body Create
 	return c.Client.Do(req)
 }
 
-func (c *Client) KeystoreIds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewKeystoreIdsRequest(c.Server)
+func (c *Client) Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewKeystoresRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -454,8 +454,8 @@ func NewCreateEntryRequestWithBody(server string, keystoreId string, contentType
 	return req, nil
 }
 
-// NewKeystoreIdsRequest generates requests for KeystoreIds
-func NewKeystoreIdsRequest(server string) (*http.Request, error) {
+// NewKeystoresRequest generates requests for Keystores
+func NewKeystoresRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -585,8 +585,8 @@ type ClientWithResponsesInterface interface {
 
 	CreateEntryWithResponse(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEntryResponse, error)
 
-	// KeystoreIds request
-	KeystoreIdsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoreIdsResponse, error)
+	// Keystores request
+	KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
@@ -708,15 +708,15 @@ func (r CreateEntryResponse) StatusCode() int {
 	return 0
 }
 
-type KeystoreIdsResponse struct {
+type KeystoresResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]string
+	JSON200      *[]Keystore
 	JSONDefault  *Error
 }
 
 // Status returns HTTPResponse.Status
-func (r KeystoreIdsResponse) Status() string {
+func (r KeystoresResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -724,7 +724,7 @@ func (r KeystoreIdsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r KeystoreIdsResponse) StatusCode() int {
+func (r KeystoresResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -823,13 +823,13 @@ func (c *ClientWithResponses) CreateEntryWithResponse(ctx context.Context, keyst
 	return ParseCreateEntryResponse(rsp)
 }
 
-// KeystoreIdsWithResponse request returning *KeystoreIdsResponse
-func (c *ClientWithResponses) KeystoreIdsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoreIdsResponse, error) {
-	rsp, err := c.KeystoreIds(ctx, reqEditors...)
+// KeystoresWithResponse request returning *KeystoresResponse
+func (c *ClientWithResponses) KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error) {
+	rsp, err := c.Keystores(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseKeystoreIdsResponse(rsp)
+	return ParseKeystoresResponse(rsp)
 }
 
 // CreateKeystoreWithBodyWithResponse request with arbitrary body returning *CreateKeystoreResponse
@@ -1007,22 +1007,22 @@ func ParseCreateEntryResponse(rsp *http.Response) (*CreateEntryResponse, error) 
 	return response, nil
 }
 
-// ParseKeystoreIdsResponse parses an HTTP response from a KeystoreIdsWithResponse call
-func ParseKeystoreIdsResponse(rsp *http.Response) (*KeystoreIdsResponse, error) {
+// ParseKeystoresResponse parses an HTTP response from a KeystoresWithResponse call
+func ParseKeystoresResponse(rsp *http.Response) (*KeystoresResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &KeystoreIdsResponse{
+	response := &KeystoresResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []string
+		var dest []Keystore
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

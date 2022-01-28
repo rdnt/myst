@@ -4,14 +4,16 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"myst/internal/client/application/domain/keystore"
+
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
 
-	application "myst/internal/client"
 	"myst/internal/client/api/http/generated"
-	"myst/internal/client/core/domain/keystore/entry"
+	"myst/internal/client/application"
+	"myst/internal/client/application/domain/keystore/entry"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -56,13 +58,24 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := api.app.CreateKeystore(
-		req.Name,
-		req.Password,
-	)
-	if err != nil {
-		Error(c, http.StatusInternalServerError, err)
-		return
+	var k *keystore.Keystore
+	if req.Password != nil {
+		k, err = api.app.Initialize(
+			req.Name,
+			*req.Password,
+		)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
+	} else {
+		k, err = api.app.CreateKeystore(req.Name)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	entries := make([]generated.Entry, len(k.Entries()))
@@ -143,6 +156,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 	//	return
 	//}
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -153,18 +167,21 @@ func (api *API) CreateEntry(c *gin.Context) {
 		entry.WithPassword(req.Password),
 	)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = k.AddEntry(*e)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = api.app.UpdateKeystore(k)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -202,6 +219,7 @@ func (api *API) Keystore(c *gin.Context) {
 	//	return
 	//}
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -226,14 +244,40 @@ func (api *API) Keystore(c *gin.Context) {
 	)
 }
 
-func (api *API) KeystoreIds(c *gin.Context) {
-	kids, err := api.app.KeystoreIds()
+func (api *API) Keystores(c *gin.Context) {
+	ks, err := api.app.Keystores()
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	Success(c, kids)
+	keystores := []generated.Keystore{}
+
+	for _, k := range ks {
+		entries := []generated.Entry{}
+
+		for _, e := range k.Entries() {
+			entries = append(
+				entries, generated.Entry{
+					Id:       e.Id(),
+					Label:    e.Label(),
+					Username: e.Username(),
+					Password: e.Password(),
+				},
+			)
+		}
+
+		keystores = append(
+			keystores, generated.Keystore{
+				Id:      k.Id(),
+				Name:    k.Name(),
+				Entries: entries,
+			},
+		)
+	}
+
+	Success(c, keystores)
 }
 
 func (api *API) HealthCheck(_ *gin.Context) {

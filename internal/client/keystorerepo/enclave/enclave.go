@@ -3,7 +3,7 @@ package enclave
 import (
 	"fmt"
 
-	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/crypto"
 )
 

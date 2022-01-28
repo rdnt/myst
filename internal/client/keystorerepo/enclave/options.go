@@ -1,7 +1,7 @@
 package enclave
 
 import (
-	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/application/domain/keystore"
 )
 
 type Option func(*Enclave) error

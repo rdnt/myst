@@ -16,7 +16,8 @@ type Repository interface {
 }
 
 type Service interface {
-	Create(opts ...Option) (*Keystore, error)
+	Create(name string) (*Keystore, error)
+	Initialize(name, password string) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)
 	KeystoreIds() ([]string, error)
 	Keystores() (map[string]*Keystore, error)

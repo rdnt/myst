@@ -1,4 +1,4 @@
-package enclaverepo
+package keystorerepo
 
 import (
 	"crypto/sha256"
@@ -9,15 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"myst/internal/client/core/domain/keystore"
-	"myst/internal/client/core/keystore_manager/enclave"
-	"myst/internal/client/core/keystorerepo/jsonkeystore"
+	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/keystorerepo/enclave"
 	"myst/pkg/crypto"
 )
 
 type Enclave struct {
-	Keystores map[string]jsonkeystore.Keystore `json:"keystores"`
-	Keys      map[string][]byte                `json:"keys"`
+	Keystores map[string]JSONKeystore `json:"keystores"`
+	Keys      map[string][]byte       `json:"keys"`
 }
 
 type Repository struct {
@@ -360,10 +359,10 @@ func (r *Repository) enclavePath() string {
 }
 
 func marshalEnclave(e *enclave.Enclave) ([]byte, error) {
-	ks := map[string]jsonkeystore.Keystore{}
+	ks := map[string]JSONKeystore{}
 
 	for _, k := range e.Keystores() {
-		ks[k.Id()] = jsonkeystore.Marshal(k)
+		ks[k.Id()] = ToJSONKeystore(k)
 	}
 
 	return json.Marshal(Enclave{Keystores: ks, Keys: e.Keys()})
@@ -380,7 +379,7 @@ func unmarshalEnclave(b, salt []byte) (*enclave.Enclave, error) {
 	ks := map[string]*keystore.Keystore{}
 
 	for _, k := range e.Keystores {
-		k, err := jsonkeystore.ToKeystore(k)
+		k, err := ToKeystore(k)
 		if err != nil {
 			return nil, err
 		}

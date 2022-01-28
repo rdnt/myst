@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 )
 

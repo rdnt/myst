@@ -229,9 +229,9 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns all keystore ids
+     * Returns all keystores
      */
-    async keystoreIdsRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<string>>> {
+    async keystoresRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -243,14 +243,14 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
     }
 
     /**
-     * Returns all keystore ids
+     * Returns all keystores
      */
-    async keystoreIds(initOverrides?: RequestInit): Promise<Array<string>> {
-        const response = await this.keystoreIdsRaw(initOverrides);
+    async keystores(initOverrides?: RequestInit): Promise<Array<Keystore>> {
+        const response = await this.keystoresRaw(initOverrides);
         return await response.value();
     }
 

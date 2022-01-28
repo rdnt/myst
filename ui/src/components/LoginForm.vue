@@ -49,15 +49,15 @@ export default defineComponent({
 			if (this.passwordValid) {
 
 				// TODO: unlock all keystores at once
-				// api.createKeystore({
-				// 	createKeystoreRequest: {
-				// 		password: this.password
-				// 	}
-				// }).then((keystore) => {
-				// 	this.$emit('created', keystore)
-				// }).catch((err) => {
-				// 	console.error(err)
-				// })
+				api.authenticate({
+					authenticateRequest: {
+						password: this.password
+					}
+				}).then(() => {
+					this.$emit('login')
+				}).catch((err) => {
+					console.error(err)
+				})
 			}
 		}
 	}

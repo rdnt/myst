@@ -3,7 +3,7 @@ package keystore
 import (
 	"errors"
 
-	"myst/internal/client/core/domain/keystore/entry"
+	"myst/internal/client/application/domain/keystore/entry"
 
 	"myst/pkg/uuid"
 )

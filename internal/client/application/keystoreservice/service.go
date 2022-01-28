@@ -3,11 +3,7 @@ package keystoreservice
 import (
 	"errors"
 
-	application "myst/internal/client"
-	"myst/internal/client/core/domain/keystore"
-
-	//keystorerepo "myst/internal/client/core/keystorerepo/fs"
-
+	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/logger"
 )
 
@@ -17,16 +13,32 @@ var (
 	//ErrAuthenticationFailed      = keystorerepo.ErrAuthenticationFailed
 )
 
+type KeystoreRepository interface {
+	keystore.Repository
+	Authenticate(password string) error
+	Initialize(password string) error
+	HealthCheck()
+}
+
 type service struct {
-	keystoreRepo application.KeystoreRepository
+	keystoreRepo KeystoreRepository
 }
 
 func (s *service) KeystoreIds() ([]string, error) {
 	return s.keystoreRepo.KeystoreIds()
 }
 
-func (s *service) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
-	return s.keystoreRepo.Create(opts...)
+func (s *service) Create(name string) (*keystore.Keystore, error) {
+	return s.keystoreRepo.Create(keystore.WithName(name))
+}
+
+func (s *service) Initialize(name, password string) (*keystore.Keystore, error) {
+	err := s.keystoreRepo.Initialize(password)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.keystoreRepo.Create(keystore.WithName(name))
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {

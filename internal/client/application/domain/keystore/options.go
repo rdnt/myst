@@ -1,7 +1,7 @@
 package keystore
 
 import (
-	"myst/internal/client/core/domain/keystore/entry"
+	"myst/internal/client/application/domain/keystore/entry"
 )
 
 type Option func(*Keystore)

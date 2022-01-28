@@ -17,8 +17,8 @@ type CreateEntryRequest struct {
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
 type CreateKeystoreRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
+	Name     string  `json:"name"`
+	Password *string `json:"password,omitempty"`
 }
 
 // Entry defines model for Entry.

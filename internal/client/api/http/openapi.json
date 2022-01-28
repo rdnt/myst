@@ -22,6 +22,37 @@
     }
   ],
   "paths": {
+    "/authenticate": {
+      "post": {
+        "description": "Attempts to authenticate the user",
+        "operationId": "Authenticate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/keystores": {
       "post": {
         "description": "Creates a new encrypted keystore with the given password",
@@ -60,17 +91,17 @@
         }
       },
       "get": {
-        "description": "Returns all keystore ids",
-        "operationId": "KeystoreIds",
+        "description": "Returns all keystores",
+        "operationId": "Keystores",
         "responses": {
           "200": {
-            "description": "KeystoreIds",
+            "description": "Keystores",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/Keystore"
                   }
                 }
               }
@@ -276,8 +307,7 @@
       "CreateKeystoreRequest": {
         "type": "object",
         "required": [
-          "name",
-          "password"
+          "name"
         ],
         "properties": {
           "name": {
@@ -289,6 +319,17 @@
         }
       },
       "UnlockKeystoreRequest": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthenticateRequest": {
         "type": "object",
         "required": [
           "password"

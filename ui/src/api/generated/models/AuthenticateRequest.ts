@@ -16,39 +16,32 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface CreateKeystoreRequest
+ * @interface AuthenticateRequest
  */
-export interface CreateKeystoreRequest {
+export interface AuthenticateRequest {
     /**
      * 
      * @type {string}
-     * @memberof CreateKeystoreRequest
+     * @memberof AuthenticateRequest
      */
-    name: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateKeystoreRequest
-     */
-    password?: string;
+    password: string;
 }
 
-export function CreateKeystoreRequestFromJSON(json: any): CreateKeystoreRequest {
-    return CreateKeystoreRequestFromJSONTyped(json, false);
+export function AuthenticateRequestFromJSON(json: any): AuthenticateRequest {
+    return AuthenticateRequestFromJSONTyped(json, false);
 }
 
-export function CreateKeystoreRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateKeystoreRequest {
+export function AuthenticateRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): AuthenticateRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'name': json['name'],
-        'password': !exists(json, 'password') ? undefined : json['password'],
+        'password': json['password'],
     };
 }
 
-export function CreateKeystoreRequestToJSON(value?: CreateKeystoreRequest | null): any {
+export function AuthenticateRequestToJSON(value?: AuthenticateRequest | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -57,7 +50,6 @@ export function CreateKeystoreRequestToJSON(value?: CreateKeystoreRequest | null
     }
     return {
         
-        'name': value.name,
         'password': value.password,
     };
 }

@@ -90,6 +90,11 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// Authenticate request  with any body
+	AuthenticateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	Authenticate(ctx context.Context, body AuthenticateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -106,13 +111,37 @@ type ClientInterface interface {
 
 	CreateEntry(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// KeystoreIds request
-	KeystoreIds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// Keystores request
+	Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) AuthenticateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthenticateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Authenticate(ctx context.Context, body AuthenticateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthenticateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -187,8 +216,8 @@ func (c *Client) CreateEntry(ctx context.Context, keystoreId string, body Create
 	return c.Client.Do(req)
 }
 
-func (c *Client) KeystoreIds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewKeystoreIdsRequest(c.Server)
+func (c *Client) Keystores(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewKeystoresRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +250,46 @@ func (c *Client) CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequ
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewAuthenticateRequest calls the generic Authenticate builder with application/json body
+func NewAuthenticateRequest(server string, body AuthenticateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAuthenticateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewAuthenticateRequestWithBody generates requests for Authenticate with any type of body
+func NewAuthenticateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authenticate")
+	if operationPath[0] == '/' {
+		operationPath = operationPath[1:]
+	}
+	operationURL := url.URL{
+		Path: operationPath,
+	}
+
+	queryURL := serverURL.ResolveReference(&operationURL)
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewKeystoreRequest generates requests for Keystore
@@ -385,8 +454,8 @@ func NewCreateEntryRequestWithBody(server string, keystoreId string, contentType
 	return req, nil
 }
 
-// NewKeystoreIdsRequest generates requests for KeystoreIds
-func NewKeystoreIdsRequest(server string) (*http.Request, error) {
+// NewKeystoresRequest generates requests for Keystores
+func NewKeystoresRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -495,6 +564,11 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// Authenticate request  with any body
+	AuthenticateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error)
+
+	AuthenticateWithResponse(ctx context.Context, body AuthenticateJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error)
+
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
 
@@ -511,13 +585,35 @@ type ClientWithResponsesInterface interface {
 
 	CreateEntryWithResponse(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEntryResponse, error)
 
-	// KeystoreIds request
-	KeystoreIdsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoreIdsResponse, error)
+	// Keystores request
+	KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error)
 
 	// CreateKeystore request  with any body
 	CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
 
 	CreateKeystoreWithResponse(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
+}
+
+type AuthenticateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r AuthenticateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AuthenticateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type KeystoreResponse struct {
@@ -612,15 +708,15 @@ func (r CreateEntryResponse) StatusCode() int {
 	return 0
 }
 
-type KeystoreIdsResponse struct {
+type KeystoresResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]string
+	JSON200      *[]Keystore
 	JSONDefault  *Error
 }
 
 // Status returns HTTPResponse.Status
-func (r KeystoreIdsResponse) Status() string {
+func (r KeystoresResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -628,7 +724,7 @@ func (r KeystoreIdsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r KeystoreIdsResponse) StatusCode() int {
+func (r KeystoresResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -656,6 +752,23 @@ func (r CreateKeystoreResponse) StatusCode() int {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
+}
+
+// AuthenticateWithBodyWithResponse request with arbitrary body returning *AuthenticateResponse
+func (c *ClientWithResponses) AuthenticateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error) {
+	rsp, err := c.AuthenticateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthenticateResponse(rsp)
+}
+
+func (c *ClientWithResponses) AuthenticateWithResponse(ctx context.Context, body AuthenticateJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error) {
+	rsp, err := c.Authenticate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthenticateResponse(rsp)
 }
 
 // KeystoreWithResponse request returning *KeystoreResponse
@@ -710,13 +823,13 @@ func (c *ClientWithResponses) CreateEntryWithResponse(ctx context.Context, keyst
 	return ParseCreateEntryResponse(rsp)
 }
 
-// KeystoreIdsWithResponse request returning *KeystoreIdsResponse
-func (c *ClientWithResponses) KeystoreIdsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoreIdsResponse, error) {
-	rsp, err := c.KeystoreIds(ctx, reqEditors...)
+// KeystoresWithResponse request returning *KeystoresResponse
+func (c *ClientWithResponses) KeystoresWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*KeystoresResponse, error) {
+	rsp, err := c.Keystores(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseKeystoreIdsResponse(rsp)
+	return ParseKeystoresResponse(rsp)
 }
 
 // CreateKeystoreWithBodyWithResponse request with arbitrary body returning *CreateKeystoreResponse
@@ -734,6 +847,32 @@ func (c *ClientWithResponses) CreateKeystoreWithResponse(ctx context.Context, bo
 		return nil, err
 	}
 	return ParseCreateKeystoreResponse(rsp)
+}
+
+// ParseAuthenticateResponse parses an HTTP response from a AuthenticateWithResponse call
+func ParseAuthenticateResponse(rsp *http.Response) (*AuthenticateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AuthenticateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseKeystoreResponse parses an HTTP response from a KeystoreWithResponse call
@@ -868,22 +1007,22 @@ func ParseCreateEntryResponse(rsp *http.Response) (*CreateEntryResponse, error) 
 	return response, nil
 }
 
-// ParseKeystoreIdsResponse parses an HTTP response from a KeystoreIdsWithResponse call
-func ParseKeystoreIdsResponse(rsp *http.Response) (*KeystoreIdsResponse, error) {
+// ParseKeystoresResponse parses an HTTP response from a KeystoresWithResponse call
+func ParseKeystoresResponse(rsp *http.Response) (*KeystoresResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &KeystoreIdsResponse{
+	response := &KeystoresResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []string
+		var dest []Keystore
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"myst/internal/client/core/domain/invitation"
-	"myst/internal/client/core/domain/keystore"
+	"myst/internal/client/application/domain/invitation"
+	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
 )

@@ -47,7 +47,6 @@ export default defineComponent({
 	methods: {
 		submit() {
 			if (this.passwordValid) {
-
 				// TODO: unlock all keystores at once
 				api.authenticate({
 					authenticateRequest: {
@@ -56,6 +55,9 @@ export default defineComponent({
 				}).then(() => {
 					this.$emit('login')
 				}).catch((err) => {
+					if (err.status == 401) {
+						alert('invalid password')
+					}
 					console.error(err)
 				})
 			}

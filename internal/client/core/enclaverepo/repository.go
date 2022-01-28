@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sync"
+	"time"
 
 	"myst/internal/client/core/domain/keystore"
 	"myst/internal/client/core/keystore_manager/enclave"
@@ -19,27 +21,52 @@ type Enclave struct {
 }
 
 type Repository struct {
-	path string
-	key  []byte
+	mux             sync.Mutex
+	path            string
+	key             []byte
+	lastHealthCheck time.Time
 }
 
 func New(path string) (*Repository, error) {
+
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Repository{
+	r := &Repository{
 		path: path,
-	}, nil
+	}
+
+	go r.startHealthCheck()
+
+	// TODO: remove simulated health check
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			r.HealthCheck()
+		}
+	}()
+
+	return r, nil
+}
+
+func (r *Repository) HealthCheck() {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	r.lastHealthCheck = time.Now()
 }
 
 func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return nil, fmt.Errorf("authentication required")
 	}
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +80,14 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (r *Repository) KeystoreIds() ([]string, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return nil, fmt.Errorf("authentication required")
 	}
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +96,14 @@ func (r *Repository) KeystoreIds() ([]string, error) {
 }
 
 func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return nil, fmt.Errorf("authentication required")
 	}
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return nil, err
 	}
@@ -79,11 +112,14 @@ func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
 }
 
 func (r *Repository) Delete(id string) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return fmt.Errorf("authentication required")
 	}
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return err
 	}
@@ -107,13 +143,16 @@ func (r *Repository) Delete(id string) error {
 }
 
 func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return nil, fmt.Errorf("authentication required")
 	}
 
 	k := keystore.New(opts...)
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return nil, err
 	}
@@ -137,6 +176,9 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 }
 
 func (r *Repository) Initialize(password string) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	// TODO: check if enclave is already created, if it is, return error
 	e, err := enclave.New()
 	if err != nil {
@@ -171,10 +213,14 @@ func (r *Repository) Initialize(password string) error {
 }
 
 func (r *Repository) Authenticate(password string) error {
+	r.mux.Lock()
+
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return err
 	}
+
+	r.mux.Unlock()
 
 	salt, err := getSaltFromData(b)
 	if err != nil {
@@ -193,16 +239,16 @@ func (r *Repository) Authenticate(password string) error {
 		return fmt.Errorf("authentication failed")
 	}
 
+	r.mux.Lock()
+
 	r.key = key
+
+	r.mux.Unlock()
 
 	return nil
 }
 
-func (r *Repository) Enclave() (*enclave.Enclave, error) {
-	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
-	}
-
+func (r *Repository) enclave() (*enclave.Enclave, error) {
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return nil, err
@@ -232,11 +278,14 @@ func (r *Repository) Enclave() (*enclave.Enclave, error) {
 }
 
 func (r *Repository) Update(k *keystore.Keystore) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
 	if r.key == nil {
 		return fmt.Errorf("authentication required")
 	}
 
-	e, err := r.Enclave()
+	e, err := r.enclave()
 	if err != nil {
 		return err
 	}
@@ -257,6 +306,33 @@ func (r *Repository) Update(k *keystore.Keystore) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) startHealthCheck() {
+	ticker := time.NewTicker(20 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			//fmt.Println("health check!")
+			r.mux.Lock()
+			elapsed := time.Since(r.lastHealthCheck)
+
+			if elapsed < time.Minute {
+				//fmt.Println("healthy...")
+
+				r.mux.Unlock()
+				continue
+			}
+
+			fmt.Println("health check failed, deleting key...")
+
+			r.key = nil
+
+			r.mux.Unlock()
+		}
+	}
 }
 
 func (r *Repository) sealAndWrite(b, key, salt []byte) error {

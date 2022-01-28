@@ -10,25 +10,18 @@ import (
 )
 
 func TestRepository(t *testing.T) {
-	repo := enclaverepo.Repository{}
+	repo, err := enclaverepo.New(t.TempDir())
+	assert.NoError(t, err)
 
-	err := repo.Initialize("12345678")
+	err = repo.Initialize("12345678")
 	assert.NoError(t, err)
 
 	err = repo.Authenticate("12345678")
 	assert.NoError(t, err)
 
-	e, err := repo.Enclave()
-	assert.NoError(t, err)
-	assert.Len(t, e.Keystores(), 0)
-
 	k, err := repo.Create(keystore.WithName("test"))
 	assert.NoError(t, err)
 
-	e, err = repo.Enclave()
-	assert.NoError(t, err)
-	assert.Len(t, e.Keystores(), 1)
-
-	_, err = e.Keystore(k.Id())
+	_, err = repo.Keystore(k.Id())
 	assert.NoError(t, err)
 }

@@ -341,9 +341,8 @@ func New(app application.Application) *API {
 	// error 404 handling
 	r.NoRoute(NoRoute)
 
-	// Attach static serve middleware for / and /assets
+	// Attach static serve middleware
 	r.Use(static.Serve("/", static.LocalFile("static", false)))
-	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
 
 	r.Use(
 		cors.New(

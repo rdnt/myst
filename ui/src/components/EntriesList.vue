@@ -46,15 +46,16 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
+import {Entry} from "../api/generated";
 
 export default defineComponent({
 	name: 'EntryList',
 	components: {},
 	props: {
 		entries: {
-			type: Array,
-			default: () => []
-		},
+			type: Array as () => Entry[],
+			required: true
+		}
 	},
 	data: () => ({}),
 	computed: {},

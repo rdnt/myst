@@ -1,31 +1,27 @@
 package entry
 
-type Option func(*Entry) error
+type Option func(*Entry)
 
 func WithId(id string) Option {
-	return func(e *Entry) error {
+	return func(e *Entry) {
 		e.id = id
-		return nil
 	}
 }
 
 func WithLabel(label string) Option {
-	return func(e *Entry) error {
+	return func(e *Entry) {
 		e.label = label
-		return nil
 	}
 }
 
 func WithUsername(username string) Option {
-	return func(e *Entry) error {
+	return func(e *Entry) {
 		e.username = username
-		return nil
 	}
 }
 
 func WithPassword(password string) Option {
-	return func(e *Entry) error {
+	return func(e *Entry) {
 		e.password = password
-		return nil
 	}
 }

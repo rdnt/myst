@@ -161,7 +161,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	e, err := entry.New(
+	e := entry.New(
 		entry.WithLabel(req.Label),
 		entry.WithUsername(req.Username),
 		entry.WithPassword(req.Password),
@@ -172,7 +172,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	err = k.AddEntry(*e)
+	err = k.AddEntry(e)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)

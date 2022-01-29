@@ -1,16 +1,13 @@
 <template>
-  <div>
-		<span>{{!ready ? 'Loading...' : ''}}</span>
-		<span>{{ error ? 'Request failed: ' + JSON.stringify(error) : undefined }}</span>
-    <InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
-		<Login v-if="login" @login="loggedIn()" />
-		<div
-			id="entries"
-			v-if="keystores.length > 0"
-		>
-			KEYSTORES {{JSON.stringify(keystores)}}
-		</div>
-  </div>
+	<span>{{!ready ? 'Loading...' : ''}}</span>
+	<InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
+	<Login v-if="login" @login="loggedIn()" />
+	<transition :duration="300" name="show">
+		<main v-if="keystore">
+			<Sidebar />
+			<EntriesList :entries="keystore.entries"></EntriesList>
+		</main>
+	</transition>
 </template>
 
 <script lang="ts">
@@ -19,25 +16,25 @@ import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFu
 import Login from "./components/LoginForm.vue";
 import api from "./api";
 import {Keystore} from "./api/generated";
+import EntriesList from "./components/EntriesList.vue";
+import Sidebar from "./components/Sidebar.vue";
 
 export default defineComponent({
 	name: "App",
-	components: {InitializeKeystoreFullscreenModal, Login},
+	components: {Sidebar, EntriesList, InitializeKeystoreFullscreenModal, Login},
 	data(): {
 		onboarding: boolean,
 		login: boolean,
-		error: any,
 		ready: boolean,
 		keystore: Keystore | undefined,
 		keystores: Keystore[],
 	} {
 		return {
 			onboarding: false,
-				login: false,
-				error: undefined,
-				ready: false,
-				keystore: undefined,
-				keystores: [],
+			login: false,
+			ready: false,
+			keystore: undefined,
+			keystores: [],
 		}
 	},
 	mounted() {
@@ -46,25 +43,20 @@ export default defineComponent({
   },
   methods: {
 		init() {
-			api.keystoresRaw().then((resp) => {
-				if (resp.raw.status === 200) {
-					resp.value().then(keystores => {
-						this.onboarding = keystores.length == 0;
-						this.login = keystores.length > 0;
-					})
-				} else if (resp.raw.status === 401) {
-					this.ready = true;
-				} else {
-					return Promise.reject(resp)
+			api.keystores().then((keystores) => {
+				this.onboarding = keystores.length == 0;
+				this.keystores = keystores
+				this.keystore = keystores[0]
+			}).catch((error: Response) => {
+				if (error.status == 401) {
+					this.login = true;
+					return
 				}
-			}).catch(error => {
-				this.error = error;
+
+				console.log(error)
 			}).finally(() => {
 				this.ready = true;
 			});
-
-			this.login = true;
-			this.ready = true;
 		},
 		keystoreCreated(keystore: Keystore) {
 			this.onboarding = false;
@@ -76,8 +68,9 @@ export default defineComponent({
 
 			api.keystores().then((keystores) => {
 				this.keystores = keystores
+				this.keystore = keystores[0]
 			}).catch(error => {
-				this.error = error;
+				console.log(error)
 			}).finally(() => {
 				this.login = false;
 			});
@@ -87,13 +80,38 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-$bg: #0a0e11;
+//$bg: #0a0e11;
+$bg: #111519;
 $accent: #00edb1;
 $text-color: #fff;
 
+:root {
+	color-scheme: dark;
+}
+
+html, body {
+	//height: 100%;
+	//overflow: hidden
+}
+
+html {
+	height: -webkit-fill-available;
+}
 body {
-  margin: 0;
+	margin: 0;
 	background-color: $bg;
+
+	height: 100vh;
+	max-height: 100vh;
+	max-height: -webkit-fill-available;
+	//max-height: 100%;
+}
+
+main {
+	display: flex;
+	align-items: stretch;
+	background-color: $bg;
+	width: 100%;
 }
 
 @import url('https://rsms.me/inter/inter.css');
@@ -104,5 +122,47 @@ body {
 	font-size: 100%;
 	color: $text-color;
 	line-height: 1.325;
+}
+
+*::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+	background: transparent;
+}
+
+* {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+#app {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+}
+
+.show-enter-active, .show-leave-active {
+	transition: .3s;
+}
+
+.show-enter-from {
+	opacity: 0;
+	transform: scale(.98);
+}
+
+.show-enter-to {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.show-leave-from {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.show-leave-to {
+	opacity: 0;
+	transform: scale(.98);
 }
 </style>

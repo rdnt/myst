@@ -3,6 +3,7 @@ package keystoreservice
 import (
 	"errors"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/keystore/entry"
 	"myst/pkg/logger"
 )
 
@@ -34,7 +35,23 @@ func (s *service) Initialize(name, password string) (*keystore.Keystore, error) 
 		return nil, err
 	}
 
-	return s.keystoreRepo.Create(keystore.WithName(name))
+	return s.keystoreRepo.Create(
+		keystore.WithName(name), keystore.WithEntries(
+			[]entry.Entry{
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+				entry.New(entry.WithLabel("google.com"), entry.WithUsername("rdnt"), entry.WithPassword("1234")),
+			},
+		),
+	)
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {

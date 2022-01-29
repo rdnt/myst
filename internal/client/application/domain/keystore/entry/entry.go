@@ -3,7 +3,6 @@ package entry
 import (
 	"errors"
 
-	"myst/pkg/logger"
 	"myst/pkg/uuid"
 )
 
@@ -48,30 +47,14 @@ func (e *Entry) SetPassword(password string) {
 	e.password = password
 }
 
-func New(opts ...Option) (*Entry, error) {
-	e := &Entry{
+func New(opts ...Option) Entry {
+	e := Entry{
 		id: uuid.New().String(),
 	}
 
 	for _, opt := range opts {
-		err := opt(e)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
+		opt(&e)
 	}
 
-	if e.label == "" {
-		return nil, ErrInvalidLabel
-	}
-
-	if e.username == "" {
-		return nil, ErrInvalidUsername
-	}
-
-	if e.password == "" {
-		return nil, ErrInvalidPassword
-	}
-
-	return e, nil
+	return e
 }

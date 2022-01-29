@@ -15,7 +15,7 @@ import {defineComponent} from "vue";
 import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
 import Login from "./components/LoginForm.vue";
 import api from "./api";
-import {Keystore} from "./api/generated";
+import {Keystore, Entry} from "./api/generated";
 import EntriesList from "./components/EntriesList.vue";
 import Sidebar from "./components/Sidebar.vue";
 
@@ -26,7 +26,7 @@ export default defineComponent({
 		onboarding: boolean,
 		login: boolean,
 		ready: boolean,
-		keystore: Keystore | undefined,
+		keystore?: Keystore,
 		keystores: Keystore[],
 	} {
 		return {

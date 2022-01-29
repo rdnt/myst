@@ -4,7 +4,7 @@ on:
     branches: [ main ]
 jobs:
   build:
-    name: Deploy to DigitalOcean App Platform
+    name: deploy
     runs-on: ubuntu-latest
     strategy:
       matrix:

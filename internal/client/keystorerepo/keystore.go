@@ -43,17 +43,13 @@ func ToKeystore(k JSONKeystore) (*keystore.Keystore, error) {
 	entries := make([]entry.Entry, len(k.Entries))
 
 	for i, e := range k.Entries {
-		e, err := entry.New(
+		e := entry.New(
 			entry.WithId(e.Id),
 			entry.WithUsername(e.Username),
 			entry.WithPassword(e.Password),
 			entry.WithLabel(e.Label),
 		)
-		if err != nil {
-			return nil, err
-		}
-
-		entries[i] = *e
+		entries[i] = e
 	}
 
 	return keystore.New(

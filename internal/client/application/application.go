@@ -91,7 +91,7 @@ func (app *application) setup() {
 	}
 
 	for i := 0; i < 0; i++ {
-		e1, err := entry.New(
+		e1 := entry.New(
 			entry.WithLabel("google.com"),
 			entry.WithUsername("someuser@google.com"),
 			entry.WithPassword("12345678"),
@@ -101,7 +101,7 @@ func (app *application) setup() {
 			return
 		}
 
-		e2, err := entry.New(
+		e2 := entry.New(
 			entry.WithLabel("stackoverflow.com"),
 			entry.WithUsername("someotheruser@google.com"),
 			entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
@@ -111,7 +111,7 @@ func (app *application) setup() {
 			return
 		}
 
-		e3, err := entry.New(
+		e3 := entry.New(
 			entry.WithLabel("reddit.com"),
 			entry.WithUsername("somethirduser@yahoo.com"),
 			entry.WithPassword("!@*#&$^!@*#&$^!"),
@@ -121,19 +121,19 @@ func (app *application) setup() {
 			return
 		}
 
-		err = k.AddEntry(*e1)
+		err = k.AddEntry(e1)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		err = k.AddEntry(*e2)
+		err = k.AddEntry(e2)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		err = k.AddEntry(*e3)
+		err = k.AddEntry(e3)
 		if err != nil {
 			fmt.Println(err)
 			return

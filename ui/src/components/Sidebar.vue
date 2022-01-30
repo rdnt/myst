@@ -36,7 +36,7 @@ h4 {
 }
 
 .sidebar {
-	background-color: #14191d;
+	background-color: #0a0e11;
 	height: 100%;
 	padding: 20px;
 	box-sizing: border-box;

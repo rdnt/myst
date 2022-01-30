@@ -19,7 +19,7 @@
 						   :tabindex="step === 1 ? 0 : -1" autofocus class="input keystore-name"
 						   placeholder="Keystore name"
 						   @focusout="warnings = true" @input="warnings = true"/>
-					<span>can only contain lowercase alphanumeric characters and hyphens</span>
+					<span>Cannot be empty</span>
 				</div>
 
 				<transition :duration="500" name="fade">
@@ -34,7 +34,7 @@
 							<expanding-textarea ref="passwordInput" v-model="password" class="password-input"
 												placeholder="Master password"
 												@keydown.enter.prevent="submit"/>
-							<span>too weak</span>
+							<span>Password too weak</span>
 						</div>
 						<br/>
 					</div>
@@ -69,7 +69,7 @@ export default defineComponent({
 		name: '',
 		password: '',
 		step: 1,
-		nameRegex: /^[a-z0-9-]+$/,
+		// nameRegex: /^[A-Za-z0-9-]+$/,
 		warnings: false,
 	}),
 	computed: {
@@ -87,9 +87,10 @@ export default defineComponent({
 		nameValid() {
 			if (this.name.length == 0) {
 				return false
-			} else if (!this.nameRegex.test(this.name)) {
-				return false
 			}
+			// else if (!this.nameRegex.test(this.name)) {
+			// 	return false
+			// }
 
 			return true
 		},

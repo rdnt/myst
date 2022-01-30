@@ -37,6 +37,7 @@
           </span>
 					<span class="pass">
             {{ entry.password }}
+						<button tabindex="-1"	><img alt="" src="/assets/eye.svg"/></button>
           </span>
 				</router-link>
 			</div>
@@ -73,7 +74,7 @@ export default defineComponent({
 	position: relative;
 	background-color: #101519;
 	height: 100%;
-	width: calc(100% - 24%);
+	flex-grow: 1;
 
 	.entries {
 		overflow-y: auto;
@@ -161,14 +162,37 @@ export default defineComponent({
 			flex-basis: 35%;
 		}
 
-		&:not(.header):hover {
-			background-color: #1e2328;
-			color: #f7f8f8;
-		}
+		&:not(.header) {
+			&:hover {
+				background-color: #1e2328;
+				color: #f7f8f8;
+			}
 
-		&:not(.header):active {
-			background-color: rgba(#2d2f36, .75);
-			color: rgb(215, 216, 219);
+			&:active {
+				background-color: rgba(#2d2f36, .75);
+				color: rgb(215, 216, 219);
+				opacity: 1;
+			}
+
+
+			.pass {
+				position: relative;
+				button {
+					position: absolute;
+					right: 0;
+					background-color: transparent;
+					border: none;
+					padding: 0;
+					outline: none;
+					display: inline-block;
+					opacity: 0;
+
+					img {
+						height: 20px;
+						display: block;
+					}
+				}
+			}
 		}
 	}
 }

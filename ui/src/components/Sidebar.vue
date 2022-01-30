@@ -17,8 +17,14 @@ export default defineComponent({
 	name: 'Sidebar',
 	components: {},
 	props: {
-		keystores: Array as () => Keystore[],
-		keystore: Object as () => Keystore,
+		keystores: {
+			type: Array as () => Keystore[],
+			required: true,
+		},
+		keystore: {
+			type: Object as () => Keystore,
+			required: true,
+		},
 	},
 	data: () => ({}),
 	computed: {},
@@ -36,7 +42,7 @@ h4 {
 }
 
 .sidebar {
-	background-color: #14191d;
+	background-color: #0a0e11;
 	height: 100%;
 	padding: 20px;
 	box-sizing: border-box;

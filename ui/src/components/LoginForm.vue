@@ -67,7 +67,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-$bg: #111519;
+$bg: #0a0e11;
 $accent: #00edb1;
 $text-color: #fff;
 

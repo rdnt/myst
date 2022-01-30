@@ -4,7 +4,7 @@
 	<Login v-if="login" @login="loggedIn()" />
 	<transition :duration="300" name="show">
 		<main v-if="keystore">
-			<Sidebar />
+			<Sidebar :keystores="keystores" :keystore="keystore"/>
 			<EntriesList :entries="keystore.entries"></EntriesList>
 		</main>
 	</transition>
@@ -15,7 +15,7 @@ import {defineComponent} from "vue";
 import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
 import Login from "./components/LoginForm.vue";
 import api from "./api";
-import {Keystore, Entry} from "./api/generated";
+import {Keystore} from "./api/generated";
 import EntriesList from "./components/EntriesList.vue";
 import Sidebar from "./components/Sidebar.vue";
 
@@ -55,8 +55,22 @@ export default defineComponent({
 		init() {
 			api.keystores().then((keystores) => {
 				this.onboarding = keystores.length == 0;
+
 				this.keystores = keystores
-				this.keystore = keystores[0]
+				if (keystores.length > 0) {
+					this.keystore = keystores[0]
+
+					this.keystores.push({
+						id: "1",
+						name: "Work",
+						entries: []
+					})
+					this.keystores.push({
+						id: "2",
+						name: "Old accounts",
+						entries: []
+					})
+				}
 			}).catch((error: Response) => {
 				if (error.status == 401) {
 					this.login = true;
@@ -72,12 +86,32 @@ export default defineComponent({
 			this.onboarding = false;
 			this.keystore = keystore;
 			this.keystores = [keystore];
+			this.keystores.push({
+				id: "1",
+				name: "Work",
+				entries: []
+			})
+			this.keystores.push({
+				id: "2",
+				name: "Old accounts",
+				entries: []
+			})
 		},
 		loggedIn() {
 			console.log("logged in");
 
 			api.keystores().then((keystores) => {
 				this.keystores = keystores
+				this.keystores.push({
+					id: "1",
+					name: "Work",
+					entries: []
+				})
+				this.keystores.push({
+					id: "2",
+					name: "Old accounts",
+					entries: []
+				})
 				this.keystore = keystores[0]
 			}).catch(error => {
 				console.log(error)

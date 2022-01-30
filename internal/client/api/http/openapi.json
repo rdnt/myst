@@ -22,6 +22,17 @@
     }
   ],
   "paths": {
+    "/health": {
+      "get": {
+        "description": "Triggers a health check",
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/authenticate": {
       "post": {
         "description": "Attempts to authenticate the user",

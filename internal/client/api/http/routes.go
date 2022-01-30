@@ -5,8 +5,8 @@ import (
 )
 
 func (api *API) initRoutes(r *gin.RouterGroup) {
-	r.POST("/authenticate", api.Authenticate)
 	r.GET("/health", api.HealthCheck)
+	r.POST("/authenticate", api.Authenticate)
 	r.POST("/keystores", api.CreateKeystore)
 	r.GET("/keystores", api.Keystores)
 	r.GET("/keystore/:keystoreId", api.Keystore)

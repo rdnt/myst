@@ -199,6 +199,31 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * Triggers a health check
+     */
+    async healthCheckRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/health`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Triggers a health check
+     */
+    async healthCheck(initOverrides?: RequestInit): Promise<void> {
+        await this.healthCheckRaw(initOverrides);
+    }
+
+    /**
      * Get a keystore if it exists and return it
      */
     async keystoreRaw(requestParameters: KeystoreRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {

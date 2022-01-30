@@ -28,6 +28,7 @@ export default defineComponent({
 		ready: boolean,
 		keystore?: Keystore,
 		keystores: Keystore[],
+		healthCheckIntervalId?: number,
 	} {
 		return {
 			onboarding: false,
@@ -37,11 +38,20 @@ export default defineComponent({
 			keystores: [],
 		}
 	},
+	created() {
+		this.healthCheckIntervalId = window.setInterval(this.healthCheck, 10000)
+	},
+	destroyed() {
+		window.clearInterval(this.healthCheckIntervalId)
+	},
 	mounted() {
 		this.ready = false
 		this.init()
   },
   methods: {
+		healthCheck() {
+			api.healthCheck()
+		},
 		init() {
 			api.keystores().then((keystores) => {
 				this.onboarding = keystores.length == 0;

@@ -17,8 +17,14 @@ export default defineComponent({
 	name: 'Sidebar',
 	components: {},
 	props: {
-		keystores: Array as () => Keystore[],
-		keystore: Object as () => Keystore,
+		keystores: {
+			type: Array as () => Keystore[],
+			required: true,
+		},
+		keystore: {
+			type: Object as () => Keystore,
+			required: true,
+		},
 	},
 	data: () => ({}),
 	computed: {},

@@ -50,7 +50,7 @@ import {defineComponent} from 'vue'
 import {Entry} from "../api/generated";
 
 export default defineComponent({
-	name: 'EntryList',
+	name: 'Entries',
 	components: {},
 	props: {
 		entries: {

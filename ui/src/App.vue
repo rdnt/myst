@@ -5,7 +5,8 @@
 	<transition :duration="300" name="show">
 		<main v-if="keystore">
 			<Sidebar :keystores="keystores" :keystore="keystore"/>
-			<EntriesList :entries="keystore.entries"></EntriesList>
+			<Entries :entries="keystore.entries"></Entries>
+			<Entry></Entry>
 		</main>
 	</transition>
 </template>
@@ -16,12 +17,13 @@ import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFu
 import Login from "./components/LoginForm.vue";
 import api from "./api";
 import {Keystore} from "./api/generated";
-import EntriesList from "./components/EntriesList.vue";
+import Entries from "./components/Entries.vue";
+import Entry from "./components/Entry.vue";
 import Sidebar from "./components/Sidebar.vue";
 
 export default defineComponent({
 	name: "App",
-	components: {Sidebar, EntriesList, InitializeKeystoreFullscreenModal, Login},
+	components: {Sidebar, Entries, InitializeKeystoreFullscreenModal, Login, Entry},
 	data(): {
 		onboarding: boolean,
 		login: boolean,
@@ -124,8 +126,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-//$bg: #0a0e11;
-$bg: #111519;
+$bg: #0a0e11;
+//$bg: #111519;
 $accent: #00edb1;
 $text-color: #fff;
 

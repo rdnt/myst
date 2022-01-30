@@ -52,7 +52,7 @@ jobs:
 
     - name: Build client
       id: build-client
-      run: go build -o build/client ./cmd/client
+      run: go build -o build/client ./  cmd/client
 
     - name: Build container image
       id: build-container-image

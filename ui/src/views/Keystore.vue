@@ -1,13 +1,5 @@
 <template>
-	<div class="sidebar">
-		<h4>Myst</h4>
-		<div class="keystores-list">
-			<h5>Keystores</h5>
-			<div class="keystore" :class="{active: keystore.id === k.id}" v-for="k in keystores" :key="k.id">
-				{{ k.name }}
-			</div>
-		</div>
-	</div>
+	<router-view/>
 </template>
 
 <script lang="ts">
@@ -15,17 +7,17 @@ import {defineComponent} from 'vue'
 import {Keystore} from "../api/generated/index";
 
 export default defineComponent({
-	name: 'Sidebar',
+	name: 'Keystore',
 	components: {},
 	props: {
-			keystores: {
-				type: Array as () => Keystore[],
-				required: true,
-			},
-			keystore: {
-				type: Object as () => Keystore,
-				required: true,
-			},
+		keystores: {
+			type: Array as () => Keystore[],
+			required: true,
+		},
+		keystore: {
+			type: Object as () => Keystore,
+			required: true,
+		},
 	},
 	data: () => ({}),
 	methods: {}

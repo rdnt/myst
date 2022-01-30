@@ -30,9 +30,6 @@ import {
     Keystore,
     KeystoreFromJSON,
     KeystoreToJSON,
-    UnlockKeystoreRequest,
-    UnlockKeystoreRequestFromJSON,
-    UnlockKeystoreRequestToJSON,
 } from '../models';
 
 export interface AuthenticateOperationRequest {
@@ -48,17 +45,12 @@ export interface CreateKeystoreOperationRequest {
     createKeystoreRequest: CreateKeystoreRequest;
 }
 
-export interface GetKeystoreRequest {
-    keystoreId: string;
-}
-
 export interface KeystoreRequest {
     keystoreId: string;
 }
 
-export interface UnlockKeystoreOperationRequest {
+export interface KeystoreEntriesRequest {
     keystoreId: string;
-    unlockKeystoreRequest: UnlockKeystoreRequest;
 }
 
 /**
@@ -169,36 +161,6 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get a keystore if it exists and returns it
-     */
-    async getKeystoreRaw(requestParameters: GetKeystoreRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
-        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
-            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling getKeystore.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/keystore/{keystoreId}/entries`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
-    }
-
-    /**
-     * Get a keystore if it exists and returns it
-     */
-    async getKeystore(requestParameters: GetKeystoreRequest, initOverrides?: RequestInit): Promise<Array<Keystore>> {
-        const response = await this.getKeystoreRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
      * Triggers a health check
      */
     async healthCheckRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
@@ -226,7 +188,7 @@ export class DefaultApi extends runtime.BaseAPI {
     /**
      * Get a keystore if it exists and return it
      */
-    async keystoreRaw(requestParameters: KeystoreRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
+    async keystoreRaw(requestParameters: KeystoreRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Keystore>> {
         if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
             throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling keystore.');
         }
@@ -242,14 +204,44 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => KeystoreFromJSON(jsonValue));
     }
 
     /**
      * Get a keystore if it exists and return it
      */
-    async keystore(requestParameters: KeystoreRequest, initOverrides?: RequestInit): Promise<Array<Keystore>> {
+    async keystore(requestParameters: KeystoreRequest, initOverrides?: RequestInit): Promise<Keystore> {
         const response = await this.keystoreRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get the entries of a keystore
+     */
+    async keystoreEntriesRaw(requestParameters: KeystoreEntriesRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Entry>>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling keystoreEntries.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entries`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(EntryFromJSON));
+    }
+
+    /**
+     * Get the entries of a keystore
+     */
+    async keystoreEntries(requestParameters: KeystoreEntriesRequest, initOverrides?: RequestInit): Promise<Array<Entry>> {
+        const response = await this.keystoreEntriesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -276,43 +268,6 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async keystores(initOverrides?: RequestInit): Promise<Array<Keystore>> {
         const response = await this.keystoresRaw(initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Unlocks a keystore if it exists and returns it
-     */
-    async unlockKeystoreRaw(requestParameters: UnlockKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
-        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
-            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling unlockKeystore.');
-        }
-
-        if (requestParameters.unlockKeystoreRequest === null || requestParameters.unlockKeystoreRequest === undefined) {
-            throw new runtime.RequiredError('unlockKeystoreRequest','Required parameter requestParameters.unlockKeystoreRequest was null or undefined when calling unlockKeystore.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/keystore/{keystoreId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: UnlockKeystoreRequestToJSON(requestParameters.unlockKeystoreRequest),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
-    }
-
-    /**
-     * Unlocks a keystore if it exists and returns it
-     */
-    async unlockKeystore(requestParameters: UnlockKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Array<Keystore>> {
-        const response = await this.unlockKeystoreRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

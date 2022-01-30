@@ -1,6 +1,6 @@
 <template>
 	<div class="entry">
-		entry content
+		DATA: {{JSON.stringify(entry)}}
 	</div>
 </template>
 
@@ -12,7 +12,10 @@ export default defineComponent({
 	name: 'Entry',
 	components: {},
 	props: {
-		entry: Object as () => Entry,
+		entry: {
+			type: Object as () => Entry,
+			required: true
+		}
 	},
 	data: () => ({}),
 	computed: {},
@@ -22,7 +25,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .entry {
-	background-color: #14191d;
+	background-color: #101519;
+	border-left: 2px solid #1a2025;
 	height: 100%;
 	padding: 20px;
 	box-sizing: border-box;

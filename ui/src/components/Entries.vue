@@ -1,6 +1,7 @@
 <template>
 	<transition :duration="500" name="show">
 		<div class="entries-list">
+			{{JSON.stringify(keystore)}}
 			<div class="entry header">
 					<span class="name">
 						Domain
@@ -15,14 +16,14 @@
 						<button><img alt="" src="/assets/sort-arrow.svg"/></button>
 					</span>
 			</div>
-			<div class="entries">
+			<div class="entries" v-if="keystore">
 				<router-link
-					v-for="entry in entries"
+					v-for="entry in keystore.entries"
 					:key="entry.id"
 					:to="{
-            // name: 'entry',
-            path: '/'
-            // params: { entryId: entry.id, entry: entry }
+            name: 'entries',
+            // path: '/'
+            params: { keystoreId: this.keystore.id, entryId: entry.id }
           }"
 					class="entry"
 				>
@@ -43,22 +44,61 @@
 			</div>
 		</div>
 	</transition>
+
+
+	<KeystoreEntry v-if="entry" :entry="entry"/>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {Entry} from "../api/generated";
+import KeystoreEntry from "./Entry.vue";
+import {Entry, Keystore} from "../api/generated";
+import api from "../api";
 
 export default defineComponent({
 	name: 'Entries',
-	components: {},
+	inheritAttrs: false,
+	components: {KeystoreEntry},
 	props: {
-		entries: {
-			type: Array as () => Entry[],
-			required: true
+		// keystore: {
+		// 	type: Object as () => Keystore,
+		// 	required: true
+		// },
+		// entries: {
+		// 	type: Array as () => Entry[],
+		// 	required: true
+		// }
+	},
+	watch: {
+		// $route: {
+			// handler: function (route) {
+			// 	console.log('handler')
+			// 	if (route.params.keystoreId) {
+			// 		console.log("keystoreId", route.params.keystoreId);
+			// 		api.keystore(route.params.keystoreId).then((keystore) => {
+			// 			this.keystore = keystore
+			// 			console.log('keystore set')
+			// 		})
+			// 	} else {
+			// 		this.keystore = undefined
+			// 	}
+			// 	// if (!route.params.entryId) {
+			// 	// 	this.entry = undefined;
+			// 	// } else {
+			// 	// 	this.entry = this.entries.find(entry => entry.id === route.params.entryId);
+			// 	// }
+			// }
+		// }
+	},
+	data(): {
+		entry?: Entry,
+		keystore?: Keystore
+	} {
+		return {
+			keystore: undefined,
+			entry: undefined,
 		}
 	},
-	data: () => ({}),
 	computed: {},
 	methods: {}
 })

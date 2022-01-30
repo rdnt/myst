@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"myst/internal/client/application/keystoreservice"
+	"myst/pkg/logger"
 	"os"
 	"path"
 	"sync"
@@ -15,6 +16,8 @@ import (
 	"myst/internal/client/keystorerepo/enclave"
 	"myst/pkg/crypto"
 )
+
+var log = logger.New("keystorerepo", logger.Green)
 
 type Enclave struct {
 	Keystores map[string]JSONKeystore `json:"keystores"`
@@ -41,12 +44,12 @@ func New(path string) (*Repository, error) {
 	go r.startHealthCheck()
 
 	// TODO: remove simulated health check
-	go func() {
-		for {
-			time.Sleep(10 * time.Second)
-			r.HealthCheck()
-		}
-	}()
+	//go func() {
+	//	for {
+	//		time.Sleep(10 * time.Second)
+	//		r.HealthCheck()
+	//	}
+	//}()
 
 	return r, nil
 }
@@ -311,17 +314,17 @@ func (r *Repository) startHealthCheck() {
 			elapsed := time.Since(r.lastHealthCheck)
 
 			if elapsed < time.Minute {
-				//fmt.Println("healthy...")
-
 				r.mux.Unlock()
+
 				continue
 			}
 
-			fmt.Println("health check failed, deleting key...")
+			if r.key != nil {
+				r.key = nil
+				r.mux.Unlock()
 
-			r.key = nil
-
-			r.mux.Unlock()
+				log.Debug("health check failed")
+			}
 		}
 	}
 }

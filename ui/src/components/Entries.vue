@@ -15,51 +15,90 @@
 						<button><img alt="" src="/assets/sort-arrow.svg"/></button>
 					</span>
 			</div>
-			<div class="entries">
+			<div class="entries" v-if="keystore">
 				<router-link
-					v-for="entry in entries"
-					:key="entry.id"
+					v-for="e in keystore.entries"
+					:key="e.id"
 					:to="{
-            // name: 'entry',
-            path: '/'
-            // params: { entryId: entry.id, entry: entry }
+            name: 'entry',
+            params: { keystoreId: keystore.id, entryId: e.id }
           }"
 					class="entry"
+					:class="{active: entry && entry.id === e.id}"
 				>
           <span class="icon">
-            <img :src="`http://${entry.label}/favicon.ico`" alt=""/>
+            <img :src="`http://${e.label}/favicon.ico`" alt=""/>
           </span>
 					<span class="name">
-            {{ entry.label }}
+            {{ e.label }}
           </span>
 					<span class="user">
-            {{ entry.username }}
+            {{ e.username }}
           </span>
 					<span class="pass">
-            {{ entry.password }}
+            {{ e.password.replace(/./g, "∗") }}
 						<button tabindex="-1"	><img alt="" src="/assets/eye.svg"/></button>
           </span>
 				</router-link>
 			</div>
 		</div>
 	</transition>
+	<KeystoreEntry :entry="entry"/>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {Entry} from "../api/generated";
+import KeystoreEntry from "./Entry.vue";
+import {Entry, Keystore} from "../api/generated";
+import {useMainStore} from "../store";
 
 export default defineComponent({
 	name: 'Entries',
-	components: {},
-	props: {
-		entries: {
-			type: Array as () => Entry[],
-			required: true
+	components: {KeystoreEntry},
+	setup() {
+		const main = useMainStore()
+
+		return {
+			main,
 		}
 	},
-	data: () => ({}),
-	computed: {},
+	props: {
+	},
+	data() {
+		return {}
+	},
+	computed: {
+		keystores(): Keystore[] {
+			return this.main.keystores
+		},
+		keystore(): Keystore | undefined {
+			return this.main.keystore
+		},
+		entry(): Entry | undefined {
+			return this.main.entry
+		},
+	},
+	watch: {
+		// $route: {
+			// handler: function (route) {
+			// 	console.log('handler')
+			// 	if (route.params.keystoreId) {
+			// 		console.log("keystoreId", route.params.keystoreId);
+			// 		api.keystore(route.params.keystoreId).then((keystore) => {
+			// 			this.keystore = keystore
+			// 			console.log('keystore set')
+			// 		})
+			// 	} else {
+			// 		this.keystore = undefined
+			// 	}
+			// 	// if (!route.params.entryId) {
+			// 	// 	this.entry = undefined;
+			// 	// } else {
+			// 	// 	this.entry = this.entries.find(entry => entry.id === route.params.entryId);
+			// 	// }
+			// }
+		// }
+	},
 	methods: {}
 })
 </script>
@@ -94,6 +133,7 @@ export default defineComponent({
 		border-radius: 5px;
 		min-height: 20px;
 		text-decoration: none;
+		margin-bottom: 2px;
 
 		&:last-child {
 			margin-bottom: 20px;
@@ -163,6 +203,7 @@ export default defineComponent({
 		}
 
 		&:not(.header) {
+
 			&:hover {
 				background-color: #1e2328;
 				color: #f7f8f8;
@@ -174,6 +215,9 @@ export default defineComponent({
 				opacity: 1;
 			}
 
+			&.active {
+				background-color: lighten(#1e2328, 3%);
+			}
 
 			.pass {
 				position: relative;

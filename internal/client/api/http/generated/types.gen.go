@@ -42,16 +42,11 @@ type Keystore struct {
 	Name    string  `json:"name"`
 }
 
-// UnlockKeystoreRequest defines model for UnlockKeystoreRequest.
-type UnlockKeystoreRequest struct {
-	Password string `json:"password"`
-}
+// Keystores defines model for Keystores.
+type Keystores []Keystore
 
 // AuthenticateJSONBody defines parameters for Authenticate.
 type AuthenticateJSONBody AuthenticateRequest
-
-// UnlockKeystoreJSONBody defines parameters for UnlockKeystore.
-type UnlockKeystoreJSONBody UnlockKeystoreRequest
 
 // CreateEntryJSONBody defines parameters for CreateEntry.
 type CreateEntryJSONBody CreateEntryRequest
@@ -61,9 +56,6 @@ type CreateKeystoreJSONBody CreateKeystoreRequest
 
 // AuthenticateJSONRequestBody defines body for Authenticate for application/json ContentType.
 type AuthenticateJSONRequestBody AuthenticateJSONBody
-
-// UnlockKeystoreJSONRequestBody defines body for UnlockKeystore for application/json ContentType.
-type UnlockKeystoreJSONRequestBody UnlockKeystoreJSONBody
 
 // CreateEntryJSONRequestBody defines body for CreateEntry for application/json ContentType.
 type CreateEntryJSONRequestBody CreateEntryJSONBody

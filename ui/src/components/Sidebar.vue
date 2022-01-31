@@ -3,32 +3,46 @@
 		<h4>Myst</h4>
 		<div class="keystores-list">
 			<h5>Keystores</h5>
-			<div class="keystore" :class="{active: keystore.id === k.id}" v-for="k in keystores" :key="k.id">
+			<router-link
+				v-for="k in keystores"
+				:key="k.id"
+				:class="{active: keystore && keystore.id === k.id}"
+				:to="{
+            name: 'entries',
+            params: { keystoreId: k.id }
+          }"
+				class="keystore">
 				{{ k.name }}
-			</div>
+			</router-link>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {Keystore} from "../api/generated";
+import {useMainStore} from "../store";
+import {Keystore} from "../api/generated/index";
 
 export default defineComponent({
 	name: 'Sidebar',
 	components: {},
-	props: {
-		keystores: {
-			type: Array as () => Keystore[],
-			required: true,
+	setup() {
+		const main = useMainStore()
+
+		return {
+			main,
+		}
+	},
+	computed: {
+		keystores(): Keystore[] {
+			return this.main.keystores
 		},
-		keystore: {
-			type: Object as () => Keystore,
-			required: true,
+		keystore(): Keystore | undefined {
+			return this.main.keystore
 		},
 	},
-	data: () => ({}),
-	computed: {},
+	data: () => ({
+	}),
 	methods: {}
 })
 </script>
@@ -39,20 +53,18 @@ $accent: #00edb1;
 h4 {
 	font-weight: 700;
 	font-size: 1.6rem;
-	margin: 0 0 76px;
+	margin: 10px 0 66px;
 	height: 20px;
 	padding: 0 20px;
 }
 
 h5 {
-	font-size: 1rem;
-	margin: 0;
 	height: 20px;
 	padding: 0 20px;
-	margin-bottom: 10px;
-	color: #8a8f98;
+	margin: 0 0 10px;
+	color: #8a8f9f;
 	text-transform: uppercase;
-	font-size: .7rem;
+	font-size: .85rem;
 	font-weight: 600;
 	letter-spacing: .5px;
 }
@@ -62,6 +74,7 @@ h5 {
 	height: 100%;
 	padding: 20px;
 	box-sizing: border-box;
+	flex-basis: 250px;
 }
 
 .keystores-list {
@@ -76,11 +89,12 @@ h5 {
 		color: #fff;
 		cursor: pointer;
 		height: 22px;
-		padding: 10px 100px 10px 20px;
+		padding: 10px 20px 10px 20px;
 		font-size: 1.1rem;
 		white-space: nowrap;
 		text-overflow: ellipsis;
-		margin-bottom: 4px;
+		margin-bottom: 2px;
+		text-decoration: none;
 
 		&:hover {
 			background-color: rgba(#1e2328, .75);

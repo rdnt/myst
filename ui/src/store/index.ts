@@ -1,37 +1,37 @@
-import { defineStore } from 'pinia'
-import api from "../api"
+import {defineStore} from 'pinia'
+import {Entry, Keystore} from "../api/generated/index";
 
-export const mainStore = defineStore('main', {
+interface State {
+    keystores: Keystore[];
+    keystore?: Keystore;
+    entry?: Entry;
+}
+
+const state: State = {
+    keystores: [],
+    keystore: undefined,
+    entry: undefined,
+}
+
+export const useMainStore = defineStore('main', {
     // a function that returns a fresh state
     state: () => ({
-        ready: false,
-        onboarding: false
+        ...state
     }),
     // optional getters
-    getters: {
-        // // getters receive the state as first parameter
-        // doubleCount: (state) => state.counter * 2,
-        // // use getters in other getters
-        // doubleCountPlusOne(): number {
-        //     return this.doubleCount * 2 + 1
-        // },
-    },
+    getters: {},
     // optional actions
     actions: {
-        // setReady(ready: boolean) {
-        //     this.ready = ready;
-        // },
-        // setOnboarding(onboarding: boolean) {
-        //     this.onboarding = onboarding;
-        // },
-        load() {
-            this.ready = true
-            console.log(api)
-            // api.keystoreIds().then((ids) => {
-            //     this.onboarding = ids.length == 0;
-            // }).finally(() => {
-            //     this.ready = true
-            // })
-        }
+        setKeystores(keystores: Keystore[]) {
+            this.keystores = keystores.sort((a, b) => {
+                return a.id < b.id ? 1 : -1;
+            });
+        },
+        setKeystore(keystore: Keystore | undefined) {
+            this.keystore = keystore;
+        },
+        setEntry(entry: Entry | undefined) {
+            this.entry = entry;
+        },
     },
 })

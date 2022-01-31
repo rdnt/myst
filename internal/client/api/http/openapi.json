@@ -110,10 +110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Keystore"
-                  }
+                  "$ref": "#/components/schemas/Keystores"
                 }
               }
             }
@@ -132,56 +129,6 @@
       }
     },
     "/keystore/{keystoreId}": {
-      "post": {
-        "description": "Unlocks a keystore if it exists and returns it",
-        "operationId": "UnlockKeystore",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "required": true,
-            "description": "unique identifier for a keystore",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UnlockKeystoreRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Keystore",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Keystore"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "description": "Get a keystore if it exists and return it",
         "operationId": "Keystore",
@@ -202,10 +149,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Keystore"
-                  }
+                  "$ref": "#/components/schemas/Keystore"
                 }
               }
             }
@@ -272,8 +216,8 @@
         }
       },
       "get": {
-        "description": "Get a keystore if it exists and returns it",
-        "operationId": "GetKeystore",
+        "description": "Get the entries of a keystore",
+        "operationId": "KeystoreEntries",
         "parameters": [
           {
             "name": "keystoreId",
@@ -287,13 +231,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Keystore",
+            "description": "Entries",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Keystore"
+                    "$ref": "#/components/schemas/Entry"
                   }
                 }
               }
@@ -368,6 +312,12 @@
           "password": {
             "type": "string"
           }
+        }
+      },
+      "Keystores": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Keystore"
         }
       },
       "Keystore": {

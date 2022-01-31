@@ -1,14 +1,33 @@
 <template>
-	<span>{{!ready ? 'Loading...' : ''}}</span>
-	<InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
-	<Login v-if="login" @login="loggedIn()" />
-	<transition :duration="300" name="show">
-		<main v-if="keystore">
-			<Sidebar :keystores="keystores" :keystore="keystore"/>
-			<Entries :entries="keystore.entries"></Entries>
-			<Entry></Entry>
-		</main>
-	</transition>
+	<span>{{ !ready ? 'Loading...' : '' }}</span>
+	<InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)"/>
+	<Login v-if="login" @login="loggedIn()"/>
+
+	<main v-if="keystores && keystore">
+		<Sidebar/>
+		<router-view/>
+	</main>
+
+	<!--	<transition>-->
+<!--	<main>-->
+
+<!--	</main>-->
+	<!--			<Entries :is="Component" v-if="keystore" :entries="keystore.entries"/>-->
+	<!--		</main>-->
+	<!--	</transition>-->
+
+
+	<!--	</router-view>-->
+
+
+	<!--	<transition :duration="300" name="show">-->
+	<!--		<main>-->
+	<!--			<Sidebar v-if="keystores && keystore" :keystores="keystores" :keystore="keystore" />-->
+	<!--			<router-view />-->
+	<!--&lt;!&ndash;			<Entries></Entries>&ndash;&gt;-->
+<!--&lt;!&ndash;			<Entry></Entry>&ndash;&gt;-->
+<!--		</main>-->
+<!--	</transition>-->
 </template>
 
 <script lang="ts">
@@ -20,37 +39,67 @@ import {Keystore} from "./api/generated";
 import Entries from "./components/Entries.vue";
 import Entry from "./components/Entry.vue";
 import Sidebar from "./components/Sidebar.vue";
+import {useMainStore} from './store/'
 
 export default defineComponent({
+	setup() {
+		const main = useMainStore()
+
+		return {
+			main,
+		}
+	},
 	name: "App",
 	components: {Sidebar, Entries, InitializeKeystoreFullscreenModal, Login, Entry},
 	data(): {
 		onboarding: boolean,
 		login: boolean,
 		ready: boolean,
-		keystore?: Keystore,
-		keystores: Keystore[],
 		healthCheckIntervalId?: number,
 	} {
 		return {
 			onboarding: false,
 			login: false,
 			ready: false,
-			keystore: undefined,
-			keystores: [],
 		}
 	},
-	created() {
-		this.healthCheckIntervalId = window.setInterval(this.healthCheck, 10000)
-	},
-	destroyed() {
-		window.clearInterval(this.healthCheckIntervalId)
-	},
 	mounted() {
+		if (this.$route.name !== "keystore") {
+			this.$router.push({ name: 'keystore'})
+		}
+
+		this.healthCheckIntervalId = window.setInterval(this.healthCheck, 10000)
 		this.ready = false
+
 		this.init()
   },
-  methods: {
+	unmounted() {
+		window.clearInterval(this.healthCheckIntervalId)
+	},
+	computed: {
+		keystores(): Keystore[] {
+			return this.main.keystores
+		},
+		keystore(): Keystore | undefined {
+			return this.main.keystore
+		},
+	},
+	watch: {
+		$route(route) {
+			if (route.params.keystoreId) {
+				this.main.setKeystore(this.keystores.find(k => k.id === route.params.keystoreId))
+
+				if (route.params.entryId) {
+					this.main.setEntry(this.keystore?.entries.find(e => e.id === route.params.entryId))
+				} else {
+					this.main.setEntry(undefined)
+				}
+			} else {
+				this.main.setKeystore(undefined)
+			}
+		},
+	},
+	methods: {
 		healthCheck() {
 			api.healthCheck()
 		},
@@ -58,20 +107,21 @@ export default defineComponent({
 			api.keystores().then((keystores) => {
 				this.onboarding = keystores.length == 0;
 
-				this.keystores = keystores
 				if (keystores.length > 0) {
-					this.keystore = keystores[0]
+					// keystores.push({
+					// 	id: "1",
+					// 	name: "Work",
+					// 	entries: []
+					// })
+					// keystores.push({
+					// 	id: "2",
+					// 	name: "Old accounts",
+					// 	entries: []
+					// })
 
-					this.keystores.push({
-						id: "1",
-						name: "Work",
-						entries: []
-					})
-					this.keystores.push({
-						id: "2",
-						name: "Old accounts",
-						entries: []
-					})
+					this.main.setKeystores(keystores)
+					this.main.setKeystore(keystores[0]);
+					this.$router.push({ name: 'entries', params: { keystoreId: keystores[0].id }})
 				}
 			}).catch((error: Response) => {
 				if (error.status == 401) {
@@ -86,39 +136,46 @@ export default defineComponent({
 		},
 		keystoreCreated(keystore: Keystore) {
 			this.onboarding = false;
-			this.keystore = keystore;
-			this.keystores = [keystore];
-			this.keystores.push({
-				id: "1",
-				name: "Work",
-				entries: []
-			})
-			this.keystores.push({
-				id: "2",
-				name: "Old accounts",
-				entries: []
-			})
+			let keystores = [keystore]
+
+			// keystores.push({
+			// 	id: "1",
+			// 	name: "Work",
+			// 	entries: []
+			// })
+			// keystores.push({
+			// 	id: "2",
+			// 	name: "Old accounts",
+			// 	entries: []
+			// })
+
+			this.main.setKeystores(keystores)
+			this.main.setKeystore(keystores[0]);
 		},
 		loggedIn() {
 			console.log("logged in");
 
 			api.keystores().then((keystores) => {
-				this.keystores = keystores
-				this.keystores.push({
-					id: "1",
-					name: "Work",
-					entries: []
-				})
-				this.keystores.push({
-					id: "2",
-					name: "Old accounts",
-					entries: []
-				})
-				this.keystore = keystores[0]
+				// keystores.push({
+				// 	id: "1",
+				// 	name: "Work",
+				// 	entries: []
+				// })
+				// keystores.push({
+				// 	id: "2",
+				// 	name: "Old accounts",
+				// 	entries: []
+				// })
+
+				this.main.setKeystores(keystores)
+				this.main.setKeystore(keystores[0]);
+
+				this.$router.push({ name: 'entries', params: { keystoreId: keystores[0].id }})
 			}).catch(error => {
 				console.log(error)
 			}).finally(() => {
 				this.login = false;
+				// this.$router.push({ name: 'entries' })
 			});
 		}
 	},
@@ -141,7 +198,7 @@ html, body {
 }
 
 html {
-	height: -webkit-fill-available;
+	//height: -webkit-fill-available;
 }
 body {
 	margin: 0;
@@ -149,7 +206,7 @@ body {
 
 	height: 100vh;
 	max-height: 100vh;
-	max-height: -webkit-fill-available;
+	//max-height: -webkit-fill-available;
 	//max-height: 100%;
 }
 
@@ -171,7 +228,7 @@ main {
 }
 
 *::-webkit-scrollbar {
-	width: 0px;
+	width: 0;
 	display: none;
 	background: transparent;
 }

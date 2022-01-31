@@ -1,7 +1,6 @@
 <template>
 	<transition :duration="500" name="show">
 		<div class="entries-list">
-			{{JSON.stringify(keystore)}}
 			<div class="entry header">
 					<span class="name">
 						Domain
@@ -18,56 +17,66 @@
 			</div>
 			<div class="entries" v-if="keystore">
 				<router-link
-					v-for="entry in keystore.entries"
-					:key="entry.id"
+					v-for="e in keystore.entries"
+					:key="e.id"
 					:to="{
-            name: 'entries',
-            // path: '/'
-            params: { keystoreId: this.keystore.id, entryId: entry.id }
+            name: 'entry',
+            params: { keystoreId: this.keystore.id, entryId: e.id }
           }"
 					class="entry"
+					:class="{active: entry && entry.id === e.id}"
 				>
           <span class="icon">
-            <img :src="`http://${entry.label}/favicon.ico`" alt=""/>
+            <img :src="`http://${e.label}/favicon.ico`" alt=""/>
           </span>
 					<span class="name">
-            {{ entry.label }}
+            {{ e.label }}
           </span>
 					<span class="user">
-            {{ entry.username }}
+            {{ e.username }}
           </span>
 					<span class="pass">
-            {{ entry.password }}
+            {{ e.password.replace(/./g, "∗") }}
 						<button tabindex="-1"	><img alt="" src="/assets/eye.svg"/></button>
           </span>
 				</router-link>
 			</div>
 		</div>
 	</transition>
-
-
-	<KeystoreEntry v-if="entry" :entry="entry"/>
+	<KeystoreEntry :entry="entry"/>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
 import KeystoreEntry from "./Entry.vue";
 import {Entry, Keystore} from "../api/generated";
-import api from "../api";
+import {useMainStore} from "../store";
 
 export default defineComponent({
 	name: 'Entries',
-	inheritAttrs: false,
 	components: {KeystoreEntry},
+	setup() {
+		const main = useMainStore()
+
+		return {
+			main,
+		}
+	},
 	props: {
-		// keystore: {
-		// 	type: Object as () => Keystore,
-		// 	required: true
-		// },
-		// entries: {
-		// 	type: Array as () => Entry[],
-		// 	required: true
-		// }
+	},
+	data() {
+		return {}
+	},
+	computed: {
+		keystores(): Keystore[] {
+			return this.main.keystores
+		},
+		keystore(): Keystore | undefined {
+			return this.main.keystore
+		},
+		entry(): Entry | undefined {
+			return this.main.entry
+		},
 	},
 	watch: {
 		// $route: {
@@ -90,16 +99,6 @@ export default defineComponent({
 			// }
 		// }
 	},
-	data(): {
-		entry?: Entry,
-		keystore?: Keystore
-	} {
-		return {
-			keystore: undefined,
-			entry: undefined,
-		}
-	},
-	computed: {},
 	methods: {}
 })
 </script>
@@ -134,6 +133,7 @@ export default defineComponent({
 		border-radius: 5px;
 		min-height: 20px;
 		text-decoration: none;
+		margin-bottom: 2px;
 
 		&:last-child {
 			margin-bottom: 20px;
@@ -203,6 +203,7 @@ export default defineComponent({
 		}
 
 		&:not(.header) {
+
 			&:hover {
 				background-color: #1e2328;
 				color: #f7f8f8;
@@ -214,6 +215,9 @@ export default defineComponent({
 				opacity: 1;
 			}
 
+			&.active {
+				background-color: lighten(#1e2328, 3%);
+			}
 
 			.pass {
 				position: relative;

@@ -13,14 +13,14 @@ export default createRouter({
             // props: true,
             children: [
                 {
-                    path: '/keystore/:keystoreId',
                     name: 'entries',
+                    path: '/keystore/:keystoreId',
                     component: Entries,
                     // props: true,
                     children: [
                         {
-                            path: '/keystore/:keystoreId/entry/:entryId',
                             name: 'entry',
+                            path: '/keystore/:keystoreId/entry/:entryId',
                             component: Entry,
                             // props: true,
                         },

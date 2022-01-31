@@ -21,7 +21,7 @@
 					:key="e.id"
 					:to="{
             name: 'entry',
-            params: { keystoreId: this.keystore.id, entryId: e.id }
+            params: { keystoreId: keystore.id, entryId: e.id }
           }"
 					class="entry"
 					:class="{active: entry && entry.id === e.id}"

@@ -6,7 +6,7 @@
 			<router-link
 				v-for="k in keystores"
 				:key="k.id"
-				:class="{active: keystore.id === k.id}"
+				:class="{active: keystore && keystore.id === k.id}"
 				:to="{
             name: 'entries',
             params: { keystoreId: k.id }
@@ -24,6 +24,8 @@ import {useMainStore} from "../store";
 import {Keystore} from "../api/generated/index";
 
 export default defineComponent({
+	name: 'Sidebar',
+	components: {},
 	setup() {
 		const main = useMainStore()
 
@@ -39,10 +41,8 @@ export default defineComponent({
 			return this.main.keystore
 		},
 	},
-	name: 'Sidebar',
-	components: {},
-	props: {},
-	data: () => ({}),
+	data: () => ({
+	}),
 	methods: {}
 })
 </script>

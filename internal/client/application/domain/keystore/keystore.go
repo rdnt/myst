@@ -88,7 +88,7 @@ func New(opts ...Option) *Keystore {
 	}
 
 	// TODO: remove this
-	k.id = "0000000000000000000000"
+	//k.id = "0000000000000000000000"
 
 	return k
 }

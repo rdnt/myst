@@ -1,29 +1,30 @@
 <template>
-	<span>{{!ready ? 'Loading...' : ''}}</span>
-	<InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)" />
-	<Login v-if="login" @login="loggedIn()" />
+	<span>{{ !ready ? 'Loading...' : '' }}</span>
+	<InitializeKeystoreFullscreenModal v-if="onboarding" @created="keystoreCreated($event)"/>
+	<Login v-if="login" @login="loggedIn()"/>
+
+	<main v-if="keystores && keystore">
+		<Sidebar/>
+		<router-view/>
+	</main>
+
+	<!--	<transition>-->
+<!--	<main>-->
+
+<!--	</main>-->
+	<!--			<Entries :is="Component" v-if="keystore" :entries="keystore.entries"/>-->
+	<!--		</main>-->
+	<!--	</transition>-->
 
 
-<!--	<transition>-->
-		<main v-if="keystores && keystore">
-			<Sidebar :keystores="keystores" :keystore="keystore" />
-			<router-view :keystores="keystores" :keystore="keystore" />
-<!--			<Entries :is="Component" v-if="keystore" :entries="keystore.entries"/>-->
-		</main>
-<!--	</transition>-->
+	<!--	</router-view>-->
 
 
-
-
-<!--	</router-view>-->
-
-
-
-<!--	<transition :duration="300" name="show">-->
-<!--		<main>-->
-<!--			<Sidebar v-if="keystores && keystore" :keystores="keystores" :keystore="keystore" />-->
-<!--			<router-view />-->
-<!--&lt;!&ndash;			<Entries></Entries>&ndash;&gt;-->
+	<!--	<transition :duration="300" name="show">-->
+	<!--		<main>-->
+	<!--			<Sidebar v-if="keystores && keystore" :keystores="keystores" :keystore="keystore" />-->
+	<!--			<router-view />-->
+	<!--&lt;!&ndash;			<Entries></Entries>&ndash;&gt;-->
 <!--&lt;!&ndash;			<Entry></Entry>&ndash;&gt;-->
 <!--		</main>-->
 <!--	</transition>-->
@@ -34,12 +35,11 @@ import {defineComponent} from "vue";
 import InitializeKeystoreFullscreenModal from "./components/InitializeKeystoreFullscreenModal.vue";
 import Login from "./components/LoginForm.vue";
 import api from "./api";
-import {Keystore, Entry as KeystoreEntry} from "./api/generated";
+import {Keystore} from "./api/generated";
 import Entries from "./components/Entries.vue";
 import Entry from "./components/Entry.vue";
 import Sidebar from "./components/Sidebar.vue";
-import { useMainStore } from './store/'
-import {mapActions} from "pinia";
+import {useMainStore} from './store/'
 
 export default defineComponent({
 	setup() {

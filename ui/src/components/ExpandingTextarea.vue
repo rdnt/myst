@@ -45,8 +45,8 @@ export default defineComponent({
 	}),
 	mounted() {
 		this.$nextTick(() => {
-			if (this.value == "") {
-				$emit('update:modelValue', this.$props.placeholder || '')
+			if (this.modelValue == "") {
+				this.$emit('update:modelValue', this.$props.placeholder || '')
 			}
 
 			// this.value = this.$props.placeholder || ''
@@ -54,8 +54,8 @@ export default defineComponent({
 			this.update().then(() => {
 				// this.currentValue = ''
 
-				if (this.value == "") {
-					$emit('update:modelValue', this.modelValue)
+				if (this.modelValue == "") {
+					this.$emit('update:modelValue', this.modelValue)
 				}
 
 			})
@@ -84,6 +84,7 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 30px;
+	border-radius: 5px;
 
 	&.focus {
 		background-color: rgba(#abc, .05);
@@ -106,7 +107,8 @@ export default defineComponent({
 		font-size: 1.1rem;
 		font-weight: 400;
 		box-sizing: border-box;
-		background-color: rgba(#abc, .05);
+		background-color: transparent;
+		//background-color: rgba(#abc, .05);
 		border-radius: 5px;
 		padding: 15px 16px;
 		color: #fff;

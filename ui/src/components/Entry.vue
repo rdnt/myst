@@ -81,6 +81,7 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 30px;
+	border-radius: 5px;
 
 	label {
 		font-size: 1.1rem;
@@ -89,38 +90,37 @@ export default defineComponent({
 		padding: 0 15px;
 	}
 
-	textarea {
-		display: block;
-		margin: 0;
-		border: none;
-		outline: none;
-		width: 100%;
-		resize: none;
-		font-size: 1.1rem;
-		font-weight: 400;
-		box-sizing: border-box;
-		background-color: rgba(#abc, .05);
-		border-radius: 5px;
-		padding: 15px 16px;
-		color: #fff;
-		overflow: hidden;
-
-		&::placeholder {
-			color: lighten(#68737e, 5%);
-		}
-
-		&:focus {
-			&::placeholder {
-				color: lighten(#68737e, 15%);
-			}
-		}
-
-		&:disabled {
-			//background-color: transparent;
-			//padding-left: 0;
-			//padding-right: 0;
-
-		}
-	}
+	//textarea {
+	//	display: block;
+	//	margin: 0;
+	//	border: none;
+	//	outline: none;
+	//	width: 100%;
+	//	resize: none;
+	//	font-size: 1.1rem;
+	//	font-weight: 400;
+	//	box-sizing: border-box;
+	//	//background-color: rgba(#abc, .05);
+	//	padding: 15px 16px;
+	//	color: #fff;
+	//	overflow: hidden;
+	//
+	//	&::placeholder {
+	//		color: lighten(#68737e, 5%);
+	//	}
+	//
+	//	&:focus {
+	//		&::placeholder {
+	//			color: lighten(#68737e, 15%);
+	//		}
+	//	}
+	//
+	//	&:disabled {
+	//		//background-color: transparent;
+	//		//padding-left: 0;
+	//		//padding-right: 0;
+	//
+	//	}
+	//}
 }
 </style>

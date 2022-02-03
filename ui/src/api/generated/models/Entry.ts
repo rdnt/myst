@@ -30,7 +30,7 @@ export interface Entry {
      * @type {string}
      * @memberof Entry
      */
-    label: string;
+    website: string;
     /**
      * 
      * @type {string}
@@ -43,6 +43,12 @@ export interface Entry {
      * @memberof Entry
      */
     password: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Entry
+     */
+    notes: string;
 }
 
 export function EntryFromJSON(json: any): Entry {
@@ -56,9 +62,10 @@ export function EntryFromJSONTyped(json: any, ignoreDiscriminator: boolean): Ent
     return {
         
         'id': json['id'],
-        'label': json['label'],
+        'website': json['website'],
         'username': json['username'],
         'password': json['password'],
+        'notes': json['notes'],
     };
 }
 
@@ -72,9 +79,10 @@ export function EntryToJSON(value?: Entry | null): any {
     return {
         
         'id': value.id,
-        'label': value.label,
+        'website': value.website,
         'username': value.username,
         'password': value.password,
+        'notes': value.notes,
     };
 }
 

@@ -1,44 +1,50 @@
 <template>
 	<transition :duration="500" name="show">
 		<div class="entries-list">
-			<div class="entry header">
-					<span class="name">
-						Domain
-						<button><img alt="" src="/assets/sort-arrow.svg"/></button>
-					</span>
-				<span class="user">
-						Username
-						<button><img alt="" src="/assets/sort-arrow.svg"/></button>
-					</span>
-				<span class="pass">
-						Password
-						<button><img alt="" src="/assets/sort-arrow.svg"/></button>
-					</span>
-			</div>
-			<div class="entries" v-if="keystore">
+<!--			<div class="entry header">-->
+<!--				<span class="name">-->
+<!--					Domain-->
+<!--					<button><img alt="" src="/assets/sort-arrow.svg"/></button>-->
+<!--				</span>-->
+<!--				<span class="user">-->
+<!--					Username-->
+<!--					<button><img alt="" src="/assets/sort-arrow.svg"/></button>-->
+<!--				</span>-->
+<!--				<span class="pass">-->
+<!--					Password-->
+<!--					<button><img alt="" src="/assets/sort-arrow.svg"/></button>-->
+<!--				</span>-->
+<!--			</div>-->
+			<div v-if="keystore" class="entries">
 				<router-link
-					v-for="e in keystore.entries"
+					v-for="(e, i) in keystore.entries"
 					:key="e.id"
+					:class="{active: entry && entry.id === e.id}"
 					:to="{
             name: 'entry',
             params: { keystoreId: keystore.id, entryId: e.id }
           }"
 					class="entry"
-					:class="{active: entry && entry.id === e.id}"
 				>
           <span class="icon">
-            <img :src="`http://${e.label}/favicon.ico`" alt=""/>
+            <img :src="`http://${e.website}/favicon.ico`" alt=""/>
+
+
           </span>
-					<span class="name">
-            {{ e.label }}
-          </span>
-					<span class="user">
-            {{ e.username }}
-          </span>
-					<span class="pass">
-            {{ e.password.replace(/./g, "∗") }}
-						<button tabindex="-1"	><img alt="" src="/assets/eye.svg"/></button>
-          </span>
+
+					<div class="info">
+						<span class="name">
+							{{ e.website }}
+						</span>
+						<span class="user">
+							{{ i === 2 ? 'multiple accounts': e.username }}
+						</span>
+					</div>
+
+<!--					<span class="pass">-->
+<!--            {{ e.password.replace(/./g, "∗") }}-->
+<!--						<button tabindex="-1"><img alt="" src="/assets/eye.svg"/></button>-->
+<!--          </span>-->
 				</router-link>
 			</div>
 		</div>
@@ -62,8 +68,7 @@ export default defineComponent({
 			main,
 		}
 	},
-	props: {
-	},
+	props: {},
 	data() {
 		return {}
 	},
@@ -80,23 +85,23 @@ export default defineComponent({
 	},
 	watch: {
 		// $route: {
-			// handler: function (route) {
-			// 	console.log('handler')
-			// 	if (route.params.keystoreId) {
-			// 		console.log("keystoreId", route.params.keystoreId);
-			// 		api.keystore(route.params.keystoreId).then((keystore) => {
-			// 			this.keystore = keystore
-			// 			console.log('keystore set')
-			// 		})
-			// 	} else {
-			// 		this.keystore = undefined
-			// 	}
-			// 	// if (!route.params.entryId) {
-			// 	// 	this.entry = undefined;
-			// 	// } else {
-			// 	// 	this.entry = this.entries.find(entry => entry.id === route.params.entryId);
-			// 	// }
-			// }
+		// handler: function (route) {
+		// 	console.log('handler')
+		// 	if (route.params.keystoreId) {
+		// 		console.log("keystoreId", route.params.keystoreId);
+		// 		api.keystore(route.params.keystoreId).then((keystore) => {
+		// 			this.keystore = keystore
+		// 			console.log('keystore set')
+		// 		})
+		// 	} else {
+		// 		this.keystore = undefined
+		// 	}
+		// 	// if (!route.params.entryId) {
+		// 	// 	this.entry = undefined;
+		// 	// } else {
+		// 	// 	this.entry = this.entries.find(entry => entry.id === route.params.entryId);
+		// 	// }
+		// }
 		// }
 	},
 	methods: {}
@@ -104,7 +109,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
 
 
 //transition: transform .5s cubic-bezier(.68,.09,.13,.89);
@@ -117,8 +121,11 @@ export default defineComponent({
 
 	.entries {
 		overflow-y: auto;
-		height: calc(100% - 60px);
-		padding: 0 20px;
+		height: calc(100% - 0px);
+		//padding: 0 20px;
+		//padding-top: 23px;
+		padding: 20px;
+		box-sizing: border-box;
 	}
 
 	.entry {
@@ -126,7 +133,6 @@ export default defineComponent({
 		display: flex;
 		flex-direction: row;
 		flex-wrap: nowrap;
-		justify-content: space-between;
 		align-items: center;
 		padding: 10px 14px;
 		box-sizing: border-box;
@@ -135,22 +141,32 @@ export default defineComponent({
 		text-decoration: none;
 		margin-bottom: 2px;
 
-		&:last-child {
-			margin-bottom: 20px;
+		.info {
+			display: flex;
+			flex-direction: column;
 		}
+
+		//&:last-child {
+		//	margin-bottom: 20px;
+		//}
 
 		&.header {
 			color: rgb(138, 143, 152);
 			height: 60px;
 			padding: 0 34px;
+			margin-top: 20px;
 
 			.name {
 				flex-basis: calc(30% + 34px);
 			}
 
 			span {
-				color: rgb(138, 143, 152);
-				font-size: 1rem;
+				color: rgba(#8a8f9f, .75);
+				text-transform: uppercase;
+				font-size: 0.85rem;
+				font-weight: 600;
+				letter-spacing: 0.5px;
+				pointer-events: none;
 			}
 
 			button {
@@ -169,18 +185,21 @@ export default defineComponent({
 		}
 
 		.icon {
-			flex-basis: 24px;
-			padding-right: 10px;
+			padding-right: 16px;
 
 			img {
 				display: block;
-				height: 20px;
+				width: 32px;
+				height: 32px;
 				vertical-align: baseline;
 			}
 		}
 
 		.name {
 			flex-basis: calc(30%);
+			font-weight: 500;
+			margin: 2px 0;
+			font-size: 1.1rem;
 		}
 
 		.name, .user, .pass {
@@ -195,7 +214,13 @@ export default defineComponent({
 			vertical-align: middle;
 			display: inline-block;
 			line-height: 1.3;
-			font-size: 1.1rem;
+			//font-size: 1.1rem;
+		}
+
+		.user {
+			color: darken(#8a8f9f, 10%);
+			font-weight: 500;
+			font-size: 1rem;
 		}
 
 		.user, .pass {
@@ -221,6 +246,7 @@ export default defineComponent({
 
 			.pass {
 				position: relative;
+
 				button {
 					position: absolute;
 					right: 0;

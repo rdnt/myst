@@ -143,7 +143,7 @@ $text-color: #fff;
 	font-weight: 300;
 	font-size: 100%;
 	color: $text-color;
-	line-height: 1.325;
+	line-height: 1.4;
 }
 
 .step-2 {

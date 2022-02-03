@@ -10,9 +10,10 @@ type AuthenticateRequest struct {
 
 // CreateEntryRequest defines model for CreateEntryRequest.
 type CreateEntryRequest struct {
-	Label    string `json:"label"`
+	Notes    string `json:"notes"`
 	Password string `json:"password"`
 	Username string `json:"username"`
+	Website  string `json:"website"`
 }
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
@@ -24,9 +25,10 @@ type CreateKeystoreRequest struct {
 // Entry defines model for Entry.
 type Entry struct {
 	Id       string `json:"id"`
-	Label    string `json:"label"`
+	Notes    string `json:"notes"`
 	Password string `json:"password"`
 	Username string `json:"username"`
+	Website  string `json:"website"`
 }
 
 // Error defines model for Error.

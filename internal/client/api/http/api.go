@@ -83,9 +83,10 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	for i, e := range k.Entries() {
 		entries[i] = generated.Entry{
 			Id:       e.Id(),
-			Label:    e.Label(),
+			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
+			Notes:    e.Notes(),
 		}
 	}
 
@@ -162,9 +163,10 @@ func (api *API) CreateEntry(c *gin.Context) {
 	}
 
 	e := entry.New(
-		entry.WithLabel(req.Label),
+		entry.WithWebsite(req.Website),
 		entry.WithUsername(req.Username),
 		entry.WithPassword(req.Password),
+		entry.WithNotes(req.Notes),
 	)
 	if err != nil {
 		log.Error(err)
@@ -191,9 +193,10 @@ func (api *API) CreateEntry(c *gin.Context) {
 	for i, e := range k.Entries() {
 		entries[i] = generated.Entry{
 			Id:       e.Id(),
-			Label:    e.Label(),
+			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
+			Notes:    e.Notes(),
 		}
 	}
 
@@ -229,9 +232,10 @@ func (api *API) Keystore(c *gin.Context) {
 	for i, e := range k.Entries() {
 		entries[i] = generated.Entry{
 			Id:       e.Id(),
-			Label:    e.Label(),
+			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
+			Notes:    e.Notes(),
 		}
 	}
 
@@ -267,9 +271,10 @@ func (api *API) Keystores(c *gin.Context) {
 			entries = append(
 				entries, generated.Entry{
 					Id:       e.Id(),
-					Label:    e.Label(),
+					Website:  e.Website(),
 					Username: e.Username(),
 					Password: e.Password(),
+					Notes:    e.Notes(),
 				},
 			)
 		}

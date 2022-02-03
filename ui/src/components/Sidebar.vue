@@ -52,9 +52,8 @@ $accent: #00edb1;
 
 h4 {
 	font-weight: 700;
-	font-size: 1.6rem;
-	margin: 10px 0 66px;
-	height: 20px;
+	font-size: 2rem;
+	margin: 10px 0 60px;
 	padding: 0 20px;
 }
 

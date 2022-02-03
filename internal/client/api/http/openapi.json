@@ -298,18 +298,22 @@
       "CreateEntryRequest": {
         "type": "object",
         "required": [
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "notes": {
             "type": "string"
           }
         }
@@ -346,21 +350,25 @@
         "type": "object",
         "required": [
           "id",
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
           "id": {
             "type": "string"
           },
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "notes": {
             "type": "string"
           }
         }

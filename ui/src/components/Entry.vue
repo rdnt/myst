@@ -1,18 +1,24 @@
 <template>
 	<div class="entry" :class="{empty: !entry}">
 		<template v-if="entry">
-			<div class="field">
-<!--				<label>Domain</label>-->
-				<ExpandingTextarea v-model="domain"></ExpandingTextarea>
+			<div class="actions">
+				<button class="button">Edit</button>
+				<button class="button">Delete</button>
 			</div>
-			<div class="field">
-<!--				<label>Username</label>-->
-				<ExpandingTextarea v-model="username" ></ExpandingTextarea>
+			<div class="header">
+				<div class="image">
+					<img :alt="entry.website" src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png">
+				</div>
+				<div class="title">
+					<h5>{{ entry.website }}</h5>
+					<a>Login</a>
+				</div>
 			</div>
-			<div class="field">
-<!--				<label>Password</label>-->
-				<ExpandingTextarea v-model="password"></ExpandingTextarea>
-			</div>
+			<div class="separator"/>
+			<ExpandingTextarea v-model="website" label="Website" :disabled="true"></ExpandingTextarea>
+			<ExpandingTextarea v-model="username" label="Email Address" :disabled="true"></ExpandingTextarea>
+			<ExpandingTextarea v-model="password" label="Password" :disabled="true"></ExpandingTextarea>
+			<ExpandingTextarea v-model="notes" label="Notes" :disabled="false"></ExpandingTextarea>
 		</template>
 	</div>
 </template>
@@ -32,16 +38,17 @@ export default defineComponent({
 		}
 	},
 	data: () => ({
-		domain: 'sddsasadsad',
+		website: 'sddsasadsad',
 		username: 'someuseadad',
-		password:'dsdsasdaasd'
+		password:'dsdsasdaasd',
+		notes: '',
 	}),
 	watch: {
 		entry(entry: Entry) {
-			console.log('entry changed', entry)
-			this.domain = entry.label
+			this.website = entry.website
 			this.username = entry.username
 			this.password = entry.password
+			this.notes = entry.notes || '—'
 		}
 	},
 	computed: {},
@@ -50,6 +57,21 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$accent: #00edb1;
+
+.separator {
+	width: calc(100% - 32px);
+	height: 2px;
+	background-color: #1b2025;
+	margin: 10px auto 20px;
+}
+
+h5 {
+	font-weight: 600;
+	font-size: 1.8rem;
+	margin: 0;
+}
+
 .entry {
 	display: flex;
 	flex-direction: column;
@@ -59,7 +81,9 @@ export default defineComponent({
 	padding: 20px;
 	box-sizing: border-box;
 	flex-basis: 40%;
-	padding-top: 100px;
+	overflow-y: auto;
+	//flex-grow: 1;
+	//padding-top: 100px;
 
 	&.empty {
 		&:after {
@@ -75,19 +99,55 @@ export default defineComponent({
 			line-height: 100%;
 		}
 	}
+
+	.actions {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		//padding: 0 16px;
+	}
+
+	.header {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		padding: 16px 16px;
+
+		.image {
+			width: 64px;
+			height: 64px;
+			padding-right: 20px;
+
+			img {
+				width: 64px;
+				height: 64px;
+			}
+		}
+
+		.title {
+			display: flex;
+			flex-direction: column;
+
+			a {
+				padding: 5px 0;
+			}
+		}
+	}
+
+	.fields {
+		padding: 20px 0;
+	}
 }
 
 .field {
-	display: flex;
-	flex-direction: column;
-	margin-bottom: 30px;
-	border-radius: 5px;
+	margin-bottom: 2px;
 
 	label {
-		font-size: 1.1rem;
-		height: 30px;
-		display: block;
-		padding: 0 15px;
+		//font-size: 1.1rem;
+		//height: 30px;
+		//display: block;
+		//padding: 0 15px;
 	}
 
 	//textarea {
@@ -122,5 +182,31 @@ export default defineComponent({
 	//
 	//	}
 	//}
+}
+
+.button {
+	outline: none;
+	border: none;
+	height: 40px;
+	font-size: 1.1rem;
+	font-weight: 500;
+	padding: 0 20px;
+	border-radius: 5px;
+	margin: 0 5px;
+	background-color: rgba(#202228, 1);
+	color: #fff;
+
+	&.disabled {
+		background-color: #161819;
+	}
+
+	&.green {
+		background-color: #002e23;
+		color: $accent;
+
+		&.disabled {
+			background-color: #0c1d19;
+		}
+	}
 }
 </style>

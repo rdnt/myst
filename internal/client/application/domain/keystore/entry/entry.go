@@ -1,34 +1,27 @@
 package entry
 
 import (
-	"errors"
-
 	"myst/pkg/uuid"
-)
-
-var (
-	ErrInvalidLabel    = errors.New("invalid label")
-	ErrInvalidUsername = errors.New("invalid username")
-	ErrInvalidPassword = errors.New("invalid password")
 )
 
 type Entry struct {
 	id       string
-	label    string
+	website  string
 	username string
 	password string
+	notes    string
 }
 
 func (e *Entry) Id() string {
 	return e.id
 }
 
-func (e *Entry) Label() string {
-	return e.label
+func (e *Entry) Website() string {
+	return e.website
 }
 
-func (e *Entry) SetLabel(label string) {
-	e.label = label
+func (e *Entry) SetWebsite(website string) {
+	e.website = website
 }
 
 func (e *Entry) Username() string {
@@ -45,6 +38,14 @@ func (e *Entry) Password() string {
 
 func (e *Entry) SetPassword(password string) {
 	e.password = password
+}
+
+func (e *Entry) Notes() string {
+	return e.notes
+}
+
+func (e *Entry) SetNotes(notes string) {
+	e.notes = notes
 }
 
 func New(opts ...Option) Entry {

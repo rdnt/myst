@@ -8,9 +8,9 @@ func WithId(id string) Option {
 	}
 }
 
-func WithLabel(label string) Option {
+func WithWebsite(website string) Option {
 	return func(e *Entry) {
-		e.label = label
+		e.website = website
 	}
 }
 
@@ -23,5 +23,11 @@ func WithUsername(username string) Option {
 func WithPassword(password string) Option {
 	return func(e *Entry) {
 		e.password = password
+	}
+}
+
+func WithNotes(notes string) Option {
+	return func(e *Entry) {
+		e.notes = notes
 	}
 }

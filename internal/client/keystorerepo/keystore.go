@@ -14,9 +14,10 @@ type JSONKeystore struct {
 
 type JSONEntry struct {
 	Id       string `json:"id"`
-	Label    string `json:"label"`
+	Website  string `json:"website"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Notes    string `json:"notes"`
 }
 
 func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
@@ -25,9 +26,10 @@ func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
 	for i, e := range k.Entries() {
 		entries[i] = JSONEntry{
 			Id:       e.Id(),
-			Label:    e.Label(),
+			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
+			Notes:    e.Notes(),
 		}
 	}
 
@@ -45,10 +47,12 @@ func ToKeystore(k JSONKeystore) (*keystore.Keystore, error) {
 	for i, e := range k.Entries {
 		e := entry.New(
 			entry.WithId(e.Id),
+			entry.WithWebsite(e.Website),
 			entry.WithUsername(e.Username),
 			entry.WithPassword(e.Password),
-			entry.WithLabel(e.Label),
+			entry.WithNotes(e.Notes),
 		)
+
 		entries[i] = e
 	}
 

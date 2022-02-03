@@ -92,7 +92,7 @@ func (app *application) setup() {
 
 	for i := 0; i < 0; i++ {
 		e1 := entry.New(
-			entry.WithLabel("google.com"),
+			entry.WithWebsite("google.com"),
 			entry.WithUsername("someuser@google.com"),
 			entry.WithPassword("12345678"),
 		)
@@ -102,7 +102,7 @@ func (app *application) setup() {
 		}
 
 		e2 := entry.New(
-			entry.WithLabel("stackoverflow.com"),
+			entry.WithWebsite("stackoverflow.com"),
 			entry.WithUsername("someotheruser@google.com"),
 			entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
 		)
@@ -112,7 +112,7 @@ func (app *application) setup() {
 		}
 
 		e3 := entry.New(
-			entry.WithLabel("reddit.com"),
+			entry.WithWebsite("reddit.com"),
 			entry.WithUsername("somethirduser@yahoo.com"),
 			entry.WithPassword("!@*#&$^!@*#&$^!"),
 		)

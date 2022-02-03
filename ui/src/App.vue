@@ -224,7 +224,7 @@ main {
 	font-weight: 300;
 	font-size: 100%;
 	color: $text-color;
-	line-height: 1.325;
+	line-height: 1.4;
 }
 
 *::-webkit-scrollbar {
@@ -237,6 +237,23 @@ main {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 }
+
+//::-webkit-scrollbar{
+//	width: 4px;
+//}
+//
+//::-webkit-scrollbar-track-piece{
+//	background-color: transparent;
+//}
+//
+//::-webkit-scrollbar-thumb{
+//	background-color: #363a41;
+//	border-radius: 2px;
+//}
+//
+//::-webkit-scrollbar-thumb:hover{
+//	background-color: #909090;
+//}
 
 #app {
 	height: 100%;

@@ -2,7 +2,7 @@
 	<div class="entry" :class="{empty: !entry}">
 		<template v-if="entry">
 			<div class="actions">
-				<button class="button">Edit</button>
+				<button v-if="!edit" @click="edit = !edit" class="button">Edit</button>
 				<button class="button">Delete</button>
 			</div>
 			<div class="header">
@@ -15,10 +15,14 @@
 				</div>
 			</div>
 			<div class="separator"/>
-			<ExpandingTextarea v-model="website" label="Website" :disabled="true"></ExpandingTextarea>
-			<ExpandingTextarea v-model="username" label="Email Address" :disabled="true"></ExpandingTextarea>
-			<ExpandingTextarea v-model="password" label="Password" :disabled="true"></ExpandingTextarea>
-			<ExpandingTextarea v-model="notes" label="Notes" :disabled="false"></ExpandingTextarea>
+			<ExpandingTextarea v-model="website" label="Website" :disabled="!edit"></ExpandingTextarea>
+			<ExpandingTextarea v-model="username" label="Email Address" :disabled="!edit"></ExpandingTextarea>
+			<ExpandingTextarea v-model="password" label="Password" :disabled="!edit"></ExpandingTextarea>
+			<ExpandingTextarea v-model="notes" label="Notes" :disabled="!edit" :placeholder="!edit && !notes ? '—' : ''"></ExpandingTextarea>
+			<div class="actions">
+				<button v-if="edit" @click="edit = !edit" class="button transparent">Cancel</button>
+				<button v-if="edit" class="button">Save</button>
+			</div>
 		</template>
 	</div>
 </template>
@@ -38,6 +42,7 @@ export default defineComponent({
 		}
 	},
 	data: () => ({
+		edit: false,
 		website: 'sddsasadsad',
 		username: 'someuseadad',
 		password:'dsdsasdaasd',
@@ -141,7 +146,7 @@ h5 {
 }
 
 .field {
-	margin-bottom: 2px;
+	//margin-bottom: 2px;
 
 	label {
 		//font-size: 1.1rem;
@@ -206,6 +211,23 @@ h5 {
 
 		&.disabled {
 			background-color: #0c1d19;
+		}
+	}
+
+	&.transparent {
+		background-color: transparent;
+
+		&.disabled {
+
+		}
+	}
+
+	&.red {
+		background-color: #342424;
+		color: #ff9999;
+
+		&.disabled {
+			background-color: rgba(29, 29, 12, 0.99);
 		}
 	}
 }

@@ -8,6 +8,7 @@
 			:style="{
 				height: height + 'px',
 			}"
+			:placeholder="placeholder"
 			:disabled="disabled"
 			@blur="hasFocus = false"
 			@focus="hasFocus = true"
@@ -106,19 +107,28 @@ export default defineComponent({
 	padding-bottom: 16px;
 	flex-shrink: 0;
 	//background-color: rgba(#abc, .05);
+	background-color: #181e22;
+	margin-bottom: 22px;
+	transition: .18s ease;
 
 	&.disabled {
+		margin-bottom: 2px;
 		background-color: transparent;
 
+		label {
+			//background-color: transparent;
+		}
 		textarea {
 			pointer-events: none;
 		}
+
 
 		&.focus {
 			background-color: transparent;
 
 			label {
-				background-color: #111519;
+				//background-color: transparent !important;
+
 				color: rgba(#8a8f9f, 1);
 			}
 		}
@@ -128,7 +138,7 @@ export default defineComponent({
 		background-color: rgba(#abc, .1);
 
 		label {
-			background-color: #20252b;
+			//background-color: #20252b;
 			color: rgba(#8a8f9f, 1);
 		}
 	}
@@ -138,7 +148,8 @@ export default defineComponent({
 		box-sizing: border-box;
 		display: block;
 		padding: 16px 16px 6px;
-		background-color: #111519;
+		//background-color: #181e22;
+
 
 		color: rgba(#8a8f9f, .75);
 		text-transform: uppercase;
@@ -146,6 +157,7 @@ export default defineComponent({
 		font-weight: 600;
 		letter-spacing: 0.5px;
 		pointer-events: none;
+
 	}
 
 	textarea {
@@ -166,9 +178,9 @@ export default defineComponent({
 		max-height: 200px;
 		flex-shrink: 0;
 
-		//&::placeholder {
-		//	color: darken(#68737e, 10%);
-		//}
+		&::placeholder {
+			color: #fff;
+		}
 		//
 		//&:focus {
 		//	&::placeholder {

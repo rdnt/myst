@@ -248,6 +248,32 @@ func (api *API) Keystore(c *gin.Context) {
 	)
 }
 
+func (api *API) UpdateEntry(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+	//entryId := c.Param("entryId")
+
+	k, err := api.app.Keystore(keystoreId)
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// TODO: change entries returned to be a map, implemennt the rest
+	Success(
+		c, generated.Entry{
+			Id: k.Id(),
+		},
+	)
+}
+
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
 	if err == application.ErrInitializationRequired {

@@ -2,20 +2,18 @@ package http
 
 import (
 	"io/ioutil"
-	"net/http"
-
+	"myst/internal/client/api/http/generated"
+	"myst/internal/client/application"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/keystore/entry"
+	"myst/pkg/config"
+	"myst/pkg/logger"
+	"net/http"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	prometheus "github.com/zsais/go-gin-prometheus"
-
-	"myst/internal/client/api/http/generated"
-	"myst/internal/client/application"
-	"myst/internal/client/application/domain/keystore/entry"
-	"myst/pkg/config"
-	"myst/pkg/logger"
 )
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
@@ -207,7 +205,6 @@ func (api *API) CreateEntry(c *gin.Context) {
 			Entries: entries,
 		},
 	)
-
 }
 
 func (api *API) Keystore(c *gin.Context) {
@@ -250,7 +247,7 @@ func (api *API) Keystore(c *gin.Context) {
 
 func (api *API) UpdateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
-	//entryId := c.Param("entryId")
+	// entryId := c.Param("entryId")
 
 	k, err := api.app.Keystore(keystoreId)
 	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {

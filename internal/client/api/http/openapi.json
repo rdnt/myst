@@ -80,11 +80,11 @@
         },
         "responses": {
           "200": {
-            "description": "Keystore",
+            "description": "Keystores",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Keystore"
+                  "$ref": "#/components/schemas/Keystores"
                 }
               }
             }
@@ -255,6 +255,63 @@
           }
         }
       }
+    },
+
+    "/keystore/{keystoreId}/entry/{entryId}": {
+      "patch": {
+        "description": "Update a keystore entry",
+        "operationId": "UpdateEntry",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -298,18 +355,38 @@
       "CreateEntryRequest": {
         "type": "object",
         "required": [
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEntryRequest": {
+        "type": "object",
+        "properties": {
+          "website": {
+            "type": "string"
+          },
+          "username": {
+           },
+          "password": {
+            "type": "string"
+          },
+          "notes": {
             "type": "string"
           }
         }
@@ -346,21 +423,25 @@
         "type": "object",
         "required": [
           "id",
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
           "id": {
             "type": "string"
           },
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "notes": {
             "type": "string"
           }
         }

@@ -17,11 +17,6 @@ var authenticateCmd = &cobra.Command{
 			return
 		}
 
-		client, err := generated.NewClientWithResponses("http://0.0.0.0:8081/api")
-		if err != nil {
-			panic(err)
-		}
-
 		res, err := client.Authenticate(
 			cmd.Context(),
 			generated.AuthenticateJSONRequestBody{

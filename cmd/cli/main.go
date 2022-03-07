@@ -23,6 +23,8 @@ func main() {
 
 	rootCmd.AddCommand(authenticateCmd)
 	rootCmd.AddCommand(keystoresCmd)
+	rootCmd.AddCommand(keystoreCmd)
+	rootCmd.AddCommand(keystoreEntriesCmd)
 
 	err = rootCmd.Execute()
 	if err != nil {

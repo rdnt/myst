@@ -139,7 +139,7 @@ export class DefaultApi extends runtime.BaseAPI {
     /**
      * Creates a new encrypted keystore with the given password
      */
-    async createKeystoreRaw(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
+    async createKeystoreRaw(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Keystore>> {
         if (requestParameters.createKeystoreRequest === null || requestParameters.createKeystoreRequest === undefined) {
             throw new runtime.RequiredError('createKeystoreRequest','Required parameter requestParameters.createKeystoreRequest was null or undefined when calling createKeystore.');
         }
@@ -158,13 +158,13 @@ export class DefaultApi extends runtime.BaseAPI {
             body: CreateKeystoreRequestToJSON(requestParameters.createKeystoreRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => KeystoreFromJSON(jsonValue));
     }
 
     /**
      * Creates a new encrypted keystore with the given password
      */
-    async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Array<Keystore>> {
+    async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Keystore> {
         const response = await this.createKeystoreRaw(requestParameters, initOverrides);
         return await response.value();
     }

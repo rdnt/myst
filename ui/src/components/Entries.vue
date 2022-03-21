@@ -230,7 +230,7 @@ export default defineComponent({
 		&:not(.header) {
 
 			&:hover {
-				background-color: #1e2328;
+				background-color: #191e23;
 				color: #f7f8f8;
 			}
 

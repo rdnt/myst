@@ -79,7 +79,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Keystore",
             "content": {
               "application/json": {

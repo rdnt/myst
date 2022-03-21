@@ -1,28 +1,71 @@
 <template>
-	<div class="entry" :class="{empty: !entry}">
+	<div :class="{empty: !entry}" class="entry">
 		<template v-if="entry">
 			<div class="actions">
-				<button v-if="!edit" @click="edit = !edit" class="button">Edit</button>
-				<button class="button">Delete</button>
+				<button class="button" @click="showEditModal = true">Edit</button>
+				<button class="button red" @click="showDeleteModal = true">Delete</button>
 			</div>
 			<div class="header">
 				<div class="image">
-					<img :alt="entry.website" src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png">
+					<img :alt="entry.website"
+							 src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png">
 				</div>
 				<div class="title">
 					<h5>{{ entry.website }}</h5>
-					<a>Login</a>
+					<a>{{ entry.username }}</a>
 				</div>
 			</div>
 			<div class="separator"/>
-			<ExpandingTextarea v-model="website" label="Website" :disabled="!edit"></ExpandingTextarea>
-			<ExpandingTextarea v-model="username" label="Email Address" :disabled="!edit"></ExpandingTextarea>
-			<ExpandingTextarea v-model="password" label="Password" :disabled="!edit"></ExpandingTextarea>
-			<ExpandingTextarea v-model="notes" label="Notes" :disabled="!edit" :placeholder="!edit && !notes ? '—' : ''"></ExpandingTextarea>
-			<div class="actions">
-				<button v-if="edit" @click="edit = !edit" class="button transparent">Cancel</button>
-				<button v-if="edit" class="button">Save</button>
+			<div class="fields">
+				<ExpandingTextarea :value="website" :disabled="true" label="Website"></ExpandingTextarea>
+				<ExpandingTextarea :value="username" :disabled="true" label="Email Address"></ExpandingTextarea>
+				<ExpandingTextarea :value="password" :disabled="true" label="Password"></ExpandingTextarea>
+				<ExpandingTextarea :value="notes" :disabled="true" :placeholder="!notes ? '—' : ''"
+													 label="Notes"></ExpandingTextarea>
 			</div>
+
+			<modal :show="showEditModal" :setShow="() => {this.showEditModal = false}">
+				<template v-slot:header>
+<!--					<div class="header modal-header">-->
+<!--						<div class="image">-->
+<!--							<img :alt="entry.website"-->
+<!--									 src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png">-->
+<!--						</div>-->
+<!--						<div class="title">-->
+<!--							<h5>{{ entry.website }}</h5>-->
+<!--							<a>{{ entry.username }}</a>-->
+<!--						</div>-->
+<!--					</div>-->
+				</template>
+				<div class="fields">
+<!--					<ExpandingTextarea2 v-model="password"></ExpandingTextarea2>-->
+					<entry-text-field v-model="password" label="Password"></entry-text-field>
+					<ExpandingTextarea :value="website" :disabled="true" label="Website"></ExpandingTextarea>
+					<ExpandingTextarea :value="username" :disabled="true" label="Email Address"></ExpandingTextarea>
+					<ExpandingTextarea v-model="password" label="Password"></ExpandingTextarea>
+					<ExpandingTextarea v-model="notes" :placeholder="!edit && !notes ? '—' : ''"
+														 label="Notes"></ExpandingTextarea>
+				</div>
+				<template v-slot:footer>
+					<div class="modal-footer">
+						<button class="button transparent" @click="showEditModal = false">Cancel</button>
+						<button class="button green">Save</button>
+					</div>
+				</template>
+			</modal>
+
+			<modal :show="showDeleteModal" :setShow="() => {this.showDeleteModal = false}">
+				<template v-slot:header>
+					<div class="delete-title">Are you sure you want to delete this entry?</div>
+				</template>
+				<template v-slot:footer>
+					<div class="modal-footer">
+						<button class="button transparent" @click="showDeleteModal = false">Cancel</button>
+						<button class="button red">Delete</button>
+					</div>
+				</template>
+			</modal>
+
 		</template>
 	</div>
 </template>
@@ -31,10 +74,13 @@
 import {defineComponent} from 'vue'
 import {Entry} from "../api/generated";
 import ExpandingTextarea from "../components/ExpandingTextarea.vue";
+import Modal from "../components/Modal.vue";
+import ExpandingTextarea2 from "../components/ExpandingTextarea2.vue";
+import EntryTextField from "../components/EntryTextField.vue";
 
 export default defineComponent({
 	name: 'Entry',
-	components: {ExpandingTextarea},
+	components: {EntryTextField, ExpandingTextarea, Modal, ExpandingTextarea2},
 	props: {
 		entry: {
 			type: Object as () => Entry,
@@ -45,8 +91,10 @@ export default defineComponent({
 		edit: false,
 		website: 'sddsasadsad',
 		username: 'someuseadad',
-		password:'dsdsasdaasd',
+		password: 'dsdsasdaasd',
 		notes: '',
+		showEditModal: false,
+		showDeleteModal: false,
 	}),
 	watch: {
 		entry(entry: Entry) {
@@ -65,10 +113,10 @@ export default defineComponent({
 $accent: #00edb1;
 
 .separator {
-	width: calc(100% - 32px);
-	height: 2px;
-	background-color: #1b2025;
-	margin: 10px auto 20px;
+	//width: calc(100% - 32px);
+	//height: 1px;
+	//background-color: #1b2025;
+	//margin: 10px auto 20px;
 }
 
 h5 {
@@ -107,17 +155,26 @@ h5 {
 
 	.actions {
 		display: flex;
+		//width: 100%;
 		flex-direction: row;
 		justify-content: flex-end;
 		align-items: center;
-		//padding: 0 16px;
+		align-self: flex-start;
+		margin-left: auto;
+
+		&.bottom {
+			margin: 16px 6px;
+			margin-top: auto;
+			justify-content: flex-start;
+		}
 	}
 
 	.header {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		padding: 16px 16px;
+		padding: 16px;
+		//padding: 16px 0 16px 16px;
 
 		.image {
 			width: 64px;
@@ -133,19 +190,30 @@ h5 {
 		.title {
 			display: flex;
 			flex-direction: column;
+			flex-grow: 1;
 
 			a {
 				padding: 5px 0;
 			}
+
+		}
+
+		.button {
+			align-self: flex-start;
 		}
 	}
 
 	.fields {
-		padding: 20px 0;
+		//padding: 20px 0;
 	}
 }
 
 .field {
+
+	&.disabled {
+		//margin-left: -16px;
+	}
+
 	//margin-bottom: 2px;
 
 	label {
@@ -197,16 +265,21 @@ h5 {
 	font-weight: 500;
 	padding: 0 20px;
 	border-radius: 5px;
-	margin: 0 5px;
 	background-color: rgba(#202228, 1);
 	color: #fff;
+	margin-left: 10px;
+
+	&.left {
+		//margin-right: auto;
+	}
 
 	&.disabled {
-		background-color: #161819;
+		//background-color: #161819;
+		opacity: .5;
 	}
 
 	&.green {
-		background-color: #002e23;
+		background-color: rgba(#002e23, .9);
 		color: $accent;
 
 		&.disabled {
@@ -216,6 +289,7 @@ h5 {
 
 	&.transparent {
 		background-color: transparent;
+		padding: 0 12px;
 
 		&.disabled {
 
@@ -223,12 +297,33 @@ h5 {
 	}
 
 	&.red {
-		background-color: #342424;
+		background-color: #2e2020;
 		color: #ff9999;
 
 		&.disabled {
 			background-color: rgba(29, 29, 12, 0.99);
 		}
 	}
+}
+
+.modal-header {
+	//margin-bottom: 22px;
+}
+
+.modal-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	margin-top: 22px;
+}
+
+.delete-title {
+	padding: 4px;
+	box-sizing: border-box;
+	font-size: 1.1rem;
+}
+
+.fields {
+	margin-bottom: 22px;
 }
 </style>

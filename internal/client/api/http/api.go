@@ -18,7 +18,9 @@ import (
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
-//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+// TODO: remove redundant go:generate for old ui
+////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui-svelte/myst/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 
 var log = logger.New("router", logger.Cyan)
 
@@ -88,8 +90,8 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		}
 	}
 
-	Success(
-		c, generated.Keystore{
+	c.JSON(
+		http.StatusCreated, generated.Keystore{
 			Id:      k.Id(),
 			Name:    k.Name(),
 			Entries: entries,

@@ -60,6 +60,7 @@ export default defineComponent({
 		return {
 			onboarding: false,
 			login: false,
+			login: false,
 			ready: false,
 		}
 	},
@@ -262,27 +263,27 @@ main {
 	flex-grow: 1;
 }
 
-.show-enter-active, .show-leave-active {
-	transition: .3s;
-}
-
-.show-enter-from {
-	opacity: 0;
-	transform: scale(.98);
-}
-
-.show-enter-to {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.show-leave-from {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.show-leave-to {
-	opacity: 0;
-	transform: scale(.98);
-}
+//.show-enter-active, .show-leave-active {
+//	transition: .3s;
+//}
+//
+//.show-enter-from {
+//	opacity: 0;
+//	transform: scale(.98);
+//}
+//
+//.show-enter-to {
+//	opacity: 1;
+//	transform: scale(1);
+//}
+//
+//.show-leave-from {
+//	opacity: 1;
+//	transform: scale(1);
+//}
+//
+//.show-leave-to {
+//	opacity: 0;
+//	transform: scale(.98);
+//}
 </style>

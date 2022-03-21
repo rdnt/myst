@@ -4,7 +4,7 @@
 		<textarea
 			:spellcheck="false"
 			ref="textarea"
-			:value="modelValue || value"
+			:value="modelValue"
 			:style="{
 				height: height + 'px',
 			}"
@@ -17,6 +17,7 @@
 				update();
 			}"
 		/>
+		<button class="field-button">Copy</button>
 	</div>
 </template>
 
@@ -38,11 +39,7 @@ export default defineComponent({
 		modelValue: {
 			type: String,
 			default: ''
-		},
-		value: {
-			type: String,
-			default: ''
-		},
+		}
 	},
 	data: (): {
 		height: number,
@@ -53,16 +50,12 @@ export default defineComponent({
 	}),
 	watch: {
 		modelValue() {
-			// console.log(this.modelValue)
+			console.log('watch');
 			this.update()
 		},
-		value() {
-			// console.log(this.value)
-			this.update()
-		}
 	},
 	mounted() {
-		// console.log('mounted')
+		console.log('mounted')
 
 		this.$nextTick(() => {
 			if (this.modelValue == "") {
@@ -84,12 +77,13 @@ export default defineComponent({
 		})
 	},
 	unmounted() {
-		// console.log('unmounted')
+		console.log('unmounted')
 
 		window.removeEventListener('resize', this.update);
 	},
 	methods: {
 		update() {
+
 			this.height = 0
 
 			return this.$nextTick(() => {
@@ -117,19 +111,12 @@ export default defineComponent({
 	flex-shrink: 0;
 	//background-color: rgba(#abc, .05);
 	background-color: #191e23;
-	margin: 12px 0;
-	//margin-bottom: 2px;
+	margin-bottom: 12px;
 	transition: .18s ease;
-	cursor: text;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
 
 	&.disabled {
-		margin: 0;
+		margin-bottom: 2px;
 		background-color: transparent;
-		cursor: default;
 
 		label {
 			//background-color: transparent;
@@ -199,13 +186,6 @@ export default defineComponent({
 		//overflow: hidden;
 		max-height: 200px;
 		flex-shrink: 0;
-
-		padding-top: 40px;
-		padding-bottom: 20px !important;
-		top: -40px;
-
-		//background-color: rgba(#0c1d19, .5);
-		margin-bottom: -60px;
 
 		&::placeholder {
 			color: #334;

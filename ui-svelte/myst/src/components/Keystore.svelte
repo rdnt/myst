@@ -2,6 +2,7 @@
   import {useFocus, useParams} from "svelte-navigator";
   import Link from "../components/Link.svelte";
   import Entry from "../components/Entry.svelte";
+  import EntryPlaceholder from "../components/EntryPlaceholder.svelte";
 
   export let keystore;
 
@@ -34,7 +35,11 @@
     {/each}
   </div>
 </div>
-<Entry {entry}/>
+{#if entry}
+  <Entry {entry}/>
+{:else}
+  <EntryPlaceholder />
+{/if}
 
 <style lang="scss">
   .entries-list {
@@ -138,7 +143,7 @@
         }
 
         .user {
-          color: darken(#8a8f9f, 10%);
+          color: darken(#8a8f9f, 5%);
           font-weight: 500;
           font-size: 1rem;
         }

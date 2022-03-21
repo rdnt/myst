@@ -2,6 +2,7 @@
   import Modal from "./Modal.svelte";
   import InputField from "../components/InputField.svelte";
   import * as models from "../api/generated/models";
+  import Field from "../components/Field.svelte";
 
   export let entry: models.Entry;
 
@@ -20,6 +21,7 @@
 
 <div class="entry" class:empty={!entry}>
   {#if entry}
+
     <div class="header">
       <div class="image">
         <img alt={entry.website}
@@ -29,17 +31,16 @@
         <h5>{entry.website}</h5>
         <a>{entry.username}</a>
       </div>
+      <div class="actions">
+        <button on:click={() => showEditModal = true} class="button"><span class="icon"></span> Edit</button>
+        <button on:click={() => showDeleteModal = true} class="button red"><span class="icon"></span> Delete</button>
+      </div>
     </div>
-    <div class="actions">
-<!--      <button on:click={() => showEditModal = true} class="button">Edit</button>-->
-      <button on:click={() => showDeleteModal = true} class="button red">Delete</button>
-    </div>
-    <div class="separator"></div>
     <div class="fields">
-      <InputField label="Website" bind:value={website}/>
-      <InputField label="Username" bind:value={username}/>
-      <InputField label="Password" bind:value={password}/>
-      <InputField label="Notes" bind:value={notes}/>
+      <Field label="Website" value={entry.website}/>
+      <Field label="Username" value={entry.username}/>
+      <Field label="Password" value={entry.password}/>
+      <Field label="Notes" value={entry.notes}/>
       <!--    <ExpandingTextarea :disabled="true" :value="website" label="Website"></ExpandingTextarea>-->
       <!--    <ExpandingTextarea :disabled="true" :value="username" label="Email Address"></ExpandingTextarea>-->
       <!--    <ExpandingTextarea :disabled="true" :value="password" label="Password"></ExpandingTextarea>-->
@@ -91,13 +92,6 @@
 <style lang="scss">
   $accent: #00edb1;
 
-  .separator {
-    //width: calc(100% - 32px);
-    //height: 1px;
-    //background-color: #1b2025;
-    //margin: 10px auto 20px;
-  }
-
   h5 {
     font-weight: 600;
     font-size: 1.8rem;
@@ -114,6 +108,7 @@
     box-sizing: border-box;
     flex-basis: 50%;
     overflow-y: auto;
+    padding: 32px;
     //flex-grow: 1;
     //padding-top: 100px;
 
@@ -136,15 +131,32 @@
       display: flex;
       //width: 100%;
       flex-direction: row;
-      justify-content: flex-end;
       align-items: center;
-      align-self: flex-start;
       margin-left: auto;
+      height: 100%;
 
       &.bottom {
         margin: 16px 6px;
         margin-top: auto;
         justify-content: flex-start;
+      }
+
+      .button {
+        display: flex;
+        align-items: center;
+
+        .icon {
+          display: block;
+          width: 20px;
+          height: 20px;
+          background-color: rgba(#c0c2c8, 1);
+          border-radius: 8px;
+          margin-right: 10px;
+        }
+
+        &.red .icon {
+          background-color: #ff9999;
+        }
       }
     }
 
@@ -152,7 +164,8 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 16px;
+      margin-bottom: 40px;
+      //padding: 16px 0;
       //padding: 16px 0 16px 16px;
 
       .image {
@@ -183,7 +196,7 @@
     }
 
     .fields {
-      //padding: 20px 0;
+      //padding: 16px 0;
     }
   }
 
@@ -242,7 +255,7 @@
     height: 40px;
     font-size: 1.1rem;
     font-weight: 500;
-    padding: 0 20px;
+    padding: 0 16px;
     border-radius: 5px;
     background-color: rgba(#202228, 1);
     color: #fff;

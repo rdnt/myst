@@ -4,7 +4,6 @@
   export let error: string = '';
   export let placeholder: string = '';
   export let value: string;
-  export let autofocus: boolean = false;
 
   import {createEventDispatcher} from 'svelte';
 
@@ -15,7 +14,7 @@
   {#if label}
     <label>{label}</label>
   {/if}
-  <input {autofocus} bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder}/>
+  <input bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder}/>
   <span class:show={error}>{error}</span>
 </div>
 
@@ -27,8 +26,15 @@
 
     label {
       flex-basis: 100%;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-size: 1.1rem;
+
+      //color: rgba(#8a8f9f, .75);
+      //text-transform: uppercase;
+      //font-size: 0.85rem;
+      //font-weight: 600;
+      //letter-spacing: 0.5px;
+      //pointer-events: none;
     }
 
     input {

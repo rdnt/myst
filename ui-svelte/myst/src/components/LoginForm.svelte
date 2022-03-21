@@ -96,6 +96,7 @@
       position: fixed;
       color: #e1e4e8;
       width: 500px;
+      height: 400px;
 
       h4 {
         font-weight: 700;

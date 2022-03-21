@@ -168,16 +168,12 @@ export default defineComponent({
 		box-sizing: border-box;
 		display: block;
 		padding: 16px 16px 6px;
-		//background-color: #181e22;
-
-
 		color: rgba(#8a8f9f, .75);
 		text-transform: uppercase;
 		font-size: 0.85rem;
 		font-weight: 600;
 		letter-spacing: 0.5px;
 		pointer-events: none;
-
 	}
 
 	textarea {

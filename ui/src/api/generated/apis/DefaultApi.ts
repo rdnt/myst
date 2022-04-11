@@ -30,6 +30,9 @@ import {
     Keystore,
     KeystoreFromJSON,
     KeystoreToJSON,
+    UpdateEntryRequest,
+    UpdateEntryRequestFromJSON,
+    UpdateEntryRequestToJSON,
 } from '../models';
 
 export interface AuthenticateOperationRequest {
@@ -45,12 +48,23 @@ export interface CreateKeystoreOperationRequest {
     createKeystoreRequest: CreateKeystoreRequest;
 }
 
+export interface DeleteEntryRequest {
+    keystoreId: string;
+    entryId: string;
+}
+
 export interface KeystoreRequest {
     keystoreId: string;
 }
 
 export interface KeystoreEntriesRequest {
     keystoreId: string;
+}
+
+export interface UpdateEntryOperationRequest {
+    keystoreId: string;
+    entryId: string;
+    updateEntryRequest: UpdateEntryRequest;
 }
 
 /**
@@ -130,7 +144,7 @@ export class DefaultApi extends runtime.BaseAPI {
     /**
      * Creates a new encrypted keystore with the given password
      */
-    async createKeystoreRaw(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Keystore>> {
+    async createKeystoreRaw(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Keystore>>> {
         if (requestParameters.createKeystoreRequest === null || requestParameters.createKeystoreRequest === undefined) {
             throw new runtime.RequiredError('createKeystoreRequest','Required parameter requestParameters.createKeystoreRequest was null or undefined when calling createKeystore.');
         }
@@ -149,15 +163,48 @@ export class DefaultApi extends runtime.BaseAPI {
             body: CreateKeystoreRequestToJSON(requestParameters.createKeystoreRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => KeystoreFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(KeystoreFromJSON));
     }
 
     /**
      * Creates a new encrypted keystore with the given password
      */
-    async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Keystore> {
+    async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Array<Keystore>> {
         const response = await this.createKeystoreRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntryRaw(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling deleteEntry.');
+        }
+
+        if (requestParameters.entryId === null || requestParameters.entryId === undefined) {
+            throw new runtime.RequiredError('entryId','Required parameter requestParameters.entryId was null or undefined when calling deleteEntry.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entry/{entryId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))).replace(`{${"entryId"}}`, encodeURIComponent(String(requestParameters.entryId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntry(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<void> {
+        await this.deleteEntryRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -268,6 +315,47 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async keystores(initOverrides?: RequestInit): Promise<Array<Keystore>> {
         const response = await this.keystoresRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Update a keystore entry
+     */
+    async updateEntryRaw(requestParameters: UpdateEntryOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Entry>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling updateEntry.');
+        }
+
+        if (requestParameters.entryId === null || requestParameters.entryId === undefined) {
+            throw new runtime.RequiredError('entryId','Required parameter requestParameters.entryId was null or undefined when calling updateEntry.');
+        }
+
+        if (requestParameters.updateEntryRequest === null || requestParameters.updateEntryRequest === undefined) {
+            throw new runtime.RequiredError('updateEntryRequest','Required parameter requestParameters.updateEntryRequest was null or undefined when calling updateEntry.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entry/{entryId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))).replace(`{${"entryId"}}`, encodeURIComponent(String(requestParameters.entryId))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateEntryRequestToJSON(requestParameters.updateEntryRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntryFromJSON(jsonValue));
+    }
+
+    /**
+     * Update a keystore entry
+     */
+    async updateEntry(requestParameters: UpdateEntryOperationRequest, initOverrides?: RequestInit): Promise<Entry> {
+        const response = await this.updateEntryRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -12,6 +12,10 @@ var keystoreCmd = &cobra.Command{
 	Use:     "keystore",
 	Aliases: []string{"store"},
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			panic("keystore command requires a keystore id")
+		}
+
 		res, err := client.KeystoreWithResponse(
 			cmd.Context(),
 			args[0],

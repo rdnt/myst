@@ -26,6 +26,13 @@ func main() {
 	rootCmd.AddCommand(keystoreCmd)
 	rootCmd.AddCommand(keystoreEntriesCmd)
 
+	rootCmd.AddCommand(entryCmd) // myst entry
+	{
+		entryCmd.AddCommand(deleteEntryCmd) // myst entry rm
+	}
+
+	// rootCmd.AddCommand(getKeystoreEntriesCmd)
+
 	err = rootCmd.Execute()
 	if err != nil {
 		panic(err)

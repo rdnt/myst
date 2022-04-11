@@ -18,7 +18,7 @@ import (
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
-//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+//go:generate sudo openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 
 var log = logger.New("router", logger.Cyan)
 
@@ -202,6 +202,38 @@ func (api *API) CreateEntry(c *gin.Context) {
 			Entries: entries,
 		},
 	)
+}
+
+func (api *API) DeleteEntry(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+	entryId := c.Param("entryId")
+
+	k, err := api.app.Keystore(keystoreId)
+	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	//	Error(c, http.StatusForbidden, err)
+	//	return
+	//}
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = k.RemoveEntry(entryId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = api.app.UpdateKeystore(k)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, nil)
 }
 
 func (api *API) Keystore(c *gin.Context) {

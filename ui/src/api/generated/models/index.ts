@@ -7,3 +7,4 @@ export * from './Entry';
 export * from './Keystore';
 export * from './ModelError';
 export * from './UnlockKeystoreRequest';
+export * from './UpdateEntryRequest';

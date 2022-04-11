@@ -256,29 +256,28 @@
         }
       }
     },
-
     "/keystore/{keystoreId}/entry/{entryId}": {
+      "parameters": [
+        {
+          "name": "keystoreId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "entryId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "patch": {
         "description": "Update a keystore entry",
         "operationId": "UpdateEntry",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entryId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -299,6 +298,25 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a keystore entry",
+        "operationId": "DeleteEntry",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "default": {
             "description": "Error",
@@ -355,13 +373,13 @@
       "CreateEntryRequest": {
         "type": "object",
         "required": [
-          "website",
+          "label",
           "username",
           "password",
           "notes"
         ],
         "properties": {
-          "website": {
+          "label": {
             "type": "string"
           },
           "username": {
@@ -378,7 +396,7 @@
       "UpdateEntryRequest": {
         "type": "object",
         "properties": {
-          "website": {
+          "label": {
             "type": "string"
           },
           "username": {
@@ -423,7 +441,7 @@
         "type": "object",
         "required": [
           "id",
-          "website",
+          "label",
           "username",
           "password",
           "notes"
@@ -432,7 +450,7 @@
           "id": {
             "type": "string"
           },
-          "website": {
+          "label": {
             "type": "string"
           },
           "username": {

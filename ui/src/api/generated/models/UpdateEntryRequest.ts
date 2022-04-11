@@ -16,53 +16,53 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface CreateEntryRequest
+ * @interface UpdateEntryRequest
  */
-export interface CreateEntryRequest {
+export interface UpdateEntryRequest {
     /**
      * 
      * @type {string}
-     * @memberof CreateEntryRequest
+     * @memberof UpdateEntryRequest
      */
-    label: string;
+    label?: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateEntryRequest
+     */
+    username?: any | null;
     /**
      * 
      * @type {string}
-     * @memberof CreateEntryRequest
+     * @memberof UpdateEntryRequest
      */
-    username: string;
+    password?: string;
     /**
      * 
      * @type {string}
-     * @memberof CreateEntryRequest
+     * @memberof UpdateEntryRequest
      */
-    password: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateEntryRequest
-     */
-    notes: string;
+    notes?: string;
 }
 
-export function CreateEntryRequestFromJSON(json: any): CreateEntryRequest {
-    return CreateEntryRequestFromJSONTyped(json, false);
+export function UpdateEntryRequestFromJSON(json: any): UpdateEntryRequest {
+    return UpdateEntryRequestFromJSONTyped(json, false);
 }
 
-export function CreateEntryRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateEntryRequest {
+export function UpdateEntryRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateEntryRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'label': json['label'],
-        'username': json['username'],
-        'password': json['password'],
-        'notes': json['notes'],
+        'label': !exists(json, 'label') ? undefined : json['label'],
+        'username': !exists(json, 'username') ? undefined : json['username'],
+        'password': !exists(json, 'password') ? undefined : json['password'],
+        'notes': !exists(json, 'notes') ? undefined : json['notes'],
     };
 }
 
-export function CreateEntryRequestToJSON(value?: CreateEntryRequest | null): any {
+export function UpdateEntryRequestToJSON(value?: UpdateEntryRequest | null): any {
     if (value === undefined) {
         return undefined;
     }

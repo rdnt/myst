@@ -28,6 +28,7 @@
       flex-basis: 100%;
       margin-bottom: 12px;
       font-size: 1.1rem;
+      //padding: 0 14px;
 
       //color: rgba(#8a8f9f, .75);
       //text-transform: uppercase;
@@ -49,7 +50,7 @@
       box-sizing: border-box;
       background-color: rgba(#abc, .05);
       border-radius: 5px;
-      padding: 14px 16px;
+      padding: 14px;
       overflow: hidden;
 
       &::placeholder {

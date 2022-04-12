@@ -1,8 +1,8 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
-  import InputField from "../components/InputField.svelte";
   import * as models from "../api/generated/models";
   import Field from "../components/Field.svelte";
+  import EditEntryModal from "../components/EditEntryModal.svelte";
 
   export let entry: models.Entry;
 
@@ -49,6 +49,24 @@
     </div>
   {/if}
 </div>
+
+<EditEntryModal show={showEditModal} {entry}/>
+
+<!--    <Modal show={showEditModal}>-->
+<!--      <div slot="header" class="modal-footer">-->
+<!--        <div class="image">-->
+<!--          <img src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png" alt={entry.website}/>-->
+<!--        </div>-->
+<!--        <div class="title">-->
+<!--          <h5>{ entry.website }</h5>-->
+<!--          <a>{ entry.username }</a>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="modal-footer" slot="footer">-->
+<!--        <button class="button transparent" on:click={() => showEditModal = false} >Cancel</button>-->
+<!--        <button class="button red">Delete</button>-->
+<!--      </div>-->
+<!--    </Modal>-->
 
 <!--    <modal :show="showEditModal" :setShow="() => {this.showEditModal = false}">-->
 <!--      <template v-slot:header>-->
@@ -172,6 +190,7 @@
         width: 64px;
         height: 64px;
         padding-right: 20px;
+        display: none;
 
         img {
           width: 64px;

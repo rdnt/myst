@@ -46,6 +46,41 @@ func (k *Keystore) Entries() []entry.Entry {
 	return k.entries
 }
 
+type UpdateEntryOptions struct {
+	Password *string
+	Notes    *string
+}
+
+func (k *Keystore) UpdateEntry(id string, opts UpdateEntryOptions) error {
+	var entry *entry.Entry
+	var index = -1
+
+	for i, e := range k.entries {
+		if e.Id() == id {
+			entry = &e
+			index = i
+			break
+		}
+	}
+
+	if entry == nil {
+		return ErrEntryNotFound
+	}
+
+	if opts.Password != nil {
+		entry.SetPassword(*opts.Password)
+	}
+
+	if opts.Notes != nil {
+		entry.SetNotes(*opts.Notes)
+	}
+
+	k.entries[index] = *entry
+
+	return nil
+
+}
+
 func (k *Keystore) AddEntry(entry entry.Entry) error {
 	for _, e := range k.entries {
 		if e.Id() == entry.Id() {

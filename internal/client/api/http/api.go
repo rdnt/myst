@@ -249,7 +249,7 @@ func (api *API) Keystore(c *gin.Context) {
 
 func (api *API) UpdateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
-	// entryId := c.Param("entryId")
+	entryId := c.Param("entryId")
 
 	k, err := api.app.Keystore(keystoreId)
 	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
@@ -259,6 +259,31 @@ func (api *API) UpdateEntry(c *gin.Context) {
 	//	Error(c, http.StatusForbidden, err)
 	//	return
 	//}
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	var req generated.UpdateEntryRequest
+
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = k.UpdateEntry(entryId, keystore.UpdateEntryOptions{
+		Password: req.Password,
+		Notes:    req.Notes,
+	})
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = api.app.UpdateKeystore(k)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -381,9 +406,9 @@ func New(app application.Application) *API {
 					return true
 				},
 				AllowedHeaders: []string{"*"},
-				//AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
+				AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
 				//// TODO allow more methods (DELETE?)
-				//AllowedMethods: []string{http.MethodGet, http.MethodPost},
+				AllowedMethods: []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 				//// TODO expose ratelimiting headers
 				//ExposedHeaders: []string{},
 				//// TODO check if we can disable this on release mode so that no

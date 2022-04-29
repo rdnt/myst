@@ -3,16 +3,30 @@
   import * as models from "../api/generated/models";
   import Field from "../components/Field.svelte";
   import EditEntryModal from "../components/EditEntryModal.svelte";
+  import api from "../api";
 
+  let showDeleteModal = false;
+  let showEditModal = false;
+
+  const updateEntry = async (password, notes: string) => {
+    api.updateEntry({
+      keystoreId: keystore.id,
+      entryId: entry.id,
+      updateEntryRequest: {
+        password,
+        notes,
+      }
+    }).then((res) => {
+      if (res) {
+        entry.password = password;
+        entry.notes = notes;
+        showEditModal = false
+      }
+    });
+  }
+
+  export let keystore: models.Keystore;
   export let entry: models.Entry;
-
-  let showDeleteModal;
-  let showEditModal;
-
-  let website = entry.website
-  let username = entry.username;
-  let password = entry.password;
-  let notes = entry.notes;
 </script>
 
 <!--<div class="entry">-->
@@ -50,7 +64,7 @@
   {/if}
 </div>
 
-<EditEntryModal show={showEditModal} {entry}/>
+<EditEntryModal bind:show={showEditModal} {entry} on:submit={(e) => {updateEntry(e.detail.password, e.detail.notes)}}/>
 
 <!--    <Modal show={showEditModal}>-->
 <!--      <div slot="header" class="modal-footer">-->
@@ -98,7 +112,7 @@
 <!--      </template>-->
 <!--    </modal>-->
 
-    <Modal show={showDeleteModal}>
+    <Modal bind:show={showDeleteModal}>
         <div slot="header" class="delete-title">Are you sure you want to delete this entry?</div>
         <div class="modal-footer" slot="footer">
           <button class="button transparent" on:click={() => showDeleteModal = false} >Cancel</button>

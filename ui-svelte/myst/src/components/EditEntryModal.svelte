@@ -3,13 +3,22 @@
   import * as models from "../api/generated/models";
   import InputField from "./InputField.svelte";
   import Field from "./Field.svelte";
+  import {createEventDispatcher} from 'svelte';
+  import {writable} from 'svelte/store';
 
-  export let show: boolean = false;
+  const dispatch = createEventDispatcher();
+
+  export let show: boolean;
+
+  const submit = () => {
+    dispatch('submit', entry);
+  };
+
   export let entry: models.Entry;
 </script>
 
-<div class="edit-entry-modal">
-  <Modal show={show}>
+<form class="edit-entry-modal" on:submit|preventDefault={submit}>
+  <Modal bind:show>
     <div class="modal-header" slot="header">
       <div class="image">
         <img alt={entry.website}
@@ -25,23 +34,24 @@
     <div class="modal-content">
       <Field label="Website" value={entry.website}/>
       <Field label="Username" value={entry.username}/>
-      <InputField label="Password" value={entry.password}/>
-      <InputField label="Notes" value={entry.notes}/>
+      <InputField bind:value={entry.password} label="Password"/>
+      <InputField bind:value={entry.notes} label="Notes"/>
     </div>
 
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false}>Cancel</button>
-      <button class="button green">Save Changes</button>
+      <button class="button green" type="submit">Save Changes</button>
     </div>
   </Modal>
-</div>
+</form>
+
 <style lang="scss">
   .edit-entry-modal {
 
     .modal-header {
       display: flex;
       flex-direction: row;
-      margin-top: 10px;
+      //margin-top: 10px;
 
       .image {
         width: 64px;
@@ -78,6 +88,7 @@
       box-sizing: border-box;
       box-sizing: border-box;
     }
+
     .modal-footer {
       display: flex;
       flex-direction: row;

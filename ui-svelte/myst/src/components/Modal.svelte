@@ -1,11 +1,13 @@
 <script lang="ts">
+  import { fade } from 'svelte/transition';
+
   export let show: boolean;
 </script>
 
 {#if show}
-  <div class="modal" class:show="{show}">
+  <div class="modal">
     <div class="overlay"></div>
-    <div class="body">
+    <div transition:fade={{delay: 0, duration: 180, ease: 'in'}} class="body">
       <div class="header">
         <slot name="header"></slot>
       </div>

@@ -36,7 +36,7 @@
   </div>
 </div>
 {#if entry}
-  <Entry {entry}/>
+  <Entry {entry} {keystore}/>
 {:else}
   <EntryPlaceholder />
 {/if}

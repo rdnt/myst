@@ -30,12 +30,6 @@
     notes = entry.notes
   });
 
-  const onKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      show = false;
-    }
-  }
-
   const submit = () => {
     if (!allowSubmit) {
       return;
@@ -46,7 +40,6 @@
       notes,
     });
   };
-
 </script>
 
 <form class="edit-entry-modal" on:submit|preventDefault={submit}>
@@ -76,8 +69,6 @@
     </div>
   </Modal>
 </form>
-
-<svelte:window on:keydown={onKeydown}/>
 
 <style lang="scss">
   .edit-entry-modal {

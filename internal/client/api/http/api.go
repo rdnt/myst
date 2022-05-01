@@ -21,7 +21,7 @@ import (
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 // TODO: remove redundant go:generate for old ui
 ////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui-svelte/myst/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 
 var log = logger.New("router", logger.Cyan)
 
@@ -229,29 +229,15 @@ func (api *API) UpdateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 	entryId := c.Param("entryId")
 
-	k, err := api.app.Keystore(keystoreId)
-	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-	//	Error(c, http.StatusForbidden, err)
-	//	return
-	//} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-	//	Error(c, http.StatusForbidden, err)
-	//	return
-	//}
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
 	var req generated.UpdateEntryRequest
 
-	err = c.ShouldBindJSON(&req)
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		Error(c, http.StatusBadRequest, err)
 		return
 	}
 
-	e, err := api.app.UpdateKeystoreEntry(k.Id(), entryId, req.Password, req.Notes)
+	e, err := api.app.UpdateKeystoreEntry(keystoreId, entryId, req.Password, req.Notes)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -268,6 +254,20 @@ func (api *API) UpdateEntry(c *gin.Context) {
 			Notes:    e.Notes(),
 		},
 	)
+}
+
+func (api *API) DeleteEntry(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+	entryId := c.Param("entryId")
+
+	err := api.app.DeleteKeystoreEntry(keystoreId, entryId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, nil)
 }
 
 func (api *API) Keystores(c *gin.Context) {

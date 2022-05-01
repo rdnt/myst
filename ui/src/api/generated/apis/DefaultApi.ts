@@ -48,6 +48,11 @@ export interface CreateKeystoreOperationRequest {
     createKeystoreRequest: CreateKeystoreRequest;
 }
 
+export interface DeleteEntryRequest {
+    keystoreId: string;
+    entryId: string;
+}
+
 export interface KeystoreRequest {
     keystoreId: string;
 }
@@ -167,6 +172,39 @@ export class DefaultApi extends runtime.BaseAPI {
     async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Keystore> {
         const response = await this.createKeystoreRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntryRaw(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling deleteEntry.');
+        }
+
+        if (requestParameters.entryId === null || requestParameters.entryId === undefined) {
+            throw new runtime.RequiredError('entryId','Required parameter requestParameters.entryId was null or undefined when calling deleteEntry.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entry/{entryId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))).replace(`{${"entryId"}}`, encodeURIComponent(String(requestParameters.entryId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntry(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<void> {
+        await this.deleteEntryRaw(requestParameters, initOverrides);
     }
 
     /**

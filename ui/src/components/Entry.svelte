@@ -1,9 +1,10 @@
 <script lang="ts">
-  import Modal from "./Modal.svelte";
   import * as models from "../api/generated/models";
   import Field from "../components/Field.svelte";
   import EditEntryModal from "../components/EditEntryModal.svelte";
   import api from "../api";
+  import DeleteEntryModal from "../components/DeleteEntryModal.svelte";
+  import {getKeystores} from "../stores/keystores";
 
   let showDeleteModal = false;
   let showEditModal = false;
@@ -28,6 +29,20 @@
 
   export let keystore: models.Keystore;
   export let entry: models.Entry;
+
+  const deleteEntry = async () => {
+    await api.deleteEntry({
+      keystoreId: keystore.id,
+      entryId: entry.id
+    }).then((res) => {
+      if (res) {
+        console.log(res)
+        showDeleteModal = false
+      }
+    });
+
+    await getKeystores()
+  }
 </script>
 
 <!--<div class="entry">-->
@@ -113,13 +128,15 @@
 <!--      </template>-->
 <!--    </modal>-->
 
-    <Modal bind:show={showDeleteModal}>
-        <div slot="header" class="delete-title">Are you sure you want to delete this entry?</div>
-        <div class="modal-footer" slot="footer">
-          <button class="button transparent" on:click={() => showDeleteModal = false} >Cancel</button>
-          <button class="button red">Delete</button>
-        </div>
-    </Modal>
+<!--    <Modal bind:show={showDeleteModal}>-->
+<!--        <div slot="header" class="delete-title">Are you sure you want to delete this entry?</div>-->
+<!--        <div class="modal-footer" slot="footer">-->
+<!--          <button class="button transparent" on:click={() => showDeleteModal = false} >Cancel</button>-->
+<!--          <button class="button red">Delete</button>-->
+<!--        </div>-->
+<!--    </Modal>-->
+
+  <DeleteEntryModal bind:show={showDeleteModal} {entry} on:submit={() => {deleteEntry()}}/>
 <!--</div>-->
 
 <style lang="scss">

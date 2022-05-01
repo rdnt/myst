@@ -2,7 +2,8 @@
   import {Route, Router} from "svelte-navigator";
   import Sidebar from "./components/Sidebar.svelte";
   import Keystores from "./pages/Keystores.svelte";
-  import {onDestroy, onMount} from 'svelte';
+  import {keystores, getKeystores} from "./stores/keystores.ts";
+  import {onMount} from 'svelte';
   import api from "./api";
   import LoginForm from "./components/LoginForm.svelte";
   import OnboardingForm from "./components/OnboardingForm.svelte";
@@ -11,7 +12,6 @@
   let ready = false;
   let login = false;
 
-  let keystores = [];
   let keystore = null;
 
   const healthCheck = () => {
@@ -26,16 +26,18 @@
   // const interval = setInterval(healthCheck, 1000);
   // onDestroy(() => clearInterval(interval));
 
-  function getKeystores() {
-    api.keystores().then((response) => {
+  function initialize() {
+    // return $keystores;
+
+    getKeystores().then((response) => {
       onboarding = response.length == 0;
       login = false
 
       if (response.length > 0) {
-
-        keystores = response.sort((a, b) => {
-          return a.id < b.id ? 1 : -1;
-        });
+        //
+        // keystores = response.sort((a, b) => {
+        //   return a.id < b.id ? 1 : -1;
+        // });
 
         keystore = response[0];
       }
@@ -53,7 +55,7 @@
   }
 
   onMount(async () => {
-    getKeystores()
+    initialize()
   });
 </script>
 
@@ -62,22 +64,22 @@
     <span>Loading...</span>
   {:else}
     {#if onboarding}
-      <OnboardingForm on:created={getKeystores} />
+      <OnboardingForm on:created={initialize} />
     {:else if login}
-      <LoginForm on:login={getKeystores}/>
+      <LoginForm on:login={initialize}/>
     {:else}
-      <Sidebar {keystores}/>
+      <Sidebar keystores={$keystores}/>
       <main>
         <Route>
-          <Keystores {keystores}/>
+          <Keystores keystores={$keystores}/>
         </Route>
 
         <Route path="/keystore/:keystoreId">
-          <Keystores {keystores}/>
+          <Keystores keystores={$keystores}/>
         </Route>
 
         <Route path="/keystore/:keystoreId/entry/:entryId">
-          <Keystores {keystores}/>
+          <Keystores keystores={$keystores}/>
         </Route>
       </main>
     {/if}

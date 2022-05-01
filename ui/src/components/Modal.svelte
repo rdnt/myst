@@ -2,6 +2,12 @@
   import { fade } from 'svelte/transition';
 
   export let show: boolean;
+
+  const keydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      show = false;
+    }
+  }
 </script>
 
 {#if show}
@@ -20,6 +26,8 @@
     </div>
   </div>
 {/if}
+
+<svelte:window on:keydown={keydown}/>
 
 <style lang="scss">
   .modal {

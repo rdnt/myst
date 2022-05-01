@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/hex"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +17,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		panic(err)
 	}
 
-	payload, err := hex.DecodeString(req.Payload)
-	if err != nil {
-		panic(err)
-	}
-
-	k, err := api.app.CreateKeystore(req.Name, userId, payload)
+	k, err := api.app.CreateKeystore(req.Name, userId, req.Payload)
 	if err != nil {
 		panic(err)
 	}

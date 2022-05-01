@@ -291,6 +291,28 @@ func (r *Repository) Update(k *keystore.Keystore) error {
 	return r.enclaves.Write(b)
 }
 
+func (r *Repository) KeystoreKey(keystoreId string) ([]byte, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	if r.key == nil {
+		return nil, fmt.Errorf("authentication required")
+	}
+
+	e, err := r.enclaves.Enclave(r.key)
+	if err != nil {
+		return nil, err
+	}
+
+	keys := e.Keys()
+	b, ok := keys[keystoreId]
+	if !ok {
+		return nil, fmt.Errorf("keystore key not found")
+	}
+
+	return b, nil
+}
+
 func (r *Repository) startHealthCheck() {
 	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()

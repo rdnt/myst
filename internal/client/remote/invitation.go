@@ -4,15 +4,11 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"myst/pkg/logger"
 
-	"myst/internal/client/application/domain/invitation"
 	"myst/internal/server/api/http/generated"
 )
 
-func (r *remote) CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*invitation.Invitation, error) {
-	logger.Debug("CreateInvitation", keystoreId, inviteeId, publicKey)
-
+func (r *remote) CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*generated.Invitation, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -28,12 +24,14 @@ func (r *remote) CreateInvitation(keystoreId, inviteeId string, publicKey []byte
 		return nil, err
 	}
 
-	return r.parseInvitation(res.JSON200)
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("invalid response")
+	}
+
+	return res.JSON200, nil
 }
 
-func (r *remote) AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*invitation.Invitation, error) {
-	logger.Debug("AcceptInvitation", invitationId, publicKey)
-
+func (r *remote) AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*generated.Invitation, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -48,14 +46,14 @@ func (r *remote) AcceptInvitation(keystoreId, invitationId string, publicKey []b
 		return nil, err
 	}
 
-	return r.parseInvitation(res.JSON200)
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("invalid response")
+	}
+
+	return res.JSON200, nil
 }
 
-func (r *remote) FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (
-	*invitation.Invitation, error,
-) {
-	logger.Debug("FinalizeInvitation", invitationId, keystoreKey)
-
+func (r *remote) FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -70,15 +68,9 @@ func (r *remote) FinalizeInvitation(keystoreId, invitationId string, keystoreKey
 		return nil, err
 	}
 
-	return r.parseInvitation(res.JSON200)
-}
-
-func (r *remote) parseInvitation(gen *generated.Invitation) (*invitation.Invitation, error) {
-	if gen == nil {
-		return nil, ErrInvalidResponse
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("invalid response")
 	}
 
-	return invitation.New(
-		invitation.WithId(gen.Id),
-	)
+	return res.JSON200, nil
 }

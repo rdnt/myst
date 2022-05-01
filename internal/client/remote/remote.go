@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
@@ -22,11 +21,11 @@ type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
 	CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error)
-	Keystore(id string) (*keystore.Keystore, error)
-	Keystores() ([]*keystore.Keystore, error)
-	CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*invitation.Invitation, error)
-	AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*invitation.Invitation, error)
-	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*invitation.Invitation, error)
+	Keystore(id string) (*generated.Keystore, error)
+	Keystores() ([]*generated.Keystore, error)
+	CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*generated.Invitation, error)
+	AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*generated.Invitation, error)
+	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
 }
 
 type remote struct {

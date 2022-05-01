@@ -13,11 +13,12 @@
       keystoreId: keystore.id,
       entryId: entry.id,
       updateEntryRequest: {
-        password,
-        notes,
+        password: password != entry.password ? password : undefined,
+        notes: notes != entry.notes ? notes : undefined,
       }
     }).then((res) => {
       if (res) {
+        console.log(res)
         entry.password = password;
         entry.notes = notes;
         showEditModal = false

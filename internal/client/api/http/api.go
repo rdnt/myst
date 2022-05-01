@@ -4,8 +4,9 @@ import (
 	"io/ioutil"
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/application"
+	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/application/domain/keystore/entry"
+	"myst/internal/client/application/keystoreservice"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"net/http"
@@ -60,7 +61,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	var k *keystore.Keystore
 	if req.Password != nil {
-		k, err = api.app.Initialize(
+		k, err = api.app.CreateFirstKeystore(
 			req.Name,
 			*req.Password,
 		)
@@ -78,16 +79,16 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		}
 	}
 
-	entries := make([]generated.Entry, len(k.Entries()))
+	entries := []generated.Entry{}
 
-	for i, e := range k.Entries() {
-		entries[i] = generated.Entry{
+	for _, e := range k.Entries() {
+		entries = append(entries, generated.Entry{
 			Id:       e.Id(),
 			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
 			Notes:    e.Notes(),
-		}
+		})
 	}
 
 	c.JSON(
@@ -162,7 +163,8 @@ func (api *API) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	e := entry.New(
+	e, err := api.app.CreateKeystoreEntry(
+		k.Id(),
 		entry.WithWebsite(req.Website),
 		entry.WithUsername(req.Username),
 		entry.WithPassword(req.Password),
@@ -174,37 +176,13 @@ func (api *API) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	err = k.AddEntry(e)
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	err = api.app.UpdateKeystore(k)
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	entries := make([]generated.Entry, len(k.Entries()))
-
-	for i, e := range k.Entries() {
-		entries[i] = generated.Entry{
+	Success(
+		c, generated.Entry{
 			Id:       e.Id(),
 			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
 			Notes:    e.Notes(),
-		}
-	}
-
-	Success(
-		c, generated.Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
-			Entries: entries,
 		},
 	)
 }
@@ -226,16 +204,16 @@ func (api *API) Keystore(c *gin.Context) {
 		return
 	}
 
-	entries := make([]generated.Entry, len(k.Entries()))
+	entries := []generated.Entry{}
 
-	for i, e := range k.Entries() {
-		entries[i] = generated.Entry{
+	for _, e := range k.Entries() {
+		entries = append(entries, generated.Entry{
 			Id:       e.Id(),
 			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
 			Notes:    e.Notes(),
-		}
+		})
 	}
 
 	Success(
@@ -273,17 +251,7 @@ func (api *API) UpdateEntry(c *gin.Context) {
 		return
 	}
 
-	err = k.UpdateEntry(entryId, keystore.UpdateEntryOptions{
-		Password: req.Password,
-		Notes:    req.Notes,
-	})
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	err = api.app.UpdateKeystore(k)
+	e, err := api.app.UpdateKeystoreEntry(k.Id(), entryId, req.Password, req.Notes)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -293,17 +261,21 @@ func (api *API) UpdateEntry(c *gin.Context) {
 	// TODO: change entries returned to be a map, implemennt the rest
 	Success(
 		c, generated.Entry{
-			Id: k.Id(),
+			Id:       e.Id(),
+			Website:  e.Website(),
+			Username: e.Username(),
+			Password: e.Password(),
+			Notes:    e.Notes(),
 		},
 	)
 }
 
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
-	if err == application.ErrInitializationRequired {
+	if err == keystoreservice.ErrInitializationRequired {
 		Success(c, []generated.Keystore{})
 		return
-	} else if err == application.ErrAuthenticationRequired {
+	} else if err == keystoreservice.ErrAuthenticationRequired {
 		Error(c, http.StatusUnauthorized, err)
 		return
 	} else if err != nil {

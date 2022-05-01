@@ -51,8 +51,6 @@ type Keystores []Keystore
 type UpdateEntryRequest struct {
 	Notes    *string `json:"notes,omitempty"`
 	Password *string `json:"password,omitempty"`
-	Username *string `json:"username,omitempty"`
-	Website  *string `json:"website,omitempty"`
 }
 
 // AuthenticateJSONBody defines parameters for Authenticate.

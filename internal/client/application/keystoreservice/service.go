@@ -2,9 +2,10 @@ package keystoreservice
 
 import (
 	"errors"
+	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/application/domain/keystore/entry"
 	"myst/pkg/logger"
+	"strings"
 )
 
 var (
@@ -12,6 +13,8 @@ var (
 	ErrAuthenticationRequired    = errors.New("authentication required")
 	ErrAuthenticationFailed      = errors.New("authentication failed")
 	ErrInitializationRequired    = errors.New("initialization required")
+	ErrInvalidPassword           = errors.New("invalid password")
+	ErrEntryNotFound             = errors.New("entry not found")
 )
 
 type KeystoreRepository interface {
@@ -25,11 +28,68 @@ type service struct {
 	keystoreRepo KeystoreRepository
 }
 
-func (s *service) Create(name string) (*keystore.Keystore, error) {
+func (s *service) KeystoreEntries(id string) (map[string]entry.Entry, error) {
+	k, err := s.keystoreRepo.Keystore(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return k.Entries(), nil
+}
+
+func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, notes *string) (entry.Entry, error) {
+	// do not allow empty password
+	if password != nil && strings.TrimSpace(*password) == "" {
+		return entry.Entry{}, ErrInvalidPassword
+	}
+
+	k, err := s.keystoreRepo.Keystore(keystoreId)
+	if err != nil {
+		return entry.Entry{}, err
+	}
+
+	entries := k.Entries()
+
+	e, ok := entries[entryId]
+	if !ok {
+		return entry.Entry{}, ErrEntryNotFound
+	}
+
+	if password != nil {
+		e.SetPassword(*password)
+	}
+
+	if notes != nil {
+		e.SetNotes(*notes)
+	}
+
+	entries[e.Id()] = e
+
+	k.SetEntries(entries)
+
+	return e, s.UpdateKeystore(k)
+}
+
+func (s *service) CreateKeystore(name string) (*keystore.Keystore, error) {
 	return s.keystoreRepo.Create(keystore.WithName(name))
 }
 
-func (s *service) Initialize(name, password string) (*keystore.Keystore, error) {
+func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {
+	k, err := s.keystoreRepo.Keystore(keystoreId)
+	if err != nil {
+		return entry.Entry{}, err
+	}
+
+	e := entry.New(opts...)
+
+	entries := k.Entries()
+	entries[e.Id()] = e
+	k.SetEntries(entries)
+
+	return e, s.keystoreRepo.Update(k)
+}
+
+func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
 	err := s.keystoreRepo.Initialize(password)
 	if err != nil {
 		return nil, err
@@ -38,51 +98,62 @@ func (s *service) Initialize(name, password string) (*keystore.Keystore, error) 
 	// TODO: remove dummy keystores and properly return error
 	s.keystoreRepo.Create(
 		keystore.WithName(name), keystore.WithEntries(
-			[]entry.Entry{
-				entry.New(
+			map[string]entry.Entry{
+				"px5VAUMgPMBtjrAj9ajeFR": entry.New(
+					entry.WithId("px5VAUMgPMBtjrAj9ajeFR"),
 					entry.WithWebsite("github.com"), entry.WithUsername("rdntdev@gmail.com"),
 					entry.WithPassword("nzK&d#u+MjFU8p&4UhL)s3+h"),
 					entry.WithNotes("Lorem ipsum"),
 				),
-				entry.New(
+				"Vxg4iMtmXUw76t77hb6m3B": entry.New(
+					entry.WithId("Vxg4iMtmXUw76t77hb6m3B"),
 					entry.WithWebsite("youtube.com"), entry.WithUsername("oldsnut@gmailni.com"),
 					entry.WithPassword("tsksWgABXhvh9LfF"),
 					entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
 				),
-				entry.New(
+				"xKPddK9gtAbUT3Ej93ShZ": entry.New(
+					entry.WithId("xKPddK9gtAbUT3Ej93ShZ"),
 					entry.WithWebsite("facebook.com"), entry.WithUsername("pete24uk@test130.com"),
 					entry.WithPassword("uXekxDRk6bmvvpda"),
 					entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
 				),
-				entry.New(
+				"ZByasmj3aLHgRMJDeDiXS4": entry.New(
+					entry.WithId("ZByasmj3aLHgRMJDeDiXS4"),
 					entry.WithWebsite("baidu.com"), entry.WithUsername("swissly0@telemol.online"),
 					entry.WithPassword("6Yu4k2YkNPxpZkHn"),
 				),
-				entry.New(
+				"hozhDrCZGqjZ2VGLcpcuNi": entry.New(
+					entry.WithId("hozhDrCZGqjZ2VGLcpcuNi"),
 					entry.WithWebsite("yahoo.com"), entry.WithUsername("swissly0@telemol.online"),
 					entry.WithPassword("LxRdhTTSg4Adfkc4"),
 				),
-				entry.New(
+				"tEsfGypbPAVCNMAKWtw2mD": entry.New(
+					entry.WithId("tEsfGypbPAVCNMAKWtw2mD"),
 					entry.WithWebsite("amazon.com"), entry.WithUsername("manhosobpe15@zetgets.com"),
 					entry.WithPassword("qHcZsZxPf8acHxxA"),
 				),
-				entry.New(
+				"McB6akkM3C5XpzXfMYhasU": entry.New(
+					entry.WithId("McB6akkM3C5XpzXfMYhasU"),
 					entry.WithWebsite("wikipedia.org"), entry.WithUsername("chuninoleg1971@piftir.com"),
 					entry.WithPassword("DT3sftJuRjxWFg68"),
 				),
-				entry.New(
+				"YBS32eK8XbeV6ujaY5xERK": entry.New(
+					entry.WithId("YBS32eK8XbeV6ujaY5xERK"),
 					entry.WithWebsite("twitter.com"), entry.WithUsername("ninablackangel@kumpulanmedia.com"),
 					entry.WithPassword("ndUZ6KGduD53up4R"),
 				),
-				entry.New(
+				"Fy7HDsbQqkYsbevjuqSG65": entry.New(
+					entry.WithId("Fy7HDsbQqkYsbevjuqSG65"),
 					entry.WithWebsite("bbc.com"), entry.WithUsername("kgdlove@omdlism.com"),
 					entry.WithPassword("jy9EpWExSmmtHa6g"),
 				),
-				entry.New(
+				"r5TbidUGZkZeqbP7iCySBn": entry.New(
+					entry.WithId("r5TbidUGZkZeqbP7iCySBn"),
 					entry.WithWebsite("steampowered.com"), entry.WithUsername("totinoprato@roselarose.com"),
 					entry.WithPassword("tbRCJ9uHvxLm9S5q"),
 				),
-				entry.New(
+				"pxnChjAmntT5aG35PM3GL4": entry.New(
+					entry.WithId("pxnChjAmntT5aG35PM3GL4"),
 					entry.WithWebsite("bing.com"), entry.WithUsername("tbiggs@massageshophome.com"),
 					entry.WithPassword("H278L5qtwvSVsQzt"),
 				),
@@ -92,13 +163,19 @@ func (s *service) Initialize(name, password string) (*keystore.Keystore, error) 
 
 	s.keystoreRepo.Create(
 		keystore.WithName("Work"), keystore.WithEntries(
-			[]entry.Entry{},
+			map[string]entry.Entry{},
 		),
 	)
 
 	return s.keystoreRepo.Create(
 		keystore.WithName("Other"), keystore.WithEntries(
-			[]entry.Entry{},
+			map[string]entry.Entry{
+				"pxnChjAmntT5aG35PM3G12": entry.New(
+					entry.WithId("pxnChjAmntT5aG35PM3G12"),
+					entry.WithWebsite("www.microsoft.com"), entry.WithUsername("test123@example.com"),
+					entry.WithPassword("H278L5qtwvSVs333"),
+				),
+			},
 		),
 	)
 }
@@ -132,7 +209,7 @@ func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
 //	return k, err
 //}
 
-func (s *service) Update(k *keystore.Keystore) error {
+func (s *service) UpdateKeystore(k *keystore.Keystore) error {
 	err := s.keystoreRepo.Update(k)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return ErrAuthenticationRequired

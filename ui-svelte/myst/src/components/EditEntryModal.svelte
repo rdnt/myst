@@ -3,18 +3,50 @@
   import * as models from "../api/generated/models";
   import InputField from "./InputField.svelte";
   import Field from "./Field.svelte";
-  import {createEventDispatcher} from 'svelte';
-  import {writable} from 'svelte/store';
-
+  import {createEventDispatcher, onMount} from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let show: boolean;
+  export let show: boolean = false;
+  export let entry: models.Entry;
+
+  $: password = '';
+  $: notes = '';
+
+  $: passwordValid = password.trim() !== '';
+  $: passwordChanged = entry && password.trim() !== entry.password;
+  $: notesChanged = entry && notes.trim() !== entry.notes;
+
+  $: allowSubmit = passwordValid && (passwordChanged || notesChanged);
+
+  $: {
+    if (!show && entry) {
+      password = entry.password
+      notes = entry.notes
+    }
+  }
+
+  onMount(async () => {
+    password = entry.password
+    notes = entry.notes
+  });
+
+  const onKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      show = false;
+    }
+  }
 
   const submit = () => {
-    dispatch('submit', entry);
+    if (!allowSubmit) {
+      return;
+    }
+
+    dispatch('submit', {
+      password,
+      notes,
+    });
   };
 
-  export let entry: models.Entry;
 </script>
 
 <form class="edit-entry-modal" on:submit|preventDefault={submit}>
@@ -34,16 +66,18 @@
     <div class="modal-content">
       <Field label="Website" value={entry.website}/>
       <Field label="Username" value={entry.username}/>
-      <InputField bind:value={entry.password} label="Password"/>
-      <InputField bind:value={entry.notes} label="Notes"/>
+      <InputField bind:value={password} error={!passwordValid && 'Password cannot be empty'} label="Password"/>
+      <InputField bind:value={notes} label="Notes"/>
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button transparent" on:click={() => show = false}>Cancel</button>
+      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
       <button class="button green" type="submit">Save Changes</button>
     </div>
   </Modal>
 </form>
+
+<svelte:window on:keydown={onKeydown}/>
 
 <style lang="scss">
   .edit-entry-modal {

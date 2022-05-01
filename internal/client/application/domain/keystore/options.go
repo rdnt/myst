@@ -1,7 +1,7 @@
 package keystore
 
 import (
-	"myst/internal/client/application/domain/keystore/entry"
+	"myst/internal/client/application/domain/entry"
 )
 
 type Option func(*Keystore)
@@ -30,7 +30,7 @@ func WithPassword(password string) Option {
 	}
 }
 
-func WithEntries(entries []entry.Entry) Option {
+func WithEntries(entries map[string]entry.Entry) Option {
 	return func(k *Keystore) {
 		k.entries = entries
 	}

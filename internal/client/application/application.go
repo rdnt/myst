@@ -7,8 +7,8 @@ import (
 
 	"golang.org/x/crypto/curve25519"
 
+	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/application/domain/keystore/entry"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/remote"
 	"myst/pkg/crypto"
@@ -24,21 +24,17 @@ var (
 )
 
 type Application interface {
+	keystore.Service
+
 	Start()
-	Initialize(name, password string) (*keystore.Keystore, error)
-	Authenticate(password string) error
-	CreateKeystore(name string) (*keystore.Keystore, error)
-	UpdateKeystore(k *keystore.Keystore) error
-	Keystore(id string) (*keystore.Keystore, error)
-	Keystores() (map[string]*keystore.Keystore, error)
-	HealthCheck()
 	SignIn(username, password string) error
 	SignOut() error
 }
 
 type application struct {
-	keystoreService keystore.Service
-	repositories    struct {
+	keystore.Service
+
+	repositories struct {
 		keystoreRepo keystoreservice.KeystoreRepository
 		remote       remote.Client
 	}
@@ -72,7 +68,7 @@ func New(opts ...Option) (*application, error) {
 		panic(err)
 	}
 
-	app.keystoreService = keystoreService
+	app.Service = keystoreService
 
 	rc, err := remote.New()
 	if err != nil {
@@ -85,13 +81,14 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	k, err := app.keystoreService.Initialize("my-keystore", "pass")
+	k, err := app.CreateFirstKeystore("my-keystore", "pass")
 	if err != nil {
 		panic(err)
 	}
 
 	for i := 0; i < 0; i++ {
-		e1 := entry.New(
+		_, err = app.CreateKeystoreEntry(
+			k.Id(),
 			entry.WithWebsite("google.com"),
 			entry.WithUsername("someuser@google.com"),
 			entry.WithPassword("12345678"),
@@ -101,7 +98,8 @@ func (app *application) setup() {
 			return
 		}
 
-		e2 := entry.New(
+		_, err = app.CreateKeystoreEntry(
+			k.Id(),
 			entry.WithWebsite("stackoverflow.com"),
 			entry.WithUsername("someotheruser@google.com"),
 			entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
@@ -111,7 +109,8 @@ func (app *application) setup() {
 			return
 		}
 
-		e3 := entry.New(
+		_, err = app.CreateKeystoreEntry(
+			k.Id(),
 			entry.WithWebsite("reddit.com"),
 			entry.WithUsername("somethirduser@yahoo.com"),
 			entry.WithPassword("!@*#&$^!@*#&$^!"),
@@ -120,27 +119,9 @@ func (app *application) setup() {
 			fmt.Println(err)
 			return
 		}
-
-		err = k.AddEntry(e1)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = k.AddEntry(e2)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = k.AddEntry(e3)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
 	}
 
-	err = app.keystoreService.Update(k)
+	k, err = app.Keystore(k.Id())
 	if err != nil {
 		fmt.Println(err)
 		return

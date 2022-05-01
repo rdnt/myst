@@ -1,7 +1,12 @@
 <script lang="ts">
   import Link from "./Link.svelte";
+  import {onMount} from "svelte";
 
   export let keystores;
+
+  onMount(() => {
+    console.log(keystores)
+  })
 </script>
 
 <div class="sidebar">

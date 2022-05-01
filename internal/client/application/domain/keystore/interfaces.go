@@ -17,6 +17,7 @@ type Service interface {
 	KeystoreEntries(id string) (map[string]entry.Entry, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
+	DeleteKeystoreEntry(keystoreId, entryId string) error
 	Keystores() (map[string]*Keystore, error)
 	UpdateKeystore(k *Keystore) error
 	Authenticate(password string) error

@@ -25,11 +25,11 @@ type KeystoreRepository interface {
 }
 
 type service struct {
-	keystoreRepo KeystoreRepository
+	keystores KeystoreRepository
 }
 
 func (s *service) KeystoreEntries(id string) (map[string]entry.Entry, error) {
-	k, err := s.keystoreRepo.Keystore(id)
+	k, err := s.keystores.Keystore(id)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, note
 		return entry.Entry{}, ErrInvalidPassword
 	}
 
-	k, err := s.keystoreRepo.Keystore(keystoreId)
+	k, err := s.keystores.Keystore(keystoreId)
 	if err != nil {
 		return entry.Entry{}, err
 	}
@@ -70,12 +70,30 @@ func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, note
 	return e, s.UpdateKeystore(k)
 }
 
+func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
+	k, err := s.keystores.Keystore(keystoreId)
+	if err != nil {
+		return err
+	}
+
+	entries := k.Entries()
+
+	if _, ok := entries[entryId]; !ok {
+		return ErrEntryNotFound
+	}
+
+	delete(entries, entryId)
+	k.SetEntries(entries)
+
+	return s.UpdateKeystore(k)
+}
+
 func (s *service) CreateKeystore(name string) (*keystore.Keystore, error) {
-	return s.keystoreRepo.Create(keystore.WithName(name))
+	return s.keystores.Create(keystore.WithName(name))
 }
 
 func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {
-	k, err := s.keystoreRepo.Keystore(keystoreId)
+	k, err := s.keystores.Keystore(keystoreId)
 	if err != nil {
 		return entry.Entry{}, err
 	}
@@ -86,17 +104,17 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 	entries[e.Id()] = e
 	k.SetEntries(entries)
 
-	return e, s.keystoreRepo.Update(k)
+	return e, s.keystores.Update(k)
 }
 
 func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
-	err := s.keystoreRepo.Initialize(password)
+	err := s.keystores.Initialize(password)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: remove dummy keystores and properly return error
-	s.keystoreRepo.Create(
+	s.keystores.Create(
 		keystore.WithName(name), keystore.WithEntries(
 			map[string]entry.Entry{
 				"px5VAUMgPMBtjrAj9ajeFR": entry.New(
@@ -139,7 +157,7 @@ func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore
 				),
 				"YBS32eK8XbeV6ujaY5xERK": entry.New(
 					entry.WithId("YBS32eK8XbeV6ujaY5xERK"),
-					entry.WithWebsite("twitter.com"), entry.WithUsername("ninablackangel@kumpulanmedia.com"),
+					entry.WithWebsite("twitter.com"), entry.WithUsername("ninablackangel@test.com"),
 					entry.WithPassword("ndUZ6KGduD53up4R"),
 				),
 				"Fy7HDsbQqkYsbevjuqSG65": entry.New(
@@ -161,13 +179,13 @@ func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore
 		),
 	)
 
-	s.keystoreRepo.Create(
+	s.keystores.Create(
 		keystore.WithName("Work"), keystore.WithEntries(
 			map[string]entry.Entry{},
 		),
 	)
 
-	return s.keystoreRepo.Create(
+	return s.keystores.Create(
 		keystore.WithName("Other"), keystore.WithEntries(
 			map[string]entry.Entry{
 				"pxnChjAmntT5aG35PM3G12": entry.New(
@@ -181,7 +199,7 @@ func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {
-	k, err := s.keystoreRepo.Keystore(id)
+	k, err := s.keystores.Keystore(id)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return nil, ErrAuthenticationRequired
 	//}
@@ -190,7 +208,7 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
-	ks, err := s.keystoreRepo.Keystores()
+	ks, err := s.keystores.Keystores()
 	//if err == keystore.ErrAuthenticationRequired {
 	//	return nil, ErrAuthenticationRequired
 	//} else if err == keystore.ErrInitializationRequired {
@@ -200,17 +218,8 @@ func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
 	return ks, err
 }
 
-//func (s *service) Unlock(id string, password string) (*keystore.Keystore, error) {
-//	k, err := s.keystoreRepo.Unlock(id, password)
-//	if errors.Is(err, keystorerepo.ErrAuthenticationFailed) {
-//		return nil, ErrAuthenticationFailed
-//	}
-//
-//	return k, err
-//}
-
 func (s *service) UpdateKeystore(k *keystore.Keystore) error {
-	err := s.keystoreRepo.Update(k)
+	err := s.keystores.Update(k)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return ErrAuthenticationRequired
 	//}
@@ -219,11 +228,11 @@ func (s *service) UpdateKeystore(k *keystore.Keystore) error {
 }
 
 func (s *service) Authenticate(password string) error {
-	return s.keystoreRepo.Authenticate(password)
+	return s.keystores.Authenticate(password)
 }
 
 func (s *service) HealthCheck() {
-	s.keystoreRepo.HealthCheck()
+	s.keystores.HealthCheck()
 }
 
 func New(opts ...Option) (keystore.Service, error) {
@@ -237,7 +246,7 @@ func New(opts ...Option) (keystore.Service, error) {
 		}
 	}
 
-	if s.keystoreRepo == nil {
+	if s.keystores == nil {
 		return nil, ErrInvalidKeystoreRepository
 	}
 

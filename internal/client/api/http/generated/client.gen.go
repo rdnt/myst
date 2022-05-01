@@ -109,6 +109,9 @@ type ClientInterface interface {
 
 	CreateEntry(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteEntry request
+	DeleteEntry(ctx context.Context, keystoreId string, entryId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UpdateEntry request with any body
 	UpdateEntryWithBody(ctx context.Context, keystoreId string, entryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -197,6 +200,18 @@ func (c *Client) CreateEntryWithBody(ctx context.Context, keystoreId string, con
 
 func (c *Client) CreateEntry(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateEntryRequest(c.Server, keystoreId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteEntry(ctx context.Context, keystoreId string, entryId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteEntryRequest(c.Server, keystoreId, entryId)
 	if err != nil {
 		return nil, err
 	}
@@ -449,6 +464,47 @@ func NewCreateEntryRequestWithBody(server string, keystoreId string, contentType
 	return req, nil
 }
 
+// NewDeleteEntryRequest generates requests for DeleteEntry
+func NewDeleteEntryRequest(server string, keystoreId string, entryId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "entryId", runtime.ParamLocationPath, entryId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/keystore/%s/entry/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUpdateEntryRequest calls the generic UpdateEntry builder with application/json body
 func NewUpdateEntryRequest(server string, keystoreId string, entryId string, body UpdateEntryJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -632,6 +688,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateEntryWithResponse(ctx context.Context, keystoreId string, body CreateEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEntryResponse, error)
 
+	// DeleteEntry request
+	DeleteEntryWithResponse(ctx context.Context, keystoreId string, entryId string, reqEditors ...RequestEditorFn) (*DeleteEntryResponse, error)
+
 	// UpdateEntry request with any body
 	UpdateEntryWithBodyWithResponse(ctx context.Context, keystoreId string, entryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateEntryResponse, error)
 
@@ -752,6 +811,28 @@ func (r CreateEntryResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateEntryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteEntryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteEntryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteEntryResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -886,6 +967,15 @@ func (c *ClientWithResponses) CreateEntryWithResponse(ctx context.Context, keyst
 		return nil, err
 	}
 	return ParseCreateEntryResponse(rsp)
+}
+
+// DeleteEntryWithResponse request returning *DeleteEntryResponse
+func (c *ClientWithResponses) DeleteEntryWithResponse(ctx context.Context, keystoreId string, entryId string, reqEditors ...RequestEditorFn) (*DeleteEntryResponse, error) {
+	rsp, err := c.DeleteEntry(ctx, keystoreId, entryId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteEntryResponse(rsp)
 }
 
 // UpdateEntryWithBodyWithResponse request with arbitrary body returning *UpdateEntryResponse
@@ -1060,6 +1150,32 @@ func ParseCreateEntryResponse(rsp *http.Response) (*CreateEntryResponse, error) 
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteEntryResponse parses an HTTP response from a DeleteEntryWithResponse call
+func ParseDeleteEntryResponse(rsp *http.Response) (*DeleteEntryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteEntryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

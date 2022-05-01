@@ -1,7 +1,7 @@
 <script lang="ts">
   export let ref = null;
   export let label: string = '';
-  export let error: string = '';
+  export let error: string | undefined = undefined;
   export let placeholder: string = '';
   export let value: string;
 
@@ -14,8 +14,10 @@
   {#if label}
     <label>{label}</label>
   {/if}
-  <input bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder}/>
-  <span class:show={error}>{error}</span>
+  <input bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder} class:has-error={error}/>
+  {#if error}
+    <span>{error}</span>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -52,6 +54,11 @@
       border-radius: 5px;
       padding: 14px;
       overflow: hidden;
+      margin-bottom: 32px;
+
+      &.has-error {
+        margin-bottom: 0;
+      }
 
       &::placeholder {
         color: lighten(#68737e, 5%);
@@ -69,15 +76,12 @@
       color: #ff9999;
       font-weight: 500;
       font-size: .9rem;
-      padding: 0 16px;
-      opacity: 0;
-      pointer-events: none;
-      margin-top: 12px;
       min-height: 20px;
+      margin-top: 12px;
+      margin-bottom: 32px;
 
       &.show {
-        opacity: 1;
-        pointer-events: unset;
+        display: block;
       }
     }
   }

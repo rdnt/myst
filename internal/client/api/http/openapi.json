@@ -378,12 +378,6 @@
       "UpdateEntryRequest": {
         "type": "object",
         "properties": {
-          "website": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
           "password": {
             "type": "string"
           },

@@ -1,23 +1,24 @@
 {
   "name": "myst",
+  "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "vite --port 8082",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@azure/core-client": "^1.4.0",
-    "axios": "^0.25.0",
-    "pinia": "^2.0.9",
-    "vue": "^3.2.25",
-    "vue-router": "^4.0.12"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.0.0",
-    "sass": "^1.49.0",
-    "typescript": "^4.4.4",
-    "vite": "^2.7.2",
-    "vue-tsc": "^0.29.8"
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
+    "@tsconfig/svelte": "^2.0.1",
+    "sass": "^1.49.9",
+    "svelte": "^3.44.0",
+    "svelte-check": "^2.2.7",
+    "svelte-navigator": "^3.1.5",
+    "svelte-preprocess": "^4.9.8",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0"
   }
 }

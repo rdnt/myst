@@ -16,60 +16,39 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface Entry
+ * @interface UpdateEntryRequest
  */
-export interface Entry {
+export interface UpdateEntryRequest {
     /**
      * 
      * @type {string}
-     * @memberof Entry
+     * @memberof UpdateEntryRequest
      */
-    id: string;
+    password?: string;
     /**
      * 
      * @type {string}
-     * @memberof Entry
+     * @memberof UpdateEntryRequest
      */
-    website: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Entry
-     */
-    username: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Entry
-     */
-    password: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Entry
-     */
-    notes: string;
+    notes?: string;
 }
 
-export function EntryFromJSON(json: any): Entry {
-    return EntryFromJSONTyped(json, false);
+export function UpdateEntryRequestFromJSON(json: any): UpdateEntryRequest {
+    return UpdateEntryRequestFromJSONTyped(json, false);
 }
 
-export function EntryFromJSONTyped(json: any, ignoreDiscriminator: boolean): Entry {
+export function UpdateEntryRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateEntryRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'id': json['id'],
-        'website': json['website'],
-        'username': json['username'],
-        'password': json['password'],
-        'notes': json['notes'],
+        'password': !exists(json, 'password') ? undefined : json['password'],
+        'notes': !exists(json, 'notes') ? undefined : json['notes'],
     };
 }
 
-export function EntryToJSON(value?: Entry | null): any {
+export function UpdateEntryRequestToJSON(value?: UpdateEntryRequest | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -78,9 +57,6 @@ export function EntryToJSON(value?: Entry | null): any {
     }
     return {
         
-        'id': value.id,
-        'website': value.website,
-        'username': value.username,
         'password': value.password,
         'notes': value.notes,
     };

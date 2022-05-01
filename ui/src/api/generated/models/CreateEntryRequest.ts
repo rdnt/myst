@@ -24,7 +24,7 @@ export interface CreateEntryRequest {
      * @type {string}
      * @memberof CreateEntryRequest
      */
-    label: string;
+    website: string;
     /**
      * 
      * @type {string}
@@ -37,6 +37,12 @@ export interface CreateEntryRequest {
      * @memberof CreateEntryRequest
      */
     password: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateEntryRequest
+     */
+    notes: string;
 }
 
 export function CreateEntryRequestFromJSON(json: any): CreateEntryRequest {
@@ -49,9 +55,10 @@ export function CreateEntryRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'label': json['label'],
+        'website': json['website'],
         'username': json['username'],
         'password': json['password'],
+        'notes': json['notes'],
     };
 }
 
@@ -64,9 +71,10 @@ export function CreateEntryRequestToJSON(value?: CreateEntryRequest | null): any
     }
     return {
         
-        'label': value.label,
+        'website': value.website,
         'username': value.username,
         'password': value.password,
+        'notes': value.notes,
     };
 }
 

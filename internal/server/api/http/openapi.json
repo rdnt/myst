@@ -459,7 +459,8 @@
             "type": "string"
           },
           "payload": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           }
         }
       },

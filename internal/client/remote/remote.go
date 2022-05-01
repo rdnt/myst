@@ -21,7 +21,7 @@ var (
 type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
-	CreateKeystore(name string, payload []byte) (*keystore.Keystore, error)
+	CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error)
 	Keystore(id string) (*keystore.Keystore, error)
 	Keystores() ([]*keystore.Keystore, error)
 	CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*invitation.Invitation, error)

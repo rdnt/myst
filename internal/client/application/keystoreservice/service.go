@@ -23,6 +23,7 @@ type KeystoreRepository interface {
 	Authenticate(password string) error
 	Initialize(password string) error
 	HealthCheck()
+	KeystoreKey(keystoreId string) ([]byte, error)
 }
 
 type service struct {
@@ -91,6 +92,15 @@ func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
 
 func (s *service) CreateKeystore(name string) (*keystore.Keystore, error) {
 	return s.keystores.Create(keystore.WithName(name))
+}
+
+func (s *service) KeystoreKey(keystoreId string) ([]byte, error) {
+	b, err := s.keystores.KeystoreKey(keystoreId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get keystore key")
+	}
+
+	return b, nil
 }
 
 func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {

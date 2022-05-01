@@ -36,7 +36,7 @@ type remote struct {
 }
 
 func (r *remote) SignIn(username, password string) error {
-	fmt.Println("SignIn", username, password)
+	fmt.Println("Signing in to remote...")
 
 	resp, err := r.client.Login(
 		context.Background(), generated.LoginJSONRequestBody{

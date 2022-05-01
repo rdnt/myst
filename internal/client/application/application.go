@@ -3,7 +3,6 @@ package application
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"golang.org/x/crypto/curve25519"
 
@@ -43,7 +42,7 @@ type application struct {
 func (app *application) Start() {
 	log.Print("App started")
 
-	//app.setup()
+	app.setup()
 }
 
 func New(opts ...Option) (*application, error) {
@@ -81,53 +80,105 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	k, err := app.CreateFirstKeystore("my-keystore", "pass")
+	k1, err := app.CreateFirstKeystore("Passwords", "12345678")
 	if err != nil {
 		panic(err)
 	}
 
-	for i := 0; i < 0; i++ {
-		_, err = app.CreateKeystoreEntry(
-			k.Id(),
-			entry.WithWebsite("google.com"),
-			entry.WithUsername("someuser@google.com"),
-			entry.WithPassword("12345678"),
-		)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	opts := [][]entry.Option{
+		{
+			entry.WithId("px5VAUMgPMBtjrAj9ajeFR"),
+			entry.WithWebsite("github.com"), entry.WithUsername("rdntdev@gmail.com"),
+			entry.WithPassword("nzK&d#u+MjFU8p&4UhL)s3+h"),
+			entry.WithNotes("Lorem ipsum"),
+		},
+		{
+			entry.WithId("Vxg4iMtmXUw76t77hb6m3B"),
+			entry.WithWebsite("youtube.com"), entry.WithUsername("oldsnut@gmailni.com"),
+			entry.WithPassword("tsksWgABXhvh9LfF"),
+			entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
+		},
+		{
+			entry.WithId("xKPddK9gtAbUT3Ej93ShZ"),
+			entry.WithWebsite("facebook.com"), entry.WithUsername("pete24uk@test130.com"),
+			entry.WithPassword("uXekxDRk6bmvvpda"),
+			entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
+		},
+		{
+			entry.WithId("ZByasmj3aLHgRMJDeDiXS4"),
+			entry.WithWebsite("baidu.com"), entry.WithUsername("swissly0@telemol.online"),
+			entry.WithPassword("6Yu4k2YkNPxpZkHn"),
+		},
+		{
+			entry.WithId("hozhDrCZGqjZ2VGLcpcuNi"),
+			entry.WithWebsite("yahoo.com"), entry.WithUsername("swissly0@telemol.online"),
+			entry.WithPassword("LxRdhTTSg4Adfkc4"),
+		},
+		{
+			entry.WithId("tEsfGypbPAVCNMAKWtw2mD"),
+			entry.WithWebsite("amazon.com"), entry.WithUsername("manhosobpe15@zetgets.com"),
+			entry.WithPassword("qHcZsZxPf8acHxxA"),
+		},
+		{
+			entry.WithId("McB6akkM3C5XpzXfMYhasU"),
+			entry.WithWebsite("wikipedia.org"), entry.WithUsername("chuninoleg1971@piftir.com"),
+			entry.WithPassword("DT3sftJuRjxWFg68"),
+		},
+		{
+			entry.WithId("YBS32eK8XbeV6ujaY5xERK"),
+			entry.WithWebsite("twitter.com"), entry.WithUsername("ninablackangel@test.com"),
+			entry.WithPassword("ndUZ6KGduD53up4R"),
+		},
+		{
+			entry.WithId("Fy7HDsbQqkYsbevjuqSG65"),
+			entry.WithWebsite("bbc.com"), entry.WithUsername("kgdlove@omdlism.com"),
+			entry.WithPassword("jy9EpWExSmmtHa6g"),
+		},
+		{
+			entry.WithId("r5TbidUGZkZeqbP7iCySBn"),
+			entry.WithWebsite("steampowered.com"), entry.WithUsername("totinoprato@roselarose.com"),
+			entry.WithPassword("tbRCJ9uHvxLm9S5q"),
+		},
+		{
+			entry.WithId("pxnChjAmntT5aG35PM3GL4"),
+			entry.WithWebsite("bing.com"), entry.WithUsername("tbiggs@massageshophome.com"),
+			entry.WithPassword("H278L5qtwvSVsQzt"),
+		},
+	}
 
-		_, err = app.CreateKeystoreEntry(
-			k.Id(),
-			entry.WithWebsite("stackoverflow.com"),
-			entry.WithUsername("someotheruser@google.com"),
-			entry.WithPassword("abcdefghijklmnopqrstuvwxyz"),
-		)
+	for _, opt := range opts {
+		_, err = app.CreateKeystoreEntry(k1.Id(), opt...)
 		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		_, err = app.CreateKeystoreEntry(
-			k.Id(),
-			entry.WithWebsite("reddit.com"),
-			entry.WithUsername("somethirduser@yahoo.com"),
-			entry.WithPassword("!@*#&$^!@*#&$^!"),
-		)
-		if err != nil {
-			fmt.Println(err)
-			return
+			panic(err)
 		}
 	}
 
-	k, err = app.Keystore(k.Id())
+	k2, err := app.CreateKeystore("Work")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = app.CreateKeystoreEntry(k2.Id(),
+		entry.WithId("pxnChjAmntT5aG35PM3G12"),
+		entry.WithWebsite("www.microsoft.com"), entry.WithUsername("test123@example.com"),
+		entry.WithPassword("H278L5qtwvSVs333"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = app.CreateKeystore("Other")
+	if err != nil {
+		panic(err)
+	}
+
+	k1, err = app.Keystore(k1.Id())
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	log.Debug(k)
+	log.Debug(k1)
 
 	err = app.repositories.remote.SignIn("rdnt", "1234")
 	if err != nil {
@@ -135,16 +186,16 @@ func (app *application) setup() {
 		return
 	}
 
-	kpath := "data/keystores/" + k.Id() + ".myst"
+	//jk := enclaverepo.KeystoreToJSON(k1)
 
-	b, err := os.ReadFile(kpath)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	//b, err := json.Marshal(jk)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 
 	sk, err := app.repositories.remote.CreateKeystore(
-		"my-keystore", b,
+		k1.Name(), nil, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
 	)
 	if err != nil {
 		fmt.Println(err)

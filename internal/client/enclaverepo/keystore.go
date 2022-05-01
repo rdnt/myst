@@ -1,9 +1,14 @@
-package keystorerepo
+package enclaverepo
 
 import (
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 )
+
+type JSONEnclave struct {
+	Keystores map[string]JSONKeystore `json:"keystores"`
+	Keys      map[string][]byte       `json:"keys"`
+}
 
 type JSONKeystore struct {
 	Id      string      `json:"id"`
@@ -20,7 +25,7 @@ type JSONEntry struct {
 	Notes    string `json:"notes"`
 }
 
-func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
+func KeystoreToJSON(k *keystore.Keystore) JSONKeystore {
 	entries := []JSONEntry{}
 
 	for _, e := range k.Entries() {
@@ -41,7 +46,7 @@ func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
 	}
 }
 
-func ToKeystore(k JSONKeystore) (*keystore.Keystore, error) {
+func KeystoreFromJSON(k JSONKeystore) (*keystore.Keystore, error) {
 	entries := make(map[string]entry.Entry, len(k.Entries))
 
 	for _, e := range k.Entries {

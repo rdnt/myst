@@ -9,13 +9,15 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strings"
+	"sync"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
-
-	"myst/pkg/config"
 )
+
+var EnableDebug bool
+var mux sync.Mutex
 
 const (
 	DefaultColor = Color(0)
@@ -134,33 +136,45 @@ func (l *Logger) prefix(caller bool) string {
 
 func (l *Logger) print(s string) {
 	s = strings.TrimRight(s, "\n")
+
+	mux.Lock()
 	_ = l.stdout.Output(3, fmt.Sprint(l.prefix(false), s))
+	mux.Unlock()
 }
 
 func (l *Logger) debugPrint(s string) {
 	s = strings.TrimRight(s, "\n")
+
+	mux.Lock()
 	_ = l.debugLog.Output(3, l.prefix(false)+s)
-	if config.Debug {
+	if EnableDebug {
 		_ = l.stdout.Output(3, l.prefix(false)+s)
 	}
+	defer mux.Unlock()
 }
 
 func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	s = Colorize(s, Red)
+
+	mux.Lock()
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config.Debug {
+	if EnableDebug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
+	mux.Unlock()
 }
 
 func (l *Logger) tracePrint() {
 	stack := debug.Stack()
 	s := Colorize(string(stack), Red)
+
+	mux.Lock()
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
-	if config.Debug {
+	if EnableDebug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
+	mux.Unlock()
 }
 
 func Init() error {

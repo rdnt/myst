@@ -34,11 +34,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) Invitation(c *gin.Context) {
@@ -51,11 +47,7 @@ func (api *API) Invitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) AcceptInvitation(c *gin.Context) {
@@ -82,11 +74,7 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) FinalizeInvitation(c *gin.Context) {
@@ -113,11 +101,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) Invitations(c *gin.Context) {

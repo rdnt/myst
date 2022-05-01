@@ -31,17 +31,17 @@ func ToJSONInvitation(inv *invitation.Invitation) generated.Invitation {
 	}
 
 	if inv.InviterKey() != nil {
-		key := hex.EncodeToString(inv.InviterKey())
+		key := inv.InviterKey()
 		gen.InviterKey = &key
 	}
 
 	if inv.InviteeKey() != nil {
-		key := hex.EncodeToString(inv.InviteeKey())
+		key := inv.InviteeKey()
 		gen.InviteeKey = &key
 	}
 
 	if inv.KeystoreKey() != nil {
-		key := hex.EncodeToString(inv.KeystoreKey())
+		key := inv.KeystoreKey()
 		gen.KeystoreKey = &key
 	}
 

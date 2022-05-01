@@ -6,15 +6,12 @@ import (
 	"fmt"
 	"myst/internal/client/enclaverepo"
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 )
 
 func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error) {
-	logger.Debug("CreateKeystore %s %x %v\n", name, key, k)
-
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -49,9 +46,7 @@ func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (
 	return res.JSON200, nil
 }
 
-func (r *remote) Keystore(id string) (*keystore.Keystore, error) {
-	logger.Debug("Keystore", id)
-
+func (r *remote) Keystore(id string) (*generated.Keystore, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -64,12 +59,10 @@ func (r *remote) Keystore(id string) (*keystore.Keystore, error) {
 		return nil, err
 	}
 
-	return r.parseKeystore(res.JSON200)
+	return res.JSON200, nil
 }
 
-func (r *remote) Keystores() ([]*keystore.Keystore, error) {
-	logger.Debug("Keystores")
-
+func (r *remote) Keystores() ([]*generated.Keystore, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -86,26 +79,22 @@ func (r *remote) Keystores() ([]*keystore.Keystore, error) {
 		return nil, ErrInvalidResponse
 	}
 
-	ks := []*keystore.Keystore{}
+	ks := []*generated.Keystore{}
 
 	for _, k := range *res.JSON200 {
-		gen, err := r.parseKeystore(&k)
-		if err != nil {
-			return nil, err
-		}
-
-		ks = append(ks, gen)
+		ks = append(ks, &k)
 	}
 
 	return ks, nil
 }
 
-func (r *remote) parseKeystore(gen *generated.Keystore) (*keystore.Keystore, error) {
-	if gen == nil {
-		return nil, ErrInvalidResponse
-	}
-
-	return keystore.New(
-		keystore.WithId(gen.Id),
-	), nil
-}
+//
+//func (r *remote) parseKeystore(gen *generated.Keystore) (*keystore.Keystore, error) {
+//	if gen == nil {
+//		return nil, ErrInvalidResponse
+//	}
+//
+//	return keystore.New(
+//		keystore.WithId(gen.Id),
+//	), nil
+//}

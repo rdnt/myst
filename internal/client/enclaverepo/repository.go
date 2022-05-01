@@ -7,7 +7,6 @@ import (
 	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 	"os"
 	"path"
 )
@@ -33,8 +32,6 @@ func (r *Repository) EnclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
 func (r *Repository) Write(b []byte) error {
-	logger.Debug("writing to ", r.EnclavePath())
-
 	return os.WriteFile(r.EnclavePath(), b, 0600)
 }
 

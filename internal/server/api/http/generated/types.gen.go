@@ -39,11 +39,11 @@ type Invitation struct {
 	CreatedAt   int     `json:"createdAt"`
 	Id          string  `json:"id"`
 	InviteeId   string  `json:"inviteeId"`
-	InviteeKey  *string `json:"inviteeKey,omitempty"`
+	InviteeKey  *[]byte `json:"inviteeKey,omitempty"`
 	InviterId   string  `json:"inviterId"`
-	InviterKey  *string `json:"inviterKey,omitempty"`
+	InviterKey  *[]byte `json:"inviterKey,omitempty"`
 	KeystoreId  string  `json:"keystoreId"`
-	KeystoreKey *string `json:"keystoreKey,omitempty"`
+	KeystoreKey *[]byte `json:"keystoreKey,omitempty"`
 	Status      string  `json:"status"`
 	UpdatedAt   int     `json:"updatedAt"`
 }

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
@@ -178,7 +179,7 @@ func (app *application) setup() {
 		return
 	}
 
-	log.Debug(k1)
+	//log.Debug(k1)
 
 	err = app.repositories.remote.SignIn("rdnt", "1234")
 	if err != nil {
@@ -200,7 +201,7 @@ func (app *application) setup() {
 		return
 	}
 
-	log.Debug("KEY", key)
+	//log.Debug("KEY", key)
 
 	sk, err := app.repositories.remote.CreateKeystore(
 		k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
@@ -210,9 +211,9 @@ func (app *application) setup() {
 		return
 	}
 
-	log.Debug(sk)
+	//log.Debug(sk)
 
-	sk2, err := app.repositories.remote.Keystore(
+	_, err = app.repositories.remote.Keystore(
 		sk.Id,
 	)
 	if err != nil {
@@ -220,15 +221,15 @@ func (app *application) setup() {
 		return
 	}
 
-	log.Debug(sk2)
+	//log.Debug(sk2)
 
-	sks, err := app.repositories.remote.Keystores()
+	_, err = app.repositories.remote.Keystores()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	log.Debug(sks)
+	//log.Debug(sks)
 
 	u1pub, u1key, err := newKeypair()
 	if err != nil {
@@ -251,23 +252,55 @@ func (app *application) setup() {
 	}
 
 	inv, err = app.repositories.remote.AcceptInvitation(
-		"0000000000000000000000", inv.Id(), u2pub,
+		"0000000000000000000000", inv.Id, u2pub,
 	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if inv.InviteeKey == nil {
+		panic("nil invitee key")
+	}
+
+	// **** ASYMMETRIC KEY GENERATION ****
+	asymKey, err := curve25519.X25519(u1key, *inv.InviteeKey)
+	if err != nil {
+		panic(err)
+	}
+
+	// encrypt the keystore key with the symmetric key
+	b, err := crypto.AES256CBC_Encrypt(asymKey, key)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	inv, err = app.repositories.remote.FinalizeInvitation(
-		"0000000000000000000000", inv.Id(), u2pub,
+		"0000000000000000000000", inv.Id, b,
 	)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(u1key, u2key)
+	asymKey2, err := curve25519.X25519(u2key, *inv.InviterKey)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	b, err = crypto.AES256CBC_Decrypt(asymKey2, *inv.KeystoreKey)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if bytes.Compare(b, key) != 0 {
+		panic("key mismatch")
+	}
+
+	log.Debug(u1key, u2key)
 	log.Debug(inv)
 }
 

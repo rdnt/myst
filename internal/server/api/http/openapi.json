@@ -520,13 +520,16 @@
             "type": "string"
           },
           "inviterKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           },
           "inviteeKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           },
           "keystoreKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           },
           "status": {
             "type": "string"

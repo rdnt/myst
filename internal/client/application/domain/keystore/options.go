@@ -24,12 +24,6 @@ func WithVersion(version int) Option {
 	}
 }
 
-func WithPassword(password string) Option {
-	return func(k *Keystore) {
-		k.password = password
-	}
-}
-
 func WithEntries(entries map[string]entry.Entry) Option {
 	return func(k *Keystore) {
 		k.entries = entries

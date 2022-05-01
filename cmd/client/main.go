@@ -4,12 +4,15 @@ import (
 	"myst/internal/client/api/http"
 	"myst/internal/client/application"
 	"myst/internal/client/keystorerepo"
+	"myst/pkg/config"
 	"myst/pkg/logger"
 )
 
 var log = logger.New("client", logger.Red)
 
 func main() {
+	logger.EnableDebug = config.Debug
+
 	keystoreRepo, err := keystorerepo.New("data")
 	if err != nil {
 		panic(err)

@@ -1,11 +1,12 @@
 package keystoreservice
 
 import (
-	"errors"
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/logger"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -110,92 +111,15 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
 	err := s.keystores.Initialize(password)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to initialize enclave")
 	}
 
-	// TODO: remove dummy keystores and properly return error
-	s.keystores.Create(
-		keystore.WithName(name), keystore.WithEntries(
-			map[string]entry.Entry{
-				"px5VAUMgPMBtjrAj9ajeFR": entry.New(
-					entry.WithId("px5VAUMgPMBtjrAj9ajeFR"),
-					entry.WithWebsite("github.com"), entry.WithUsername("rdntdev@gmail.com"),
-					entry.WithPassword("nzK&d#u+MjFU8p&4UhL)s3+h"),
-					entry.WithNotes("Lorem ipsum"),
-				),
-				"Vxg4iMtmXUw76t77hb6m3B": entry.New(
-					entry.WithId("Vxg4iMtmXUw76t77hb6m3B"),
-					entry.WithWebsite("youtube.com"), entry.WithUsername("oldsnut@gmailni.com"),
-					entry.WithPassword("tsksWgABXhvh9LfF"),
-					entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
-				),
-				"xKPddK9gtAbUT3Ej93ShZ": entry.New(
-					entry.WithId("xKPddK9gtAbUT3Ej93ShZ"),
-					entry.WithWebsite("facebook.com"), entry.WithUsername("pete24uk@test130.com"),
-					entry.WithPassword("uXekxDRk6bmvvpda"),
-					entry.WithNotes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-				),
-				"ZByasmj3aLHgRMJDeDiXS4": entry.New(
-					entry.WithId("ZByasmj3aLHgRMJDeDiXS4"),
-					entry.WithWebsite("baidu.com"), entry.WithUsername("swissly0@telemol.online"),
-					entry.WithPassword("6Yu4k2YkNPxpZkHn"),
-				),
-				"hozhDrCZGqjZ2VGLcpcuNi": entry.New(
-					entry.WithId("hozhDrCZGqjZ2VGLcpcuNi"),
-					entry.WithWebsite("yahoo.com"), entry.WithUsername("swissly0@telemol.online"),
-					entry.WithPassword("LxRdhTTSg4Adfkc4"),
-				),
-				"tEsfGypbPAVCNMAKWtw2mD": entry.New(
-					entry.WithId("tEsfGypbPAVCNMAKWtw2mD"),
-					entry.WithWebsite("amazon.com"), entry.WithUsername("manhosobpe15@zetgets.com"),
-					entry.WithPassword("qHcZsZxPf8acHxxA"),
-				),
-				"McB6akkM3C5XpzXfMYhasU": entry.New(
-					entry.WithId("McB6akkM3C5XpzXfMYhasU"),
-					entry.WithWebsite("wikipedia.org"), entry.WithUsername("chuninoleg1971@piftir.com"),
-					entry.WithPassword("DT3sftJuRjxWFg68"),
-				),
-				"YBS32eK8XbeV6ujaY5xERK": entry.New(
-					entry.WithId("YBS32eK8XbeV6ujaY5xERK"),
-					entry.WithWebsite("twitter.com"), entry.WithUsername("ninablackangel@test.com"),
-					entry.WithPassword("ndUZ6KGduD53up4R"),
-				),
-				"Fy7HDsbQqkYsbevjuqSG65": entry.New(
-					entry.WithId("Fy7HDsbQqkYsbevjuqSG65"),
-					entry.WithWebsite("bbc.com"), entry.WithUsername("kgdlove@omdlism.com"),
-					entry.WithPassword("jy9EpWExSmmtHa6g"),
-				),
-				"r5TbidUGZkZeqbP7iCySBn": entry.New(
-					entry.WithId("r5TbidUGZkZeqbP7iCySBn"),
-					entry.WithWebsite("steampowered.com"), entry.WithUsername("totinoprato@roselarose.com"),
-					entry.WithPassword("tbRCJ9uHvxLm9S5q"),
-				),
-				"pxnChjAmntT5aG35PM3GL4": entry.New(
-					entry.WithId("pxnChjAmntT5aG35PM3GL4"),
-					entry.WithWebsite("bing.com"), entry.WithUsername("tbiggs@massageshophome.com"),
-					entry.WithPassword("H278L5qtwvSVsQzt"),
-				),
-			},
-		),
-	)
+	k, err := s.keystores.Create(keystore.WithName(name))
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to create keystore")
+	}
 
-	s.keystores.Create(
-		keystore.WithName("Work"), keystore.WithEntries(
-			map[string]entry.Entry{},
-		),
-	)
-
-	return s.keystores.Create(
-		keystore.WithName("Other"), keystore.WithEntries(
-			map[string]entry.Entry{
-				"pxnChjAmntT5aG35PM3G12": entry.New(
-					entry.WithId("pxnChjAmntT5aG35PM3G12"),
-					entry.WithWebsite("www.microsoft.com"), entry.WithUsername("test123@example.com"),
-					entry.WithPassword("H278L5qtwvSVs333"),
-				),
-			},
-		),
-	)
+	return k, nil
 }
 
 func (s *service) Keystore(id string) (*keystore.Keystore, error) {

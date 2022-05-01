@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"myst/pkg/logger"
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/server/api/http/generated"
 )
 
 func (r *remote) CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*invitation.Invitation, error) {
-	fmt.Println("CreateInvitation", keystoreId, inviteeId, publicKey)
+	logger.Debug("CreateInvitation", keystoreId, inviteeId, publicKey)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
@@ -31,7 +32,7 @@ func (r *remote) CreateInvitation(keystoreId, inviteeId string, publicKey []byte
 }
 
 func (r *remote) AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*invitation.Invitation, error) {
-	fmt.Println("AcceptInvitation", invitationId, publicKey)
+	logger.Debug("AcceptInvitation", invitationId, publicKey)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
@@ -53,7 +54,7 @@ func (r *remote) AcceptInvitation(keystoreId, invitationId string, publicKey []b
 func (r *remote) FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (
 	*invitation.Invitation, error,
 ) {
-	fmt.Println("FinalizeInvitation", invitationId, keystoreKey)
+	logger.Debug("FinalizeInvitation", invitationId, keystoreKey)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")

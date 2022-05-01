@@ -2,33 +2,29 @@ package keystorerepo
 
 import (
 	"crypto/sha256"
-	"encoding/json"
-	"errors"
 	"fmt"
+	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/keystoreservice"
+	"myst/internal/client/enclaverepo"
 	"myst/pkg/logger"
 	"os"
-	"path"
 	"sync"
 	"time"
 
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/keystorerepo/enclave"
 	"myst/pkg/crypto"
+
+	"github.com/pkg/errors"
 )
 
 var log = logger.New("keystorerepo", logger.Green)
-
-type Enclave struct {
-	Keystores map[string]JSONKeystore `json:"keystores"`
-	Keys      map[string][]byte       `json:"keys"`
-}
 
 type Repository struct {
 	mux             sync.Mutex
 	path            string
 	key             []byte
 	lastHealthCheck time.Time
+	enclaves        *enclaverepo.Repository
 }
 
 func New(path string) (*Repository, error) {
@@ -42,6 +38,11 @@ func New(path string) (*Repository, error) {
 	}
 
 	go r.startHealthCheck()
+
+	r.enclaves, err = enclaverepo.New("./data")
+	if err != nil {
+		return nil, err
+	}
 
 	// TODO: remove simulated health check
 	//go func() {
@@ -69,7 +70,7 @@ func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
 		return nil, fmt.Errorf("authentication required")
 	}
 
-	e, err := r.enclave()
+	e, err := r.enclaves.Enclave(r.key)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, err := os.ReadFile(r.enclavePath())
+	_, err := os.ReadFile(r.enclaves.EnclavePath())
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, keystoreservice.ErrInitializationRequired
 	} else if err != nil {
@@ -97,7 +98,7 @@ func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
 		return nil, keystoreservice.ErrAuthenticationRequired
 	}
 
-	e, err := r.enclave()
+	e, err := r.enclaves.Enclave(r.key)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (r *Repository) Delete(id string) error {
 		return fmt.Errorf("authentication required")
 	}
 
-	e, err := r.enclave()
+	e, err := r.enclaves.Enclave(r.key)
 	if err != nil {
 		return err
 	}
@@ -123,12 +124,17 @@ func (r *Repository) Delete(id string) error {
 		return err
 	}
 
-	b, err := marshalEnclave(e)
+	b, err := enclaverepo.MarshalEnclave(e)
 	if err != nil {
 		return err
 	}
 
-	err = r.sealAndWrite(b, r.key, e.Salt())
+	b, err = r.seal(b, r.key, e.Salt())
+	if err != nil {
+		return err
+	}
+
+	err = r.enclaves.Write(b)
 	if err != nil {
 		return err
 	}
@@ -146,29 +152,35 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 
 	k := keystore.New(opts...)
 
-	e, err := r.enclave()
+	e, err := r.enclaves.Enclave(r.key)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to get enclave")
 	}
 
 	err = e.AddKeystore(k)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to add keystore")
 	}
 
-	b, err := marshalEnclave(e)
+	b, err := enclaverepo.MarshalEnclave(e)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to marshal enclave")
 	}
 
-	err = r.sealAndWrite(b, r.key, e.Salt())
+	b, err = r.seal(b, r.key, e.Salt())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to seal enclave")
+	}
+
+	err = r.enclaves.Write(b)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to write enclave")
 	}
 
 	return k, nil
 }
 
+// Initialize initializes the enclave with the given password
 func (r *Repository) Initialize(password string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
@@ -179,7 +191,7 @@ func (r *Repository) Initialize(password string) error {
 		return err
 	}
 
-	b, err := marshalEnclave(e)
+	b, err := enclaverepo.MarshalEnclave(e)
 	if err != nil {
 		return err
 	}
@@ -196,7 +208,12 @@ func (r *Repository) Initialize(password string) error {
 		return err
 	}
 
-	err = r.sealAndWrite(b, key, salt)
+	b, err = r.seal(b, key, salt)
+	if err != nil {
+		return err
+	}
+
+	err = r.enclaves.Write(b)
 	if err != nil {
 		return err
 	}
@@ -209,7 +226,7 @@ func (r *Repository) Initialize(password string) error {
 func (r *Repository) Authenticate(password string) error {
 	r.mux.Lock()
 
-	b, err := os.ReadFile(r.enclavePath())
+	b, err := os.ReadFile(r.enclaves.EnclavePath())
 	if err != nil {
 		r.mux.Unlock()
 		return err
@@ -217,7 +234,7 @@ func (r *Repository) Authenticate(password string) error {
 
 	r.mux.Unlock()
 
-	salt, err := getSaltFromData(b)
+	salt, err := enclaverepo.GetSaltFromData(b)
 	if err != nil {
 		return err
 	}
@@ -243,35 +260,6 @@ func (r *Repository) Authenticate(password string) error {
 	return nil
 }
 
-func (r *Repository) enclave() (*enclave.Enclave, error) {
-	b, err := os.ReadFile(r.enclavePath())
-	if err != nil {
-		return nil, err
-	}
-
-	salt, err := getSaltFromData(b)
-	if err != nil {
-		return nil, err
-	}
-
-	p := crypto.DefaultArgon2IdParams
-
-	mac := b[p.SaltLength : sha256.Size+p.SaltLength]
-	b = b[p.SaltLength+sha256.Size:]
-
-	valid := crypto.VerifyHMAC_SHA256(r.key, mac, b)
-	if !valid {
-		return nil, fmt.Errorf("authentication failed")
-	}
-
-	b, err = crypto.AES256CBC_Decrypt(r.key, b)
-	if err != nil {
-		return nil, err
-	}
-
-	return unmarshalEnclave(b, salt)
-}
-
 func (r *Repository) Update(k *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
@@ -280,7 +268,7 @@ func (r *Repository) Update(k *keystore.Keystore) error {
 		return fmt.Errorf("authentication required")
 	}
 
-	e, err := r.enclave()
+	e, err := r.enclaves.Enclave(r.key)
 	if err != nil {
 		return err
 	}
@@ -290,17 +278,17 @@ func (r *Repository) Update(k *keystore.Keystore) error {
 		return err
 	}
 
-	b, err := marshalEnclave(e)
+	b, err := enclaverepo.MarshalEnclave(e)
 	if err != nil {
 		return err
 	}
 
-	err = r.sealAndWrite(b, r.key, e.Salt())
+	b, err = r.seal(b, r.key, e.Salt())
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return r.enclaves.Write(b)
 }
 
 func (r *Repository) startHealthCheck() {
@@ -331,10 +319,10 @@ func (r *Repository) startHealthCheck() {
 	}
 }
 
-func (r *Repository) sealAndWrite(b, key, salt []byte) error {
+func (r *Repository) seal(b, key, salt []byte) ([]byte, error) {
 	b, err := crypto.AES256CBC_Encrypt(key, b)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// authenticate
@@ -343,53 +331,5 @@ func (r *Repository) sealAndWrite(b, key, salt []byte) error {
 	// prepend salt and mac to the ciphertext
 	b = append(salt, append(mac, b...)...)
 
-	err = os.WriteFile(r.enclavePath(), b, 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *Repository) enclavePath() string {
-	return path.Join(r.path, "data.myst")
-}
-
-func marshalEnclave(e *enclave.Enclave) ([]byte, error) {
-	ks := map[string]JSONKeystore{}
-
-	for _, k := range e.Keystores() {
-		ks[k.Id()] = ToJSONKeystore(k)
-	}
-
-	return json.Marshal(Enclave{Keystores: ks, Keys: e.Keys()})
-}
-
-func unmarshalEnclave(b, salt []byte) (*enclave.Enclave, error) {
-	e := &Enclave{}
-
-	err := json.Unmarshal(b, e)
-	if err != nil {
-		return nil, err
-	}
-
-	ks := map[string]*keystore.Keystore{}
-
-	for _, k := range e.Keystores {
-		k, err := ToKeystore(k)
-		if err != nil {
-			return nil, err
-		}
-
-		ks[k.Id()] = k
-	}
-
-	return enclave.New(
-		enclave.WithKeystores(ks),
-		enclave.WithSalt(salt),
-	)
-}
-
-func getSaltFromData(b []byte) ([]byte, error) {
-	return b[:crypto.DefaultArgon2IdParams.SaltLength], nil
+	return b, nil
 }

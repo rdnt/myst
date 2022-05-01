@@ -1,8 +1,8 @@
 package keystorerepo
 
 import (
+	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/application/domain/keystore/entry"
 )
 
 type JSONKeystore struct {
@@ -14,21 +14,23 @@ type JSONKeystore struct {
 
 type JSONEntry struct {
 	Id       string `json:"id"`
-	Label    string `json:"label"`
+	Website  string `json:"website"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Notes    string `json:"notes"`
 }
 
 func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
-	entries := make([]JSONEntry, len(k.Entries()))
+	entries := []JSONEntry{}
 
-	for i, e := range k.Entries() {
-		entries[i] = JSONEntry{
+	for _, e := range k.Entries() {
+		entries = append(entries, JSONEntry{
 			Id:       e.Id(),
-			Label:    e.Label(),
+			Website:  e.Website(),
 			Username: e.Username(),
 			Password: e.Password(),
-		}
+			Notes:    e.Notes(),
+		})
 	}
 
 	return JSONKeystore{
@@ -40,16 +42,18 @@ func ToJSONKeystore(k *keystore.Keystore) JSONKeystore {
 }
 
 func ToKeystore(k JSONKeystore) (*keystore.Keystore, error) {
-	entries := make([]entry.Entry, len(k.Entries))
+	entries := make(map[string]entry.Entry, len(k.Entries))
 
-	for i, e := range k.Entries {
+	for _, e := range k.Entries {
 		e := entry.New(
 			entry.WithId(e.Id),
+			entry.WithWebsite(e.Website),
 			entry.WithUsername(e.Username),
 			entry.WithPassword(e.Password),
-			entry.WithLabel(e.Label),
+			entry.WithNotes(e.Notes),
 		)
-		entries[i] = e
+
+		entries[e.Id()] = e
 	}
 
 	return keystore.New(

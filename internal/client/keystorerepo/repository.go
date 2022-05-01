@@ -211,6 +211,7 @@ func (r *Repository) Authenticate(password string) error {
 
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
+		r.mux.Unlock()
 		return err
 	}
 
@@ -319,9 +320,10 @@ func (r *Repository) startHealthCheck() {
 			}
 
 			if r.key != nil {
-				r.key = nil
+				// TODO: re-enable health check
+				//r.key = nil
 
-				log.Debug("health check failed")
+				//log.Debug("health check failed")
 			}
 
 			r.mux.Unlock()

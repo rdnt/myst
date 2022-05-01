@@ -24,18 +24,6 @@ export interface UpdateEntryRequest {
      * @type {string}
      * @memberof UpdateEntryRequest
      */
-    website?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateEntryRequest
-     */
-    username?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateEntryRequest
-     */
     password?: string;
     /**
      * 
@@ -55,8 +43,6 @@ export function UpdateEntryRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'website': !exists(json, 'website') ? undefined : json['website'],
-        'username': !exists(json, 'username') ? undefined : json['username'],
         'password': !exists(json, 'password') ? undefined : json['password'],
         'notes': !exists(json, 'notes') ? undefined : json['notes'],
     };
@@ -71,8 +57,6 @@ export function UpdateEntryRequestToJSON(value?: UpdateEntryRequest | null): any
     }
     return {
         
-        'website': value.website,
-        'username': value.username,
         'password': value.password,
         'notes': value.notes,
     };

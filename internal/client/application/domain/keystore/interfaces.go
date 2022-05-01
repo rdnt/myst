@@ -1,6 +1,8 @@
 package keystore
 
-import "myst/internal/client/application/domain/entry"
+import (
+	"myst/internal/client/application/domain/entry"
+)
 
 type Repository interface {
 	Create(opts ...Option) (*Keystore, error)
@@ -18,6 +20,7 @@ type Service interface {
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
 	DeleteKeystoreEntry(keystoreId, entryId string) error
+	KeystoreKey(keystoreId string) ([]byte, error)
 	Keystores() (map[string]*Keystore, error)
 	UpdateKeystore(k *Keystore) error
 	Authenticate(password string) error

@@ -194,8 +194,16 @@ func (app *application) setup() {
 	//	return
 	//}
 
+	key, err := app.KeystoreKey(k1.Id())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	log.Debug("KEY", key)
+
 	sk, err := app.repositories.remote.CreateKeystore(
-		k1.Name(), nil, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
+		k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -205,7 +213,7 @@ func (app *application) setup() {
 	log.Debug(sk)
 
 	sk2, err := app.repositories.remote.Keystore(
-		sk.Id(),
+		sk.Id,
 	)
 	if err != nil {
 		fmt.Println(err)

@@ -2,24 +2,39 @@ package remote
 
 import (
 	"context"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"myst/internal/client/enclaverepo"
+	"myst/pkg/crypto"
+	"myst/pkg/logger"
 
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 )
 
-func (r *remote) CreateKeystore(name string, payload []byte) (*keystore.Keystore, error) {
-	fmt.Printf("CreateKeystore %s %x\n", name, payload)
+func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error) {
+	logger.Debug("CreateKeystore %s %x %v\n", name, key, k)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
 
+	jk := enclaverepo.KeystoreToJSON(k)
+
+	b, err := json.Marshal(jk)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err = crypto.AES256CBC_Encrypt(key, b)
+	if err != nil {
+		return nil, err
+	}
+
 	res, err := r.client.CreateKeystoreWithResponse(
 		context.Background(), generated.CreateKeystoreJSONRequestBody{
 			Name:    name,
-			Payload: hex.EncodeToString(payload),
+			Payload: b,
 		},
 		r.authenticate(),
 	)
@@ -27,11 +42,15 @@ func (r *remote) CreateKeystore(name string, payload []byte) (*keystore.Keystore
 		return nil, err
 	}
 
-	return r.parseKeystore(res.JSON200)
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("invalid response")
+	}
+
+	return res.JSON200, nil
 }
 
 func (r *remote) Keystore(id string) (*keystore.Keystore, error) {
-	fmt.Println("Keystore", id)
+	logger.Debug("Keystore", id)
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
@@ -49,7 +68,7 @@ func (r *remote) Keystore(id string) (*keystore.Keystore, error) {
 }
 
 func (r *remote) Keystores() ([]*keystore.Keystore, error) {
-	fmt.Println("Keystores")
+	logger.Debug("Keystores")
 
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")

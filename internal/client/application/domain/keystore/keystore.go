@@ -15,11 +15,10 @@ var (
 )
 
 type Keystore struct {
-	id       string
-	name     string
-	version  int
-	entries  map[string]entry.Entry
-	password string
+	id      string
+	name    string
+	version int
+	entries map[string]entry.Entry
 }
 
 func (k *Keystore) Id() string {
@@ -71,14 +70,6 @@ func (k *Keystore) SetEntries(entries map[string]entry.Entry) {
 //
 //	return nil
 //}
-
-func (k *Keystore) Password() string {
-	return k.password
-}
-
-func (k *Keystore) SetPassword(password string) {
-	k.password = password
-}
 
 func New(opts ...Option) *Keystore {
 	k := &Keystore{

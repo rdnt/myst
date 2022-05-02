@@ -300,8 +300,8 @@ func (app *application) setup() {
 		panic("key mismatch")
 	}
 
-	log.Debug(u1key, u2key)
-	log.Debug(inv)
+	//log.Debug(u1key, u2key)
+	//log.Debug(inv)
 }
 
 func newKeypair() ([]byte, []byte, error) {

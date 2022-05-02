@@ -1,4 +1,4 @@
-package enclaverepo
+package keystorerepo
 
 import (
 	"myst/internal/client/application/domain/entry"

@@ -1,4 +1,4 @@
-package enclaverepo
+package keystorerepo
 
 import (
 	"crypto/sha256"
@@ -11,37 +11,17 @@ import (
 	"path"
 )
 
-type Repository struct {
-	path string
-}
-
-func New(path string) (*Repository, error) {
-	err := os.MkdirAll(path, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
-
-	r := &Repository{
-		path: path,
-	}
-
-	return r, nil
-}
-
-func (r *Repository) EnclavePath() string {
+func (r *Repository) enclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
-func (r *Repository) Write(b []byte) error {
-	return os.WriteFile(r.EnclavePath(), b, 0600)
-}
 
-func (r *Repository) Enclave(argon2idKey []byte) (*enclave.Enclave, error) {
-	b, err := os.ReadFile(r.EnclavePath())
+func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
+	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return nil, err
 	}
 
-	salt, err := GetSaltFromData(b)
+	salt, err := getSaltFromData(b)
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +41,10 @@ func (r *Repository) Enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 		return nil, err
 	}
 
-	return UnmarshalEnclave(b, salt)
+	return enclaveFromJSON(b, salt)
 }
 
-func MarshalEnclave(e *enclave.Enclave) ([]byte, error) {
+func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 	ks := map[string]JSONKeystore{}
 
 	for _, k := range e.Keystores() {
@@ -74,7 +54,7 @@ func MarshalEnclave(e *enclave.Enclave) ([]byte, error) {
 	return json.Marshal(JSONEnclave{Keystores: ks, Keys: e.Keys()})
 }
 
-func UnmarshalEnclave(b, salt []byte) (*enclave.Enclave, error) {
+func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 	e := &JSONEnclave{}
 
 	err := json.Unmarshal(b, e)
@@ -99,6 +79,6 @@ func UnmarshalEnclave(b, salt []byte) (*enclave.Enclave, error) {
 	)
 }
 
-func GetSaltFromData(b []byte) ([]byte, error) {
+func getSaltFromData(b []byte) ([]byte, error) {
 	return b[:crypto.DefaultArgon2IdParams.SaltLength], nil
 }

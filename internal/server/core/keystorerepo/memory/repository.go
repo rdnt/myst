@@ -21,8 +21,6 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	fmt.Println(k, string(k.Payload()))
-
 	r.keystores[k.Id()] = *k
 
 	return k, nil

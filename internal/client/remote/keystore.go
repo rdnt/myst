@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"myst/internal/client/enclaverepo"
+	"myst/internal/client/keystorerepo"
 	"myst/pkg/crypto"
 
 	"myst/internal/client/application/domain/keystore"
@@ -16,7 +16,7 @@ func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (
 		return nil, fmt.Errorf("not signed in")
 	}
 
-	jk := enclaverepo.KeystoreToJSON(k)
+	jk := keystorerepo.KeystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
 	if err != nil {

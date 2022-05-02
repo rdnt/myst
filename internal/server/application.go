@@ -82,7 +82,7 @@ func New(opts ...Option) (*Application, error) {
 }
 
 func (app *Application) setup() {
-	u, err := app.Users.Register(
+	_, err := app.Users.Register(
 		user.WithUsername("rdnt"),
 		user.WithPassword("1234"),
 	)
@@ -90,9 +90,9 @@ func (app *Application) setup() {
 		panic(err)
 	}
 
-	log.Debug(u)
+	//log.Debug(u)
 
-	u2, err := app.Users.Register(
+	_, err = app.Users.Register(
 		user.WithUsername("abcd"),
 		user.WithPassword("5678"),
 	)
@@ -100,7 +100,7 @@ func (app *Application) setup() {
 		panic(err)
 	}
 
-	log.Debug(u2)
+	//log.Debug(u2)
 
 	//k, err := app.Keystores.Create("my-keystore", u.Id(), []byte("payload"))
 	//if err != nil {

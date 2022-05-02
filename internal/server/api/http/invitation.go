@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/hex"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,10 +18,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	inviterKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
+	inviterKey := params.PublicKey
 
 	inv, err := api.app.CreateInvitation(
 		keystoreId,
@@ -61,10 +57,7 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	inviteeKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
+	inviteeKey := params.PublicKey
 
 	inv, err := api.app.AcceptInvitation(
 		invitationId,
@@ -88,10 +81,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	keystoreKey, err := hex.DecodeString(params.KeystoreKey)
-	if err != nil {
-		panic(err)
-	}
+	keystoreKey := params.KeystoreKey
 
 	inv, err := api.app.FinalizeInvitation(
 		invitationId,

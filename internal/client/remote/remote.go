@@ -2,12 +2,15 @@ package remote
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
+	"myst/internal/client/application/domain/keystore"
+	"myst/pkg/crypto"
 	"net/http"
 
-	"myst/internal/client/application/domain/keystore"
+	"github.com/pkg/errors"
+
+	"golang.org/x/crypto/curve25519"
+
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
 )
@@ -20,11 +23,11 @@ var (
 type Client interface {
 	SignIn(username, password string) error
 	SignOut() error
-	CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error)
+	CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	Keystore(id string) (*generated.Keystore, error)
 	Keystores() ([]*generated.Keystore, error)
-	CreateInvitation(keystoreId, inviteeId string, publicKey []byte) (*generated.Invitation, error)
-	AcceptInvitation(keystoreId, invitationId string, publicKey []byte) (*generated.Invitation, error)
+	CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
+	AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
 	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
 }
 
@@ -32,12 +35,42 @@ type remote struct {
 	client *generated.ClientWithResponses
 
 	bearerToken string
+
+	publicKey  []byte
+	privateKey []byte
+}
+
+func New() (Client, error) {
+	r := &remote{
+		client:      nil,
+		bearerToken: "",
+		publicKey:   nil,
+		privateKey:  nil,
+	}
+
+	c, err := generated.NewClientWithResponses("http://localhost:8080",
+		generated.WithRequestEditorFn(r.authenticate()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	pub, key, err := newKeypair()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to generate public/private keypair")
+	}
+
+	r.client = c
+	r.publicKey = pub
+	r.privateKey = key
+
+	return r, nil
 }
 
 func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
 
-	resp, err := r.client.Login(
+	res, err := r.client.LoginWithResponse(
 		context.Background(), generated.LoginJSONRequestBody{
 			Username: username,
 			Password: password,
@@ -47,18 +80,11 @@ func (r *remote) SignIn(username, password string) error {
 		return err
 	}
 
-	defer resp.Body.Close()
-
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
+	if res.JSON200 == nil {
+		return ErrInvalidResponse
 	}
 
-	var token generated.AuthToken
-	err = json.Unmarshal(b, &token)
-	if err != nil {
-		return err
-	}
+	token := *res.JSON200
 
 	if token == "" {
 		return fmt.Errorf("invalid token")
@@ -76,20 +102,24 @@ func (r *remote) SignOut() error {
 	return nil
 }
 
-func New() (Client, error) {
-	c, err := generated.NewClientWithResponses("http://localhost:8080")
-	if err != nil {
-		return nil, err
-	}
-
-	return &remote{
-		client: c,
-	}, nil
-}
-
 func (r *remote) authenticate() generated.RequestEditorFn {
 	return func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("Authorization", "Bearer "+r.bearerToken)
 		return nil
 	}
+}
+
+func newKeypair() ([]byte, []byte, error) {
+	var pub [32]byte
+	var key [32]byte
+
+	b, err := crypto.GenerateRandomBytes(32)
+	if err != nil {
+		return nil, nil, err
+	}
+	copy(key[:], b)
+
+	curve25519.ScalarBaseMult(&pub, &key)
+
+	return pub[:], key[:], nil
 }

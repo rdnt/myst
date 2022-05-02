@@ -204,7 +204,7 @@ func TokenAuthentication(c *gin.Context) error {
 		return fmt.Errorf("authentication failed")
 	}
 
-	if username != "rdnt" {
+	if username != "rdnt" && username != "abcd" {
 		return fmt.Errorf("authentication failed")
 	}
 

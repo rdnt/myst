@@ -40,7 +40,7 @@ func (api *API) Keystore(c *gin.Context) {
 func (api *API) Keystores(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	ks, err := api.app.Keystores.UserKeystores(userId)
+	ks, err := api.app.Invitations.UserKeystores(userId)
 	if err != nil {
 		panic(err)
 	}

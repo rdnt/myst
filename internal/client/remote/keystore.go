@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/keystorerepo"
 	"myst/pkg/crypto"
 
-	"myst/internal/client/application/domain/keystore"
 	"myst/internal/server/api/http/generated"
 )
 
-func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (*generated.Keystore, error) {
+func (r *remote) CreateKeystore(name string, keystoreKey []byte, k *keystore.Keystore) (*generated.Keystore, error) {
 	if r.bearerToken == "" {
 		return nil, fmt.Errorf("not signed in")
 	}
@@ -23,7 +23,7 @@ func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (
 		return nil, err
 	}
 
-	b, err = crypto.AES256CBC_Encrypt(key, b)
+	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,6 @@ func (r *remote) CreateKeystore(name string, key []byte, k *keystore.Keystore) (
 			Name:    name,
 			Payload: b,
 		},
-		r.authenticate(),
 	)
 	if err != nil {
 		return nil, err
@@ -53,7 +52,6 @@ func (r *remote) Keystore(id string) (*generated.Keystore, error) {
 
 	res, err := r.client.KeystoreWithResponse(
 		context.Background(), id,
-		r.authenticate(),
 	)
 	if err != nil {
 		return nil, err
@@ -69,7 +67,6 @@ func (r *remote) Keystores() ([]*generated.Keystore, error) {
 
 	res, err := r.client.KeystoresWithResponse(
 		context.Background(),
-		r.authenticate(),
 	)
 	if err != nil {
 		return nil, err

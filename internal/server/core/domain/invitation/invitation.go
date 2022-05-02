@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"myst/internal/server/core/domain/keystore"
 	"myst/pkg/logger"
 	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
@@ -19,7 +18,7 @@ var (
 type Invitation struct {
 	id          string
 	inviterId   string
-	keystore    *keystore.Keystore
+	keystoreId  string
 	inviteeId   string
 	inviterKey  []byte
 	inviteeKey  []byte
@@ -38,8 +37,8 @@ func (i *Invitation) InviterId() string {
 	return i.inviterId
 }
 
-func (i *Invitation) Keystore() *keystore.Keystore {
-	return i.keystore
+func (i *Invitation) KeystoreId() string {
+	return i.keystoreId
 }
 
 func (i *Invitation) InviteeId() string {
@@ -75,7 +74,7 @@ func (i *Invitation) UpdatedAt() timestamp.Timestamp {
 }
 
 func (i *Invitation) String() string {
-	return fmt.Sprintln(i.id, i.inviterId, i.keystore.Id(), i.inviteeId, i.accepted, i.finalized)
+	return fmt.Sprintln(i.id, i.inviterId, i.keystoreId, i.inviteeId, i.accepted, i.finalized)
 }
 
 func (i *Invitation) Accept(inviteeKey []byte) error {

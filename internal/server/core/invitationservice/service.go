@@ -1,13 +1,12 @@
 package invitationservice
 
 import (
-	"errors"
-
 	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/keystore"
 	"myst/internal/server/core/domain/user"
-
 	"myst/pkg/logger"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -40,7 +39,7 @@ func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []b
 	}
 
 	return s.invitationRepo.Create(
-		invitation.WithKeystore(store),
+		invitation.WithKeystoreId(store.Id()),
 		invitation.WithInviterId(inviter.Id()),
 		invitation.WithInviteeId(invitee.Id()),
 		invitation.WithInviterKey(inviterKey),
@@ -109,6 +108,39 @@ func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invit
 	}
 
 	return s.invitationRepo.UserInvitation(u.Id(), invitationId)
+}
+
+func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+	invs, err := s.UserInvitations(userId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get user invitations")
+	}
+
+	keystores := []*keystore.Keystore{}
+
+	for _, inv := range invs {
+		// TODO: split logic to separate function "AcceptedUserInviations"
+		if inv.Finalized() && inv.InviteeId() == userId {
+			k, err := s.keystoreRepo.Keystore(inv.KeystoreId())
+			if err != nil {
+				return nil, errors.WithMessage(err, "failed to get keystore")
+			}
+
+			keystores = append(keystores, k)
+		}
+	}
+
+	u, err := s.userRepo.User(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	ks, err := s.keystoreRepo.UserKeystores(u.Id())
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get user keystores")
+	}
+
+	return append(keystores, ks...), nil
 }
 
 func New(opts ...Option) (invitation.Service, error) {

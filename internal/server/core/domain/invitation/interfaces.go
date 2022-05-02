@@ -2,6 +2,7 @@ package invitation
 
 import (
 	"errors"
+	"myst/internal/server/core/domain/keystore"
 )
 
 var (
@@ -29,4 +30,6 @@ type Service interface {
 
 	UserInvitations(userId string) ([]*Invitation, error)
 	UserInvitation(userId, invitationId string) (*Invitation, error)
+
+	UserKeystores(userId string) ([]*keystore.Keystore, error)
 }

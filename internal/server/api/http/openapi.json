@@ -422,7 +422,8 @@
             "type": "string"
           },
           "publicKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           }
         }
       },
@@ -433,7 +434,8 @@
         ],
         "properties": {
           "publicKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           }
         }
       },
@@ -444,7 +446,8 @@
         ],
         "properties": {
           "keystoreKey": {
-            "type": "string"
+            "type": "string",
+            "format": "byte"
           }
         }
       },

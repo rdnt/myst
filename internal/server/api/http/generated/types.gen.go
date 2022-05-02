@@ -5,7 +5,7 @@ package generated
 
 // AcceptInvitationRequest defines model for AcceptInvitationRequest.
 type AcceptInvitationRequest struct {
-	PublicKey string `json:"publicKey"`
+	PublicKey []byte `json:"publicKey"`
 }
 
 // AuthToken defines model for AuthToken.
@@ -14,7 +14,7 @@ type AuthToken string
 // CreateInvitationRequest defines model for CreateInvitationRequest.
 type CreateInvitationRequest struct {
 	InviteeId string `json:"inviteeId"`
-	PublicKey string `json:"publicKey"`
+	PublicKey []byte `json:"publicKey"`
 }
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
@@ -31,7 +31,7 @@ type Error struct {
 
 // FinalizeInvitationRequest defines model for FinalizeInvitationRequest.
 type FinalizeInvitationRequest struct {
-	KeystoreKey string `json:"keystoreKey"`
+	KeystoreKey []byte `json:"keystoreKey"`
 }
 
 // Invitation defines model for Invitation.

@@ -1,9 +1,5 @@
 package invitation
 
-import (
-	"myst/internal/server/core/domain/keystore"
-)
-
 type Option func(i *Invitation) error
 
 func WithInviterId(id string) Option {
@@ -13,9 +9,9 @@ func WithInviterId(id string) Option {
 	}
 }
 
-func WithKeystore(k *keystore.Keystore) Option {
+func WithKeystoreId(id string) Option {
 	return func(i *Invitation) error {
-		i.keystore = k
+		i.keystoreId = id
 		return nil
 	}
 }

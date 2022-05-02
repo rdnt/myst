@@ -1,17 +1,13 @@
 package application
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-
-	"golang.org/x/crypto/curve25519"
 
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/remote"
-	"myst/pkg/crypto"
 	"myst/pkg/logger"
 )
 
@@ -231,90 +227,90 @@ func (app *application) setup() {
 
 	//log.Debug(sks)
 
-	u1pub, u1key, err := newKeypair()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	u2pub, u2key, err := newKeypair()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	inv, err := app.repositories.remote.CreateInvitation(
-		"0000000000000000000000", "abcd", u1pub,
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	inv, err = app.repositories.remote.AcceptInvitation(
-		"0000000000000000000000", inv.Id, u2pub,
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	if inv.InviteeKey == nil {
-		panic("nil invitee key")
-	}
-
-	// **** ASYMMETRIC KEY GENERATION ****
-	asymKey, err := curve25519.X25519(u1key, *inv.InviteeKey)
-	if err != nil {
-		panic(err)
-	}
-
-	// encrypt the keystore key with the symmetric key
-	b, err := crypto.AES256CBC_Encrypt(asymKey, key)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	inv, err = app.repositories.remote.FinalizeInvitation(
-		"0000000000000000000000", inv.Id, b,
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	asymKey2, err := curve25519.X25519(u2key, *inv.InviterKey)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	b, err = crypto.AES256CBC_Decrypt(asymKey2, *inv.KeystoreKey)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	if bytes.Compare(b, key) != 0 {
-		panic("key mismatch")
-	}
+	//u1pub, u1key, err := newKeypair()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//u2pub, u2key, err := newKeypair()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//inv, err := app.repositories.remote.CreateInvitation(
+	//	"0000000000000000000000", "abcd", u1pub,
+	//)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//inv, err = app.repositories.remote.AcceptInvitation(
+	//	"0000000000000000000000", inv.Id, u2pub,
+	//)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//if inv.InviteeKey == nil {
+	//	panic("nil invitee key")
+	//}
+	//
+	//// **** ASYMMETRIC KEY GENERATION ****
+	//asymKey, err := curve25519.X25519(u1key, *inv.InviteeKey)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//// encrypt the keystore key with the symmetric key
+	//b, err := crypto.AES256CBC_Encrypt(asymKey, key)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//inv, err = app.repositories.remote.FinalizeInvitation(
+	//	"0000000000000000000000", inv.Id, b,
+	//)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//asymKey2, err := curve25519.X25519(u2key, *inv.InviterKey)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//b, err = crypto.AES256CBC_Decrypt(asymKey2, *inv.KeystoreKey)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//if bytes.Compare(b, key) != 0 {
+	//	panic("key mismatch")
+	//}
 
 	//log.Debug(u1key, u2key)
 	//log.Debug(inv)
 }
 
-func newKeypair() ([]byte, []byte, error) {
-	var pub [32]byte
-	var key [32]byte
-
-	b, err := crypto.GenerateRandomBytes(32)
-	if err != nil {
-		return nil, nil, err
-	}
-	copy(key[:], b)
-
-	curve25519.ScalarBaseMult(&pub, &key)
-
-	return pub[:], key[:], nil
-}
+//func newKeypair() ([]byte, []byte, error) {
+//	var pub [32]byte
+//	var key [32]byte
+//
+//	b, err := crypto.GenerateRandomBytes(32)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//	copy(key[:], b)
+//
+//	curve25519.ScalarBaseMult(&pub, &key)
+//
+//	return pub[:], key[:], nil
+//}

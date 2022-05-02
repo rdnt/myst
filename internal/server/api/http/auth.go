@@ -18,8 +18,8 @@ func (api *API) Login(c *gin.Context) {
 		panic(err)
 	}
 
-	if params.Username == "rdnt" && params.Password != "1234" {
-		panic(err)
+	if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
+		panic("invalid username or password")
 	}
 
 	key, err := api.loginUser(params.Username)

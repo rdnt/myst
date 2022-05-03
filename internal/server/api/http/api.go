@@ -24,10 +24,10 @@ var (
 
 type API struct {
 	*gin.Engine
-	app *application.Application
+	app application.Application
 }
 
-func New(app *application.Application) *API {
+func New(app application.Application) *API {
 	api := new(API)
 
 	api.app = app

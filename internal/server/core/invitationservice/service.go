@@ -88,16 +88,34 @@ func (s *service) Finalize(invitationId string, keystoreKey []byte) (*invitation
 	return inv, nil
 }
 
+type UserInvitationsOptions struct {
+	Status *string
+}
+
 // UserInvitations returns all the invitations this user has access to. These include:
 // - invitations where the user is the inviter
 // - invitations where the user is the invitee
-func (s *service) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]*invitation.Invitation, error) {
 	u, err := s.userRepo.User(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.invitationRepo.UserInvitations(u.Id())
+	invs, err := s.invitationRepo.UserInvitations(u.Id())
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get user invitations")
+	}
+
+	invitations := []*invitation.Invitation{}
+	for _, inv := range invs {
+		if opts != nil && opts.Status != nil && *opts.Status != inv.Status() {
+			continue
+		}
+
+		invitations = append(invitations, inv)
+	}
+
+	return invitations, nil
 }
 
 // UserInvitation returns an invitation that a user has access to.
@@ -110,38 +128,38 @@ func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invit
 	return s.invitationRepo.UserInvitation(u.Id(), invitationId)
 }
 
-func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
-	invs, err := s.UserInvitations(userId)
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get user invitations")
-	}
-
-	keystores := []*keystore.Keystore{}
-
-	for _, inv := range invs {
-		// TODO: split logic to separate function "AcceptedUserInviations"
-		if inv.Finalized() && inv.InviteeId() == userId {
-			k, err := s.keystoreRepo.Keystore(inv.KeystoreId())
-			if err != nil {
-				return nil, errors.WithMessage(err, "failed to get keystore")
-			}
-
-			keystores = append(keystores, k)
-		}
-	}
-
-	u, err := s.userRepo.User(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	ks, err := s.keystoreRepo.UserKeystores(u.Id())
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get user keystores")
-	}
-
-	return append(keystores, ks...), nil
-}
+//func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+//	invs, err := s.UserInvitations(userId)
+//	if err != nil {
+//		return nil, errors.WithMessage(err, "failed to get user invitations")
+//	}
+//
+//	keystores := []*keystore.Keystore{}
+//
+//	for _, inv := range invs {
+//		// TODO: split logic to separate function "AcceptedUserInviations"
+//		if inv.Finalized() && inv.InviteeId() == userId {
+//			k, err := s.keystoreRepo.Keystore(inv.KeystoreId())
+//			if err != nil {
+//				return nil, errors.WithMessage(err, "failed to get keystore")
+//			}
+//
+//			keystores = append(keystores, k)
+//		}
+//	}
+//
+//	u, err := s.userRepo.User(userId)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	ks, err := s.keystoreRepo.UserKeystores(u.Id())
+//	if err != nil {
+//		return nil, errors.WithMessage(err, "failed to get user keystores")
+//	}
+//
+//	return append(keystores, ks...), nil
+//}
 
 func New(opts ...Option) (invitation.Service, error) {
 	s := &service{}

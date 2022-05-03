@@ -3,6 +3,7 @@ package main
 import (
 	"myst/internal/client/api/http"
 	"myst/internal/client/application"
+	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -18,8 +19,15 @@ func main() {
 		panic(err)
 	}
 
+	keystoreService, err := keystoreservice.New(
+		keystoreservice.WithKeystoreRepository(keystoreRepo),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	app, err := application.New(
-		application.WithKeystoreRepository(keystoreRepo),
+		application.WithKeystoreService(keystoreService),
 	)
 	if err != nil {
 		panic(err)

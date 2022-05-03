@@ -3,10 +3,8 @@ package application
 import (
 	"errors"
 	"fmt"
-
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/remote"
 	"myst/pkg/logger"
 )
@@ -14,32 +12,58 @@ import (
 var log = logger.New("app", logger.Blue)
 
 var (
-	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
-	ErrInvalidKeystoreService    = errors.New("invalid keystore service")
-	ErrAuthenticationFailed      = errors.New("authentiation failed")
+	ErrInvalidKeystoreService = errors.New("invalid keystore service")
+	ErrAuthenticationFailed   = errors.New("authentiation failed")
 )
 
 type Application interface {
-	keystore.Service
+	Start() error
+	Stop() error
 
-	Start()
+	// remote
 	SignIn(username, password string) error
 	SignOut() error
+	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
+	//Keystore(id string) (*generated.Keystore, error)
+	//Keystores() ([]*generated.Keystore, error)
+	//CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
+	//AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
+	//FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
+
+	// keystores
+	Authenticate(password string) error
+	CreateFirstKeystore(name, password string) (*keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
+	CreateKeystore(name string) (*keystore.Keystore, error)
+	Keystore(id string) (*keystore.Keystore, error)
+	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
+	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
+	DeleteKeystoreEntry(keystoreId, entryId string) error
+	Keystores() (map[string]*keystore.Keystore, error)
+	HealthCheck()
 }
 
 type application struct {
-	keystore.Service
+	keystores keystore.Service
 
-	repositories struct {
-		keystoreRepo keystoreservice.KeystoreRepository
-		remote       remote.Client
-	}
+	remote remote.Client
 }
 
-func (app *application) Start() {
+func (app *application) HealthCheck() {
+	app.keystores.HealthCheck()
+}
+
+func (app *application) Start() error {
 	log.Print("App started")
 
 	app.setup()
+
+	return nil
+}
+
+func (app *application) Stop() error {
+	log.Print("App stopped")
+
+	return nil
 }
 
 func New(opts ...Option) (*application, error) {
@@ -53,31 +77,22 @@ func New(opts ...Option) (*application, error) {
 		}
 	}
 
-	if app.repositories.keystoreRepo == nil {
-		return nil, ErrInvalidKeystoreRepository
+	if app.keystores == nil {
+		return nil, ErrInvalidKeystoreService
 	}
-
-	keystoreService, err := keystoreservice.New(
-		keystoreservice.WithKeystoreRepository(app.repositories.keystoreRepo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	app.Service = keystoreService
 
 	rc, err := remote.New()
 	if err != nil {
 		return nil, err
 	}
 
-	app.repositories.remote = rc
+	app.remote = rc
 
 	return app, nil
 }
 
 func (app *application) setup() {
-	k1, err := app.CreateFirstKeystore("Passwords", "12345678")
+	k1, err := app.keystores.CreateFirstKeystore("Passwords", "12345678")
 	if err != nil {
 		panic(err)
 	}
@@ -144,18 +159,18 @@ func (app *application) setup() {
 	}
 
 	for _, opt := range opts {
-		_, err = app.CreateKeystoreEntry(k1.Id(), opt...)
+		_, err = app.keystores.CreateKeystoreEntry(k1.Id(), opt...)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	k2, err := app.CreateKeystore("Work")
+	k2, err := app.keystores.CreateKeystore("Work")
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = app.CreateKeystoreEntry(k2.Id(),
+	_, err = app.keystores.CreateKeystoreEntry(k2.Id(),
 		entry.WithId("pxnChjAmntT5aG35PM3G12"),
 		entry.WithWebsite("www.microsoft.com"), entry.WithUsername("test123@example.com"),
 		entry.WithPassword("H278L5qtwvSVs333"),
@@ -164,12 +179,12 @@ func (app *application) setup() {
 		panic(err)
 	}
 
-	_, err = app.CreateKeystore("Other")
+	_, err = app.keystores.CreateKeystore("Other")
 	if err != nil {
 		panic(err)
 	}
 
-	k1, err = app.Keystore(k1.Id())
+	k1, err = app.keystores.Keystore(k1.Id())
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -177,7 +192,7 @@ func (app *application) setup() {
 
 	//log.Debug(k1)
 
-	err = app.repositories.remote.SignIn("rdnt", "1234")
+	err = app.remote.SignIn("rdnt", "1234")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -191,7 +206,7 @@ func (app *application) setup() {
 	//	return
 	//}
 
-	key, err := app.KeystoreKey(k1.Id())
+	key, err := app.keystores.KeystoreKey(k1.Id())
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -199,7 +214,7 @@ func (app *application) setup() {
 
 	//log.Debug("KEY", key)
 
-	sk, err := app.repositories.remote.CreateKeystore(
+	sk, err := app.remote.CreateKeystore(
 		k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
 	)
 	if err != nil {
@@ -209,7 +224,7 @@ func (app *application) setup() {
 
 	//log.Debug(sk)
 
-	_, err = app.repositories.remote.Keystore(
+	_, err = app.remote.Keystore(
 		sk.Id,
 	)
 	if err != nil {
@@ -219,98 +234,9 @@ func (app *application) setup() {
 
 	//log.Debug(sk2)
 
-	_, err = app.repositories.remote.Keystores()
+	_, err = app.remote.Keystores()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	//log.Debug(sks)
-
-	//u1pub, u1key, err := newKeypair()
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//u2pub, u2key, err := newKeypair()
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//inv, err := app.repositories.remote.CreateInvitation(
-	//	"0000000000000000000000", "abcd", u1pub,
-	//)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//inv, err = app.repositories.remote.AcceptInvitation(
-	//	"0000000000000000000000", inv.Id, u2pub,
-	//)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//if inv.InviteeKey == nil {
-	//	panic("nil invitee key")
-	//}
-	//
-	//// **** ASYMMETRIC KEY GENERATION ****
-	//asymKey, err := curve25519.X25519(u1key, *inv.InviteeKey)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//// encrypt the keystore key with the symmetric key
-	//b, err := crypto.AES256CBC_Encrypt(asymKey, key)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//inv, err = app.repositories.remote.FinalizeInvitation(
-	//	"0000000000000000000000", inv.Id, b,
-	//)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//asymKey2, err := curve25519.X25519(u2key, *inv.InviterKey)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//b, err = crypto.AES256CBC_Decrypt(asymKey2, *inv.KeystoreKey)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//if bytes.Compare(b, key) != 0 {
-	//	panic("key mismatch")
-	//}
-
-	//log.Debug(u1key, u2key)
-	//log.Debug(inv)
 }
-
-//func newKeypair() ([]byte, []byte, error) {
-//	var pub [32]byte
-//	var key [32]byte
-//
-//	b, err := crypto.GenerateRandomBytes(32)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//	copy(key[:], b)
-//
-//	curve25519.ScalarBaseMult(&pub, &key)
-//
-//	return pub[:], key[:], nil
-//}

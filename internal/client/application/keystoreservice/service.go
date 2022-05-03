@@ -30,6 +30,24 @@ type service struct {
 	keystores KeystoreRepository
 }
 
+func New(opts ...Option) (keystore.Service, error) {
+	s := &service{}
+
+	for _, opt := range opts {
+		err := opt(s)
+		if err != nil {
+			logger.Error(err)
+			return nil, err
+		}
+	}
+
+	if s.keystores == nil {
+		return nil, ErrInvalidKeystoreRepository
+	}
+
+	return s, nil
+}
+
 func (s *service) KeystoreEntries(id string) (map[string]entry.Entry, error) {
 	k, err := s.keystores.Keystore(id)
 	if err != nil {
@@ -167,22 +185,4 @@ func (s *service) Authenticate(password string) error {
 
 func (s *service) HealthCheck() {
 	s.keystores.HealthCheck()
-}
-
-func New(opts ...Option) (keystore.Service, error) {
-	s := &service{}
-
-	for _, opt := range opts {
-		err := opt(s)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
-	}
-
-	if s.keystores == nil {
-		return nil, ErrInvalidKeystoreRepository
-	}
-
-	return s, nil
 }

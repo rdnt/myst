@@ -22,7 +22,20 @@ var (
 	ErrInvalidUserService        = errors.New("invalid user service")
 )
 
-type Application struct {
+type Application interface {
+	Start() error
+	Stop() error
+	CreateInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error)
+	AcceptInvitation(invitationId string, inviteeKey []byte) (*invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error)
+	GetInvitation(invitationId string) (*invitation.Invitation, error)
+	CreateKeystore(name, ownerId string, payload []byte) (*keystore.Keystore, error)
+	UserKeystores(userId string) ([]*keystore.Keystore, error)
+	UserInvitations(userId string) ([]*invitation.Invitation, error)
+	UserKeystore(userId, keystoreId string) (*keystore.Keystore, error)
+}
+
+type application struct {
 	repositories struct {
 		invitationRepo invitation.Repository
 		userRepo       user.Repository
@@ -34,14 +47,22 @@ type Application struct {
 	Invitations invitation.Service
 }
 
-func (app *Application) Start() {
+func (app *application) Start() error {
 	log.Print("App started")
 
 	app.setup()
+
+	return nil
 }
 
-func New(opts ...Option) (*Application, error) {
-	app := &Application{}
+func (app *application) Stop() error {
+	log.Print("App stopped")
+
+	return nil
+}
+
+func New(opts ...Option) (*application, error) {
+	app := &application{}
 
 	for _, opt := range opts {
 		err := opt(app)
@@ -81,7 +102,7 @@ func New(opts ...Option) (*Application, error) {
 	return app, nil
 }
 
-func (app *Application) setup() {
+func (app *application) setup() {
 	_, err := app.Users.Register(
 		user.WithUsername("rdnt"),
 		user.WithPassword("1234"),

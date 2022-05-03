@@ -97,7 +97,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 func (api *API) Invitations(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	invs, err := api.app.Invitations.UserInvitations(userId)
+	invs, err := api.app.UserInvitations(userId)
 	if err != nil {
 		panic(err)
 	}

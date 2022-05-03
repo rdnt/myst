@@ -5,11 +5,11 @@ import (
 )
 
 type Repository interface {
-	Create(opts ...Option) (*Keystore, error)
+	CreateKeystore(opts ...Option) (*Keystore, error)
 	Keystore(id string) (*Keystore, error)
-	Update(k *Keystore) error
+	UpdateKeystore(k *Keystore) error
 	Keystores() (map[string]*Keystore, error)
-	Delete(id string) error
+	DeleteKeystore(id string) error
 }
 
 type Service interface {

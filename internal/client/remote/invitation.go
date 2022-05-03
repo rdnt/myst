@@ -1,8 +1,6 @@
 package remote
 
 import (
-	"context"
-	"fmt"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
 
@@ -11,103 +9,53 @@ import (
 )
 
 func (r *remote) CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error) {
-	if r.bearerToken == "" {
-		return nil, fmt.Errorf("not signed in")
-	}
-
-	res, err := r.client.CreateInvitationWithResponse(
-		context.Background(), keystoreId, generated.CreateInvitationJSONRequestBody{
-			InviteeId: inviteeId,
-			PublicKey: r.publicKey,
-		},
-	)
+	inv, err := r.client.CreateInvitation(keystoreId, inviteeId, r.publicKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to create invitation")
 	}
 
-	if res.JSON200 == nil {
-		return nil, fmt.Errorf("invalid response")
-	}
-
-	return res.JSON200, nil
+	return inv, nil
 }
 
 func (r *remote) AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error) {
-	if r.bearerToken == "" {
-		return nil, fmt.Errorf("not signed in")
-	}
-
-	//res, err := r.client.InvitationWithResponse(context.Background(), keystoreId, invitationId)
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "failed to get invitation")
-	//}
-	//
-	//if res.JSON200 == nil || res.JSON200.InviterKey == nil {
-	//	return nil, fmt.Errorf("invalid response")
-	//}
-	//
-	//// TODO: not needed for acceptance, needed after finalization to decrypt the keystore key
-	//inviterKey := *res.JSON200.InviterKey
-	//
-	//asymKey, err := curve25519.X25519(r.privateKey, inviterKey)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	res, err := r.client.AcceptInvitationWithResponse(
-		context.Background(), keystoreId, invitationId, generated.AcceptInvitationJSONRequestBody{
-			PublicKey: r.publicKey,
-		},
-	)
+	inv, err := r.client.AcceptInvitation(keystoreId, invitationId, r.publicKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to accept invitation")
 	}
 
-	if res.JSON200 == nil {
-		return nil, fmt.Errorf("invalid response")
-	}
-
-	return res.JSON200, nil
+	return inv, nil
 }
-
-func (r *remote) FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error) {
-	if r.bearerToken == "" {
-		return nil, fmt.Errorf("not signed in")
-	}
-
-	res, err := r.client.InvitationWithResponse(context.Background(), keystoreId, invitationId)
+func (r *remote) FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error) {
+	inv, err := r.client.Invitation(keystoreId, invitationId)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get invitation")
-	}
-	if res.JSON200 == nil || res.JSON200.InviteeKey == nil {
-		return nil, fmt.Errorf("invalid response")
+		return nil, errors.WithMessage(err, "failed to get invitation")
 	}
 
-	inviteeKey := *res.JSON200.InviteeKey
-
-	asymKey, err := curve25519.X25519(r.privateKey, inviteeKey)
+	// TODO: this should be LOCAL keystoreId, while the function only receives remote one
+	keystoreKey, err := r.keystores.KeystoreKey(localKeystoreId)
 	if err != nil {
-		panic(err)
+		return nil, errors.WithMessage(err, "failed to get keystore key")
+	}
+
+	if inv.Status != "accepted" || inv.InviteeKey == nil {
+		return nil, errors.New("invitation has not been accepted")
+	}
+
+	asymKey, err := curve25519.X25519(r.privateKey, *inv.InviteeKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create asymmetric key")
 	}
 
 	// encrypt the keystore key with the asymmetric key
 	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(asymKey, keystoreKey)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to encrypt keystore key")
+		return nil, errors.Wrap(err, "failed to encrypt keystore key")
 	}
 
-	res2, err := r.client.FinalizeInvitationWithResponse(
-		context.Background(), keystoreId, invitationId, generated.FinalizeInvitationJSONRequestBody{
-			KeystoreKey: encryptedKeystoreKey,
-		},
-	)
+	inv, err = r.client.FinalizeInvitation(keystoreId, invitationId, encryptedKeystoreKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to finalize invitation")
 	}
 
-	if res2.JSON200 == nil {
-		return nil, fmt.Errorf("invalid response")
-	}
-
-	return res2.JSON200, nil
+	return inv, nil
 }

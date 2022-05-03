@@ -2,7 +2,10 @@ package application
 
 import (
 	"myst/internal/client/application/domain/entry"
+	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+
+	"github.com/pkg/errors"
 )
 
 func (app *application) SignIn(username, password string) error {
@@ -55,4 +58,16 @@ func (app *application) UpdateKeystore(k *keystore.Keystore) error {
 
 func (app *application) Authenticate(password string) error {
 	return app.keystores.Authenticate(password)
+}
+
+func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error) {
+	// TODO: needs refinement. app services should have access to the remote, no the other way around.
+	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
+	rinv, err := app.remote.CreateInvitation("0000000000000000000000", inviteeId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to create invitation")
+	}
+
+	log.Debug("invitation created", "invitation", rinv)
+	return nil, nil
 }

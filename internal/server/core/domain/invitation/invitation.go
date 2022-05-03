@@ -10,9 +10,11 @@ import (
 )
 
 var (
-	ErrAccepted    = errors.New("invitation already accepted")
-	ErrNotAccepted = errors.New("invitation not accepted")
-	ErrFinalized   = errors.New("invitation already finalized")
+	ErrAlreadyAccepted  = errors.New("invitation already accepted")
+	ErrNotAccepted      = errors.New("invitation not accepted")
+	ErrAlreadyFinalized = errors.New("invitation already finalized")
+	ErrCannotAccept     = errors.New("cannot accept non-pending invitation")
+	ErrCannotFinalize   = errors.New("cannot finalize non-accepted invitation")
 )
 
 type Invitation struct {
@@ -23,10 +25,28 @@ type Invitation struct {
 	inviterKey  []byte
 	inviteeKey  []byte
 	keystoreKey []byte // encrypted
-	accepted    bool
-	finalized   bool
+	status      Status
 	createdAt   timestamp.Timestamp
 	updatedAt   timestamp.Timestamp
+}
+
+func New(opts ...Option) (*Invitation, error) {
+	k := &Invitation{
+		id:        uuid.New().String(),
+		createdAt: timestamp.New(),
+		updatedAt: timestamp.New(),
+		status:    Pending,
+	}
+
+	for _, opt := range opts {
+		err := opt(k)
+		if err != nil {
+			logger.Error(err)
+			return nil, err
+		}
+	}
+
+	return k, nil
 }
 
 func (i *Invitation) Id() string {
@@ -57,12 +77,16 @@ func (i *Invitation) KeystoreKey() []byte {
 	return i.keystoreKey
 }
 
+func (i *Invitation) Pending() bool {
+	return i.status == Pending
+}
+
 func (i *Invitation) Accepted() bool {
-	return i.accepted
+	return i.status == Accepted
 }
 
 func (i *Invitation) Finalized() bool {
-	return i.finalized
+	return i.status == Finalized
 }
 
 func (i *Invitation) CreatedAt() timestamp.Timestamp {
@@ -73,50 +97,32 @@ func (i *Invitation) UpdatedAt() timestamp.Timestamp {
 	return i.updatedAt
 }
 
+func (i *Invitation) Status() Status {
+	return i.status
+}
+
 func (i *Invitation) String() string {
-	return fmt.Sprintln(i.id, i.inviterId, i.keystoreId, i.inviteeId, i.accepted, i.finalized)
+	return fmt.Sprintln(i.id, i.inviterId, i.keystoreId, i.inviteeId, i.status)
 }
 
 func (i *Invitation) Accept(inviteeKey []byte) error {
-	if i.accepted {
-		return ErrAccepted
+	if i.status != Pending {
+		return ErrCannotAccept
 	}
 
 	i.inviteeKey = inviteeKey
-	i.accepted = true
+	i.status = Accepted
 
 	return nil
 }
 
 func (i *Invitation) Finalize(keystoreKey []byte) error {
-	if !i.accepted {
-		return ErrNotAccepted
-	}
-
-	if i.finalized {
-		return ErrFinalized
+	if i.status != Accepted {
+		return ErrCannotFinalize
 	}
 
 	i.keystoreKey = keystoreKey
-	i.finalized = true
+	i.status = Finalized
 
 	return nil
-}
-
-func New(opts ...Option) (*Invitation, error) {
-	k := &Invitation{
-		id:        uuid.New().String(),
-		createdAt: timestamp.New(),
-		updatedAt: timestamp.New(),
-	}
-
-	for _, opt := range opts {
-		err := opt(k)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
-	}
-
-	return k, nil
 }

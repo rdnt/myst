@@ -109,7 +109,7 @@ func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
 }
 
 func (s *service) CreateKeystore(name string) (*keystore.Keystore, error) {
-	return s.keystores.Create(keystore.WithName(name))
+	return s.keystores.CreateKeystore(keystore.WithName(name))
 }
 
 func (s *service) KeystoreKey(keystoreId string) ([]byte, error) {
@@ -133,7 +133,7 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 	entries[e.Id()] = e
 	k.SetEntries(entries)
 
-	return e, s.keystores.Update(k)
+	return e, s.keystores.UpdateKeystore(k)
 }
 
 func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
@@ -142,7 +142,7 @@ func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore
 		return nil, errors.WithMessage(err, "failed to initialize enclave")
 	}
 
-	k, err := s.keystores.Create(keystore.WithName(name))
+	k, err := s.keystores.CreateKeystore(keystore.WithName(name))
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create keystore")
 	}
@@ -171,7 +171,7 @@ func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
 }
 
 func (s *service) UpdateKeystore(k *keystore.Keystore) error {
-	err := s.keystores.Update(k)
+	err := s.keystores.UpdateKeystore(k)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return ErrAuthenticationRequired
 	//}

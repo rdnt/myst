@@ -99,7 +99,7 @@ func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
 	return e.Keystores(), nil
 }
 
-func (r *Repository) Delete(id string) error {
+func (r *Repository) DeleteKeystore(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -130,7 +130,7 @@ func (r *Repository) Delete(id string) error {
 	return nil
 }
 
-func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *Repository) CreateKeystore(opts ...keystore.Option) (*keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -238,7 +238,7 @@ func (r *Repository) Authenticate(password string) error {
 	return nil
 }
 
-func (r *Repository) Update(k *keystore.Keystore) error {
+func (r *Repository) UpdateKeystore(k *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

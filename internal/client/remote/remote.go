@@ -1,17 +1,18 @@
 package remote
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/keystorerepo"
+	"myst/internal/client/remote/client"
+	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
-	"net/http"
 
 	"github.com/pkg/errors"
 
 	"golang.org/x/crypto/curve25519"
 
-	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
 )
 
@@ -20,19 +21,29 @@ var (
 	ErrInvalidResponse      = fmt.Errorf("invalid response")
 )
 
-type Client interface {
+// Remote is a remote repository that holds upstream keystores/invitations
+type Remote interface {
+	//invitation.Repository
+	//keystore.Repository
+
 	SignIn(username, password string) error
 	SignOut() error
-	CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
-	Keystore(id string) (*generated.Keystore, error)
+
+	// keystores
+	UploadKeystore(id string) (*generated.Keystore, error)
 	Keystores() ([]*generated.Keystore, error)
+
+	// invitations
 	CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
 	AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
-	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
+
+	// TODO: refine to dynamically find local keystoreId
+	FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
 }
 
 type remote struct {
-	client *generated.ClientWithResponses
+	client    client.Client
+	keystores keystore.Service
 
 	bearerToken string
 
@@ -40,19 +51,13 @@ type remote struct {
 	privateKey []byte
 }
 
-func New() (Client, error) {
+func New(keystores keystore.Service) (Remote, error) {
 	r := &remote{
 		client:      nil,
 		bearerToken: "",
 		publicKey:   nil,
 		privateKey:  nil,
-	}
-
-	c, err := generated.NewClientWithResponses("http://localhost:8080",
-		generated.WithRequestEditorFn(r.authenticate()),
-	)
-	if err != nil {
-		return nil, err
+		keystores:   keystores,
 	}
 
 	pub, key, err := newKeypair()
@@ -60,53 +65,73 @@ func New() (Client, error) {
 		return nil, errors.WithMessage(err, "failed to generate public/private keypair")
 	}
 
-	r.client = c
+	rc, err := client.New()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to create remote client")
+	}
+
+	r.client = rc
 	r.publicKey = pub
 	r.privateKey = key
 
 	return r, nil
 }
 
+func (r *remote) UploadKeystore(id string) (*generated.Keystore, error) {
+	k, err := r.keystores.Keystore(id)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get keystore")
+	}
+
+	keystoreKey, err := r.keystores.KeystoreKey(k.Id())
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get keystore key")
+	}
+
+	jk := keystorerepo.KeystoreToJSON(k)
+
+	b, err := json.Marshal(jk)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
+	if err != nil {
+		return nil, err
+	}
+
+	rk, err := r.client.UploadKeystore(k.Name(), b)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to upload keystore")
+	}
+
+	return rk, nil
+}
+
 func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
 
-	res, err := r.client.LoginWithResponse(
-		context.Background(), generated.LoginJSONRequestBody{
-			Username: username,
-			Password: password,
-		},
-	)
+	err := r.client.SignIn(username, password)
 	if err != nil {
 		return err
 	}
 
-	if res.JSON200 == nil {
-		return ErrInvalidResponse
-	}
-
-	token := *res.JSON200
-
-	if token == "" {
-		return fmt.Errorf("invalid token")
-	}
-
-	r.bearerToken = string(token)
 	fmt.Println("Signed in.")
 
 	return nil
 }
 
 func (r *remote) SignOut() error {
-	r.bearerToken = ""
+	fmt.Println("Signing out from remote...")
+
+	err := r.client.SignOut()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Signed out.")
 
 	return nil
-}
-
-func (r *remote) authenticate() generated.RequestEditorFn {
-	return func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("Authorization", "Bearer "+r.bearerToken)
-		return nil
-	}
 }
 
 func newKeypair() ([]byte, []byte, error) {

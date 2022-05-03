@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"myst/internal/client/application/domain/entry"
+	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/remote"
 	"myst/pkg/logger"
@@ -40,12 +41,15 @@ type Application interface {
 	DeleteKeystoreEntry(keystoreId, entryId string) error
 	Keystores() (map[string]*keystore.Keystore, error)
 	HealthCheck()
+
+	CreateKeystoreInvitation(userId string, keystoreId string) (*invitation.Invitation, error)
 }
 
 type application struct {
-	keystores keystore.Service
+	keystores   keystore.Service
+	invitations invitation.Service
 
-	remote remote.Client
+	remote remote.Remote
 }
 
 func (app *application) HealthCheck() {
@@ -81,7 +85,7 @@ func New(opts ...Option) (*application, error) {
 		return nil, ErrInvalidKeystoreService
 	}
 
-	rc, err := remote.New()
+	rc, err := remote.New(app.keystores)
 	if err != nil {
 		return nil, err
 	}
@@ -190,53 +194,38 @@ func (app *application) setup() {
 		return
 	}
 
-	//log.Debug(k1)
-
 	err = app.remote.SignIn("rdnt", "1234")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	//jk := enclaverepo.KeystoreToJSON(k1)
-
-	//b, err := json.Marshal(jk)
+	//key, err := app.keystores.KeystoreKey(k1.Id())
 	//if err != nil {
 	//	fmt.Println(err)
 	//	return
 	//}
 
-	key, err := app.keystores.KeystoreKey(k1.Id())
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	//log.Debug("KEY", key)
-
-	sk, err := app.remote.CreateKeystore(
-		k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	//log.Debug(sk)
-
-	_, err = app.remote.Keystore(
-		sk.Id,
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	//log.Debug(sk2)
-
-	_, err = app.remote.Keystores()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// TODO: fix application debug initialization
+	//sk, err := app.remote.UploadKeystore(
+	//	k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
+	//)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//_, err = app.remote.Keystore(
+	//	sk.Id,
+	//)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//_, err = app.remote.Keystores()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 }

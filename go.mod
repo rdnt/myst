@@ -3,6 +3,7 @@ module myst
 go 1.14
 
 require (
+	github.com/alicebob/miniredis/v2 v2.21.0
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/deepmap/oapi-codegen v1.9.1
 	github.com/gin-contrib/static v0.0.1

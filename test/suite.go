@@ -2,33 +2,26 @@ package test
 
 import (
 	"fmt"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 
 	"myst/pkg/logger"
-	"myst/test/pkg/capture"
+	"myst/pkg/testing/capture"
 )
 
 type IntegrationTestSuite struct {
 	suite.Suite
 	capture *capture.Capture
 
-	mini   *miniredis.Miniredis
-	router *gin.Engine
+	mini *miniredis.Miniredis
+	//router *gin.Engine
 	//rdb      *redis.Client
-	server *httptest.Server
-}
+	//server *httptest.Server
 
-func TestIntegration(t *testing.T) {
-	s := &IntegrationTestSuite{}
-
-	s.capture = capture.New(t)
-
-	suite.Run(t, s)
+	server Server
+	client Client
 }
 
 func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInformation) {
@@ -48,33 +41,23 @@ func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInform
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	fmt.Println("Running integration tests...")
+	fmt.Println("Running integration_suite tests...")
 
-	//err := logger.Init()
-	//s.Require().Nil(err)
-
-	//s.capture.Start()
+	s.setupServer()
+	s.setupClient()
 
 	var err error
 	s.mini, err = miniredis.Run()
 	s.Require().Nil(err)
 
-	//s.rdb = redis.NewClient(&redis.Options{
-	//	Network: "tcp",
-	//	Addr:    s.mini.Addr(),
-	//})
-
-	//database.SetDB(s.rdb)
-	//models.Init(s.rdb)
-
-	//s.router = router.Init()
-	//s.server = httptest.NewServer(s.router)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	//s.server.Close()
 	s.mini.Close()
 	//logger.Close()
+
+	s.teardownClient()
 
 	//output := s.capture.Stop()
 
@@ -113,9 +96,4 @@ func (s *IntegrationTestSuite) TearDownTest() {
 			fmt.Println()
 		}
 	}
-}
-
-func (s *IntegrationTestSuite) TestLogin() {
-	fmt.Print("@@@@@@@@@@@@@@@@@")
-	s.Require().Nil(nil)
 }

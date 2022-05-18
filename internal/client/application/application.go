@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
@@ -42,14 +43,15 @@ type Application interface {
 	Keystores() (map[string]*keystore.Keystore, error)
 	HealthCheck()
 
-	CreateKeystoreInvitation(userId string, keystoreId string) (*invitation.Invitation, error)
+	CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error)
 }
 
 type application struct {
 	keystores   keystore.Service
 	invitations invitation.Service
 
-	remote remote.Remote
+	remote        remote.Remote
+	remoteAddress string
 }
 
 func (app *application) HealthCheck() {
@@ -85,7 +87,7 @@ func New(opts ...Option) (*application, error) {
 		return nil, ErrInvalidKeystoreService
 	}
 
-	rc, err := remote.New(app.keystores)
+	rc, err := remote.New(app.keystores, app.remoteAddress)
 	if err != nil {
 		return nil, err
 	}

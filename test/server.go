@@ -19,19 +19,27 @@ type Server struct {
 	server *httptest.Server
 }
 
-func (s *IntegrationTestSuite) setupServer() {
+func (s *IntegrationTestSuite) setupServer() *Server {
+	server := &Server{}
+
 	keystoreRepo := keystorerepo.New()
 	userRepo := userrepo.New()
 	invitationRepo := invitationrepo.New()
 
 	var err error
-	s.server.app, err = application.New(
+	server.app, err = application.New(
 		application.WithKeystoreRepository(keystoreRepo),
 		application.WithUserRepository(userRepo),
 		application.WithInvitationRepository(invitationRepo),
 	)
 	s.Require().Nil(err)
 
-	s.server.router = http.New(s.server.app).Engine
-	s.server.server = httptest.NewServer(s.server.router)
+	server.router = http.New(server.app).Engine
+	server.server = httptest.NewServer(server.router)
+
+	return server
+}
+
+func (s *IntegrationTestSuite) teardownServer(server *Server) {
+	server.server.Close()
 }

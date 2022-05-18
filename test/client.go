@@ -19,12 +19,17 @@ type Client struct {
 	server *httptest.Server
 }
 
-func (s *IntegrationTestSuite) setupClient() {
+func (s *IntegrationTestSuite) setupClient(serverAddress string) *Client {
+	client := &Client{}
+
 	var err error
-	s.client.dir, err = os.MkdirTemp("", "myst-client-data-*")
+	client.dir, err = os.MkdirTemp("", "myst-client-data-*")
 	s.Require().Nil(err)
 
-	keystoreRepo, err := keystorerepo.New(s.client.dir)
+	err = os.Chmod(client.dir, os.ModePerm)
+	s.Require().Nil(err)
+
+	keystoreRepo, err := keystorerepo.New(client.dir)
 	s.Require().Nil(err)
 
 	keystoreService, err := keystoreservice.New(
@@ -32,15 +37,19 @@ func (s *IntegrationTestSuite) setupClient() {
 	)
 	s.Require().Nil(err)
 
-	s.client.app, err = application.New(
+	client.app, err = application.New(
 		application.WithKeystoreService(keystoreService),
+		application.WithRemoteAddress(serverAddress),
 	)
 	s.Require().Nil(err)
 
-	s.client.router = clienthttp.New(s.client.app).Engine
-	s.client.server = httptest.NewServer(s.server.router)
+	client.router = clienthttp.New(client.app).Engine
+	client.server = httptest.NewServer(s.server.router)
+
+	return client
 }
 
-func (s *IntegrationTestSuite) teardownClient() {
-	s.Require().Nil(os.RemoveAll(s.client.dir))
+func (s *IntegrationTestSuite) teardownClient(client *Client) {
+	s.Require().Nil(os.RemoveAll(client.dir))
+	client.server.Close()
 }

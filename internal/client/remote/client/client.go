@@ -2,9 +2,10 @@ package client
 
 import (
 	"context"
+	"net/http"
+
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/enclave"
-	"net/http"
 
 	"github.com/pkg/errors"
 )
@@ -34,10 +35,11 @@ type client struct {
 	bearerToken string
 }
 
-func New() (*client, error) {
+func New(address string) (*client, error) {
 	c := &client{}
 
-	cw, err := generated.NewClientWithResponses("http://localhost:8080",
+	cw, err := generated.NewClientWithResponses(
+		address,
 		generated.WithRequestEditorFn(c.authenticate()),
 	)
 	if err != nil {

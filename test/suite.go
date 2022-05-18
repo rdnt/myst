@@ -20,8 +20,9 @@ type IntegrationTestSuite struct {
 	//rdb      *redis.Client
 	//server *httptest.Server
 
-	server Server
-	client Client
+	server  *Server
+	client1 *Client
+	client2 *Client
 }
 
 func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInformation) {
@@ -43,13 +44,13 @@ func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInform
 func (s *IntegrationTestSuite) SetupSuite() {
 	fmt.Println("Running integration_suite tests...")
 
-	s.setupServer()
-	s.setupClient()
+	s.server = s.setupServer()
+	s.client1 = s.setupClient(s.server.server.URL)
+	s.client2 = s.setupClient(s.server.server.URL)
 
 	var err error
 	s.mini, err = miniredis.Run()
 	s.Require().Nil(err)
-
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -57,7 +58,9 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.mini.Close()
 	//logger.Close()
 
-	s.teardownClient()
+	s.teardownClient(s.client1)
+	s.teardownClient(s.client2)
+	s.teardownServer(s.server)
 
 	//output := s.capture.Stop()
 

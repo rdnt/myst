@@ -61,9 +61,28 @@ func (app *application) Authenticate(password string) error {
 }
 
 func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error) {
-	// TODO: needs refinement. app services should have access to the remote, no the other way around.
+	// TODO: needs refinement. app services should have access to the remote, not the other way around.
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
-	rinv, err := app.remote.CreateInvitation("0000000000000000000000", inviteeId)
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	if k.RemoteId() == "" {
+		genk, err := app.remote.UploadKeystore(k.Id())
+		if err != nil {
+			return nil, err
+		}
+
+		k.SetRemoteId(genk.Id)
+
+		err = app.keystores.UpdateKeystore(k)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create invitation")
 	}

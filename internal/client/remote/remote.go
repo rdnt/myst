@@ -3,6 +3,7 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/keystorerepo"
 	"myst/internal/client/remote/client"
@@ -51,7 +52,7 @@ type remote struct {
 	privateKey []byte
 }
 
-func New(keystores keystore.Service) (Remote, error) {
+func New(keystores keystore.Service, address string) (Remote, error) {
 	r := &remote{
 		client:      nil,
 		bearerToken: "",
@@ -65,7 +66,7 @@ func New(keystores keystore.Service) (Remote, error) {
 		return nil, errors.WithMessage(err, "failed to generate public/private keypair")
 	}
 
-	rc, err := client.New()
+	rc, err := client.New(address)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create remote client")
 	}

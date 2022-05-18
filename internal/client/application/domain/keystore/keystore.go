@@ -15,14 +15,23 @@ var (
 )
 
 type Keystore struct {
-	id      string
-	name    string
-	version int
-	entries map[string]entry.Entry
+	id       string
+	remoteId string
+	name     string
+	version  int
+	entries  map[string]entry.Entry
 }
 
 func (k *Keystore) Id() string {
 	return k.id
+}
+
+func (k *Keystore) RemoteId() string {
+	return k.remoteId
+}
+
+func (k *Keystore) SetRemoteId(id string) {
+	k.remoteId = id
 }
 
 func (k *Keystore) Name() string {

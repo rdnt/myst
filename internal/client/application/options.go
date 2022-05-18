@@ -12,3 +12,10 @@ func WithKeystoreService(service keystore.Service) Option {
 		return nil
 	}
 }
+
+func WithRemoteAddress(address string) Option {
+	return func(app *application) error {
+		app.remoteAddress = address
+		return nil
+	}
+}

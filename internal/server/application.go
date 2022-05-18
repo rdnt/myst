@@ -33,6 +33,11 @@ type Application interface {
 	UserKeystores(userId string) ([]*keystore.Keystore, error)
 	UserInvitations(userId string) ([]*invitation.Invitation, error)
 	UserKeystore(userId, keystoreId string) (*keystore.Keystore, error)
+
+	CreateUser(username, password string) (*user.User, error)
+	AuthorizeUser(userId, password string) error
+	User(userId string) (*user.User, error)
+	//CreateAccount(username, password string) (*user.User, error)
 }
 
 type application struct {
@@ -103,7 +108,7 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	_, err := app.Users.Register(
+	_, err := app.Users.CreateUser(
 		user.WithUsername("rdnt"),
 		user.WithPassword("1234"),
 	)
@@ -113,7 +118,7 @@ func (app *application) setup() {
 
 	//log.Debug(u)
 
-	_, err = app.Users.Register(
+	_, err = app.Users.CreateUser(
 		user.WithUsername("abcd"),
 		user.WithPassword("5678"),
 	)

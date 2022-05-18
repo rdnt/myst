@@ -17,7 +17,7 @@ type User struct {
 	passwordHash string
 }
 
-func (r *Repository) Create(opts ...user.Option) (*user.User, error) {
+func (r *Repository) CreateUser(opts ...user.Option) (*user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -65,7 +65,7 @@ func (r *Repository) Users() ([]*user.User, error) {
 	return users, nil
 }
 
-func (r *Repository) Update(u *user.User) error {
+func (r *Repository) UpdateUser(u *user.User) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -84,7 +84,7 @@ func (r *Repository) Update(u *user.User) error {
 	return nil
 }
 
-func (r *Repository) Delete(id string) error {
+func (r *Repository) DeleteUser(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

@@ -3,6 +3,7 @@ package application
 import (
 	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/keystore"
+	"myst/internal/server/core/domain/user"
 
 	"github.com/pkg/errors"
 )
@@ -66,4 +67,21 @@ func (app *application) UserKeystore(userId, keystoreId string) (*keystore.Keyst
 	}
 
 	return k, nil
+}
+
+func (app *application) CreateUser(username, password string) (*user.User, error) {
+	return app.Users.CreateUser(user.WithUsername(username), user.WithPassword(password))
+}
+
+func (app *application) AuthorizeUser(userId, password string) error {
+	u, err := app.Users.User(userId)
+	if err != nil {
+		return err
+	}
+
+	return app.Users.AuthorizeUser(u, password)
+}
+
+func (app *application) User(userId string) (*user.User, error) {
+	return app.Users.User(userId)
 }

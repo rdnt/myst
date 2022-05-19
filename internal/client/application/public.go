@@ -1,11 +1,11 @@
 package application
 
 import (
+	"github.com/pkg/errors"
+
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
-
-	"github.com/pkg/errors"
 )
 
 func (app *application) SignIn(username, password string) error {
@@ -89,4 +89,16 @@ func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId st
 
 	log.Debug("invitation created", "invitation", rinv)
 	return nil, nil
+}
+
+func (app *application) Invitations() ([]invitation.Invitation, error) {
+	return app.remote.Invitations()
+}
+
+func (app *application) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
+	panic("implement me")
+	//rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
+	//if err != nil {
+	//	return nil, errors.WithMessage(err, "failed to create invitation")
+	//}
 }

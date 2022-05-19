@@ -27,6 +27,7 @@ type Client interface {
 	AcceptInvitation(keystoreId, invitationId string, inviteePublicKey []byte) (*generated.Invitation, error)
 	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
 	Invitation(keystoreId, invitationId string) (*generated.Invitation, error)
+	Invitations() ([]generated.Invitation, error)
 }
 
 type client struct {

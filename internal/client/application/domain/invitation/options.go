@@ -1,31 +1,27 @@
 package invitation
 
-type Option func(i *Invitation) error
+type Option func(i *Invitation)
 
 func WithInviterId(id string) Option {
-	return func(i *Invitation) error {
+	return func(i *Invitation) {
 		i.InviterId = id
-		return nil
 	}
 }
 
 func WithKeystoreId(id string) Option {
-	return func(i *Invitation) error {
+	return func(i *Invitation) {
 		i.KeystoreId = id
-		return nil
 	}
 }
 
 func WithInviteeId(id string) Option {
-	return func(i *Invitation) error {
+	return func(i *Invitation) {
 		i.InviteeId = id
-		return nil
 	}
 }
 
 func WithInviterKey(key []byte) Option {
-	return func(i *Invitation) error {
+	return func(i *Invitation) {
 		i.InviterKey = key
-		return nil
 	}
 }

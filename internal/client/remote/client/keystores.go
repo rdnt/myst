@@ -3,12 +3,13 @@ package client
 import (
 	"context"
 	"fmt"
+
 	"myst/internal/server/api/http/generated"
 )
 
-func (c *client) UploadKeystore(name string, payload []byte) (*generated.Keystore, error) {
+func (c *client) UploadKeystore(name string, payload []byte) (generated.Keystore, error) {
 	if !c.SignedIn() {
-		return nil, ErrNotSignedIn
+		return generated.Keystore{}, ErrNotSignedIn
 	}
 
 	res, err := c.client.CreateKeystoreWithResponse(
@@ -18,32 +19,32 @@ func (c *client) UploadKeystore(name string, payload []byte) (*generated.Keystor
 		},
 	)
 	if err != nil {
-		return nil, err
+		return generated.Keystore{}, err
 	}
 
 	if res.JSON200 == nil {
-		return nil, fmt.Errorf("invalid response")
+		return generated.Keystore{}, fmt.Errorf("invalid response")
 	}
 
-	return res.JSON200, nil
+	return *res.JSON200, nil
 }
 
-func (c *client) Keystore(id string) (*generated.Keystore, error) {
+func (c *client) Keystore(id string) (generated.Keystore, error) {
 	if !c.SignedIn() {
-		return nil, ErrNotSignedIn
+		return generated.Keystore{}, ErrNotSignedIn
 	}
 
 	res, err := c.client.KeystoreWithResponse(
 		context.Background(), id,
 	)
 	if err != nil {
-		return nil, err
+		return generated.Keystore{}, err
 	}
 
-	return res.JSON200, nil
+	return *res.JSON200, nil
 }
 
-func (c *client) Keystores() ([]*generated.Keystore, error) {
+func (c *client) Keystores() ([]generated.Keystore, error) {
 	if !c.SignedIn() {
 		return nil, ErrNotSignedIn
 	}
@@ -59,10 +60,10 @@ func (c *client) Keystores() ([]*generated.Keystore, error) {
 		return nil, ErrInvalidResponse
 	}
 
-	ks := []*generated.Keystore{}
+	ks := []generated.Keystore{}
 
 	for _, k := range *res.JSON200 {
-		ks = append(ks, &k)
+		ks = append(ks, k)
 	}
 
 	return ks, nil

@@ -50,12 +50,13 @@ type Invitation struct {
 
 // Keystore defines model for Keystore.
 type Keystore struct {
-	CreatedAt int    `json:"createdAt"`
+	CreatedAt int64  `json:"createdAt"`
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	OwnerId   string `json:"ownerId"`
 	Payload   string `json:"payload"`
-	UpdatedAt int    `json:"updatedAt"`
+	UpdatedAt int64  `json:"updatedAt"`
+	Version   int    `json:"version"`
 }
 
 // LoginRequest defines model for LoginRequest.

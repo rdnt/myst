@@ -5,52 +5,32 @@ import (
 )
 
 type Entry struct {
-	id       string
-	website  string
-	username string
-	password string
-	notes    string
-}
-
-func (e *Entry) Id() string {
-	return e.id
-}
-
-func (e *Entry) Website() string {
-	return e.website
+	Id       string
+	Website  string
+	Username string
+	Password string
+	Notes    string
 }
 
 func (e *Entry) SetWebsite(website string) {
-	e.website = website
-}
-
-func (e *Entry) Username() string {
-	return e.username
+	e.Website = website
 }
 
 func (e *Entry) SetUsername(username string) {
-	e.username = username
-}
-
-func (e *Entry) Password() string {
-	return e.password
+	e.Username = username
 }
 
 func (e *Entry) SetPassword(password string) {
-	e.password = password
-}
-
-func (e *Entry) Notes() string {
-	return e.notes
+	e.Password = password
 }
 
 func (e *Entry) SetNotes(notes string) {
-	e.notes = notes
+	e.Notes = notes
 }
 
 func New(opts ...Option) Entry {
 	e := Entry{
-		id: uuid.New().String(),
+		Id: uuid.New().String(),
 	}
 
 	for _, opt := range opts {

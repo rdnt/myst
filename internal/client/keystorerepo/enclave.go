@@ -4,11 +4,12 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
+
 	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/crypto"
-	"os"
-	"path"
 )
 
 func (r *Repository) enclavePath() string {
@@ -48,7 +49,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 	ks := map[string]JSONKeystore{}
 
 	for _, k := range e.Keystores() {
-		ks[k.Id()] = KeystoreToJSON(k)
+		ks[k.Id] = KeystoreToJSON(k)
 	}
 
 	return json.Marshal(JSONEnclave{Keystores: ks, Keys: e.Keys()})
@@ -62,7 +63,7 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 		return nil, err
 	}
 
-	ks := map[string]*keystore.Keystore{}
+	ks := map[string]keystore.Keystore{}
 
 	for _, k := range e.Keystores {
 		k, err := KeystoreFromJSON(k)
@@ -70,7 +71,7 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 			return nil, err
 		}
 
-		ks[k.Id()] = k
+		ks[k.Id] = k
 	}
 
 	return enclave.New(

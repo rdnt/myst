@@ -8,24 +8,24 @@ type Option func(*Keystore)
 
 func WithId(id string) Option {
 	return func(k *Keystore) {
-		k.id = id
+		k.Id = id
 	}
 }
 
 func WithName(name string) Option {
 	return func(k *Keystore) {
-		k.name = name
+		k.Name = name
 	}
 }
 
 func WithVersion(version int) Option {
 	return func(k *Keystore) {
-		k.version = version
+		k.Version = version
 	}
 }
 
 func WithEntries(entries map[string]entry.Entry) Option {
 	return func(k *Keystore) {
-		k.entries = entries
+		k.Entries = entries
 	}
 }

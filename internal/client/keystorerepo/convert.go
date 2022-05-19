@@ -25,28 +25,28 @@ type JSONEntry struct {
 	Notes    string `json:"notes"`
 }
 
-func KeystoreToJSON(k *keystore.Keystore) JSONKeystore {
+func KeystoreToJSON(k keystore.Keystore) JSONKeystore {
 	entries := []JSONEntry{}
 
-	for _, e := range k.Entries() {
+	for _, e := range k.Entries {
 		entries = append(entries, JSONEntry{
-			Id:       e.Id(),
-			Website:  e.Website(),
-			Username: e.Username(),
-			Password: e.Password(),
-			Notes:    e.Notes(),
+			Id:       e.Id,
+			Website:  e.Website,
+			Username: e.Username,
+			Password: e.Password,
+			Notes:    e.Notes,
 		})
 	}
 
 	return JSONKeystore{
-		Id:      k.Id(),
-		Name:    k.Name(),
-		Version: k.Version(),
+		Id:      k.Id,
+		Name:    k.Name,
+		Version: k.Version,
 		Entries: entries,
 	}
 }
 
-func KeystoreFromJSON(k JSONKeystore) (*keystore.Keystore, error) {
+func KeystoreFromJSON(k JSONKeystore) (keystore.Keystore, error) {
 	entries := make(map[string]entry.Entry, len(k.Entries))
 
 	for _, e := range k.Entries {
@@ -58,7 +58,7 @@ func KeystoreFromJSON(k JSONKeystore) (*keystore.Keystore, error) {
 			entry.WithNotes(e.Notes),
 		)
 
-		entries[e.Id()] = e
+		entries[e.Id] = e
 	}
 
 	return keystore.New(

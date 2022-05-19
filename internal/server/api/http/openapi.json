@@ -242,6 +242,43 @@
         }
       }
     },
+    "/api/invitation/{invitationId}": {
+      "get": {
+        "description": "Returns an invitation",
+        "operationId": "Invitation",
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/keystore/{keystoreId}/invitation/{invitationId}": {
       "patch": {
         "description": "Accepts an invitation",
@@ -308,48 +345,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "invitationId",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Invitation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Invitation"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "description": "Returns an invitation",
-        "operationId": "Invitation",
         "parameters": [
           {
             "name": "keystoreId",
@@ -474,6 +469,7 @@
           "name",
           "payload",
           "ownerId",
+          "version",
           "createdAt",
           "updatedAt"
         ],
@@ -490,11 +486,16 @@
           "ownerId": {
             "type": "string"
           },
-          "createdAt": {
+          "version": {
             "type": "integer"
           },
+          "createdAt": {
+            "type": "integer",
+            "format": "int64"
+          },
           "updatedAt": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

@@ -3,9 +3,8 @@ package invitation
 import (
 	"errors"
 	"fmt"
+	"time"
 
-	"myst/pkg/logger"
-	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
 )
 
@@ -19,34 +18,30 @@ var (
 
 type Invitation struct {
 	Id          string
-	InviterId   string
 	KeystoreId  string
+	InviterId   string
 	InviteeId   string
 	InviterKey  []byte
 	InviteeKey  []byte
 	KeystoreKey []byte
 	Status      Status
-	CreatedAt   timestamp.Timestamp
-	UpdatedAt   timestamp.Timestamp
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
-func New(opts ...Option) (*Invitation, error) {
-	k := &Invitation{
+func New(opts ...Option) Invitation {
+	inv := Invitation{
 		Id:        uuid.New().String(),
-		CreatedAt: timestamp.New(),
-		UpdatedAt: timestamp.New(),
 		Status:    Pending,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	for _, opt := range opts {
-		err := opt(k)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
+		opt(&inv)
 	}
 
-	return k, nil
+	return inv
 }
 
 func (i *Invitation) Pending() bool {

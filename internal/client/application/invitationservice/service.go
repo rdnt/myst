@@ -33,7 +33,7 @@ func New(opts ...Option) (invitation.Service, error) {
 	return s, nil
 }
 
-func (s *service) CreateKeystoreInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error) {
+func (s service) CreateKeystoreInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (invitation.Invitation, error) {
 	//TODO implement me
 	panic("implement me")
 }

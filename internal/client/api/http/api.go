@@ -2,6 +2,8 @@ package http
 
 import (
 	"io/ioutil"
+	"net/http"
+
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/application"
 	"myst/internal/client/application/domain/entry"
@@ -9,7 +11,6 @@ import (
 	"myst/internal/client/application/keystoreservice"
 	"myst/pkg/config"
 	"myst/pkg/logger"
-	"net/http"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -59,7 +60,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	var k *keystore.Keystore
+	var k keystore.Keystore
 	if req.Password != nil {
 		k, err = api.app.CreateFirstKeystore(
 			req.Name,
@@ -81,20 +82,20 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	entries := []generated.Entry{}
 
-	for _, e := range k.Entries() {
+	for _, e := range k.Entries {
 		entries = append(entries, generated.Entry{
-			Id:       e.Id(),
-			Website:  e.Website(),
-			Username: e.Username(),
-			Password: e.Password(),
-			Notes:    e.Notes(),
+			Id:       e.Id,
+			Website:  e.Website,
+			Username: e.Username,
+			Password: e.Password,
+			Notes:    e.Notes,
 		})
 	}
 
 	c.JSON(
 		http.StatusCreated, generated.Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
+			Id:      k.Id,
+			Name:    k.Name,
 			Entries: entries,
 		},
 	)
@@ -164,7 +165,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 	}
 
 	e, err := api.app.CreateKeystoreEntry(
-		k.Id(),
+		k.Id,
 		entry.WithWebsite(req.Website),
 		entry.WithUsername(req.Username),
 		entry.WithPassword(req.Password),
@@ -178,11 +179,11 @@ func (api *API) CreateEntry(c *gin.Context) {
 
 	Success(
 		c, generated.Entry{
-			Id:       e.Id(),
-			Website:  e.Website(),
-			Username: e.Username(),
-			Password: e.Password(),
-			Notes:    e.Notes(),
+			Id:       e.Id,
+			Website:  e.Website,
+			Username: e.Username,
+			Password: e.Password,
+			Notes:    e.Notes,
 		},
 	)
 }
@@ -206,20 +207,20 @@ func (api *API) Keystore(c *gin.Context) {
 
 	entries := []generated.Entry{}
 
-	for _, e := range k.Entries() {
+	for _, e := range k.Entries {
 		entries = append(entries, generated.Entry{
-			Id:       e.Id(),
-			Website:  e.Website(),
-			Username: e.Username(),
-			Password: e.Password(),
-			Notes:    e.Notes(),
+			Id:       e.Id,
+			Website:  e.Website,
+			Username: e.Username,
+			Password: e.Password,
+			Notes:    e.Notes,
 		})
 	}
 
 	Success(
 		c, generated.Keystore{
-			Id:      k.Id(),
-			Name:    k.Name(),
+			Id:      k.Id,
+			Name:    k.Name,
 			Entries: entries,
 		},
 	)
@@ -247,11 +248,11 @@ func (api *API) UpdateEntry(c *gin.Context) {
 	// TODO: change entries returned to be a map, implemennt the rest
 	Success(
 		c, generated.Entry{
-			Id:       e.Id(),
-			Website:  e.Website(),
-			Username: e.Username(),
-			Password: e.Password(),
-			Notes:    e.Notes(),
+			Id:       e.Id,
+			Website:  e.Website,
+			Username: e.Username,
+			Password: e.Password,
+			Notes:    e.Notes,
 		},
 	)
 }
@@ -289,22 +290,22 @@ func (api *API) Keystores(c *gin.Context) {
 	for _, k := range ks {
 		entries := []generated.Entry{}
 
-		for _, e := range k.Entries() {
+		for _, e := range k.Entries {
 			entries = append(
 				entries, generated.Entry{
-					Id:       e.Id(),
-					Website:  e.Website(),
-					Username: e.Username(),
-					Password: e.Password(),
-					Notes:    e.Notes(),
+					Id:       e.Id,
+					Website:  e.Website,
+					Username: e.Username,
+					Password: e.Password,
+					Notes:    e.Notes,
 				},
 			)
 		}
 
 		keystores = append(
 			keystores, generated.Keystore{
-				Id:      k.Id(),
-				Name:    k.Name(),
+				Id:      k.Id,
+				Name:    k.Name,
 				Entries: entries,
 			},
 		)

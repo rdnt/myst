@@ -95,14 +95,14 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// Invitation request
+	Invitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// Invitations request
 	Invitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// Invitation request
-	Invitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// AcceptInvitation request with any body
 	AcceptInvitationWithBody(ctx context.Context, keystoreId string, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -152,6 +152,18 @@ func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditor
 	return c.Client.Do(req)
 }
 
+func (c *Client) Invitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInvitationRequest(c.Server, invitationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) Invitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInvitationsRequest(c.Server)
 	if err != nil {
@@ -166,18 +178,6 @@ func (c *Client) Invitations(ctx context.Context, reqEditors ...RequestEditorFn)
 
 func (c *Client) Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewKeystoreRequest(c.Server, keystoreId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) Invitation(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInvitationRequest(c.Server, keystoreId, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -336,6 +336,40 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	return req, nil
 }
 
+// NewInvitationRequest generates requests for Invitation
+func NewInvitationRequest(server string, invitationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/invitation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewInvitationsRequest generates requests for Invitations
 func NewInvitationsRequest(server string) (*http.Request, error) {
 	var err error
@@ -380,47 +414,6 @@ func NewKeystoreRequest(server string, keystoreId string) (*http.Request, error)
 	}
 
 	operationPath := fmt.Sprintf("/api/keystore/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewInvitationRequest generates requests for Invitation
-func NewInvitationRequest(server string, keystoreId string, invitationId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/api/keystore/%s/invitation/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -708,14 +701,14 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
+	// Invitation request
+	InvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error)
+
 	// Invitations request
 	InvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*InvitationsResponse, error)
 
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
-
-	// Invitation request
-	InvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error)
 
 	// AcceptInvitation request with any body
 	AcceptInvitationWithBodyWithResponse(ctx context.Context, keystoreId string, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
@@ -764,6 +757,29 @@ func (r LoginResponse) StatusCode() int {
 	return 0
 }
 
+type InvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r InvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type InvitationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -804,29 +820,6 @@ func (r KeystoreResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r KeystoreResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type InvitationResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *Invitation
-	JSONDefault  *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r InvitationResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r InvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -965,6 +958,15 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
+// InvitationWithResponse request returning *InvitationResponse
+func (c *ClientWithResponses) InvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error) {
+	rsp, err := c.Invitation(ctx, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInvitationResponse(rsp)
+}
+
 // InvitationsWithResponse request returning *InvitationsResponse
 func (c *ClientWithResponses) InvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*InvitationsResponse, error) {
 	rsp, err := c.Invitations(ctx, reqEditors...)
@@ -981,15 +983,6 @@ func (c *ClientWithResponses) KeystoreWithResponse(ctx context.Context, keystore
 		return nil, err
 	}
 	return ParseKeystoreResponse(rsp)
-}
-
-// InvitationWithResponse request returning *InvitationResponse
-func (c *ClientWithResponses) InvitationWithResponse(ctx context.Context, keystoreId string, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error) {
-	rsp, err := c.Invitation(ctx, keystoreId, invitationId, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseInvitationResponse(rsp)
 }
 
 // AcceptInvitationWithBodyWithResponse request with arbitrary body returning *AcceptInvitationResponse
@@ -1102,6 +1095,39 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 	return response, nil
 }
 
+// ParseInvitationResponse parses an HTTP response from a InvitationWithResponse call
+func ParseInvitationResponse(rsp *http.Response) (*InvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseInvitationsResponse parses an HTTP response from a InvitationsWithResponse call
 func ParseInvitationsResponse(rsp *http.Response) (*InvitationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1151,39 +1177,6 @@ func ParseKeystoreResponse(rsp *http.Response) (*KeystoreResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest Keystore
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseInvitationResponse parses an HTTP response from a InvitationWithResponse call
-func ParseInvitationResponse(rsp *http.Response) (*InvitationResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &InvitationResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Invitation
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -17,17 +17,17 @@ var (
 )
 
 type Client interface {
-	SignIn(username, password string) error
-	SignOut() error
-	SignedIn() bool
-	UploadKeystore(name string, payload []byte) (*generated.Keystore, error)
-	Keystore(id string) (*generated.Keystore, error)
-	Keystores() ([]*generated.Keystore, error)
-	CreateInvitation(keystoreId, inviteeId string, inviterPublicKey []byte) (*generated.Invitation, error)
-	AcceptInvitation(keystoreId, invitationId string, inviteePublicKey []byte) (*generated.Invitation, error)
-	FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
-	Invitation(keystoreId, invitationId string) (*generated.Invitation, error)
-	Invitations() ([]generated.Invitation, error)
+	//SignIn(username, password string) error
+	//SignOut() error
+	//SignedIn() bool
+	//UploadKeystore(name string, payload []byte) (generated.Keystore, error)
+	//Keystore(id string) (generated.Keystore, error)
+	//Keystores() ([]generated.Keystore, error)
+	//CreateInvitation(keystoreId, inviteeId string, inviterPublicKey []byte) (generated.Invitation, error)
+	//AcceptInvitation(keystoreId, invitationId string, inviteePublicKey []byte) (generated.Invitation, error)
+	//FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (generated.Invitation, error)
+	//Invitation(keystoreId, invitationId string) (generated.Invitation, error)
+	//Invitations() ([]generated.Invitation, error)
 }
 
 type client struct {

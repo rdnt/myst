@@ -34,13 +34,13 @@ type Application interface {
 
 	// keystores
 	Authenticate(password string) error
-	CreateFirstKeystore(name, password string) (*keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
-	CreateKeystore(name string) (*keystore.Keystore, error)
-	Keystore(id string) (*keystore.Keystore, error)
+	CreateFirstKeystore(name, password string) (keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
+	CreateKeystore(name string) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
 	DeleteKeystoreEntry(keystoreId, entryId string) error
-	Keystores() (map[string]*keystore.Keystore, error)
+	Keystores() (map[string]keystore.Keystore, error)
 	HealthCheck()
 
 	CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error)
@@ -165,7 +165,7 @@ func (app *application) setup() {
 	}
 
 	for _, opt := range opts {
-		_, err = app.keystores.CreateKeystoreEntry(k1.Id(), opt...)
+		_, err = app.keystores.CreateKeystoreEntry(k1.Id, opt...)
 		if err != nil {
 			panic(err)
 		}
@@ -176,7 +176,7 @@ func (app *application) setup() {
 		panic(err)
 	}
 
-	_, err = app.keystores.CreateKeystoreEntry(k2.Id(),
+	_, err = app.keystores.CreateKeystoreEntry(k2.Id,
 		entry.WithId("pxnChjAmntT5aG35PM3G12"),
 		entry.WithWebsite("www.microsoft.com"), entry.WithUsername("test123@example.com"),
 		entry.WithPassword("H278L5qtwvSVs333"),
@@ -190,7 +190,7 @@ func (app *application) setup() {
 		panic(err)
 	}
 
-	k1, err = app.keystores.Keystore(k1.Id())
+	k1, err = app.keystores.Keystore(k1.Id)
 	if err != nil {
 		fmt.Println(err)
 		return

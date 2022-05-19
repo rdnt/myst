@@ -1,10 +1,11 @@
 package keystoreservice
 
 import (
+	"strings"
+
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/logger"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -54,7 +55,7 @@ func (s *service) KeystoreEntries(id string) (map[string]entry.Entry, error) {
 		return nil, err
 	}
 
-	return k.Entries(), nil
+	return k.Entries, nil
 }
 
 func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, notes *string) (entry.Entry, error) {
@@ -68,7 +69,7 @@ func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, note
 		return entry.Entry{}, err
 	}
 
-	entries := k.Entries()
+	entries := k.Entries
 
 	e, ok := entries[entryId]
 	if !ok {
@@ -83,7 +84,7 @@ func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, note
 		e.SetNotes(*notes)
 	}
 
-	entries[e.Id()] = e
+	entries[e.Id] = e
 
 	k.SetEntries(entries)
 
@@ -96,7 +97,7 @@ func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
 		return err
 	}
 
-	entries := k.Entries()
+	entries := k.Entries
 
 	if _, ok := entries[entryId]; !ok {
 		return ErrEntryNotFound
@@ -108,8 +109,8 @@ func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
 	return s.UpdateKeystore(k)
 }
 
-func (s *service) CreateKeystore(name string) (*keystore.Keystore, error) {
-	return s.keystores.CreateKeystore(keystore.WithName(name))
+func (s *service) CreateKeystore(name string) (keystore.Keystore, error) {
+	return s.keystores.CreateKeystore(keystore.New(keystore.WithName(name)))
 }
 
 func (s *service) KeystoreKey(keystoreId string) ([]byte, error) {
@@ -129,28 +130,28 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 
 	e := entry.New(opts...)
 
-	entries := k.Entries()
-	entries[e.Id()] = e
+	entries := k.Entries
+	entries[e.Id] = e
 	k.SetEntries(entries)
 
 	return e, s.keystores.UpdateKeystore(k)
 }
 
-func (s *service) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
+func (s *service) CreateFirstKeystore(name, password string) (keystore.Keystore, error) {
 	err := s.keystores.Initialize(password)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to initialize enclave")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to initialize enclave")
 	}
 
-	k, err := s.keystores.CreateKeystore(keystore.WithName(name))
+	k, err := s.keystores.CreateKeystore(keystore.New(keystore.WithName(name)))
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to create keystore")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to create keystore")
 	}
 
 	return k, nil
 }
 
-func (s *service) Keystore(id string) (*keystore.Keystore, error) {
+func (s *service) Keystore(id string) (keystore.Keystore, error) {
 	k, err := s.keystores.Keystore(id)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return nil, ErrAuthenticationRequired
@@ -159,7 +160,7 @@ func (s *service) Keystore(id string) (*keystore.Keystore, error) {
 	return k, err
 }
 
-func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
+func (s *service) Keystores() (map[string]keystore.Keystore, error) {
 	ks, err := s.keystores.Keystores()
 	//if err == keystore.ErrAuthenticationRequired {
 	//	return nil, ErrAuthenticationRequired
@@ -170,7 +171,7 @@ func (s *service) Keystores() (map[string]*keystore.Keystore, error) {
 	return ks, err
 }
 
-func (s *service) UpdateKeystore(k *keystore.Keystore) error {
+func (s *service) UpdateKeystore(k keystore.Keystore) error {
 	err := s.keystores.UpdateKeystore(k)
 	//if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return ErrAuthenticationRequired

@@ -1,13 +1,12 @@
 package remote
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"net/http"
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
-	"myst/internal/client/keystorerepo"
-	"myst/internal/client/remote/client"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
 
@@ -25,28 +24,43 @@ var (
 
 // Remote is a remote repository that holds upstream keystores/invitations
 type Remote interface {
-	//invitation.Repository
-	//keystore.Repository
+	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
+	Invitation(id string) (invitation.Invitation, error)
+	UpdateInvitation(inv invitation.Invitation) error
+	Invitations() (map[string]invitation.Invitation, error)
+	DeleteInvitation(id string) error
+
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) error
+	Keystores() (map[string]keystore.Keystore, error)
+	DeleteKeystore(id string) error
 
 	SignIn(username, password string) error
+	SignedIn() bool
 	SignOut() error
 
 	// keystores
-	UploadKeystore(id string) (*generated.Keystore, error)
-	Keystores() ([]*generated.Keystore, error)
-
-	// invitations
-	CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
-	AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
-
-	Invitations() ([]invitation.Invitation, error)
-
-	// TODO: refine to dynamically find local keystoreId
-	FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
+	//UploadKeystore(id string) (*generated.Keystore, error)
+	//Keystores() ([]keystore.Keystore, error)
+	//
+	//// invitations
+	//CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error)
+	//AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error)
+	//
+	//Invitation(id string) (invitation.Invitation, error)
+	//UpdateInvitation(k invitation.Invitation) error
+	//DeleteInvitation(id string) error
+	//
+	//Invitations() ([]invitation.Invitation, error)
+	//
+	//// TODO: refine to dynamically find local keystoreId
+	//FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
 }
 
 type remote struct {
-	client    client.Client
+	client *generated.ClientWithResponses
+
 	keystores keystore.Service
 
 	bearerToken string
@@ -69,69 +83,111 @@ func New(keystores keystore.Service, address string) (Remote, error) {
 		return nil, errors.WithMessage(err, "failed to generate public/private keypair")
 	}
 
-	rc, err := client.New(address)
+	r.client, err = generated.NewClientWithResponses(
+		address,
+		generated.WithRequestEditorFn(r.authenticate()),
+	)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to create remote client")
+		return nil, errors.Wrap(err, "failed to create remote client")
 	}
 
-	r.client = rc
 	r.publicKey = pub
 	r.privateKey = key
 
 	return r, nil
 }
 
-func (r *remote) UploadKeystore(id string) (*generated.Keystore, error) {
-	k, err := r.keystores.Keystore(id)
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get keystore")
-	}
-
-	keystoreKey, err := r.keystores.KeystoreKey(k.Id())
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get keystore key")
-	}
-
-	jk := keystorerepo.KeystoreToJSON(k)
-
-	b, err := json.Marshal(jk)
-	if err != nil {
-		return nil, err
-	}
-
-	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
-	if err != nil {
-		return nil, err
-	}
-
-	rk, err := r.client.UploadKeystore(k.Name(), b)
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to upload keystore")
-	}
-
-	return rk, nil
-}
+//func (r *remote) UploadKeystore(id string) (keystore.Keystore, error) {
+//	if !r.SignedIn() {
+//		return keystore.Keystore{}, ErrSignedOut
+//	}
+//
+//	k, err := r.keystores.Keystore(id)
+//	if err != nil {
+//		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
+//	}
+//
+//	keystoreKey, err := r.keystores.KeystoreKey(k.Id)
+//	if err != nil {
+//		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore key")
+//	}
+//
+//	jk := keystorerepo.KeystoreToJSON(k)
+//
+//	b, err := json.Marshal(jk)
+//	if err != nil {
+//		return keystore.Keystore{}, err
+//	}
+//
+//	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
+//	if err != nil {
+//		return keystore.Keystore{}, err
+//	}
+//
+//	if !r.SignedIn() {
+//		return keystore.Keystore{}, ErrSignedOut
+//	}
+//
+//	res, err := r.client.CreateKeystoreWithResponse(
+//		context.Background(), generated.CreateKeystoreJSONRequestBody{
+//			Name:    k.Name,
+//			Payload: b,
+//		},
+//	)
+//	if err != nil {
+//		return keystore.Keystore{}, err
+//	}
+//
+//	if res.JSON200 == nil {
+//		return keystore.Keystore{}, fmt.Errorf("invalid response")
+//	}
+//
+//	k, err = KeystoreFromJSON(*res.JSON200)
+//	if err != nil {
+//		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
+//	}
+//
+//	return k, nil
+//}
 
 func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
 
-	err := r.client.SignIn(username, password)
+	res, err := r.client.LoginWithResponse(
+		context.Background(), generated.LoginJSONRequestBody{
+			Username: username,
+			Password: password,
+		},
+	)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to sign in")
 	}
+
+	if res.JSON200 == nil {
+		return ErrInvalidResponse
+	}
+
+	token := *res.JSON200
+
+	if token == "" {
+		return errors.New("invalid token")
+	}
+
+	r.bearerToken = string(token)
 
 	fmt.Println("Signed in.")
 
 	return nil
 }
 
+func (r *remote) SignedIn() bool {
+	return r.bearerToken != ""
+}
+
 func (r *remote) SignOut() error {
 	fmt.Println("Signing out from remote...")
 
-	err := r.client.SignOut()
-	if err != nil {
-		return err
-	}
+	r.bearerToken = ""
 
 	fmt.Println("Signed out.")
 
@@ -151,4 +207,11 @@ func newKeypair() ([]byte, []byte, error) {
 	curve25519.ScalarBaseMult(&pub, &key)
 
 	return pub[:], key[:], nil
+}
+
+func (r *remote) authenticate() generated.RequestEditorFn {
+	return func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer "+r.bearerToken)
+		return nil
+	}
 }

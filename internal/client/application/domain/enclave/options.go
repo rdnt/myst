@@ -6,7 +6,7 @@ import (
 
 type Option func(*Enclave) error
 
-func WithKeystores(keystores map[string]*keystore.Keystore) Option {
+func WithKeystores(keystores map[string]keystore.Keystore) Option {
 	return func(e *Enclave) error {
 		for _, k := range keystores {
 			err := e.AddKeystore(k)
@@ -27,7 +27,7 @@ func WithSalt(salt []byte) Option {
 	}
 }
 
-func WithKeystore(k *keystore.Keystore) Option {
+func WithKeystore(k keystore.Keystore) Option {
 	return func(e *Enclave) error {
 		return e.AddKeystore(k)
 	}

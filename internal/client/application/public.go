@@ -16,15 +16,15 @@ func (app *application) SignOut() error {
 	return app.remote.SignOut()
 }
 
-func (app *application) CreateFirstKeystore(name, password string) (*keystore.Keystore, error) {
+func (app *application) CreateFirstKeystore(name, password string) (keystore.Keystore, error) {
 	return app.keystores.CreateFirstKeystore(name, password)
 }
 
-func (app *application) CreateKeystore(name string) (*keystore.Keystore, error) {
+func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
 	return app.keystores.CreateKeystore(name)
 }
 
-func (app *application) Keystore(id string) (*keystore.Keystore, error) {
+func (app *application) Keystore(id string) (keystore.Keystore, error) {
 	return app.keystores.Keystore(id)
 }
 
@@ -48,11 +48,11 @@ func (app *application) KeystoreKey(keystoreId string) ([]byte, error) {
 	return app.keystores.KeystoreKey(keystoreId)
 }
 
-func (app *application) Keystores() (map[string]*keystore.Keystore, error) {
+func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	return app.keystores.Keystores()
 }
 
-func (app *application) UpdateKeystore(k *keystore.Keystore) error {
+func (app *application) UpdateKeystore(k keystore.Keystore) error {
 	return app.keystores.UpdateKeystore(k)
 }
 
@@ -68,21 +68,23 @@ func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId st
 		return nil, err
 	}
 
-	if k.RemoteId() == "" {
-		genk, err := app.remote.UploadKeystore(k.Id())
-		if err != nil {
-			return nil, err
-		}
-
-		k.SetRemoteId(genk.Id)
-
-		err = app.keystores.UpdateKeystore(k)
-		if err != nil {
-			return nil, err
-		}
+	// TODO: do this separately
+	k, err = app.remote.CreateKeystore(k)
+	if err != nil {
+		return nil, err
 	}
 
-	rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
+	err = app.keystores.UpdateKeystore(k)
+	if err != nil {
+		return nil, err
+	}
+
+	inv := invitation.New(
+		invitation.WithKeystoreId(k.Id),
+		invitation.WithInviteeId(inviteeId),
+	)
+
+	rinv, err := app.remote.CreateInvitation(inv)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create invitation")
 	}
@@ -91,7 +93,7 @@ func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId st
 	return nil, nil
 }
 
-func (app *application) Invitations() ([]invitation.Invitation, error) {
+func (app *application) Invitations() (map[string]invitation.Invitation, error) {
 	return app.remote.Invitations()
 }
 

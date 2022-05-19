@@ -55,28 +55,28 @@ func (r *Repository) HealthCheck() {
 	r.lastHealthCheck = time.Now()
 }
 
-func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
+func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
+		return keystore.Keystore{}, fmt.Errorf("authentication required")
 	}
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return nil, err
+		return keystore.Keystore{}, err
 	}
 
 	k, err := e.Keystore(id)
 	if err != nil {
-		return nil, err
+		return keystore.Keystore{}, err
 	}
 
 	return k, nil
 }
 
-func (r *Repository) Keystores() (map[string]*keystore.Keystore, error) {
+func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -130,34 +130,32 @@ func (r *Repository) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (r *Repository) CreateKeystore(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
+		return keystore.Keystore{}, fmt.Errorf("authentication required")
 	}
-
-	k := keystore.New(opts...)
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get enclave")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
 	err = e.AddKeystore(k)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to add keystore")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to add keystore")
 	}
 
 	b, err := enclaveToJSON(e)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to marshal enclave")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to marshal enclave")
 	}
 
 	err = r.sealAndWrite(b, r.key, e.Salt())
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to seal enclave")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to seal enclave")
 	}
 
 	return k, nil
@@ -238,7 +236,7 @@ func (r *Repository) Authenticate(password string) error {
 	return nil
 }
 
-func (r *Repository) UpdateKeystore(k *keystore.Keystore) error {
+func (r *Repository) UpdateKeystore(k keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

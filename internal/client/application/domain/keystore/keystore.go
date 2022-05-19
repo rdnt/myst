@@ -2,6 +2,7 @@ package keystore
 
 import (
 	"errors"
+	"time"
 
 	"myst/internal/client/application/domain/entry"
 
@@ -15,80 +16,36 @@ var (
 )
 
 type Keystore struct {
-	id       string
-	remoteId string
-	name     string
-	version  int
-	entries  map[string]entry.Entry
-}
+	Id      string
+	Name    string
+	Version int
+	Entries map[string]entry.Entry
 
-func (k *Keystore) Id() string {
-	return k.id
-}
-
-func (k *Keystore) RemoteId() string {
-	return k.remoteId
-}
-
-func (k *Keystore) SetRemoteId(id string) {
-	k.remoteId = id
-}
-
-func (k *Keystore) Name() string {
-	return k.name
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (k *Keystore) SetName(name string) {
-	k.name = name
-}
-
-func (k *Keystore) Version() int {
-	return k.version
+	k.Name = name
 }
 
 func (k *Keystore) IncrementVersion() {
-	k.version++
-}
-
-func (k *Keystore) Entries() map[string]entry.Entry {
-	return k.entries
+	k.Version++
 }
 
 func (k *Keystore) SetEntries(entries map[string]entry.Entry) {
-	k.entries = entries
+	k.Entries = entries
 }
 
-//func (k *Keystore) CreateEntry(opts ...entry.Option) error {
-//	e := entry.New(opts...)
-//
-//	if _, ok := k.entries[e.Id()]; ok {
-//		return ErrEntryExists
-//	}
-//
-//	k.entries[e.Id()] = e
-//
-//	return nil
-//}
-//
-//func (k *Keystore) DeleteEntry(id string) error {
-//	if _, ok := k.entries[id]; !ok {
-//		return ErrEntryNotFound
-//	}
-//
-//	delete(k.entries, id)
-//
-//	return nil
-//}
-
-func New(opts ...Option) *Keystore {
-	k := &Keystore{
-		id:      uuid.New().String(),
-		version: 1,
-		entries: map[string]entry.Entry{},
+func New(opts ...Option) Keystore {
+	k := Keystore{
+		Id:      uuid.New().String(),
+		Version: 1,
+		Entries: map[string]entry.Entry{},
 	}
 
 	for _, opt := range opts {
-		opt(k)
+		opt(&k)
 	}
 
 	// TODO: remove this

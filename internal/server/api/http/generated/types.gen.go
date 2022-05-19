@@ -36,16 +36,16 @@ type FinalizeInvitationRequest struct {
 
 // Invitation defines model for Invitation.
 type Invitation struct {
-	CreatedAt   int     `json:"createdAt"`
-	Id          string  `json:"id"`
-	InviteeId   string  `json:"inviteeId"`
-	InviteeKey  *[]byte `json:"inviteeKey,omitempty"`
-	InviterId   string  `json:"inviterId"`
-	InviterKey  *[]byte `json:"inviterKey,omitempty"`
-	KeystoreId  string  `json:"keystoreId"`
-	KeystoreKey *[]byte `json:"keystoreKey,omitempty"`
-	Status      string  `json:"status"`
-	UpdatedAt   int     `json:"updatedAt"`
+	CreatedAt   int64  `json:"createdAt"`
+	Id          string `json:"id"`
+	InviteeId   string `json:"inviteeId"`
+	InviteeKey  []byte `json:"inviteeKey"`
+	InviterId   string `json:"inviterId"`
+	InviterKey  []byte `json:"inviterKey"`
+	KeystoreId  string `json:"keystoreId"`
+	KeystoreKey []byte `json:"keystoreKey"`
+	Status      string `json:"status"`
+	UpdatedAt   int64  `json:"updatedAt"`
 }
 
 // Keystore defines model for Keystore.

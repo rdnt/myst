@@ -19,11 +19,11 @@ func (r *Repository) UserInvitations(userId string) ([]*invitation.Invitation, e
 	invs := []*invitation.Invitation{}
 
 	for _, inv := range r.invitations {
-		if inv.InviterId() == userId {
+		if inv.InviterId == userId {
 			invs = append(invs, &inv)
 		}
 
-		if inv.InviteeId() == userId {
+		if inv.InviteeId == userId {
 			invs = append(invs, &inv)
 		}
 	}
@@ -36,11 +36,11 @@ func (r *Repository) UserInvitation(userId, invitationId string) (*invitation.In
 	defer r.mux.Unlock()
 
 	for _, inv := range r.invitations {
-		if inv.InviterId() == userId && inv.Id() == invitationId {
+		if inv.InviterId == userId && inv.Id == invitationId {
 			return &inv, nil
 		}
 
-		if inv.InviteeId() == userId && inv.Id() == invitationId {
+		if inv.InviteeId == userId && inv.Id == invitationId {
 			return &inv, nil
 		}
 	}
@@ -57,12 +57,12 @@ func (r *Repository) Create(opts ...invitation.Option) (*invitation.Invitation, 
 		return nil, err
 	}
 
-	_, ok := r.invitations[i.Id()]
+	_, ok := r.invitations[i.Id]
 	if ok {
 		return nil, fmt.Errorf("already exists")
 	}
 
-	r.invitations[i.Id()] = *i
+	r.invitations[i.Id] = *i
 
 	return i, nil
 }
@@ -95,12 +95,12 @@ func (r *Repository) Update(s *invitation.Invitation) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.invitations[s.Id()]
+	_, ok := r.invitations[s.Id]
 	if !ok {
 		return fmt.Errorf("not found")
 	}
 
-	r.invitations[s.Id()] = *s
+	r.invitations[s.Id] = *s
 	return nil
 }
 

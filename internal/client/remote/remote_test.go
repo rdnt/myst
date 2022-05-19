@@ -2,12 +2,13 @@ package remote_test
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
 	"myst/internal/client/remote"
-	"os"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -27,10 +28,10 @@ func TestRemote(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 
-	r1, err := remote.New(keystoreService)
+	r1, err := remote.New(keystoreService, "http://localhost:8080")
 	assert.NoError(t, err)
 
-	r2, err := remote.New(keystoreService)
+	r2, err := remote.New(keystoreService, "http://localhost:8080")
 	assert.NoError(t, err)
 
 	user1, pass1 := "rdnt", "1234"

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/keystorerepo"
 	"myst/internal/client/remote/client"
@@ -37,6 +38,8 @@ type Remote interface {
 	// invitations
 	CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
 	AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
+
+	Invitations() ([]invitation.Invitation, error)
 
 	// TODO: refine to dynamically find local keystoreId
 	FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)

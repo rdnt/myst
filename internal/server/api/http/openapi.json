@@ -505,6 +505,9 @@
           "keystoreId",
           "inviterId",
           "inviteeId",
+          "inviterKey",
+          "inviteeKey",
+          "keystoreKey",
           "status",
           "createdAt",
           "updatedAt"
@@ -538,10 +541,12 @@
             "type": "string"
           },
           "createdAt": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "updatedAt": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

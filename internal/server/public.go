@@ -41,7 +41,7 @@ func (app *application) UserKeystores(userId string) ([]*keystore.Keystore, erro
 	}
 
 	for _, inv := range invs {
-		k, err := app.Keystores.Keystore(inv.KeystoreId())
+		k, err := app.Keystores.Keystore(inv.KeystoreId)
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get keystore")
 		}

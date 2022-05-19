@@ -108,7 +108,7 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 
 	invitations := []*invitation.Invitation{}
 	for _, inv := range invs {
-		if opts != nil && opts.Status != nil && *opts.Status != inv.Status() {
+		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
 			continue
 		}
 

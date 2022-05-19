@@ -25,13 +25,17 @@ func New() Timestamp {
 	return Timestamp{time.Now()}
 }
 
+func Parse(t int64) Timestamp {
+	return Timestamp{time.Unix(t, 0)}
+}
+
 // assert timestamp has custom json marshaler/unmarshaler on compile-time
 var _ json.Marshaler = (*Timestamp)(nil)
 var _ json.Unmarshaler = (*Timestamp)(nil)
 
 // MarshalJSON implements the json.Marshaler interface
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	stamp := fmt.Sprintf("%d", t.Time.UnixNano())
+	stamp := fmt.Sprintf("%d", t.Time.Unix())
 	return []byte(stamp), nil
 }
 
@@ -41,7 +45,7 @@ func (t *Timestamp) UnmarshalJSON(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	t.Time = time.Unix(0, ts)
+	t.Time = time.Unix(ts, 0)
 	return
 }
 
@@ -51,7 +55,7 @@ var _ bson.ValueUnmarshaler = (*Timestamp)(nil)
 
 // MarshalBSONValue implements the bson.ValueMarshaler interface
 func (t Timestamp) MarshalBSONValue() (bsontype.Type, []byte, error) {
-	typ, b, err := bson.MarshalValue(t.Time.UnixNano())
+	typ, b, err := bson.MarshalValue(t.Time.Unix())
 	if err != nil {
 		return typ, nil, err
 	}
@@ -65,7 +69,7 @@ func (t *Timestamp) UnmarshalBSONValue(typ bsontype.Type, b []byte) error {
 	}
 
 	i := binary.LittleEndian.Uint64(b)
-	t.Time = time.Unix(0, int64(i))
+	t.Time = time.Unix(int64(i), 0)
 
 	return nil
 }

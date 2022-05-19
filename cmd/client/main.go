@@ -28,6 +28,7 @@ func main() {
 
 	app, err := application.New(
 		application.WithKeystoreService(keystoreService),
+		application.WithRemoteAddress("http://localhost:8080"),
 	)
 	if err != nil {
 		panic(err)

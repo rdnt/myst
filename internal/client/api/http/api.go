@@ -22,7 +22,8 @@ import (
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 // TODO: remove redundant go:generate for old ui
 ////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+//go:generate openapi --input openapi.json --output ../../../../ui/src/api/generated
 
 var log = logger.New("router", logger.Cyan)
 
@@ -285,6 +286,26 @@ func (api *API) GetInvitations(c *gin.Context) {
 	}
 
 	Success(c, restInvs)
+}
+
+func (api *API) CreateInvitation(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	var req generated.CreateInvitationRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	inv, err := api.app.CreateKeystoreInvitation(keystoreId, req.InviteeId)
+	if err != nil {
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
 }
 
 func (api *API) Keystores(c *gin.Context) {

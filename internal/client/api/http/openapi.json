@@ -350,6 +350,53 @@
         }
       }
     },
+    "/keystore/{keystoreId}/invitations": {
+      "parameters": [
+        {
+          "name": "keystoreId",
+          "in": "path",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Create a keystore invitation",
+        "operationId": "CreateInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvitationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/invitations": {
       "get": {
         "description": "Get all keystore invitations",
@@ -502,6 +549,17 @@
             "type": "string"
           },
           "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateInvitationRequest": {
+        "type": "object",
+        "required": [
+          "inviteeId"
+        ],
+        "properties": {
+          "inviteeId": {
             "type": "string"
           }
         }

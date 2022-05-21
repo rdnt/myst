@@ -79,7 +79,7 @@ func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 		return nil, fmt.Errorf("invalid response")
 	}
 
-	var invs map[string]invitation.Invitation
+	invs := map[string]invitation.Invitation{}
 	for _, inv := range *res.JSON200 {
 		inv, err := InvitationFromJSON(inv)
 		if err != nil {

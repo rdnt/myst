@@ -1,13 +1,14 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
-  import * as models from "../api/generated/models";
+  // import * as models from "../api/generated/models";
   import InputField from "./InputField.svelte";
   import Field from "./Field.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
+  import type {Entry} from "../api/generated/index";
   const dispatch = createEventDispatcher();
 
   export let show: boolean = false;
-  export let entry: models.Entry;
+  export let entry: Entry;
 
   $: password = '';
   $: notes = '';

@@ -1,7 +1,8 @@
 <script lang="ts">
   import Modal from "../components/Modal.svelte";
   import {createEventDispatcher} from "svelte";
-  import * as models from "../api/generated/models/index";
+  import type {Entry} from "../api/generated/index";
+  // import * as models from "../api/generated/models/index";
 
   const dispatch = createEventDispatcher();
   const submit = () => {
@@ -9,7 +10,7 @@
   }
 
   export let show: boolean = false;
-  export let entry: models.Entry;
+  export let entry: Entry;
 </script>
 
 <form on:submit|preventDefault={submit}>

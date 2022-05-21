@@ -3,6 +3,7 @@
   import Link from "../components/Link.svelte";
   import Entry from "../components/Entry.svelte";
   import EntryPlaceholder from "../components/EntryPlaceholder.svelte";
+  import CreateInvitationModal from "../components/CreateInvitationModal.svelte";
 
   export let keystore;
 
@@ -14,6 +15,10 @@
   let entry;
 
   $: entry = keystore.entries.find(e => e.id === $params.entryId);
+
+  function createInvitation(detail: any) {
+    console.log("createInvitation", detail);
+  }
 </script>
 
 <div class="entries-list">
@@ -43,6 +48,8 @@
 {:else}
   <EntryPlaceholder />
 {/if}
+
+<CreateInvitationModal bind:show={showCreateInvitationModal} {keystore} on:submit={(e) => {createInvitation(e.detail)}}/>
 
 <style lang="scss">
   .entries-list {

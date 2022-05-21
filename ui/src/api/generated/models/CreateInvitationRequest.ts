@@ -2,6 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type AuthenticateRequest = {
-    password: string;
+export type CreateInvitationRequest = {
+    inviteeId: string;
 };

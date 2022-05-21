@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type AuthenticateRequest = {
-    password: string;
+export type Error = {
+    code: string;
+    message: string;
 };

@@ -6,6 +6,8 @@
 
   export let keystore;
 
+  let showCreateInvitationModal: boolean = false;
+
   const params = useParams();
   const registerFocus = useFocus();
 
@@ -15,6 +17,7 @@
 </script>
 
 <div class="entries-list">
+  <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
   <div class="entries" use:registerFocus>
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>

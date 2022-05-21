@@ -4,11 +4,10 @@
   import Keystores from "./pages/Keystores.svelte";
   import {keystores, getKeystores} from "./stores/keystores.ts";
   import {onMount} from 'svelte';
-  // import api from "./api";
   import LoginForm from "./components/LoginForm.svelte";
   import OnboardingForm from "./components/OnboardingForm.svelte";
   import {DefaultService} from "./api/generated/index";
-  import Error from "./components/Error.svelte";
+  import Messages from "./components/Messages.svelte";
 
   let onboarding = false;
   let ready = false;
@@ -88,7 +87,7 @@
   {/if}
 </Router>
 
-<Error />
+<Messages />
 
 <style lang="scss">
   $bg: #0a0e11;
@@ -121,7 +120,7 @@
       font-family: 'Inter', sans-serif;
       font-weight: 300;
       font-size: 100%;
-      color: $text-color;
+      //color: $text-color;
       line-height: 1.4;
     }
 

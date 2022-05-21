@@ -5,6 +5,31 @@ export interface MystError {
   message: string;
 }
 
+export enum MessageType {
+  Status = "status",
+  Info = "info",
+  Error = "error",
+}
+
+export interface Message {
+  title: string;
+  message: string;
+  type: MessageType;
+}
+
+let setMessagesFunc;
+export const messages = readable<Message[]>(undefined, (set) => {
+  setMessagesFunc = set
+
+  return () => {
+    setMessagesFunc([]);
+  }
+});
+
+export const showMessage( ) => {
+  setMessagesFunc([msg]);
+}
+
 let setErrorFunc;
 export const error = readable<MystError | undefined>(undefined, (set) => {
   setErrorFunc = set

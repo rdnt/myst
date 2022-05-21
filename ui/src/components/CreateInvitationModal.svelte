@@ -7,7 +7,7 @@
   // import api from "../api/index";
   import type {Invitation, Keystore} from "../api/generated/index";
   import {DefaultService} from "../api/generated/index";
-  import {showError} from "../stores/errors";
+  import {showError} from "src/stores/messages";
 
   const dispatchCreated = createEventDispatcher<{ created: { id: string } }>();
 
@@ -53,7 +53,7 @@
   <Modal bind:show>
     <div class="modal-header" slot="header">
       <div class="title">
-        <span>Invite user to keystore</span>
+        <span>Share with...</span>
       </div>
     </div>
 
@@ -92,6 +92,11 @@
         font-weight: 600;
         font-size: 1.8rem;
         margin: 0;
+
+        .keystore-name {
+          font-weight: 400;
+          font-style: italic;
+        }
       }
     }
 

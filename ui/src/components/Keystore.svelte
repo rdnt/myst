@@ -23,7 +23,9 @@
 
 <div class="entries-list">
   <div class="entries" use:registerFocus>
-    <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
+    <div class="entries-list-header">
+      <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
+    </div>
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
         <div class="entry">
@@ -203,7 +205,62 @@
     }
   }
 
+  .entries-list-header {
+    height: 84px;
+    padding: 12px 0;
+    box-sizing: border-box;
+  }
+
   //#entry {
   //  flex-basis: 100%;
   //}
+
+  $accent: #00edb1;
+  .button {
+    outline: none;
+    border: none;
+    height: 40px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0 16px;
+    border-radius: 5px;
+    background-color: rgba(#202228, 1);
+    color: #fff;
+
+    &.left {
+      //margin-right: auto;
+    }
+
+    &.disabled {
+      //background-color: #161819;
+      opacity: .5;
+    }
+
+    &.green {
+      background-color: rgba(#002e23, .9);
+      color: $accent;
+
+      &.disabled {
+        background-color: #0c1d19;
+      }
+    }
+
+    &.transparent {
+      background-color: transparent;
+      padding: 0 12px;
+
+      &.disabled {
+
+      }
+    }
+
+    &.red {
+      background-color: #2e2020;
+      color: #ff9999;
+
+      &.disabled {
+        background-color: rgba(29, 29, 12, 0.99);
+      }
+    }
+  }
 </style>

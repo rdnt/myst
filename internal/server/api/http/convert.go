@@ -15,8 +15,8 @@ func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 		Name:      k.Name(),
 		OwnerId:   k.OwnerId(),
 		Payload:   hex.EncodeToString(k.Payload()),
-		CreatedAt: int(k.CreatedAt().Unix()),
-		UpdatedAt: int(k.UpdatedAt().Unix()),
+		CreatedAt: k.CreatedAt().Unix(),
+		UpdatedAt: k.UpdatedAt().Unix(),
 	}
 }
 

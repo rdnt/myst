@@ -5,6 +5,7 @@ models/AuthenticateRequest.ts
 models/CreateEntryRequest.ts
 models/CreateKeystoreRequest.ts
 models/Entry.ts
+models/Invitation.ts
 models/Keystore.ts
 models/ModelError.ts
 models/UnlockKeystoreRequest.ts

@@ -271,6 +271,22 @@ func (api *API) DeleteEntry(c *gin.Context) {
 	Success(c, nil)
 }
 
+func (api *API) GetInvitations(c *gin.Context) {
+	invs, err := api.app.Invitations()
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	restInvs := generated.Invitations{}
+	for _, inv := range invs {
+		restInvs = append(restInvs, InvitationToRest(inv))
+	}
+
+	Success(c, restInvs)
+}
+
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
 	if err == keystoreservice.ErrInitializationRequired {

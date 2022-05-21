@@ -349,6 +349,34 @@
           }
         }
       }
+    },
+    "/invitations": {
+      "get": {
+        "description": "Get all keystore invitations",
+        "operationId": "GetInvitations",
+        "responses": {
+          "200": {
+            "description": "Invitations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitations"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -477,6 +505,70 @@
             "type": "string"
           }
         }
+      },
+      "Invitations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Invitation"
+        }
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "keystoreId": {
+            "type": "string"
+          },
+          "inviterId": {
+            "type": "string"
+          },
+          "inviteeId": {
+            "type": "string"
+          },
+          "inviterKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "inviteeKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "keystoreKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected",
+              "finalized"
+            ]
+          },
+          "createdAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "id",
+          "keystoreId",
+          "inviterId",
+          "inviteeId",
+          "inviterKey",
+          "inviteeKey",
+          "keystoreKey",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "Error": {
         "type": "object",

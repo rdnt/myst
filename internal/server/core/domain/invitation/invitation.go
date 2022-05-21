@@ -3,9 +3,9 @@ package invitation
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"myst/pkg/logger"
-	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
 )
 
@@ -26,15 +26,15 @@ type Invitation struct {
 	InviteeKey  []byte
 	KeystoreKey []byte
 	Status      Status
-	CreatedAt   timestamp.Timestamp
-	UpdatedAt   timestamp.Timestamp
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func New(opts ...Option) (*Invitation, error) {
 	k := &Invitation{
 		Id:        uuid.New().String(),
-		CreatedAt: timestamp.New(),
-		UpdatedAt: timestamp.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 		Status:    Pending,
 	}
 

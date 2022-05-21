@@ -43,7 +43,8 @@ type Application interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	HealthCheck()
 
-	CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error)
+	CreateKeystoreInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
+	Invitations() (map[string]invitation.Invitation, error)
 }
 
 type application struct {

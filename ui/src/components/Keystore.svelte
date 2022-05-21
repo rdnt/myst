@@ -14,7 +14,7 @@
 
   let entry;
 
-  $: entry = keystore.entries.find(e => e.id === $params.entryId);
+  $: entry = keystore?.entries.find(e => e.id === $params.entryId);
 
   function createInvitation(detail: any) {
     console.log("createInvitation", detail);
@@ -22,8 +22,8 @@
 </script>
 
 <div class="entries-list">
-  <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
   <div class="entries" use:registerFocus>
+    <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
         <div class="entry">

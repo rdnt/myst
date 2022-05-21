@@ -1,6 +1,6 @@
 <script lang="ts">
   import {slide} from 'svelte/transition';
-  import {error} from "../stores/errors"
+  import {error} from "src/stores/messages"
 </script>
 
 {#if $error !== undefined}

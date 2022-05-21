@@ -27,6 +27,9 @@ import {
     Entry,
     EntryFromJSON,
     EntryToJSON,
+    Invitation,
+    InvitationFromJSON,
+    InvitationToJSON,
     Keystore,
     KeystoreFromJSON,
     KeystoreToJSON,
@@ -205,6 +208,32 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async deleteEntry(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<void> {
         await this.deleteEntryRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get all keystore invitations
+     */
+    async getInvitationsRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Invitation>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/invitations`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(InvitationFromJSON));
+    }
+
+    /**
+     * Get all keystore invitations
+     */
+    async getInvitations(initOverrides?: RequestInit): Promise<Array<Invitation>> {
+        const response = await this.getInvitationsRaw(initOverrides);
+        return await response.value();
     }
 
     /**

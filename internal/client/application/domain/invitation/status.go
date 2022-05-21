@@ -9,6 +9,7 @@ type Status string
 const (
 	Pending   Status = "pending"
 	Accepted  Status = "accepted"
+	Rejected  Status = "rejected"
 	Finalized Status = "finalized"
 )
 
@@ -22,6 +23,8 @@ func StatusFromString(s string) (Status, error) {
 		return Pending, nil
 	case Accepted:
 		return Accepted, nil
+	case Rejected:
+		return Rejected, nil
 	case Finalized:
 		return Finalized, nil
 	default:

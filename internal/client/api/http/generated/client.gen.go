@@ -98,6 +98,9 @@ type ClientInterface interface {
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetInvitations request
+	GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -152,6 +155,18 @@ func (c *Client) Authenticate(ctx context.Context, body AuthenticateJSONRequestB
 
 func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewHealthCheckRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetInvitationsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -332,6 +347,33 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/health")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetInvitationsRequest generates requests for GetInvitations
+func NewGetInvitationsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/invitations")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -677,6 +719,9 @@ type ClientWithResponsesInterface interface {
 	// HealthCheck request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
+	// GetInvitations request
+	GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error)
+
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
 
@@ -742,6 +787,29 @@ func (r HealthCheckResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r HealthCheckResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetInvitationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitations
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetInvitationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetInvitationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -934,6 +1002,15 @@ func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEd
 	return ParseHealthCheckResponse(rsp)
 }
 
+// GetInvitationsWithResponse request returning *GetInvitationsResponse
+func (c *ClientWithResponses) GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error) {
+	rsp, err := c.GetInvitations(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetInvitationsResponse(rsp)
+}
+
 // KeystoreWithResponse request returning *KeystoreResponse
 func (c *ClientWithResponses) KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error) {
 	rsp, err := c.Keystore(ctx, keystoreId, reqEditors...)
@@ -1058,6 +1135,39 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 	response := &HealthCheckResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseGetInvitationsResponse parses an HTTP response from a GetInvitationsWithResponse call
+func ParseGetInvitationsResponse(rsp *http.Response) (*GetInvitationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetInvitationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitations
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
 	}
 
 	return response, nil

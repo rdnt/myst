@@ -2,9 +2,9 @@ package keystore
 
 import (
 	"fmt"
+	"time"
 
 	"myst/pkg/logger"
-	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
 )
 
@@ -14,8 +14,8 @@ type Keystore struct {
 	payload   []byte
 	ownerId   string
 	viewerIds []string
-	createdAt timestamp.Timestamp
-	updatedAt timestamp.Timestamp
+	createdAt time.Time
+	updatedAt time.Time
 }
 
 func (k *Keystore) Id() string {
@@ -44,7 +44,6 @@ func (k *Keystore) SetOwnerId(id string) {
 
 func (k *Keystore) SetName(name string) {
 	k.name = name
-	k.updatedAt = timestamp.New()
 }
 
 func (k *Keystore) Payload() []byte {
@@ -53,22 +52,21 @@ func (k *Keystore) Payload() []byte {
 
 func (k *Keystore) SetPayload(payload []byte) {
 	k.payload = payload
-	k.updatedAt = timestamp.New()
 }
 
-func (k *Keystore) CreatedAt() timestamp.Timestamp {
+func (k *Keystore) CreatedAt() time.Time {
 	return k.createdAt
 }
 
-func (k *Keystore) UpdatedAt() timestamp.Timestamp {
+func (k *Keystore) UpdatedAt() time.Time {
 	return k.updatedAt
 }
 
 func New(opts ...Option) (*Keystore, error) {
 	k := &Keystore{
 		id:        uuid.New().String(),
-		createdAt: timestamp.New(),
-		updatedAt: timestamp.New(),
+		createdAt: time.Now(),
+		updatedAt: time.Now(),
 	}
 
 	for _, opt := range opts {

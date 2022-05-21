@@ -8,6 +8,7 @@
   import LoginForm from "./components/LoginForm.svelte";
   import OnboardingForm from "./components/OnboardingForm.svelte";
   import {DefaultService} from "./api/generated/index";
+  import Error from "./components/Error.svelte";
 
   let onboarding = false;
   let ready = false;
@@ -86,6 +87,8 @@
     {/if}
   {/if}
 </Router>
+
+<Error />
 
 <style lang="scss">
   $bg: #0a0e11;

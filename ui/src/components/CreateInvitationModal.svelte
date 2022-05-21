@@ -7,6 +7,7 @@
   // import api from "../api/index";
   import type {Invitation, Keystore} from "../api/generated/index";
   import {DefaultService} from "../api/generated/index";
+  import {showError} from "../stores/errors";
 
   const dispatchCreated = createEventDispatcher<{ created: { id: string } }>();
 
@@ -38,6 +39,7 @@
       console.log(res);
       // dispatchCreated('created', inv.id)
     }).catch((err) => {
+      showError("Create Invitation Failed", err);
       console.error(err)
     })
 
@@ -51,11 +53,7 @@
   <Modal bind:show>
     <div class="modal-header" slot="header">
       <div class="title">
-        <span>Invite user
-          {#if user !== ''}
-            <em>{user}</em>
-          {/if}
-          to keystore <em>{keystore.name}</em></span>
+        <span>Invite user to keystore</span>
       </div>
     </div>
 
@@ -66,7 +64,7 @@
 
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class="button green" type="submit">Invite</button>
+      <button class="button green" type="submit">Invite User</button>
     </div>
   </Modal>
 </form>
@@ -91,20 +89,9 @@
       }
 
       .title {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-
-        .website {
-          font-weight: 600;
-          font-size: 1.8rem;
-          margin: 0;
-        }
-
-        .username {
-          //padding: 5px 0;
-        }
-
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin: 0;
       }
     }
 

@@ -1,24 +1,18 @@
-import {readable} from "svelte/store";
-
-export interface MystError {
-  title: string;
-  message: string;
-}
+import {get, readable} from "svelte/store";
 
 export enum MessageType {
-  Status = "status",
   Info = "info",
   Error = "error",
 }
 
 export interface Message {
-  title: string;
-  message: string;
   type: MessageType;
+  title: string;
+  message: any;
 }
 
 let setMessagesFunc;
-export const messages = readable<Message[]>(undefined, (set) => {
+export const messages = readable<Message[]>([], (set) => {
   setMessagesFunc = set
 
   return () => {
@@ -26,22 +20,22 @@ export const messages = readable<Message[]>(undefined, (set) => {
   }
 });
 
-export const showMessage( ) => {
-  setMessagesFunc([msg]);
+export const showMessage = (title: string, message?: any) => {
+  showMsg({type: MessageType.Info, title, message});
 }
 
-let setErrorFunc;
-export const error = readable<MystError | undefined>(undefined, (set) => {
-  setErrorFunc = set
+export const showError = (title: string, message?: any) => {
+  showMsg({type: MessageType.Error, title, message});
+}
 
-  return () => {
-    set(undefined);
-  }
-});
+const showMsg = (msg: Message) => {
+  const msgs = get(messages);
+  msgs.push(msg);
+  setMessagesFunc(msgs);
 
-export const showError = (title: string, message: string) => {
-  setErrorFunc({ title, message })
   window.setTimeout(() => {
-    setErrorFunc(undefined)
-  }, 10000);
+    const msgs = get(messages);
+    msgs.shift();
+    setMessagesFunc(msgs)
+  }, 5000);
 }

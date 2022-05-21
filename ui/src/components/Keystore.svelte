@@ -67,7 +67,6 @@
       box-sizing: border-box;
 
       :global(.link a) {
-        color: #f00;
         text-decoration: none;
       }
 
@@ -139,6 +138,7 @@
           font-weight: 500;
           margin: 2px 0;
           font-size: 1.1rem;
+          color: #fff;
         }
 
         .name, .user, .pass {

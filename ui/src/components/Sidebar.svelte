@@ -1,6 +1,7 @@
 <script lang="ts">
   import Link from "./Link.svelte";
   import {onMount} from "svelte";
+  import api from "../api";
 
   export let keystores;
 
@@ -17,6 +18,11 @@
       <Link path="/keystore/{keystore.id}">{keystore.name}</Link>
     {/each}
   </div>
+
+
+  {#await api.getInvitations() then invitations}
+    {JSON.stringify(invitations, null, 2)}
+  {/await}
 </div>
 
 <style lang="scss">

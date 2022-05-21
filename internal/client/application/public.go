@@ -60,23 +60,23 @@ func (app *application) Authenticate(password string) error {
 	return app.keystores.Authenticate(password)
 }
 
-func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId string) (*invitation.Invitation, error) {
+func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error) {
 	// TODO: needs refinement. app services should have access to the remote, not the other way around.
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
 	k, err := app.keystores.Keystore(keystoreId)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	// TODO: do this separately
 	k, err = app.remote.CreateKeystore(k)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	err = app.keystores.UpdateKeystore(k)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	inv := invitation.New(
@@ -84,13 +84,13 @@ func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId st
 		invitation.WithInviteeId(inviteeId),
 	)
 
-	rinv, err := app.remote.CreateInvitation(inv)
+	inv, err = app.remote.CreateInvitation(inv)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to create invitation")
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to create invitation")
 	}
 
-	log.Debug("invitation created", "invitation", rinv)
-	return nil, nil
+	log.Debug("invitation created", "invitation", inv)
+	return inv, nil
 }
 
 func (app *application) Invitations() (map[string]invitation.Invitation, error) {

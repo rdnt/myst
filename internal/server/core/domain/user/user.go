@@ -3,9 +3,9 @@ package user
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"myst/pkg/logger"
-	"myst/pkg/timestamp"
 	"myst/pkg/uuid"
 )
 
@@ -17,8 +17,8 @@ type User struct {
 	id        string
 	username  string
 	password  string
-	createdAt timestamp.Timestamp
-	updatedAt timestamp.Timestamp
+	createdAt time.Time
+	updatedAt time.Time
 }
 
 func (u *User) Id() string {
@@ -37,19 +37,19 @@ func (u *User) Password() string {
 	return u.password
 }
 
-func (u *User) CreatedAt() timestamp.Timestamp {
+func (u *User) CreatedAt() time.Time {
 	return u.createdAt
 }
 
-func (u *User) UpdatedAt() timestamp.Timestamp {
+func (u *User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
 
 func New(opts ...Option) (*User, error) {
 	u := &User{
 		id:        uuid.New().String(),
-		createdAt: timestamp.New(),
-		updatedAt: timestamp.New(),
+		createdAt: time.Now(),
+		updatedAt: time.Now(),
 	}
 
 	for _, opt := range opts {

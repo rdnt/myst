@@ -13,4 +13,5 @@ func (api *API) initRoutes(r *gin.RouterGroup) {
 	r.POST("/keystore/:keystoreId/entries", api.CreateEntry)
 	r.PATCH("/keystore/:keystoreId/entry/:entryId", api.UpdateEntry)
 	r.DELETE("/keystore/:keystoreId/entry/:entryId", api.DeleteEntry)
+	r.GET("/invitations", api.GetInvitations)
 }

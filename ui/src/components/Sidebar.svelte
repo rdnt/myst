@@ -1,7 +1,8 @@
 <script lang="ts">
   import Link from "./Link.svelte";
   import {onMount} from "svelte";
-  import api from "../api";
+  import {DefaultService} from "../api/generated/index.ts";
+  // import api from "../api";
 
   export let keystores;
 
@@ -20,7 +21,7 @@
   </div>
 
 
-  {#await api.getInvitations() then invitations}
+  {#await DefaultService.getInvitations() then invitations}
     {JSON.stringify(invitations, null, 2)}
   {/await}
 </div>

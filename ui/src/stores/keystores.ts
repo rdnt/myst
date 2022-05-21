@@ -1,6 +1,7 @@
 import {readable} from "svelte/store";
 import type {Keystore} from "../api/generated";
-import api from "../api";
+import {DefaultService} from "../api/generated";
+// import api from "../api";
 
 let setKeystores;
 export const keystores = readable<Keystore[]>([], (set) => {
@@ -18,7 +19,7 @@ export const keystores = readable<Keystore[]>([], (set) => {
 });
 
 export const getKeystores = () => {
-  return api.keystores().then((keystores: Keystore[]) => {
+  return DefaultService.keystores().then((keystores: Keystore[]) => {
     keystores = keystores.sort((a, b) => {
       return a.id < b.id ? 1 : -1;
     })

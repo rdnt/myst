@@ -1,13 +1,17 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
-  import * as models from "../api/generated/models";
+  // import * as models from "../api/generated/models";
   import InputField from "./InputField.svelte";
   import Field from "./Field.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
-  const dispatch = createEventDispatcher();
+  // import api from "../api/index";
+  import type {Invitation, Keystore} from "../api/generated/index";
+  import {DefaultService} from "../api/generated/index";
+
+  const dispatchCreated = createEventDispatcher<{ created: { id: string } }>();
 
   export let show: boolean = false;
-  export let keystore: models.Keystore;
+  export let keystore: Keystore;
 
   $: user = '';
 
@@ -30,42 +34,45 @@
       return;
     }
 
-    dispatch('submit', {
-      user,
+    DefaultService.createInvitation({inviteeId: user}, keystore.id).then((res) => {
+      console.log(res);
+      // dispatchCreated('created', inv.id)
+    }).catch((err) => {
+      console.error(err)
+    })
+
+    dispatchCreated('created', {
+      id: '',
     });
   };
 </script>
 
-<form class="edit-entry-modal" on:submit|preventDefault={submit}>
+<form class="create-invitation-modal" on:submit|preventDefault={submit}>
   <Modal bind:show>
     <div class="modal-header" slot="header">
-      <div class="image">
-        <img alt={entry.website}
-             src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png"/>
-      </div>
-
       <div class="title">
-        <span class="website">{entry.website}</span>
-        <span class="username">{entry.username}</span>
+        <span>Invite user
+          {#if user !== ''}
+            <em>{user}</em>
+          {/if}
+          to keystore <em>{keystore.name}</em></span>
       </div>
     </div>
 
     <div class="modal-content">
-      <Field label="Website" value={entry.website}/>
-      <Field label="Username" value={entry.username}/>
-      <InputField bind:value={password} error={!passwordValid && 'Password cannot be empty'} label="Password"/>
-      <InputField bind:value={notes} label="Notes"/>
+      <Field label="Keystore" value={keystore.name}/>
+      <InputField bind:value={user} label="User"/>
     </div>
 
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class="button green" type="submit">Save Changes</button>
+      <button class="button green" type="submit">Invite</button>
     </div>
   </Modal>
 </form>
 
 <style lang="scss">
-  .edit-entry-modal {
+  .create-invitation-modal {
 
     .modal-header {
       display: flex;

@@ -1,22 +1,19 @@
 <script lang="ts">
-  import * as models from "../api/generated/models";
+  // import * as models from "../api/generated/models";
   import Field from "../components/Field.svelte";
   import EditEntryModal from "../components/EditEntryModal.svelte";
-  import api from "../api";
+  // import api from "../api/index";
   import DeleteEntryModal from "../components/DeleteEntryModal.svelte";
   import {getKeystores} from "../stores/keystores";
+  import type {Entry, Keystore} from "../api/generated/index";
 
   let showDeleteModal = false;
   let showEditModal = false;
 
   const updateEntry = async (password, notes: string) => {
-    api.updateEntry({
-      keystoreId: keystore.id,
-      entryId: entry.id,
-      updateEntryRequest: {
+    api.updateEntry(keystore.id, entry.id, {
         password: password != entry.password ? password : undefined,
         notes: notes != entry.notes ? notes : undefined,
-      }
     }).then((res) => {
       if (res) {
         console.log(res)
@@ -27,14 +24,11 @@
     });
   }
 
-  export let keystore: models.Keystore;
-  export let entry: models.Entry;
+  export let keystore: Keystore;
+  export let entry: Entry;
 
   const deleteEntry = async () => {
-    await api.deleteEntry({
-      keystoreId: keystore.id,
-      entryId: entry.id
-    }).then((res) => {
+    await api.deleteEntry(keystore.id, entry.id).then((res) => {
       if (res) {
         console.log(res)
         showDeleteModal = false

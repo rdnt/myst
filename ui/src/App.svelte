@@ -4,9 +4,10 @@
   import Keystores from "./pages/Keystores.svelte";
   import {keystores, getKeystores} from "./stores/keystores.ts";
   import {onMount} from 'svelte';
-  import api from "./api";
+  // import api from "./api";
   import LoginForm from "./components/LoginForm.svelte";
   import OnboardingForm from "./components/OnboardingForm.svelte";
+  import {DefaultService} from "./api/generated/index";
 
   let onboarding = false;
   let ready = false;
@@ -15,7 +16,7 @@
   let keystore = null;
 
   const healthCheck = () => {
-    api.healthCheck().then(() => {
+    DefaultService.healthCheck().then(() => {
       console.log("Health check passed");
     }).catch(() => {
       console.log("Health check failed");

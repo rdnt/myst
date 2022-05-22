@@ -1,6 +1,7 @@
 package invitation
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -44,20 +45,20 @@ func New(opts ...Option) Invitation {
 	return inv
 }
 
-func (i *Invitation) Pending() bool {
+func (i Invitation) Pending() bool {
 	return i.Status == Pending
 }
 
-func (i *Invitation) Accepted() bool {
+func (i Invitation) Accepted() bool {
 	return i.Status == Accepted
 }
 
-func (i *Invitation) Finalized() bool {
+func (i Invitation) Finalized() bool {
 	return i.Status == Finalized
 }
 
-func (i *Invitation) String() string {
-	return fmt.Sprintln(i.Id, i.InviteeKey, i.KeystoreKey, i.InviteeId, i.Status)
+func (i Invitation) String() string {
+	return fmt.Sprintln(i.Id, i.KeystoreId, i.InviterId, i.InviteeId, i.Status, base64.StdEncoding.EncodeToString(i.InviterKey), base64.StdEncoding.EncodeToString(i.InviteeKey), base64.StdEncoding.EncodeToString(i.KeystoreKey))
 }
 
 func (i *Invitation) Accept(inviteeKey []byte) error {

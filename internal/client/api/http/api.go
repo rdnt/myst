@@ -299,7 +299,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	inv, err := api.app.CreateKeystoreInvitation(keystoreId, req.InviteeId)
+	inv, err := api.app.CreateInvitation(keystoreId, req.InviteeId)
 	if err != nil {
 		Error(c, http.StatusInternalServerError, err)
 		return

@@ -60,7 +60,7 @@ func (app *application) Authenticate(password string) error {
 	return app.keystores.Authenticate(password)
 }
 
-func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error) {
+func (app *application) CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error) {
 	// TODO: needs refinement. app services should have access to the remote, not the other way around.
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
 	k, err := app.keystores.Keystore(keystoreId)
@@ -100,6 +100,15 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 	}
 
 	return inv, err
+}
+
+func (app *application) FinalizeInvitation(id string) (invitation.Invitation, error) {
+	inv, err := app.remote.FinalizeInvitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
+	}
+
+	return inv, nil
 }
 
 func (app *application) Invitations() (map[string]invitation.Invitation, error) {

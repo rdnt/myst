@@ -1,6 +1,5 @@
 <script lang="ts">
   import Link from "./Link.svelte";
-  import {onMount} from "svelte";
   import api from "../api";
 
   export let keystores;

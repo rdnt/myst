@@ -9,64 +9,36 @@ import (
 )
 
 type Keystore struct {
-	id        string
-	name      string
-	payload   []byte
-	ownerId   string
-	viewerIds []string
-	createdAt time.Time
-	updatedAt time.Time
-}
-
-func (k *Keystore) Id() string {
-	return k.id
+	Id        string
+	Name      string
+	Payload   []byte
+	OwnerId   string
+	ViewerIds []string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (k *Keystore) String() string {
-	return fmt.Sprintln(k.id, k.name, k.ownerId)
-}
-
-func (k *Keystore) ViewerIds() []string {
-	return k.viewerIds
-}
-
-func (k *Keystore) Name() string {
-	return k.name
-}
-
-func (k *Keystore) OwnerId() string {
-	return k.ownerId
+	return fmt.Sprintln(k.Id, k.Name, k.OwnerId, k.ViewerIds, k.CreatedAt, k.UpdatedAt)
 }
 
 func (k *Keystore) SetOwnerId(id string) {
-	k.ownerId = id
+	k.OwnerId = id
 }
 
 func (k *Keystore) SetName(name string) {
-	k.name = name
-}
-
-func (k *Keystore) Payload() []byte {
-	return k.payload
+	k.Name = name
 }
 
 func (k *Keystore) SetPayload(payload []byte) {
-	k.payload = payload
-}
-
-func (k *Keystore) CreatedAt() time.Time {
-	return k.createdAt
-}
-
-func (k *Keystore) UpdatedAt() time.Time {
-	return k.updatedAt
+	k.Payload = payload
 }
 
 func New(opts ...Option) (*Keystore, error) {
 	k := &Keystore{
-		id:        uuid.New().String(),
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
+		Id:        uuid.New().String(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	for _, opt := range opts {
@@ -78,7 +50,7 @@ func New(opts ...Option) (*Keystore, error) {
 	}
 
 	// TODO: remove this
-	k.id = "0000000000000000000000"
+	k.Id = "0000000000000000000000"
 
 	return k, nil
 }

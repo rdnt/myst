@@ -21,7 +21,7 @@ func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error)
 		return nil, err
 	}
 
-	r.keystores[k.Id()] = *k
+	r.keystores[k.Id] = *k
 
 	return k, nil
 }
@@ -54,12 +54,12 @@ func (r *Repository) Update(s *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.keystores[s.Id()]
+	_, ok := r.keystores[s.Id]
 	if !ok {
 		return fmt.Errorf("not found")
 	}
 
-	r.keystores[s.Id()] = *s
+	r.keystores[s.Id] = *s
 	return nil
 }
 
@@ -78,10 +78,10 @@ func (r *Repository) UserKeystores(userId string) ([]*keystore.Keystore, error) 
 	ks := []*keystore.Keystore{}
 
 	for _, k := range r.keystores {
-		if k.OwnerId() == userId {
+		if k.OwnerId == userId {
 			ks = append(ks, &k)
 		} else {
-			for _, uid := range k.ViewerIds() {
+			for _, uid := range k.ViewerIds {
 				if uid == userId {
 					ks = append(ks, &k)
 				}
@@ -97,12 +97,12 @@ func (r *Repository) UserKeystore(userId, keystoreId string) (*keystore.Keystore
 	defer r.mux.Unlock()
 
 	for _, k := range r.keystores {
-		if k.Id() == keystoreId {
-			if k.OwnerId() == userId {
+		if k.Id == keystoreId {
+			if k.OwnerId == userId {
 				return &k, nil
 			}
 
-			for _, uid := range k.ViewerIds() {
+			for _, uid := range k.ViewerIds {
 				if uid == userId {
 					return &k, nil
 				}

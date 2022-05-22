@@ -65,8 +65,25 @@ type LoginRequest struct {
 	Username string `json:"username"`
 }
 
+// RegisterRequest defines model for RegisterRequest.
+type RegisterRequest struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// User defines model for User.
+type User struct {
+	CreatedAt int64  `json:"createdAt"`
+	Id        string `json:"id"`
+	UpdatedAt int64  `json:"updatedAt"`
+	Username  string `json:"username"`
+}
+
 // LoginJSONBody defines parameters for Login.
 type LoginJSONBody LoginRequest
+
+// RegisterJSONBody defines parameters for Register.
+type RegisterJSONBody RegisterRequest
 
 // AcceptInvitationJSONBody defines parameters for AcceptInvitation.
 type AcceptInvitationJSONBody AcceptInvitationRequest
@@ -82,6 +99,9 @@ type CreateKeystoreJSONBody CreateKeystoreRequest
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody LoginJSONBody
+
+// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+type RegisterJSONRequestBody RegisterJSONBody
 
 // AcceptInvitationJSONRequestBody defines body for AcceptInvitation for application/json ContentType.
 type AcceptInvitationJSONRequestBody AcceptInvitationJSONBody

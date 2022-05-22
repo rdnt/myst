@@ -17,28 +17,28 @@ type User struct {
 	passwordHash string
 }
 
-func (r *Repository) CreateUser(opts ...user.Option) (*user.User, error) {
+func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	u, err := user.New(opts...)
 	if err != nil {
-		return nil, err
+		return user.User{}, err
 	}
 
-	_, ok := r.users[u.Id()]
+	_, ok := r.users[u.Id]
 	if ok {
-		return nil, fmt.Errorf("already exists")
+		return user.User{}, fmt.Errorf("already exists")
 	}
 
 	ru := User{
-		User:         *u,
+		User:         u,
 		passwordHash: "asd", // todo: generate hash
 	}
 
-	r.users[ru.Id()] = ru
+	r.users[ru.Id] = ru
 
-	return &ru.User, nil
+	return ru.User, nil
 }
 
 func (r *Repository) User(id string) (*user.User, error) {
@@ -69,7 +69,7 @@ func (r *Repository) UpdateUser(u *user.User) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	ru, ok := r.users[u.Id()]
+	ru, ok := r.users[u.Id]
 	if !ok {
 		return fmt.Errorf("not found")
 	}
@@ -79,7 +79,7 @@ func (r *Repository) UpdateUser(u *user.User) error {
 		passwordHash: ru.passwordHash,
 	}
 
-	r.users[ru2.Id()] = ru2
+	r.users[ru2.Id] = ru2
 
 	return nil
 }

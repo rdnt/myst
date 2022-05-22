@@ -101,6 +101,7 @@ func New(app application.Application) *API {
 
 func (api *API) initRoutes(r *gin.RouterGroup) {
 	r.POST("/auth/login", api.Login)
+	r.POST("/auth/register", api.Register)
 
 	sec := r.Group("")
 	sec.Use(Authentication())

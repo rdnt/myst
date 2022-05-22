@@ -16,32 +16,39 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface AuthenticateRequest
+ * @interface ModelError
  */
-export interface AuthenticateRequest {
+export interface ModelError {
     /**
      * 
      * @type {string}
-     * @memberof AuthenticateRequest
+     * @memberof ModelError
      */
-    password: string;
+    code: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelError
+     */
+    message: string;
 }
 
-export function AuthenticateRequestFromJSON(json: any): AuthenticateRequest {
-    return AuthenticateRequestFromJSONTyped(json, false);
+export function ModelErrorFromJSON(json: any): ModelError {
+    return ModelErrorFromJSONTyped(json, false);
 }
 
-export function AuthenticateRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): AuthenticateRequest {
+export function ModelErrorFromJSONTyped(json: any, ignoreDiscriminator: boolean): ModelError {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'password': json['password'],
+        'code': json['code'],
+        'message': json['message'],
     };
 }
 
-export function AuthenticateRequestToJSON(value?: AuthenticateRequest | null): any {
+export function ModelErrorToJSON(value?: ModelError | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -50,7 +57,8 @@ export function AuthenticateRequestToJSON(value?: AuthenticateRequest | null): a
     }
     return {
         
-        'password': value.password,
+        'code': value.code,
+        'message': value.message,
     };
 }
 

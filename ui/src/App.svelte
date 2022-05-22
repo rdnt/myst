@@ -6,8 +6,8 @@
   import {onMount} from 'svelte';
   import LoginForm from "./components/LoginForm.svelte";
   import OnboardingForm from "./components/OnboardingForm.svelte";
-  import {DefaultService} from "./api/generated/index";
   import Messages from "./components/Messages.svelte";
+  import api from "./api";
 
   let onboarding = false;
   let ready = false;
@@ -16,7 +16,7 @@
   let keystore = null;
 
   const healthCheck = () => {
-    DefaultService.healthCheck().then(() => {
+    api.healthCheck().then(() => {
       console.log("Health check passed");
     }).catch(() => {
       console.log("Health check failed");

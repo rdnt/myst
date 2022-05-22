@@ -5,9 +5,9 @@
   import Field from "./Field.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
   // import api from "../api/index";
-  import type {Keystore} from "../api/generated/index";
-  import {DefaultService} from "../api/generated/index";
+  import type {Invitation, Keystore} from "../api/generated";
   import {showError, showMessage} from "../stores/messages";
+  import api from "../api";
 
   const dispatchCreated = createEventDispatcher<{ created: { id: string } }>();
 
@@ -35,17 +35,16 @@
       return;
     }
 
-    DefaultService.createInvitation({inviteeId: user}, keystore.id).then((res) => {
+    api.createInvitation({
+      keystoreId: keystore.id,
+      createInvitationRequest: {inviteeId: user}
+    }).then((inv: Invitation) => {
       showMessage("Invitation sent");
-      // dispatchCreated('created', inv.id)
+      dispatchCreated('created', {id: inv.id})
     }).catch((err) => {
-      showError("Create Invitation Failed", err);
+      showError("Create Invitation Failed");
       console.error(err)
     })
-
-    dispatchCreated('created', {
-      id: '',
-    });
   };
 </script>
 

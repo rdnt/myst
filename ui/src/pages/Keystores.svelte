@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {useNavigate, useParams} from "svelte-navigator";
-  import Keystore from "../components/Keystore.svelte";
+  import Keystore from "@/components/Keystore.svelte";
   import {onMount} from "svelte";
+  import {useNavigate, useParams} from "svelte-navigator";
 
   const navigate = useNavigate();
   const params = useParams();
@@ -15,13 +15,15 @@
       // TODO: maybe select default keystore once that functionality is implemented
       // keystore = keystores[0];
       keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      navigate("/keystore/"+ keystore.id)
+      navigate("/keystore/" + keystore.id);
     }
-  })
+  });
 
-  $: keystore = (keystores || []).find((keystore) => keystore.id === $params.keystoreId);
+  $: keystore = (keystores || []).find(
+    (keystore) => keystore.id === $params.keystoreId
+  );
 </script>
 
 {#if keystore}
-  <Keystore {keystore} />
+  <Keystore {keystore}/>
 {/if}

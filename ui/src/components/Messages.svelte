@@ -1,6 +1,6 @@
 <script lang="ts">
+  import {messages, MessageType} from "@/stores/messages";
   import {slide} from 'svelte/transition';
-  import {messages, MessageType} from "../stores/messages"
 </script>
 
 {#if $messages.length > 0}

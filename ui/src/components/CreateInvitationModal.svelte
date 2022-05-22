@@ -1,13 +1,11 @@
 <script lang="ts">
-  import Modal from "./Modal.svelte";
-  // import * as models from "../api/generated/models";
-  import InputField from "./InputField.svelte";
-  import Field from "./Field.svelte";
+  import type {Invitation, Keystore} from "@/api";
+  import api from "@/api";
+  import Field from "@/components/Field.svelte";
+  import InputField from "@/components/InputField.svelte";
+  import Modal from "@/components/Modal.svelte";
+  import {showError, showMessage} from "@/stores/messages";
   import {createEventDispatcher, onMount} from 'svelte';
-  // import api from "../api/index";
-  import type {Invitation, Keystore} from "../api/generated";
-  import {showError, showMessage} from "../stores/messages";
-  import api from "../api";
 
   const dispatchCreated = createEventDispatcher<{ created: { id: string } }>();
 

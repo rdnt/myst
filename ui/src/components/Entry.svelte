@@ -1,19 +1,22 @@
 <script lang="ts">
-  // import * as models from "../api/generated/models";
-  import Field from "../components/Field.svelte";
-  import EditEntryModal from "../components/EditEntryModal.svelte";
-  // import api from "../api/index";
-  import DeleteEntryModal from "../components/DeleteEntryModal.svelte";
-  import {getKeystores} from "../stores/keystores";
-  import type {Entry, Keystore} from "../api/generated/index";
+  import type {Entry, Keystore} from "@/api";
+  import api from "@/api";
+  import DeleteEntryModal from "@/components/DeleteEntryModal.svelte";
+  import EditEntryModal from "@/components/EditEntryModal.svelte";
+  import Field from "@/components/Field.svelte";
+  import {getKeystores} from "@/stores/keystores";
 
   let showDeleteModal = false;
   let showEditModal = false;
 
   const updateEntry = async (password, notes: string) => {
-    api.updateEntry(keystore.id, entry.id, {
+    api.updateEntry({
+      keystoreId: keystore.id,
+      entryId: entry.id,
+      updateEntryRequest: {
         password: password != entry.password ? password : undefined,
         notes: notes != entry.notes ? notes : undefined,
+      }
     }).then((res) => {
       if (res) {
         console.log(res)
@@ -28,7 +31,10 @@
   export let entry: Entry;
 
   const deleteEntry = async () => {
-    await api.deleteEntry(keystore.id, entry.id).then((res) => {
+    await api.deleteEntry({
+      keystoreId: keystore.id,
+      entryId: entry.id
+    }).then((res) => {
       if (res) {
         console.log(res)
         showDeleteModal = false
@@ -130,7 +136,7 @@
 <!--        </div>-->
 <!--    </Modal>-->
 
-  <DeleteEntryModal bind:show={showDeleteModal} {entry} on:submit={() => {deleteEntry()}}/>
+<DeleteEntryModal bind:show={showDeleteModal} {entry} on:submit={() => {deleteEntry()}}/>
 <!--</div>-->
 
 <style lang="scss">

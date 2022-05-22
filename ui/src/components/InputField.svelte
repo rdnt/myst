@@ -1,11 +1,11 @@
 <script lang="ts">
+  import {createEventDispatcher} from 'svelte';
+
   export let ref = null;
   export let label: string = '';
   export let error: string | undefined = undefined;
   export let placeholder: string = '';
   export let value: string;
-
-  import {createEventDispatcher} from 'svelte';
 
   const dispatch = createEventDispatcher();
 </script>

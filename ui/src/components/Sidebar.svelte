@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Link from "./Link.svelte";
-  import api from "../api";
+  import api from "@/api";
+  import Link from "@/components/Link.svelte";
 
   export let keystores;
 </script>

@@ -26,6 +26,8 @@ var (
 type Remote interface {
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
+	AcceptInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string) (invitation.Invitation, error)
 	UpdateInvitation(inv invitation.Invitation) error
 	Invitations() (map[string]invitation.Invitation, error)
 	DeleteInvitation(id string) error
@@ -84,7 +86,7 @@ func New(keystores keystore.Service, address string) (Remote, error) {
 	}
 
 	r.client, err = generated.NewClientWithResponses(
-		address,
+		address+"/api",
 		generated.WithRequestEditorFn(r.authenticate()),
 	)
 	if err != nil {

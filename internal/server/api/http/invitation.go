@@ -54,7 +54,9 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	var params generated.AcceptInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	inviteeKey := params.PublicKey
@@ -64,7 +66,9 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 		inviteeKey,
 	)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusOK, ToJSONInvitation(inv))

@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 
 	"myst/internal/server/core/domain/invitation"
+	"myst/internal/server/core/domain/user"
 
 	"myst/internal/server/api/http/generated"
 	"myst/internal/server/core/domain/keystore"
@@ -54,4 +55,13 @@ func ToJSONInvitation(inv *invitation.Invitation) generated.Invitation {
 	}
 
 	return gen
+}
+
+func ToJSONUser(u user.User) generated.User {
+	return generated.User{
+		Id:        u.Id,
+		Username:  u.Username,
+		CreatedAt: u.CreatedAt.Unix(),
+		UpdatedAt: u.UpdatedAt.Unix(),
+	}
 }

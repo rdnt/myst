@@ -41,6 +41,10 @@ import {
     UpdateEntryRequestToJSON,
 } from '../models';
 
+export interface AcceptInvitationRequest {
+    invitationId?: string;
+}
+
 export interface AuthenticateOperationRequest {
     authenticateRequest: AuthenticateRequest;
 }
@@ -82,6 +86,32 @@ export interface UpdateEntryOperationRequest {
  * 
  */
 export class DefaultApi extends runtime.BaseAPI {
+
+    /**
+     * Accepts an invitation
+     */
+    async acceptInvitationRaw(requestParameters: AcceptInvitationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Invitation>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/invitation/{invitationId}`.replace(`{${"invitationId"}}`, encodeURIComponent(String(requestParameters.invitationId))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InvitationFromJSON(jsonValue));
+    }
+
+    /**
+     * Accepts an invitation
+     */
+    async acceptInvitation(requestParameters: AcceptInvitationRequest, initOverrides?: RequestInit): Promise<Invitation> {
+        const response = await this.acceptInvitationRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Attempts to authenticate the user

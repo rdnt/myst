@@ -26,6 +26,9 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 	err = os.Chmod(client.dir, os.ModePerm)
 	s.Require().NoError(err)
 
+	//rem, err := remote.New("http://localhost:8080")
+	//s.Require().NoError(err)
+
 	keystoreRepo, err := keystorerepo.New(client.dir)
 	s.Require().NoError(err)
 

@@ -525,7 +525,8 @@
 						"type": "string"
 					},
 					"payload": {
-						"type": "string"
+						"type": "string",
+						"format": "byte"
 					},
 					"ownerId": {
 						"type": "string"

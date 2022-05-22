@@ -71,13 +71,13 @@ type remote struct {
 	privateKey []byte
 }
 
-func New(keystores keystore.Service, address string) (Remote, error) {
+func New(keystoreService keystore.Service, address string) (Remote, error) {
 	r := &remote{
 		client:      nil,
 		bearerToken: "",
 		publicKey:   nil,
 		privateKey:  nil,
-		keystores:   keystores,
+		keystores:   keystoreService,
 	}
 
 	pub, key, err := newKeypair()

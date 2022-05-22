@@ -1,6 +1,5 @@
+import api, {Keystore} from "@/api";
 import {readable} from "svelte/store";
-import type {Keystore} from "../api/generated";
-import api from "../api";
 
 let setKeystores;
 export const keystores = readable<Keystore[]>([], (set) => {

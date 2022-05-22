@@ -5,3 +5,4 @@ const configuration = new Configuration({
 });
 
 export default new DefaultApi(configuration);
+export * from './generated';

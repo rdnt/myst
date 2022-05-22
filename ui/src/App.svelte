@@ -1,13 +1,13 @@
 <script lang="ts">
-  import {Route, Router} from "svelte-navigator";
-  import Sidebar from "./components/Sidebar.svelte";
-  import Keystores from "./pages/Keystores.svelte";
-  import {keystores, getKeystores} from "./stores/keystores.ts";
+  import api from "@/api";
+  import LoginForm from "@/components/LoginForm.svelte";
+  import Messages from "@/components/Messages.svelte";
+  import OnboardingForm from "@/components/OnboardingForm.svelte";
+  import Sidebar from "@/components/Sidebar.svelte";
+  import Keystores from "@/pages/Keystores.svelte";
+  import {getKeystores, keystores} from "@/stores/keystores.ts";
   import {onMount} from 'svelte';
-  import LoginForm from "./components/LoginForm.svelte";
-  import OnboardingForm from "./components/OnboardingForm.svelte";
-  import Messages from "./components/Messages.svelte";
-  import api from "./api";
+  import {Route, Router} from "svelte-navigator";
 
   let onboarding = false;
   let ready = false;
@@ -65,7 +65,7 @@
     <span>Loading...</span>
   {:else}
     {#if onboarding}
-      <OnboardingForm on:created={initialize} />
+      <OnboardingForm on:created={initialize}/>
     {:else if login}
       <LoginForm on:login={initialize}/>
     {:else}
@@ -87,7 +87,7 @@
   {/if}
 </Router>
 
-<Messages />
+<Messages/>
 
 <style lang="scss">
   $bg: #0a0e11;

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import Modal from "../components/Modal.svelte";
+  import type {Entry} from "@/api";
+  import Modal from "@/components/Modal.svelte";
   import {createEventDispatcher} from "svelte";
-  import type {Entry} from "../api/generated/index";
-  // import * as models from "../api/generated/models/index";
 
   const dispatch = createEventDispatcher();
   const submit = () => {

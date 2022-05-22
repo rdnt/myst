@@ -43,8 +43,9 @@ type Application interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	HealthCheck()
 
-	CreateKeystoreInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
-	AcceptInvitation(invitationId string) (invitation.Invitation, error)
+	CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
+	AcceptInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 }
 

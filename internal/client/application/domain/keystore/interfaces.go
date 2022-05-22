@@ -10,11 +10,16 @@ type Repository interface {
 	UpdateKeystore(k Keystore) error
 	Keystores() (map[string]Keystore, error)
 	DeleteKeystore(id string) error
+
+	Authenticate(password string) error
+	Initialize(password string) error
+	HealthCheck()
+	KeystoreKey(keystoreId string) ([]byte, error)
 }
 
 type Service interface {
-	CreateKeystore(name string) (Keystore, error)
-	CreateFirstKeystore(name, password string) (Keystore, error)
+	CreateKeystore(k Keystore) (Keystore, error)
+	CreateFirstKeystore(k Keystore, password string) (Keystore, error)
 	Keystore(id string) (Keystore, error)
 	KeystoreEntries(id string) (map[string]entry.Entry, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)

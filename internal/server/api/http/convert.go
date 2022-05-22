@@ -1,8 +1,6 @@
 package http
 
 import (
-	"encoding/hex"
-
 	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/user"
 
@@ -15,7 +13,7 @@ func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 		Id:        k.Id,
 		Name:      k.Name,
 		OwnerId:   k.OwnerId,
-		Payload:   hex.EncodeToString(k.Payload),
+		Payload:   k.Payload,
 		CreatedAt: k.CreatedAt.Unix(),
 		UpdatedAt: k.UpdatedAt.Unix(),
 	}

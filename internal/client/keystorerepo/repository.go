@@ -23,6 +23,7 @@ type Repository struct {
 	path            string
 	key             []byte
 	lastHealthCheck time.Time
+	//remote          remote.Remote
 }
 
 func New(path string) (*Repository, error) {
@@ -75,6 +76,43 @@ func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 
 	return k, nil
 }
+
+//func (r *Repository) Sync() error {
+//	r.mux.Lock()
+//	defer r.mux.Unlock()
+//
+//	if r.key == nil {
+//		return fmt.Errorf("authentication required")
+//	}
+//
+//	rks, err := r.remote.Keystores()
+//	if err != nil {
+//		return errors.WithMessage(err, "failed to get remote keystores")
+//	}
+//
+//	ks, err := r.Keystores()
+//	if err != nil {
+//		return errors.WithMessage(err, "failed to get local keystores")
+//	}
+//
+//	for _, k := range rks {
+//		if _, ok := ks[k.Id]; !ok {
+//			k, err = r.createKeystore(k)
+//			if err != nil {
+//				return errors.WithMessage(err, "failed to create keystore")
+//			}
+//
+//			ks[k.Id] = k
+//		} else {
+//			err = r.updateKeystore(k)
+//			if err != nil {
+//				return errors.WithMessage(err, "failed to update keystore")
+//			}
+//		}
+//	}
+//
+//	return nil
+//}
 
 func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	r.mux.Lock()
@@ -138,6 +176,10 @@ func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, err
 		return keystore.Keystore{}, fmt.Errorf("authentication required")
 	}
 
+	return r.createKeystore(k)
+}
+
+func (r *Repository) createKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	e, err := r.enclave(r.key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
@@ -244,6 +286,10 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) error {
 		return fmt.Errorf("authentication required")
 	}
 
+	return r.updateKeystore(k)
+}
+
+func (r *Repository) updateKeystore(k keystore.Keystore) error {
 	e, err := r.enclave(r.key)
 	if err != nil {
 		return err

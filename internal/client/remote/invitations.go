@@ -10,6 +10,7 @@ import (
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
+	"myst/pkg/logger"
 )
 
 var (
@@ -124,6 +125,8 @@ func (r *remote) FinalizeInvitation(invitationId string) (invitation.Invitation,
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
 	}
+
+	logger.Error("@@@ ###################### SYMMETRIC WHEN CREATE", string(asymKey))
 
 	// encrypt the keystore key with the asymmetric key
 	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(asymKey, keystoreKey)

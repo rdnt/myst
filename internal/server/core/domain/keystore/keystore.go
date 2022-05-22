@@ -50,7 +50,7 @@ func New(opts ...Option) (*Keystore, error) {
 	}
 
 	// TODO: remove this
-	k.Id = "0000000000000000000000"
+	//k.Id = "0000000000000000000000"
 
 	return k, nil
 }

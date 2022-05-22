@@ -14,6 +14,11 @@ var log = logger.New("client", logger.Red)
 func main() {
 	logger.EnableDebug = config.Debug
 
+	//rem, err := remote.New("http://localhost:8080")
+	//if err != nil {
+	//	panic(err)
+	//}
+
 	keystoreRepo, err := keystorerepo.New("data")
 	if err != nil {
 		panic(err)

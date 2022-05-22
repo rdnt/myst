@@ -12,6 +12,8 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
+	log.Println("SERVER Creating invitation", userId, keystoreId)
+
 	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {

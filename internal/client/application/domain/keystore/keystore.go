@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"myst/internal/client/application/domain/entry"
-
 	"myst/pkg/uuid"
 )
 

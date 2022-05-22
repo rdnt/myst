@@ -69,7 +69,7 @@ func (app *application) UserKeystore(userId, keystoreId string) (*keystore.Keyst
 	return k, nil
 }
 
-func (app *application) CreateUser(username, password string) (*user.User, error) {
+func (app *application) CreateUser(username, password string) (user.User, error) {
 	return app.Users.CreateUser(user.WithUsername(username), user.WithPassword(password))
 }
 

@@ -95,6 +95,11 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// Register request with any body
+	RegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	Register(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// Invitation request
 	Invitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -142,6 +147,30 @@ func (c *Client) LoginWithBody(ctx context.Context, contentType string, body io.
 
 func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewLoginRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRegisterRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Register(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRegisterRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -317,6 +346,46 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	}
 
 	operationPath := fmt.Sprintf("/api/auth/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRegisterRequest calls the generic Register builder with application/json body
+func NewRegisterRequest(server string, body RegisterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRegisterRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRegisterRequestWithBody generates requests for Register with any type of body
+func NewRegisterRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/auth/register")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -701,6 +770,11 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
+	// Register request with any body
+	RegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*RegisterResponse, error)
+
+	RegisterWithResponse(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*RegisterResponse, error)
+
 	// Invitation request
 	InvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error)
 
@@ -751,6 +825,29 @@ func (r LoginResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r LoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type RegisterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r RegisterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RegisterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -958,6 +1055,23 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
+// RegisterWithBodyWithResponse request with arbitrary body returning *RegisterResponse
+func (c *ClientWithResponses) RegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*RegisterResponse, error) {
+	rsp, err := c.RegisterWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRegisterResponse(rsp)
+}
+
+func (c *ClientWithResponses) RegisterWithResponse(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*RegisterResponse, error) {
+	rsp, err := c.Register(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRegisterResponse(rsp)
+}
+
 // InvitationWithResponse request returning *InvitationResponse
 func (c *ClientWithResponses) InvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*InvitationResponse, error) {
 	rsp, err := c.Invitation(ctx, invitationId, reqEditors...)
@@ -1078,6 +1192,39 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest AuthToken
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRegisterResponse parses an HTTP response from a RegisterWithResponse call
+func ParseRegisterResponse(rsp *http.Response) (*RegisterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RegisterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

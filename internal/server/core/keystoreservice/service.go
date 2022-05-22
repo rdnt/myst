@@ -27,7 +27,7 @@ func (s *service) Create(name, ownerId string, payload []byte) (*keystore.Keysto
 
 	return s.keystoreRepo.Create(
 		keystore.WithName(name),
-		keystore.WithOwnerId(u.Id()),
+		keystore.WithOwnerId(u.Id),
 		keystore.WithPayload(payload),
 	)
 }
@@ -46,7 +46,7 @@ func (s *service) UserKeystore(userId, keystoreId string) (*keystore.Keystore, e
 		return nil, err
 	}
 
-	return s.keystoreRepo.UserKeystore(u.Id(), keystoreId)
+	return s.keystoreRepo.UserKeystore(u.Id, keystoreId)
 }
 
 func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
@@ -55,7 +55,7 @@ func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
 		return nil, err
 	}
 
-	return s.keystoreRepo.UserKeystores(u.Id())
+	return s.keystoreRepo.UserKeystores(u.Id)
 }
 
 func New(opts ...Option) (keystore.Service, error) {

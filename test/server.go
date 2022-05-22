@@ -1,15 +1,15 @@
 package test
 
 import (
+	"fmt"
 	"net/http/httptest"
 
 	"github.com/gin-gonic/gin"
 
-	keystorerepo "myst/internal/server/core/keystorerepo/memory"
-
 	application "myst/internal/server"
 	"myst/internal/server/api/http"
 	invitationrepo "myst/internal/server/core/invitationrepo/memory"
+	keystorerepo "myst/internal/server/core/keystorerepo/memory"
 	userrepo "myst/internal/server/core/userrepo/memory"
 )
 
@@ -19,7 +19,7 @@ type Server struct {
 	server *httptest.Server
 }
 
-func (s *IntegrationTestSuite) setupServer() *Server {
+func (s *IntegrationTestSuite) setupServer(port int) *Server {
 	server := &Server{}
 
 	keystoreRepo := keystorerepo.New()
@@ -32,10 +32,14 @@ func (s *IntegrationTestSuite) setupServer() *Server {
 		application.WithUserRepository(userRepo),
 		application.WithInvitationRepository(invitationRepo),
 	)
-	s.Require().Nil(err)
+	s.Require().NoError(err)
 
-	server.router = http.New(server.app).Engine
-	server.server = httptest.NewServer(server.router)
+	api := http.New(server.app)
+
+	go func() {
+		err = api.Run(fmt.Sprintf(":%d", port))
+		s.Require().NoError(err)
+	}()
 
 	return server
 }

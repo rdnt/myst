@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"myst/pkg/logger"
 	"myst/pkg/uuid"
 )
 
@@ -14,54 +13,30 @@ var (
 )
 
 type User struct {
-	id        string
-	username  string
-	password  string
-	createdAt time.Time
-	updatedAt time.Time
-}
-
-func (u *User) Id() string {
-	return u.id
+	Id        string
+	Username  string
+	Password  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (u *User) String() string {
-	return fmt.Sprintln(u.id, u.username, u.password)
+	return fmt.Sprintln(u.Id, u.Username, "****", u.CreatedAt, u.UpdatedAt)
 }
 
-func (u *User) Username() string {
-	return u.username
-}
-
-func (u *User) Password() string {
-	return u.password
-}
-
-func (u *User) CreatedAt() time.Time {
-	return u.createdAt
-}
-
-func (u *User) UpdatedAt() time.Time {
-	return u.updatedAt
-}
-
-func New(opts ...Option) (*User, error) {
-	u := &User{
-		id:        uuid.New().String(),
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
+func New(opts ...Option) (User, error) {
+	u := User{
+		Id:        uuid.New().String(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	for _, opt := range opts {
-		err := opt(u)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
-		}
+		opt(&u)
 	}
 
-	if u.username == "" {
-		return nil, ErrInvalidUsername
+	if u.Username == "" {
+		return User{}, ErrInvalidUsername
 	}
 
 	return u, nil

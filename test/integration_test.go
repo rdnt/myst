@@ -16,7 +16,7 @@ func TestIntegration(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) TestLogin() {
-	u1, err := s.server.app.CreateUser("rdnt", "1234")
+	u1, err := s.server.CreateUser("rdnt", "1234")
 	s.Require().NoError(err)
 
 	err = s.client1.app.SignIn(u1.Id(), u1.Password())

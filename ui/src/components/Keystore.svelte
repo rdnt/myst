@@ -16,8 +16,9 @@
 
   $: entry = keystore?.entries.find(e => e.id === $params.entryId);
 
-  function createInvitation(detail: any) {
-    console.log("createInvitation", detail);
+  function onInvitationCreated(e: { id: string }) {
+    console.log("onInvitationCreated", e);
+    showCreateInvitationModal = false
   }
 </script>
 
@@ -48,10 +49,11 @@
 {#if entry}
   <Entry {entry} {keystore}/>
 {:else}
-  <EntryPlaceholder />
+  <EntryPlaceholder/>
 {/if}
 
-<CreateInvitationModal bind:show={showCreateInvitationModal} {keystore} on:submit={(e) => {createInvitation(e.detail)}}/>
+<CreateInvitationModal bind:show={showCreateInvitationModal} {keystore}
+                       on:created={(e) => {onInvitationCreated(e.detail)}}/>
 
 <style lang="scss">
   .entries-list {

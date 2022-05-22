@@ -2,22 +2,18 @@ package test
 
 import (
 	"fmt"
-	"net/http/httptest"
 	"os"
 
 	"myst/internal/client/api/http"
 	"myst/internal/client/application"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Client struct {
-	dir    string
-	app    application.Application
-	router *gin.Engine
-	server *httptest.Server
+	dir     string
+	app     application.Application
+	address string
 }
 
 func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Client {
@@ -45,9 +41,10 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 	s.Require().NoError(err)
 
 	api := http.New(client.app)
+	client.address = fmt.Sprintf("localhost:%d", port)
 
 	go func() {
-		err = api.Run(fmt.Sprintf(":%d", port))
+		err = api.Run(client.address)
 		s.Require().NoError(err)
 	}()
 
@@ -56,5 +53,5 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 
 func (s *IntegrationTestSuite) teardownClient(client *Client) {
 	s.Require().NoError(os.RemoveAll(client.dir))
-	client.server.Close()
+	//client.server.Close()
 }

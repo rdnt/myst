@@ -93,14 +93,23 @@ func (app *application) CreateKeystoreInvitation(keystoreId string, inviteeId st
 	return inv, nil
 }
 
+func (app *application) AcceptInvitation(id string) (invitation.Invitation, error) {
+	inv, err := app.remote.AcceptInvitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to accept invitation")
+	}
+
+	return inv, err
+}
+
 func (app *application) Invitations() (map[string]invitation.Invitation, error) {
 	return app.remote.Invitations()
 }
 
-func (app *application) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
-	panic("implement me")
-	//rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
-	//if err != nil {
-	//	return nil, errors.WithMessage(err, "failed to create invitation")
-	//}
-}
+//func (app *application) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
+//	panic("implement me")
+//	//rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
+//	//if err != nil {
+//	//	return nil, errors.WithMessage(err, "failed to create invitation")
+//	//}
+//}

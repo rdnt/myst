@@ -22,7 +22,7 @@
 		}
 	],
 	"paths": {
-		"/api/auth/register": {
+		"/auth/register": {
 			"post": {
 				"description": "Registers a new users",
 				"operationId": "Register",
@@ -37,8 +37,8 @@
 					}
 				},
 				"responses": {
-					"200": {
-						"description": "User",
+					"201": {
+						"description": "User created",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -60,7 +60,7 @@
 				}
 			}
 		},
-		"/api/auth/login": {
+		"/auth/login": {
 			"post": {
 				"description": "Authenticates a user",
 				"operationId": "Login",
@@ -98,7 +98,7 @@
 				}
 			}
 		},
-		"/api/keystores": {
+		"/keystores": {
 			"post": {
 				"description": "Creates a keystore",
 				"operationId": "CreateKeystore",
@@ -165,7 +165,7 @@
 				}
 			}
 		},
-		"/api/invitations": {
+		"/invitations": {
 			"get": {
 				"description": "Returns all the invitations that concern this user",
 				"operationId": "Invitations",
@@ -196,7 +196,7 @@
 				}
 			}
 		},
-		"/api/keystore/{keystoreId}": {
+		"/keystore/{keystoreId}": {
 			"get": {
 				"description": "Returns a keystore",
 				"operationId": "Keystore",
@@ -233,7 +233,7 @@
 				}
 			}
 		},
-		"/api/keystore/{keystoreId}/invitations": {
+		"/keystore/{keystoreId}/invitations": {
 			"post": {
 				"description": "Creates an invitation from a user (inviter) to another user (invitee), which, once accepted, will grant the invitee read/write access to the keystore",
 				"operationId": "CreateInvitation",
@@ -280,19 +280,19 @@
 				}
 			}
 		},
-		"/api/invitation/{invitationId}": {
+		"/invitation/{invitationId}": {
+			"parameters": [
+				{
+					"name": "invitationId",
+					"in": "path",
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
 			"get": {
 				"description": "Returns an invitation",
-				"operationId": "Invitation",
-				"parameters": [
-					{
-						"name": "invitationId",
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
+				"operationId": "GetInvitation",
 				"responses": {
 					"200": {
 						"description": "Invitation",
@@ -315,9 +315,7 @@
 						}
 					}
 				}
-			}
-		},
-		"/api/keystore/{keystoreId}/invitation/{invitationId}": {
+			},
 			"patch": {
 				"description": "Accepts an invitation",
 				"operationId": "AcceptInvitation",
@@ -331,22 +329,6 @@
 						}
 					}
 				},
-				"parameters": [
-					{
-						"name": "keystoreId",
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"name": "invitationId",
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
 				"responses": {
 					"200": {
 						"description": "Invitation",
@@ -383,22 +365,6 @@
 						}
 					}
 				},
-				"parameters": [
-					{
-						"name": "keystoreId",
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"name": "invitationId",
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
 				"responses": {
 					"200": {
 						"description": "Invitation",

@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"net/http/httptest"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,9 +13,9 @@ import (
 )
 
 type Server struct {
-	app    application.Application
-	router *gin.Engine
-	server *httptest.Server
+	app     application.Application
+	router  *gin.Engine
+	address string
 }
 
 func (s *IntegrationTestSuite) setupServer(port int) *Server {
@@ -35,9 +34,10 @@ func (s *IntegrationTestSuite) setupServer(port int) *Server {
 	s.Require().NoError(err)
 
 	api := http.New(server.app)
+	server.address = fmt.Sprintf("localhost:%d", port)
 
 	go func() {
-		err = api.Run(fmt.Sprintf(":%d", port))
+		err = api.Run(server.address)
 		s.Require().NoError(err)
 	}()
 
@@ -45,5 +45,5 @@ func (s *IntegrationTestSuite) setupServer(port int) *Server {
 }
 
 func (s *IntegrationTestSuite) teardownServer(server *Server) {
-	server.server.Close()
+	//server.server.Close()
 }

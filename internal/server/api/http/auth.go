@@ -9,30 +9,24 @@ import (
 	"github.com/golang-jwt/jwt"
 
 	"myst/internal/server/api/http/generated"
-	"myst/internal/server/core/domain/user"
 )
 
 func (api *API) Register(c *gin.Context) {
 	var req generated.RegisterRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		panic(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	u, err := api.app.CreateUser(req.Username, req.Password)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
+		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONUser(u))
-}
-
-func ToJSONUser(u user.User) generated.User {
-	return generated.User{
-		Id:       u.Id,
-		Username: u.Username,
-	}
+	c.JSON(http.StatusCreated, ToJSONUser(u))
 }
 
 func (api *API) Login(c *gin.Context) {

@@ -2,10 +2,6 @@
   export let ref = null;
   export let label: string;
   export let value: string;
-
-  import {createEventDispatcher} from 'svelte';
-
-  const dispatch = createEventDispatcher();
 </script>
 
 <div class={$$props.class} class:field={true}>

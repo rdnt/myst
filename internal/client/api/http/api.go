@@ -15,7 +15,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	prometheus "github.com/zsais/go-gin-prometheus"
+	//prometheus "github.com/zsais/go-gin-prometheus"
 )
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
@@ -308,6 +308,18 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	Success(c, InvitationToRest(inv))
 }
 
+func (api *API) AcceptInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	inv, err := api.app.AcceptInvitation(invitationId)
+	if err != nil {
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
+}
+
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
 	if err == keystoreservice.ErrInitializationRequired {
@@ -399,8 +411,8 @@ func New(app application.Application) *API {
 
 	// metrics
 	if config.Debug {
-		p := prometheus.NewPrometheus("gin")
-		p.Use(r)
+		//p := prometheus.NewPrometheus("gin")
+		//p.Use(r)
 	}
 
 	// error 404 handling

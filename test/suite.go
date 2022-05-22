@@ -1,15 +1,17 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 
 	clientGenerated "myst/internal/client/api/http/generated"
 	"myst/internal/server/api/http/generated"
+	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/testing/capture"
 )
@@ -18,10 +20,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 	capture *capture.Capture
 
-	mini *miniredis.Miniredis
-	//router *gin.Engine
-	//rdb      *redis.Client
-	//server *httptest.Server
+	//mini *miniredis.Miniredis
 
 	_server  *Server
 	_client1 *Client
@@ -51,31 +50,57 @@ func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInform
 func (s *IntegrationTestSuite) SetupSuite() {
 	fmt.Println("Running integration_suite tests...")
 
+	config.Debug = true
+	logger.EnableDebug = config.Debug
+
 	ports, err := freeport.GetFreePorts(3)
 	s.Require().NoError(err)
 
 	s._server = s.setupServer(ports[0])
-	s._client1 = s.setupClient(s._server.server.URL, ports[1])
-	s._client2 = s.setupClient(s._server.server.URL, ports[2])
+	s._client1 = s.setupClient("http://"+s._server.address, ports[1])
+	s._client2 = s.setupClient("http://"+s._server.address, ports[2])
 
-	s.server, err = generated.NewClientWithResponses(s._server.server.URL)
-	s.client1, err = clientGenerated.NewClientWithResponses(s._client1.server.URL)
-	s.client2, err = clientGenerated.NewClientWithResponses(s._client2.server.URL)
+	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
+	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
+	s.client2, err = clientGenerated.NewClientWithResponses("http://" + s._client2.address + "/api")
 
-	s.mini, err = miniredis.Run()
+	//s.mini, err = miniredis.Run()
+	//s.Require().NoError(err)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	user, pass := "rdnt", "1234"
+
+	res, err := s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
+	s.Require().NoError(err)
+
+	fmt.Println(string(res.Body))
+
+	s.Require().NotNil(res.JSON201)
+	s.Require().Equal(user, (*res.JSON201).Username)
+
+	err = s._client1.app.SignIn(user, pass)
+	s.Require().NoError(err)
+
+	user, pass = "abcd", "5678"
+
+	res, err = s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
+	s.Require().NoError(err)
+
+	s.Require().NotNil(res.JSON201)
+	s.Require().Equal(user, (*res.JSON201).Username)
+
+	err = s._client2.app.SignIn(user, pass)
 	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	//s.server.Close()
-	s.mini.Close()
-	//logger.Close()
+	//s.mini.Close()
 
 	s.teardownClient(s._client1)
 	s.teardownClient(s._client2)
 	s.teardownServer(s._server)
-
-	//output := s.capture.Stop()
 
 	// if verbose is enabled, print logger output
 	if testing.Verbose() {
@@ -88,11 +113,12 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.capture.Start()
+
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
 	// start next tests with a flushed database
-	s.mini.FlushDB()
+	//s.mini.FlushDB()
 	output := s.capture.Stop()
 
 	if !testing.Verbose() {

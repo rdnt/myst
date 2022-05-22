@@ -1,10 +1,16 @@
 package test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
+	clientgen "myst/internal/client/api/http/generated"
+	"myst/pkg/optional"
+
+	//servergen "myst/internal/server/api/http/generated"
 	"myst/pkg/testing/capture"
 )
 
@@ -15,30 +21,48 @@ func TestIntegration(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *IntegrationTestSuite) TestLogin() {
-	u1, err := s.server.CreateUser("rdnt", "1234")
-	s.Require().NoError(err)
+func (s *IntegrationTestSuite) TestKeystoreCreation() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	err = s.client1.app.SignIn(u1.Id(), u1.Password())
-	s.Require().NoError(err)
+	masterPassword := "12345678"
 
-	u2, err := s.server.app.CreateUser("abcd", "5678")
+	createksres, err := s.client1.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
+		Name:     "test-keystore-1",
+		Password: optional.Ref(masterPassword),
+	})
 	s.Require().NoError(err)
+	s.Require().NotNil(createksres.JSON201)
 
-	err = s.client2.app.SignIn(u2.Id(), u2.Password())
+	ks := *createksres.JSON201
+	s.Require().Equal(ks.Name, "test-keystore-1")
+
+	createinvres, err := s.client1.CreateInvitationWithResponse(ctx, ks.Id, clientgen.CreateInvitationJSONRequestBody{
+		InviteeId: "abcd",
+	})
 	s.Require().NoError(err)
+	s.Require().NotNil(createinvres.JSON200)
 
-	k, err := s.client1.app.CreateFirstKeystore("test", "12345678")
-	s.Require().NoError(err)
-	s.Require().Equal(k.RemoteId(), "")
-
-	err = s.client1.app.SignIn(u1.Id(), u1.Password())
-	s.Require().NoError(err)
-
-	inv, err := s.client1.app.CreateKeystoreInvitation(k.Id(), u2.Id())
-	s.Require().NoError(err)
-
+	inv := *createinvres.JSON200
 	s.T().Log(inv)
 
-	// TODO: accept and finalize
+	invres, err := s.client1.GetInvitationsWithResponse(ctx)
+	s.Require().NoError(err)
+	s.Require().NotNil(invres.JSON200)
+	s.Require().Len(*invres.JSON200, 1)
+
+	invres, err = s.client2.GetInvitationsWithResponse(ctx)
+	s.Require().NoError(err)
+	s.Require().NotNil(invres.JSON200)
+	s.Require().Len(*invres.JSON200, 1)
+
+	acceptResponse, err := s.client2.AcceptInvitationWithResponse(ctx, inv.Id)
+	s.Require().NoError(err)
+	s.Require().NotNil(acceptResponse.JSON200)
+
+	inv = *acceptResponse.JSON200
+	s.Require().Equal(inv.Status, clientgen.InvitationStatusAccepted)
+	s.Require().NotNil(inv.InviteeKey)
+
+	// TODO: accept/decline keystore invitation
 }

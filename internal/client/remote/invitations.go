@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/curve25519"
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/server/api/http/generated"
+	"myst/pkg/crypto"
 )
 
 var (
@@ -15,23 +17,7 @@ var (
 )
 
 func (r *remote) Invitation(id string) (invitation.Invitation, error) {
-	res, err := r.client.InvitationWithResponse(context.Background(), id)
-	if err != nil {
-		return invitation.Invitation{}, errors.Wrap(err, "failed to get invitation")
-	}
-
-	// TODO: add statuscode check
-
-	if res.JSON200 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
-	}
-
-	inv, err := InvitationFromJSON(*res.JSON200)
-	if err != nil {
-		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
-	}
-
-	return inv, nil
+	return r.getInvitation(id)
 }
 
 func (r *remote) UpdateInvitation(k invitation.Invitation) error {
@@ -92,31 +78,86 @@ func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 	return invs, nil
 }
 
-//func (r *remote) AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error) {
-//	if !r.SignedIn() {
-//		return invitation.Invitation{}, ErrSignedOut
-//	}
-//
-//	res, err := r.client.AcceptInvitationWithResponse(
-//		context.Background(), keystoreId, invitationId, generated.AcceptInvitationJSONRequestBody{
-//			PublicKey: r.publicKey,
-//		},
-//	)
-//	if err != nil {
-//		return invitation.Invitation{}, err
-//	}
-//
-//	if res.JSON200 == nil {
-//		return invitation.Invitation{}, fmt.Errorf("invalid response")
-//	}
-//
-//	inv, err := InvitationFromJSON(*res.JSON200)
-//	if err != nil {
-//		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
-//	}
-//
-//	return inv, nil
-//}
+func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, error) {
+	if !r.SignedIn() {
+		return invitation.Invitation{}, ErrSignedOut
+	}
+
+	res, err := r.client.AcceptInvitationWithResponse(
+		context.Background(), invitationId, generated.AcceptInvitationJSONRequestBody{
+			PublicKey: r.publicKey,
+		},
+	)
+	if err != nil {
+		return invitation.Invitation{}, err
+	}
+
+	if res.JSON200 == nil {
+		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	}
+
+	inv, err := InvitationFromJSON(*res.JSON200)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
+	}
+
+	return inv, nil
+}
+
+func (r *remote) FinalizeInvitation(invitationId string) (invitation.Invitation, error) {
+	inv, err := r.getInvitation(invitationId)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
+	}
+
+	// TODO: this should be LOCAL keystoreId, while the function only receives remote one
+	keystoreKey, err := r.keystores.KeystoreKey(inv.KeystoreId)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore key")
+	}
+
+	if inv.Status != "accepted" || inv.InviteeKey == nil {
+		return invitation.Invitation{}, errors.New("invitation has not been accepted")
+	}
+
+	asymKey, err := curve25519.X25519(r.privateKey, inv.InviteeKey)
+	if err != nil {
+		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
+	}
+
+	// encrypt the keystore key with the asymmetric key
+	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(asymKey, keystoreKey)
+	if err != nil {
+		return invitation.Invitation{}, errors.Wrap(err, "failed to encrypt keystore key")
+	}
+
+	res, err := r.client.FinalizeInvitationWithResponse(context.Background(), invitationId, generated.FinalizeInvitationJSONRequestBody{
+		KeystoreKey: encryptedKeystoreKey,
+	})
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
+	}
+
+	if res.JSON200 == nil {
+		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	}
+
+	return InvitationFromJSON(*res.JSON200)
+}
+
+func (r *remote) getInvitation(id string) (invitation.Invitation, error) {
+	res, err := r.client.GetInvitationWithResponse(context.Background(), id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
+	}
+
+	if res.JSON200 == nil {
+		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	}
+
+	return InvitationFromJSON(*res.JSON200)
+}
+
 //
 //func (r *remote) FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (invitation.Invitation, error) {
 //	inv, err := r.client.Invitation(keystoreId, invitationId)

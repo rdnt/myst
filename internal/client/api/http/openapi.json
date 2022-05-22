@@ -397,6 +397,43 @@
         }
       }
     },
+    "/invitation/{invitationId}": {
+      "parameters": [
+        {
+          "name": "invitationId",
+          "in": "path",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Accepts an invitation",
+        "operationId": "AcceptInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/invitations": {
       "get": {
         "description": "Get all keystore invitations",

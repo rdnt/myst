@@ -64,5 +64,12 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	s.Require().Equal(inv.Status, clientgen.InvitationStatusAccepted)
 	s.Require().NotNil(inv.InviteeKey)
 
+	finalizedInv, err := s._client1.app.FinalizeInvitation(inv.Id)
+	s.Require().NoError(err)
+	s.Require().NotNil(acceptResponse.JSON200)
+	s.Require().Equal(finalizedInv.Id, inv.Id)
+
+	s.T().Log(finalizedInv)
+
 	// TODO: accept/decline keystore invitation
 }

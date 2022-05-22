@@ -1,7 +1,6 @@
 <script lang="ts">
-  import InputField from "./InputField.svelte";
-  import api from "../api";
-
+  import api from "@/api";
+  import InputField from "@/components/InputField.svelte";
   import {createEventDispatcher} from 'svelte';
 
   const dispatch = createEventDispatcher();

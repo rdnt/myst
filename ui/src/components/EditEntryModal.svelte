@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Modal from "./Modal.svelte";
-  // import * as models from "../api/generated/models";
-  import InputField from "./InputField.svelte";
-  import Field from "./Field.svelte";
+  import type {Entry} from "@/api";
+  import Field from "@/components/Field.svelte";
+  import InputField from "@/components/InputField.svelte";
+  import Modal from "@/components/Modal.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
-  import type {Entry} from "../api/generated/index";
+
   const dispatch = createEventDispatcher();
 
   export let show: boolean = false;

@@ -1,9 +1,9 @@
 <script lang="ts">
+  import CreateInvitationModal from "@/components/CreateInvitationModal.svelte";
+  import Entry from "@/components/Entry.svelte";
+  import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
+  import Link from "@/components/Link.svelte";
   import {useFocus, useParams} from "svelte-navigator";
-  import Link from "../components/Link.svelte";
-  import Entry from "../components/Entry.svelte";
-  import EntryPlaceholder from "../components/EntryPlaceholder.svelte";
-  import CreateInvitationModal from "../components/CreateInvitationModal.svelte";
 
   export let keystore;
 

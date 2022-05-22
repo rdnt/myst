@@ -19,7 +19,7 @@ type service struct {
 	keystoreRepo keystore.Repository
 }
 
-func (s *service) CreateUser(opts ...user.Option) (*user.User, error) {
+func (s *service) CreateUser(opts ...user.Option) (user.User, error) {
 	return s.userRepo.CreateUser(opts...)
 }
 

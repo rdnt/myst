@@ -11,12 +11,12 @@ import (
 
 func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 	return generated.Keystore{
-		Id:        k.Id(),
-		Name:      k.Name(),
-		OwnerId:   k.OwnerId(),
-		Payload:   hex.EncodeToString(k.Payload()),
-		CreatedAt: k.CreatedAt().Unix(),
-		UpdatedAt: k.UpdatedAt().Unix(),
+		Id:        k.Id,
+		Name:      k.Name,
+		OwnerId:   k.OwnerId,
+		Payload:   hex.EncodeToString(k.Payload),
+		CreatedAt: k.CreatedAt.Unix(),
+		UpdatedAt: k.UpdatedAt.Unix(),
 	}
 }
 

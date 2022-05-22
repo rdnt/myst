@@ -39,9 +39,9 @@ func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []b
 	}
 
 	return s.invitationRepo.Create(
-		invitation.WithKeystoreId(store.Id()),
-		invitation.WithInviterId(inviter.Id()),
-		invitation.WithInviteeId(invitee.Id()),
+		invitation.WithKeystoreId(store.Id),
+		invitation.WithInviterId(inviter.Id),
+		invitation.WithInviteeId(invitee.Id),
 		invitation.WithInviterKey(inviterKey),
 	)
 }
@@ -101,7 +101,7 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 		return nil, err
 	}
 
-	invs, err := s.invitationRepo.UserInvitations(u.Id())
+	invs, err := s.invitationRepo.UserInvitations(u.Id)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")
 	}
@@ -125,7 +125,7 @@ func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invit
 		return nil, err
 	}
 
-	return s.invitationRepo.UserInvitation(u.Id(), invitationId)
+	return s.invitationRepo.UserInvitation(u.Id, invitationId)
 }
 
 //func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {

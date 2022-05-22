@@ -1,18 +1,16 @@
 package user
 
-type Option func(*User) error
+type Option func(*User)
 
 func WithUsername(username string) Option {
-	return func(u *User) error {
-		u.id = username // TODO: remove
-		u.username = username
-		return nil
+	return func(u *User) {
+		u.Id = username // TODO: remove
+		u.Username = username
 	}
 }
 
 func WithPassword(password string) Option {
-	return func(u *User) error {
-		u.password = password
-		return nil
+	return func(u *User) {
+		u.Password = password
 	}
 }

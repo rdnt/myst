@@ -54,7 +54,7 @@ type Keystore struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	OwnerId   string `json:"ownerId"`
-	Payload   string `json:"payload"`
+	Payload   []byte `json:"payload"`
 	UpdatedAt int64  `json:"updatedAt"`
 	Version   int    `json:"version"`
 }

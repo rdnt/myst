@@ -64,7 +64,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	var k keystore.Keystore
 	if req.Password != nil {
 		k, err = api.app.CreateFirstKeystore(
-			req.Name,
+			keystore.New(keystore.WithName(req.Name)),
 			*req.Password,
 		)
 		if err != nil {
@@ -73,7 +73,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 			return
 		}
 	} else {
-		k, err = api.app.CreateKeystore(req.Name)
+		k, err = api.app.CreateKeystore(keystore.New(keystore.WithName(req.Name)))
 		if err != nil {
 			log.Error(err)
 			Error(c, http.StatusInternalServerError, err)

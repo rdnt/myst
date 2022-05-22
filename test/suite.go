@@ -56,9 +56,9 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	ports, err := freeport.GetFreePorts(3)
 	s.Require().NoError(err)
 
-	s._server = s.setupServer(ports[0])
+	s._server = s.setupServer(8080)
 	s._client1 = s.setupClient("http://"+s._server.address, ports[1])
-	s._client2 = s.setupClient("http://"+s._server.address, ports[2])
+	s._client2 = s.setupClient("http://"+s._server.address, 8081)
 
 	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")

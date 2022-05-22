@@ -1,13 +1,17 @@
 package remote
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/keystorerepo"
 	"myst/internal/server/api/http/generated"
+	"myst/pkg/crypto"
+	"myst/pkg/logger"
 )
 
 func InvitationToJSON(inv invitation.Invitation) generated.Invitation {
@@ -54,7 +58,7 @@ func KeystoreToJSON(k keystore.Keystore) generated.Keystore {
 	}
 }
 
-func KeystoreFromJSON(gen generated.Keystore) (keystore.Keystore, error) {
+func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keystore, error) {
 	//CreatedAt
 	//Id
 	//Name
@@ -62,12 +66,25 @@ func KeystoreFromJSON(gen generated.Keystore) (keystore.Keystore, error) {
 	//Payload
 	//UpdatedAt
 
+	logger.Error("@@@@@@@@@@@@@@@@@@@@@@@@@@", string(keystoreKey))
+
+	decryptedKeystorePayload, err := crypto.AES256CBC_Decrypt(keystoreKey, gen.Payload)
+	if err != nil {
+		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc decrypt failed when parsing keystore")
+	}
+
+	logger.Error("DECRYPTEEEED", string(decryptedKeystorePayload))
+
+	var jk keystorerepo.JSONKeystore
+
+	err = json.Unmarshal(decryptedKeystorePayload, &jk)
+	if err != nil {
+		return keystore.Keystore{}, errors.Wrap(err, "failed to unmarshal keystore")
+	}
+
+	return keystorerepo.KeystoreFromJSON(jk)
+
 	// FIXME: this should decode the keystore from the generated one. generated keystore should also return the encrypted
 	// payload so that the client can decrypt and parse it into a keystore.Keystore
 
-	return keystore.Keystore{
-		Id:      gen.Id,
-		Name:    gen.Name,
-		Version: gen.Version,
-	}, nil
 }

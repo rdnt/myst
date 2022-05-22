@@ -34,8 +34,8 @@ type Application interface {
 
 	// keystores
 	Authenticate(password string) error
-	CreateFirstKeystore(name, password string) (keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
-	CreateKeystore(name string) (keystore.Keystore, error)
+	CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystore(id string) (keystore.Keystore, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
@@ -47,6 +47,8 @@ type Application interface {
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
+
+	SyncKeystores() error
 }
 
 type application struct {
@@ -57,6 +59,11 @@ type application struct {
 	remoteAddress string
 }
 
+func (app *application) SyncKeystores() error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (app *application) HealthCheck() {
 	app.keystores.HealthCheck()
 }
@@ -64,7 +71,7 @@ func (app *application) HealthCheck() {
 func (app *application) Start() error {
 	log.Print("App started")
 
-	app.setup()
+	//app.setup()
 
 	return nil
 }
@@ -101,7 +108,7 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	k1, err := app.keystores.CreateFirstKeystore("Passwords", "12345678")
+	k1, err := app.keystores.CreateFirstKeystore(keystore.New(keystore.WithName("Passwords")), "12345678")
 	if err != nil {
 		panic(err)
 	}
@@ -174,7 +181,7 @@ func (app *application) setup() {
 		}
 	}
 
-	k2, err := app.keystores.CreateKeystore("Work")
+	k2, err := app.keystores.CreateKeystore(keystore.New(keystore.WithName("Work")))
 	if err != nil {
 		panic(err)
 	}
@@ -188,7 +195,7 @@ func (app *application) setup() {
 		panic(err)
 	}
 
-	_, err = app.keystores.CreateKeystore("Other")
+	_, err = app.keystores.CreateKeystore(keystore.New(keystore.WithName("Other")))
 	if err != nil {
 		panic(err)
 	}

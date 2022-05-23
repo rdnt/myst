@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
@@ -45,25 +46,25 @@ func TestRemote(t *testing.T) {
 	err = repo.Initialize("12345678")
 	assert.NoError(t, err)
 
-	k, err := repo.CreateKeystore(keystore.WithName("test-keystore"))
+	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test-keystore")))
 	assert.NoError(t, err)
 
 	//keystoreKey, err := repo.KeystoreKey(k.Id())
 	//assert.NoError(t, err)
 
-	genk, err := r1.UploadKeystore(k.Id())
+	genk, err := r1.CreateKeystore(k)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	inv, err := r1.CreateInvitation(genk.Id, user2)
+	inv, err := r1.CreateInvitation(invitation.New(invitation.WithKeystoreId(genk.Id), invitation.WithInviteeId(user2)))
 	assert.NoError(t, err)
 
-	inv, err = r2.AcceptInvitation(genk.Id, inv.Id)
+	inv, err = r2.AcceptInvitation(inv.Id)
 	assert.NoError(t, err)
 
-	inv, err = r1.FinalizeInvitation(k.Id(), genk.Id, inv.Id)
+	inv, err = r1.FinalizeInvitation(inv.Id)
 	assert.NoError(t, err)
 
 	ks, err := r2.Keystores()

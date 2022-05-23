@@ -15,6 +15,7 @@ import (
 )
 
 func TestIntegration(t *testing.T) {
+	t.Log("Integration test")
 	s := &IntegrationTestSuite{
 		capture: capture.New(t),
 	}
@@ -100,5 +101,5 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	// TODO: accept/decline keystore invitation
 
-	time.Sleep(10 * time.Minute)
+	//time.Sleep(10 * time.Minute)
 }

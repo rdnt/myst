@@ -112,14 +112,14 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	s.capture.Start()
+	//s.capture.Start()
 
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
 	// start next tests with a flushed database
 	//s.mini.FlushDB()
-	output := s.capture.Stop()
+	//output := s.capture.Stop()
 
 	if !testing.Verbose() {
 		// show progress
@@ -133,7 +133,7 @@ func (s *IntegrationTestSuite) TearDownTest() {
 	} else {
 		// if verbose is enabled, print logger output
 		if testing.Verbose() {
-			fmt.Printf("%s", output)
+			//fmt.Printf("%s", output)
 		} else {
 			fmt.Println()
 		}

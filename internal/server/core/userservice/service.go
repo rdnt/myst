@@ -19,11 +19,11 @@ type service struct {
 	keystoreRepo keystore.Repository
 }
 
-func (s *service) Register(opts ...user.Option) (*user.User, error) {
-	return s.userRepo.Create(opts...)
+func (s *service) CreateUser(opts ...user.Option) (user.User, error) {
+	return s.userRepo.CreateUser(opts...)
 }
 
-func (s *service) Authorize(u *user.User, password string) error {
+func (s *service) AuthorizeUser(u *user.User, password string) error {
 	panic("implement me")
 }
 

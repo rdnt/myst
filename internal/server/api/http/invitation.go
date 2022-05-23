@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/hex"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,16 +12,15 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
+	log.Println("SERVER Creating invitation", userId, keystoreId)
+
 	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		panic(err)
 	}
 
-	inviterKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
+	inviterKey := params.PublicKey
 
 	inv, err := api.app.CreateInvitation(
 		keystoreId,
@@ -34,11 +32,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) Invitation(c *gin.Context) {
@@ -51,11 +45,7 @@ func (api *API) Invitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) AcceptInvitation(c *gin.Context) {
@@ -66,27 +56,24 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	var params generated.AcceptInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
-	inviteeKey, err := hex.DecodeString(params.PublicKey)
-	if err != nil {
-		panic(err)
-	}
+	inviteeKey := params.PublicKey
 
 	inv, err := api.app.AcceptInvitation(
 		invitationId,
 		inviteeKey,
 	)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) FinalizeInvitation(c *gin.Context) {
@@ -100,10 +87,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	keystoreKey, err := hex.DecodeString(params.KeystoreKey)
-	if err != nil {
-		panic(err)
-	}
+	keystoreKey := params.KeystoreKey
 
 	inv, err := api.app.FinalizeInvitation(
 		invitationId,
@@ -113,17 +97,13 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(
-		http.StatusOK, generated.Invitation{
-			Id: inv.Id(),
-		},
-	)
+	c.JSON(http.StatusOK, ToJSONInvitation(inv))
 }
 
 func (api *API) Invitations(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	invs, err := api.app.Invitations.UserInvitations(userId)
+	invs, err := api.app.UserInvitations(userId)
 	if err != nil {
 		panic(err)
 	}

@@ -21,16 +21,29 @@ import {
     CreateEntryRequest,
     CreateEntryRequestFromJSON,
     CreateEntryRequestToJSON,
+    CreateInvitationRequest,
+    CreateInvitationRequestFromJSON,
+    CreateInvitationRequestToJSON,
     CreateKeystoreRequest,
     CreateKeystoreRequestFromJSON,
     CreateKeystoreRequestToJSON,
     Entry,
     EntryFromJSON,
     EntryToJSON,
+    Invitation,
+    InvitationFromJSON,
+    InvitationToJSON,
     Keystore,
     KeystoreFromJSON,
     KeystoreToJSON,
+    UpdateEntryRequest,
+    UpdateEntryRequestFromJSON,
+    UpdateEntryRequestToJSON,
 } from '../models';
+
+export interface AcceptInvitationRequest {
+    invitationId?: string;
+}
 
 export interface AuthenticateOperationRequest {
     authenticateRequest: AuthenticateRequest;
@@ -41,8 +54,18 @@ export interface CreateEntryOperationRequest {
     createEntryRequest: CreateEntryRequest;
 }
 
+export interface CreateInvitationOperationRequest {
+    createInvitationRequest: CreateInvitationRequest;
+    keystoreId?: string;
+}
+
 export interface CreateKeystoreOperationRequest {
     createKeystoreRequest: CreateKeystoreRequest;
+}
+
+export interface DeleteEntryRequest {
+    keystoreId: string;
+    entryId: string;
 }
 
 export interface KeystoreRequest {
@@ -53,10 +76,42 @@ export interface KeystoreEntriesRequest {
     keystoreId: string;
 }
 
+export interface UpdateEntryOperationRequest {
+    keystoreId: string;
+    entryId: string;
+    updateEntryRequest: UpdateEntryRequest;
+}
+
 /**
  * 
  */
 export class DefaultApi extends runtime.BaseAPI {
+
+    /**
+     * Accepts an invitation
+     */
+    async acceptInvitationRaw(requestParameters: AcceptInvitationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Invitation>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/invitation/{invitationId}`.replace(`{${"invitationId"}}`, encodeURIComponent(String(requestParameters.invitationId))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InvitationFromJSON(jsonValue));
+    }
+
+    /**
+     * Accepts an invitation
+     */
+    async acceptInvitation(requestParameters: AcceptInvitationRequest, initOverrides?: RequestInit): Promise<Invitation> {
+        const response = await this.acceptInvitationRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Attempts to authenticate the user
@@ -128,6 +183,39 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * Create a keystore invitation
+     */
+    async createInvitationRaw(requestParameters: CreateInvitationOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Invitation>> {
+        if (requestParameters.createInvitationRequest === null || requestParameters.createInvitationRequest === undefined) {
+            throw new runtime.RequiredError('createInvitationRequest','Required parameter requestParameters.createInvitationRequest was null or undefined when calling createInvitation.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/invitations`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateInvitationRequestToJSON(requestParameters.createInvitationRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InvitationFromJSON(jsonValue));
+    }
+
+    /**
+     * Create a keystore invitation
+     */
+    async createInvitation(requestParameters: CreateInvitationOperationRequest, initOverrides?: RequestInit): Promise<Invitation> {
+        const response = await this.createInvitationRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Creates a new encrypted keystore with the given password
      */
     async createKeystoreRaw(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Keystore>> {
@@ -157,6 +245,65 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async createKeystore(requestParameters: CreateKeystoreOperationRequest, initOverrides?: RequestInit): Promise<Keystore> {
         const response = await this.createKeystoreRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntryRaw(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling deleteEntry.');
+        }
+
+        if (requestParameters.entryId === null || requestParameters.entryId === undefined) {
+            throw new runtime.RequiredError('entryId','Required parameter requestParameters.entryId was null or undefined when calling deleteEntry.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entry/{entryId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))).replace(`{${"entryId"}}`, encodeURIComponent(String(requestParameters.entryId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Delete a keystore entry
+     */
+    async deleteEntry(requestParameters: DeleteEntryRequest, initOverrides?: RequestInit): Promise<void> {
+        await this.deleteEntryRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Get all keystore invitations
+     */
+    async getInvitationsRaw(initOverrides?: RequestInit): Promise<runtime.ApiResponse<Array<Invitation>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/invitations`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(InvitationFromJSON));
+    }
+
+    /**
+     * Get all keystore invitations
+     */
+    async getInvitations(initOverrides?: RequestInit): Promise<Array<Invitation>> {
+        const response = await this.getInvitationsRaw(initOverrides);
         return await response.value();
     }
 
@@ -268,6 +415,47 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async keystores(initOverrides?: RequestInit): Promise<Array<Keystore>> {
         const response = await this.keystoresRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Update a keystore entry
+     */
+    async updateEntryRaw(requestParameters: UpdateEntryOperationRequest, initOverrides?: RequestInit): Promise<runtime.ApiResponse<Entry>> {
+        if (requestParameters.keystoreId === null || requestParameters.keystoreId === undefined) {
+            throw new runtime.RequiredError('keystoreId','Required parameter requestParameters.keystoreId was null or undefined when calling updateEntry.');
+        }
+
+        if (requestParameters.entryId === null || requestParameters.entryId === undefined) {
+            throw new runtime.RequiredError('entryId','Required parameter requestParameters.entryId was null or undefined when calling updateEntry.');
+        }
+
+        if (requestParameters.updateEntryRequest === null || requestParameters.updateEntryRequest === undefined) {
+            throw new runtime.RequiredError('updateEntryRequest','Required parameter requestParameters.updateEntryRequest was null or undefined when calling updateEntry.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/keystore/{keystoreId}/entry/{entryId}`.replace(`{${"keystoreId"}}`, encodeURIComponent(String(requestParameters.keystoreId))).replace(`{${"entryId"}}`, encodeURIComponent(String(requestParameters.entryId))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateEntryRequestToJSON(requestParameters.updateEntryRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntryFromJSON(jsonValue));
+    }
+
+    /**
+     * Update a keystore entry
+     */
+    async updateEntry(requestParameters: UpdateEntryOperationRequest, initOverrides?: RequestInit): Promise<Entry> {
+        const response = await this.updateEntryRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

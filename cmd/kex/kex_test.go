@@ -9,6 +9,10 @@ import (
 )
 
 func TestKex(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping")
+		return
+	}
 
 	pub, key, err := NewKeypair()
 	if err != nil {

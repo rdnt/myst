@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/hex"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +17,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 		panic(err)
 	}
 
-	payload, err := hex.DecodeString(req.Payload)
-	if err != nil {
-		panic(err)
-	}
-
-	k, err := api.app.CreateKeystore(req.Name, userId, payload)
+	k, err := api.app.CreateKeystore(req.Name, userId, req.Payload)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +29,7 @@ func (api *API) Keystore(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
-	k, err := api.app.Keystores.UserKeystore(userId, keystoreId)
+	k, err := api.app.UserKeystore(userId, keystoreId)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +40,7 @@ func (api *API) Keystore(c *gin.Context) {
 func (api *API) Keystores(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	ks, err := api.app.Keystores.UserKeystores(userId)
+	ks, err := api.app.UserKeystores(userId)
 	if err != nil {
 		panic(err)
 	}

@@ -11,6 +11,24 @@ import (
 	"myst/internal/server/api/http/generated"
 )
 
+func (api *API) Register(c *gin.Context) {
+	var req generated.RegisterRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	u, err := api.app.CreateUser(req.Username, req.Password)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusCreated, ToJSONUser(u))
+}
+
 func (api *API) Login(c *gin.Context) {
 	var params generated.LoginRequest
 	err := c.ShouldBindJSON(&params)
@@ -18,8 +36,8 @@ func (api *API) Login(c *gin.Context) {
 		panic(err)
 	}
 
-	if params.Username == "rdnt" && params.Password != "1234" {
-		panic(err)
+	if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
+		panic("invalid username or password")
 	}
 
 	key, err := api.loginUser(params.Username)

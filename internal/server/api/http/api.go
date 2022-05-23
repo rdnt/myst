@@ -9,7 +9,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	prometheus "github.com/zsais/go-gin-prometheus"
+	//prometheus "github.com/zsais/go-gin-prometheus"
 
 	application "myst/internal/server"
 	"myst/pkg/config"
@@ -24,10 +24,10 @@ var (
 
 type API struct {
 	*gin.Engine
-	app *application.Application
+	app application.Application
 }
 
-func New(app *application.Application) *API {
+func New(app application.Application) *API {
 	api := new(API)
 
 	api.app = app
@@ -62,8 +62,8 @@ func New(app *application.Application) *API {
 
 	// metrics
 	if config.Debug {
-		p := prometheus.NewPrometheus("gin")
-		p.Use(r)
+		//p := prometheus.NewPrometheus("gin")
+		//p.Use(r)
 	}
 
 	// error 404 handling
@@ -99,10 +99,11 @@ func New(app *application.Application) *API {
 	return api
 }
 
-func (api *API) initRoutes(r *gin.RouterGroup) {
-	r.POST("/auth/login", api.Login)
+func (api *API) initRoutes(g *gin.RouterGroup) {
+	g.POST("/auth/login", api.Login)
+	g.POST("/auth/register", api.Register)
 
-	sec := r.Group("")
+	sec := g.Group("")
 	sec.Use(Authentication())
 
 	// keystore
@@ -112,9 +113,9 @@ func (api *API) initRoutes(r *gin.RouterGroup) {
 
 	// invitation
 	sec.POST("/keystore/:keystoreId/invitations", api.CreateInvitation)
-	sec.GET("/keystore/:keystoreId/invitation/:invitationId", api.Invitation)
-	sec.PATCH("/keystore/:keystoreId/invitation/:invitationId", api.AcceptInvitation)
-	sec.POST("/keystore/:keystoreId/invitation/:invitationId", api.FinalizeInvitation)
+	sec.GET("/invitation/:invitationId", api.Invitation)
+	sec.PATCH("/invitation/:invitationId", api.AcceptInvitation)
+	sec.POST("/invitation/:invitationId", api.FinalizeInvitation)
 	sec.GET("/invitations", api.Invitations)
 }
 

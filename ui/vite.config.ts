@@ -1,19 +1,20 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import * as path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-  server: {
-    proxy: {
-      // with options
-      '/api': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-      },
-    }
-  },
   build: {
-    outDir: '../build/static',
-  }
+    outDir: '../build'
+  },
+  server: {
+    port: 8082,
+  },
+  plugins: [svelte()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  optimizeDeps: {exclude: ["svelte-navigator"]},
 })

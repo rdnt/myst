@@ -11,7 +11,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
-	ginprometheus "github.com/zsais/go-gin-prometheus"
+	//ginprometheus "github.com/zsais/go-gin-prometheus"
 
 	"myst/pkg/logger"
 	"myst/pkg/rest"
@@ -62,8 +62,8 @@ func New(opts ...func()) *gin.Engine {
 
 	// metrics (only enable if debugging)
 	if debug {
-		p := ginprometheus.NewPrometheus("gin")
-		p.Use(r)
+		//p := ginprometheus.NewPrometheus("gin")
+		//p.Use(r)
 	}
 
 	// error 404 handling

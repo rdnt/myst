@@ -79,7 +79,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Keystore",
             "content": {
               "application/json": {
@@ -255,6 +255,212 @@
           }
         }
       }
+    },
+
+    "/keystore/{keystoreId}/entry/{entryId}": {
+      "patch": {
+        "description": "Update a keystore entry",
+        "operationId": "UpdateEntry",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a keystore entry",
+        "operationId": "DeleteEntry",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/keystore/{keystoreId}/invitations": {
+      "parameters": [
+        {
+          "name": "keystoreId",
+          "in": "path",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Create a keystore invitation",
+        "operationId": "CreateInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvitationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invitation/{invitationId}": {
+      "parameters": [
+        {
+          "name": "invitationId",
+          "in": "path",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Accepts an invitation",
+        "operationId": "AcceptInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invitations": {
+      "get": {
+        "description": "Get all keystore invitations",
+        "operationId": "GetInvitations",
+        "responses": {
+          "200": {
+            "description": "Invitations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitations"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -298,18 +504,33 @@
       "CreateEntryRequest": {
         "type": "object",
         "required": [
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEntryRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "notes": {
             "type": "string"
           }
         }
@@ -346,15 +567,16 @@
         "type": "object",
         "required": [
           "id",
-          "label",
+          "website",
           "username",
-          "password"
+          "password",
+          "notes"
         ],
         "properties": {
           "id": {
             "type": "string"
           },
-          "label": {
+          "website": {
             "type": "string"
           },
           "username": {
@@ -362,8 +584,86 @@
           },
           "password": {
             "type": "string"
+          },
+          "notes": {
+            "type": "string"
           }
         }
+      },
+      "CreateInvitationRequest": {
+        "type": "object",
+        "required": [
+          "inviteeId"
+        ],
+        "properties": {
+          "inviteeId": {
+            "type": "string"
+          }
+        }
+      },
+      "Invitations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Invitation"
+        }
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "keystoreId": {
+            "type": "string"
+          },
+          "inviterId": {
+            "type": "string"
+          },
+          "inviteeId": {
+            "type": "string"
+          },
+          "inviterKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "inviteeKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "keystoreKey": {
+            "type": "string",
+            "format": "byte"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected",
+              "finalized"
+            ]
+          },
+          "createdAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "id",
+          "keystoreId",
+          "inviterId",
+          "inviteeId",
+          "inviterKey",
+          "inviteeKey",
+          "keystoreKey",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "Error": {
         "type": "object",

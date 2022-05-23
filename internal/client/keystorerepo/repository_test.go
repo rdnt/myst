@@ -19,9 +19,9 @@ func TestRepository(t *testing.T) {
 	err = repo.Authenticate("12345678")
 	assert.NoError(t, err)
 
-	k, err := repo.Create(keystore.WithName("test"))
+	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test")))
 	assert.NoError(t, err)
 
-	_, err = repo.Keystore(k.Id())
+	_, err = repo.Keystore(k.Id)
 	assert.NoError(t, err)
 }

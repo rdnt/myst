@@ -2,9 +2,9 @@ package keystore
 
 import (
 	"errors"
+	"time"
 
-	"myst/internal/client/application/domain/keystore/entry"
-
+	"myst/internal/client/application/domain/entry"
 	"myst/pkg/uuid"
 )
 
@@ -15,76 +15,36 @@ var (
 )
 
 type Keystore struct {
-	id       string
-	name     string
-	version  int
-	entries  []entry.Entry
-	password string
-}
+	Id      string
+	Name    string
+	Version int
+	Entries map[string]entry.Entry
 
-func (k *Keystore) Id() string {
-	return k.id
-}
-
-func (k *Keystore) Name() string {
-	return k.name
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (k *Keystore) SetName(name string) {
-	k.name = name
-}
-
-func (k *Keystore) Version() int {
-	return k.version
+	k.Name = name
 }
 
 func (k *Keystore) IncrementVersion() {
-	k.version++
+	k.Version++
 }
 
-func (k *Keystore) Entries() []entry.Entry {
-	return k.entries
+func (k *Keystore) SetEntries(entries map[string]entry.Entry) {
+	k.Entries = entries
 }
 
-func (k *Keystore) AddEntry(entry entry.Entry) error {
-	for _, e := range k.entries {
-		if e.Id() == entry.Id() {
-			return ErrEntryExists
-		}
-	}
-
-	k.entries = append(k.entries, entry)
-	return nil
-}
-
-func (k *Keystore) RemoveEntry(id string) error {
-	for i, e := range k.entries {
-		if e.Id() == id {
-			k.entries = append(k.entries[:i], k.entries[i+1:]...)
-			return nil
-		}
-	}
-
-	return ErrEntryNotFound
-}
-
-func (k *Keystore) Password() string {
-	return k.password
-}
-
-func (k *Keystore) SetPassword(password string) {
-	k.password = password
-}
-
-func New(opts ...Option) *Keystore {
-	k := &Keystore{
-		id:      uuid.New().String(),
-		version: 1,
-		entries: []entry.Entry{},
+func New(opts ...Option) Keystore {
+	k := Keystore{
+		Id:      uuid.New().String(),
+		Version: 1,
+		Entries: map[string]entry.Entry{},
 	}
 
 	for _, opt := range opts {
-		opt(k)
+		opt(&k)
 	}
 
 	// TODO: remove this

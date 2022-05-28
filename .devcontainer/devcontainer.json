@@ -1,7 +1,6 @@
 {
     "image": "ghcr.io/rdnt/devcontainer",
     "name": "devcontainer",
-    "dockerFile": "dockerfile",
     "settings": {
         "go.useLanguageServer": true,
         "telemetry.telemetryLevel": "off",

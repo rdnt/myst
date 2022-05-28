@@ -2,6 +2,7 @@
     "image": "ghcr.io/rdnt/devcontainer",
     "name": "devcontainer",
     "settings": {
+        "go.useLanguageServer": true,
         "telemetry.telemetryLevel": "off",
         "workbench.colorTheme": "GitHub Dark",
         "editor.inlineSuggest.enabled": true,
@@ -11,7 +12,8 @@
         "editor.fontFamily": "Hack, monospace",
         "editor.fontSize": 19,
         "terminal.integrated.fontFamily": "Hack, monospace",
-        "terminal.integrated.fontSize": 19
+        "terminal.integrated.fontSize": 19,
+        "go.useLanguageServer": true
     },
     "extensions": [
         "GitHub.codespaces",

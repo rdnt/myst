@@ -19,8 +19,6 @@
         "GitHub.github-vscode-theme",
         "GitHub.vscode-pull-request-github",
         "golang.go",
-        "iocave.customize-ui",
-        "iocave.monkey-patch",
         "ms-azuretools.vscode-docker",
         "ms-vscode-remote.remote-containers",
         "svelte.svelte-vscode"

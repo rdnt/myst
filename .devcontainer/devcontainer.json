@@ -1,19 +1,17 @@
 {
     "image": "ghcr.io/rdnt/devcontainer",
     "name": "devcontainer",
+    "dockerFile": "dockerfile",
     "settings": {
         "go.useLanguageServer": true,
         "telemetry.telemetryLevel": "off",
         "workbench.colorTheme": "GitHub Dark",
         "editor.inlineSuggest.enabled": true,
-        "customizeUI.font.regular": "Inter",
-        "customizeUI.font.monospace": "Hack, monospace",
         "svelte.enable-ts-plugin": true,
         "editor.fontFamily": "Hack, monospace",
         "editor.fontSize": 19,
         "terminal.integrated.fontFamily": "Hack, monospace",
-        "terminal.integrated.fontSize": 19,
-        "go.useLanguageServer": true
+        "terminal.integrated.fontSize": 19
     },
     "extensions": [
         "GitHub.codespaces",

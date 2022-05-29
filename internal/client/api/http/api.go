@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -22,8 +23,8 @@ import (
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 // TODO: remove redundant go:generate for old ui
 ////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-//go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-////go:generate openapi --input openapi.json --output ../../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
+////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
+//go:generate openapi --input openapi.json --output ../../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
 
 var log = logger.New("router", logger.Cyan)
 
@@ -339,10 +340,10 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
-	if err == keystoreservice.ErrInitializationRequired {
+	if errors.Is(err, keystoreservice.ErrInitializationRequired) {
 		Success(c, []generated.Keystore{})
 		return
-	} else if err == keystoreservice.ErrAuthenticationRequired {
+	} else if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
 		Error(c, http.StatusUnauthorized, err)
 		return
 	} else if err != nil {

@@ -41,6 +41,7 @@ type Remote interface {
 
 	SignIn() error
 	SignedIn() bool
+	UserId() string
 	SignOut() error
 
 	// keystores
@@ -72,12 +73,14 @@ type remote struct {
 	client *generated.ClientWithResponses
 
 	bearerToken string
+	userId      string
 }
 
 func New(opts ...Option) (Remote, error) {
 	r := &remote{
 		client:      nil,
 		bearerToken: "",
+		userId:      "",
 		publicKey:   nil,
 		privateKey:  nil,
 	}
@@ -177,13 +180,14 @@ func (r *remote) SignIn() error {
 		return ErrInvalidResponse
 	}
 
-	token := *res.JSON200
+	authz := *res.JSON200
 
-	if token == "" {
+	if authz.Token == "" {
 		return errors.New("invalid token")
 	}
 
-	r.bearerToken = string(token)
+	r.bearerToken = authz.Token
+	r.userId = authz.UserId
 
 	fmt.Println("Signed in.")
 
@@ -194,10 +198,15 @@ func (r *remote) SignedIn() bool {
 	return r.bearerToken != ""
 }
 
+func (r *remote) UserId() string {
+	return r.userId
+}
+
 func (r *remote) SignOut() error {
 	fmt.Println("Signing out from remote...")
 
 	r.bearerToken = ""
+	r.userId = ""
 
 	fmt.Println("Signed out.")
 

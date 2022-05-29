@@ -80,7 +80,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/AuthToken"
+									"$ref": "#/components/schemas/AuthorizationResponse"
 								}
 							}
 						}
@@ -447,8 +447,20 @@
 					}
 				}
 			},
-			"AuthToken": {
-				"type": "string"
+			"AuthorizationResponse": {
+				"type": "object",
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token",
+					"userId"
+				]
 			},
 			"CreateInvitationRequest": {
 				"type": "object",

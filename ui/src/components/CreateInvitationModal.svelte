@@ -35,7 +35,9 @@
 
     api.createInvitation({
       keystoreId: keystore.id,
-      createInvitationRequest: {inviteeId: user}
+      requestBody: {
+        inviteeId: user
+      }
     }).then((inv: Invitation) => {
       showMessage("Invitation sent");
       dispatchCreated('created', {id: inv.id})

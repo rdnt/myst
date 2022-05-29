@@ -108,25 +108,25 @@ func New(opts ...Option) (*application, error) {
 }
 
 func (app *application) setup() {
-	//_, err := app.Users.CreateUser(
-	//	user.WithUsername("rdnt"),
-	//	user.WithPassword("1234"),
-	//)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	////log.Debug(u)
-	//
-	//_, err = app.Users.CreateUser(
-	//	user.WithUsername("abcd"),
-	//	user.WithPassword("5678"),
-	//)
-	//if err != nil {
-	//	panic(err)
-	//}
+	u, err := app.Users.CreateUser(
+		user.WithUsername("rdnt"),
+		user.WithPassword("1234"),
+	)
+	if err != nil {
+		panic(err)
+	}
 
-	//log.Debug(u2)
+	log.Debug(u)
+
+	u, err = app.Users.CreateUser(
+		user.WithUsername("abcd"),
+		user.WithPassword("5678"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Debug(u)
 
 	//k, err := app.Keystores.Create("my-keystore", u.Id(), []byte("payload"))
 	//if err != nil {

@@ -324,6 +324,19 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	Success(c, InvitationToRest(inv))
 }
 
+func (api *API) FinalizeInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	inv, err := api.app.FinalizeInvitation(invitationId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
+}
+
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
 	if err == keystoreservice.ErrInitializationRequired {

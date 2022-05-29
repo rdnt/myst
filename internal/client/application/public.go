@@ -116,7 +116,7 @@ func (app *application) CreateInvitation(keystoreId string, inviteeId string) (i
 	}
 
 	inv := invitation.New(
-		invitation.WithKeystoreId(k.Id),
+		invitation.WithKeystoreId(k.RemoteId),
 		invitation.WithInviteeId(inviteeId),
 	)
 
@@ -139,12 +139,17 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 }
 
 func (app *application) FinalizeInvitation(id string) (invitation.Invitation, error) {
-	k, err := app.keystores.Keystore(id)
+	inv, err := app.remote.Invitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
+	}
+
+	k, err := app.keystores.KeystoreByRemoteId(inv.KeystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	inv, err := app.remote.FinalizeInvitation(k.RemoteId, k.Key)
+	inv, err = app.remote.FinalizeInvitation(id, k.Key)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
 	}

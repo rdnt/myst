@@ -14,8 +14,8 @@
       // TODO: always select first
       // TODO: maybe select default keystore once that functionality is implemented
       // keystore = keystores[0];
-      keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      navigate("/keystore/" + keystore.id);
+      // keystore = keystores.find((keystore) => keystore.name === "Passwords");
+      navigate("/keystore/" + keystores[0].id);
     }
   });
 

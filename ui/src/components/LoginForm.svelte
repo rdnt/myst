@@ -16,7 +16,7 @@
     }
 
     api.authenticate({
-      authenticateRequest: {
+      requestBody: {
         password
       }
     }).then(() => {

@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
@@ -47,8 +48,6 @@ type Application interface {
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
-
-	SyncKeystores() error
 }
 
 type application struct {
@@ -56,34 +55,6 @@ type application struct {
 	invitations invitation.Service
 
 	remote remote.Remote
-}
-
-func (app *application) SyncKeystores() error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (app *application) HealthCheck() {
-	app.keystores.HealthCheck()
-}
-
-func (app *application) Start() error {
-	log.Print("App started")
-
-	//app.setup()
-
-	err := app.remote.SignIn()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (app *application) Stop() error {
-	log.Print("App stopped")
-
-	return nil
 }
 
 func New(opts ...Option) (*application, error) {
@@ -106,6 +77,39 @@ func New(opts ...Option) (*application, error) {
 	}
 
 	return app, nil
+}
+
+func (app *application) Start() error {
+	defer log.Print("App started")
+
+	//app.setup()
+
+	err := app.remote.SignIn()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			err := app.sync()
+			if err != nil {
+				log.Error(err)
+			}
+			time.Sleep(10 * time.Second)
+		}
+	}()
+
+	return nil
+}
+
+func (app *application) Stop() error {
+	log.Print("App stopped")
+
+	return nil
+}
+
+func (app *application) HealthCheck() {
+	app.keystores.HealthCheck()
 }
 
 func (app *application) setup() {
@@ -241,8 +245,4 @@ func (app *application) setup() {
 	//	fmt.Println(err)
 	//	return
 	//}
-}
-
-func (app *application) syncKeystore() {
-	//panic("not implemented")
 }

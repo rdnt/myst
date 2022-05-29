@@ -13,7 +13,7 @@
     api.updateEntry({
       keystoreId: keystore.id,
       entryId: entry.id,
-      updateEntryRequest: {
+      requestBody: {
         password: password != entry.password ? password : undefined,
         notes: notes != entry.notes ? notes : undefined,
       }

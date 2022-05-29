@@ -54,37 +54,37 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 		return nil, err
 	}
 
-	log.Debug("remote", rks)
+	log.Debug("remote: ", rks)
 
 	ks, err := app.keystores.Keystores()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get keystores")
 	}
 
-	log.Debug("local", ks)
+	log.Debug("local: ", ks)
 
 	for _, k := range rks {
 		if _, ok := ks[k.Id]; !ok {
-			log.Debug("syncing from remote to local (create)", k.Id)
+			log.Debugln("syncing from remote to local (create)", k.Id)
 			k, err = app.keystores.CreateKeystore(k)
 			if err != nil {
 				return nil, errors.WithMessage(err, "failed to create keystore")
 			}
-			log.Debug("synced from remote to local (create)", k.Id)
+			log.Debugln("synced from remote to local (create)", k.Id)
 
 			ks[k.Id] = k
 		} else {
-			log.Debug("synced from remote to local (update)", k.Id)
+			log.Debugln("synced from remote to local (update)", k.Id)
 			err = app.keystores.UpdateKeystore(k)
 			if err != nil {
 				return nil, errors.WithMessage(err, "failed to update keystore")
 			}
 
-			log.Debug("synced from remote to local (update)", k.Id)
+			log.Debugln("synced from remote to local (update)", k.Id)
 		}
 	}
 
-	log.Debug("final", ks)
+	log.Debug("final: ", ks)
 
 	return ks, nil
 }

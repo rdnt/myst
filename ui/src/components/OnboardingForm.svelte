@@ -33,7 +33,7 @@
       setTimeout(() => passwordInput.focus(), 0)
     } else if (step === 2) {
       api.createKeystore({
-        createKeystoreRequest: {
+        requestBody: {
           name,
           password,
         }

@@ -40,12 +40,15 @@ func (api *API) Login(c *gin.Context) {
 		panic("invalid username or password")
 	}
 
-	key, err := api.loginUser(params.Username)
+	token, err := api.loginUser(params.Username)
 	if err != nil {
 		panic(err)
 	}
 
-	c.JSON(http.StatusOK, generated.AuthToken(key))
+	c.JSON(http.StatusOK, generated.AuthorizationResponse{
+		Token:  token,
+		UserId: params.Username, // TODO: query user on login and return proper UserID (uuid)
+	})
 }
 
 func (api *API) loginUser(username string) (string, error) {
@@ -64,6 +67,7 @@ func (api *API) loginUser(username string) (string, error) {
 			"usr": username,
 		},
 	)
+
 	key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
 	if err != nil {
 		return "", err

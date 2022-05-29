@@ -8,8 +8,11 @@ type AcceptInvitationRequest struct {
 	PublicKey []byte `json:"publicKey"`
 }
 
-// AuthToken defines model for AuthToken.
-type AuthToken string
+// AuthorizationResponse defines model for AuthorizationResponse.
+type AuthorizationResponse struct {
+	Token  string `json:"token"`
+	UserId string `json:"userId"`
+}
 
 // CreateInvitationRequest defines model for CreateInvitationRequest.
 type CreateInvitationRequest struct {

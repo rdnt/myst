@@ -1,15 +1,16 @@
-import api, {Keystore} from "@/api";
+import api from "@/api";
+import type {Keystore} from "@/api";
 import {readable} from "svelte/store";
 
 let setKeystores;
 export const keystores = readable<Keystore[]>([], (set) => {
   setKeystores = set
 
-  getKeystores().then((keystores) => {
-    set(keystores);
-  }).catch(() => {
-    set([]);
-  });
+  // getKeystores().then((keystores) => {
+  //   set(keystores);
+  // }).catch(() => {
+  //   set([]);
+  // });
 
   return () => {
     set([]);
@@ -34,8 +35,6 @@ export const getKeystores = () => {
 
     return Promise.resolve(keystores)
   }).catch((error: Response) => {
-    console.log(error)
-
     if (setKeystores) {
       setKeystores([]);
     }

@@ -1,0 +1,82 @@
+name: Build and test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        id: checkout-repository
+        uses: actions/checkout@v3
+      - name: Cache go modules
+        id: cache-go-modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+      - name: Install Go ${{ matrix.go-version }}
+        id: install-go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Download go modules
+        id: download-go-modules
+        run: go mod download
+  build-server:
+    needs: bootstrap
+    name: Build and test server
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ 1.18 ]
+    steps:
+      - name: Build server
+        id: build-server
+        run: go build ./cmd/server
+      - name: Test server
+        id: test-server
+        run: go test ./cmd/server/... ./internal/server/...
+  build-client:
+    needs: bootstrap
+    name: Build and test client
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ 1.18 ]
+    steps:
+      - name: Checkout code
+        id: checkout-code
+        uses: actions/checkout@v2
+      - name: Cache go modules
+        id: cache-go-modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+      - name: Install Go ${{ matrix.go-version }}
+        id: install-go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Download go modules
+        id: download-go-modules
+        run: go mod download
+      - name: Build client
+        id: build-client
+        run: go build ./cmd/client
+      - name: Test client
+        id: test-client
+        run: go test ./cmd/client/... ./internal/client/...
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - build-server
+      - build-client
+    steps:
+      - name: Run tests
+        id: run-tests
+        run: go test ./test/... ./pkg/...

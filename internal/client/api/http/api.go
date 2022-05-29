@@ -95,9 +95,10 @@ func (api *API) CreateKeystore(c *gin.Context) {
 
 	c.JSON(
 		http.StatusCreated, generated.Keystore{
-			Id:      k.Id,
-			Name:    k.Name,
-			Entries: entries,
+			Id:       k.Id,
+			RemoteId: k.RemoteId,
+			Name:     k.Name,
+			Entries:  entries,
 		},
 	)
 }
@@ -220,9 +221,10 @@ func (api *API) Keystore(c *gin.Context) {
 
 	Success(
 		c, generated.Keystore{
-			Id:      k.Id,
-			Name:    k.Name,
-			Entries: entries,
+			Id:       k.Id,
+			RemoteId: k.RemoteId,
+			Name:     k.Name,
+			Entries:  entries,
 		},
 	)
 }
@@ -301,6 +303,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 
 	inv, err := api.app.CreateInvitation(keystoreId, req.InviteeId)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -313,6 +316,7 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 
 	inv, err := api.app.AcceptInvitation(invitationId)
 	if err != nil {
+		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -353,9 +357,10 @@ func (api *API) Keystores(c *gin.Context) {
 
 		keystores = append(
 			keystores, generated.Keystore{
-				Id:      k.Id,
-				Name:    k.Name,
-				Entries: entries,
+				Id:       k.Id,
+				RemoteId: k.RemoteId,
+				Name:     k.Name,
+				Entries:  entries,
 			},
 		)
 	}

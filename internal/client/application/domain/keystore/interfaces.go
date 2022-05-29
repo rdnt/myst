@@ -14,7 +14,7 @@ type Repository interface {
 	Authenticate(password string) error
 	Initialize(password string) error
 	HealthCheck()
-	KeystoreKey(keystoreId string) ([]byte, error)
+	//KeystoreKey(keystoreId string) ([]byte, error)
 }
 
 type Service interface {
@@ -25,7 +25,6 @@ type Service interface {
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
 	DeleteKeystoreEntry(keystoreId, entryId string) error
-	KeystoreKey(keystoreId string) ([]byte, error)
 	Keystores() (map[string]Keystore, error)
 	UpdateKeystore(k Keystore) error
 	Authenticate(password string) error

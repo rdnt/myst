@@ -7,6 +7,7 @@ import (
 	"myst/internal/client/application"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
+	"myst/internal/client/remote"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 
@@ -14,8 +15,10 @@ import (
 )
 
 type Config struct {
-	RemoteAddress string
-	Port          int
+	RemoteAddress  string
+	RemoteUsername string
+	RemotePassword string
+	Port           int
 }
 
 func parseFlags() Config {
@@ -23,6 +26,9 @@ func parseFlags() Config {
 
 	flag.StringVar(&cfg.RemoteAddress, "remote", "http://localhost:8080", "URL address of the remote server")
 	flag.IntVar(&cfg.Port, "port", 8081, "Port the client should listen on")
+
+	flag.StringVar(&cfg.RemoteUsername, "username", "", "Username used to get authorized to the remote server")
+	flag.StringVar(&cfg.RemotePassword, "password", "", "Password used to get authorized to the remote server")
 
 	flag.Parse()
 
@@ -53,9 +59,18 @@ func main() {
 		panic(err)
 	}
 
+	remote, err := remote.New(
+		remote.WithAddress(cfg.RemoteAddress),
+		remote.WithUsername(cfg.RemoteUsername),
+		remote.WithPassword(cfg.RemotePassword),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	app, err := application.New(
 		application.WithKeystoreService(keystoreService),
-		application.WithRemoteAddress(cfg.RemoteAddress),
+		application.WithRemote(remote),
 	)
 	if err != nil {
 		panic(err)

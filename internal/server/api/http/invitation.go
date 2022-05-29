@@ -1,23 +1,29 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"myst/internal/server/api/http/generated"
+	"myst/pkg/config"
 )
 
 func (api *API) CreateInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
+	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+	fmt.Println(config.Debug)
 	log.Println("SERVER Creating invitation", userId, keystoreId)
 
 	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	inviterKey := params.PublicKey
@@ -29,7 +35,9 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		inviterKey,
 	)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusOK, ToJSONInvitation(inv))
@@ -42,7 +50,9 @@ func (api *API) Invitation(c *gin.Context) {
 
 	inv, err := api.app.GetInvitation(invitationId)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusOK, ToJSONInvitation(inv))
@@ -84,7 +94,9 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 	var params generated.FinalizeInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	keystoreKey := params.KeystoreKey
@@ -94,7 +106,9 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		keystoreKey,
 	)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusOK, ToJSONInvitation(inv))
@@ -105,7 +119,9 @@ func (api *API) Invitations(c *gin.Context) {
 
 	invs, err := api.app.UserInvitations(userId)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	gen := []generated.Invitation{}

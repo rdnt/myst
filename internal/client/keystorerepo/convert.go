@@ -11,10 +11,11 @@ type JSONEnclave struct {
 }
 
 type JSONKeystore struct {
-	Id      string      `json:"id"`
-	Name    string      `json:"name"`
-	Version int         `json:"version"`
-	Entries []JSONEntry `json:"entries"`
+	Id       string      `json:"id"`
+	RemoteId string      `json:"remoteId"`
+	Name     string      `json:"name"`
+	Version  int         `json:"version"`
+	Entries  []JSONEntry `json:"entries"`
 }
 
 type JSONEntry struct {
@@ -39,10 +40,11 @@ func KeystoreToJSON(k keystore.Keystore) JSONKeystore {
 	}
 
 	return JSONKeystore{
-		Id:      k.Id,
-		Name:    k.Name,
-		Version: k.Version,
-		Entries: entries,
+		Id:       k.Id,
+		RemoteId: k.RemoteId,
+		Name:     k.Name,
+		Version:  k.Version,
+		Entries:  entries,
 	}
 }
 
@@ -63,6 +65,7 @@ func KeystoreFromJSON(k JSONKeystore) (keystore.Keystore, error) {
 
 	return keystore.New(
 		keystore.WithId(k.Id),
+		keystore.WithRemoteId(k.RemoteId),
 		keystore.WithName(k.Name),
 		keystore.WithVersion(k.Version),
 		keystore.WithEntries(entries),

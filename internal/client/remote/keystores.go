@@ -20,10 +20,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	keystoreKey, err := r.keystores.KeystoreKey(k.Id)
-	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore key")
-	}
+	//id := k.Id
 
 	jk := keystorerepo.KeystoreToJSON(k)
 
@@ -32,7 +29,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, errors.Wrap(err, "failed to marshal keystore to json")
 	}
 
-	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
+	b, err = crypto.AES256CBC_Encrypt(k.Key, b)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc encrypt failed")
 	}
@@ -51,17 +48,17 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, fmt.Errorf("invalid response")
 	}
 
-	k.Id = res.JSON200.Id
+	//err = r.keystores.UpdateKeystore(k)
+	//if err != nil {
+	//	return keystore.Keystore{}, errors.Wrap(err, "failed to update keystore with remote id")
+	//}
 
-	err = r.keystores.UpdateKeystore(k)
-	if err != nil {
-		return keystore.Keystore{}, errors.Wrap(err, "failed to update keystore with remote id")
-	}
-
-	//k, err = KeystoreFromJSON(*res.JSON200)
+	//k, err = KeystoreFromJSON(*res.JSON200, k.Key)
 	//if err != nil {
 	//	return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
 	//}
+
+	k.RemoteId = (*res.JSON200).Id
 
 	return k, nil
 }
@@ -71,13 +68,8 @@ func (r *remote) Keystore(id string) (keystore.Keystore, error) {
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	k, err := r.keystores.Keystore(id)
-	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore key")
-	}
-
 	res, err := r.client.KeystoreWithResponse(
-		context.Background(), k.Id,
+		context.Background(), id,
 	)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "failed to create keystore")
@@ -94,7 +86,7 @@ func (r *remote) Keystore(id string) (keystore.Keystore, error) {
 
 	var keystoreKey []byte
 	for _, inv := range invs {
-		if inv.KeystoreId == k.Id && inv.Finalized() {
+		if inv.KeystoreId == id && inv.Finalized() {
 			symKey, err := curve25519.X25519(r.privateKey, inv.InviterKey)
 			if err != nil {
 				return keystore.Keystore{}, errors.Wrap(err, "failed to create asymmetric key")
@@ -115,7 +107,7 @@ func (r *remote) Keystore(id string) (keystore.Keystore, error) {
 		panic(err)
 	}
 
-	k, err = KeystoreFromJSON(*res.JSON200, keystoreKey)
+	k, err := KeystoreFromJSON(*res.JSON200, keystoreKey)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
 	}

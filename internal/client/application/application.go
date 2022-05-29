@@ -23,7 +23,7 @@ type Application interface {
 	Stop() error
 
 	// remote
-	SignIn(username, password string) error
+	SignIn() error
 	SignOut() error
 	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	//Keystore(id string) (*generated.Keystore, error)
@@ -55,8 +55,7 @@ type application struct {
 	keystores   keystore.Service
 	invitations invitation.Service
 
-	remote        remote.Remote
-	remoteAddress string
+	remote remote.Remote
 }
 
 func (app *application) SyncKeystores() error {
@@ -73,7 +72,7 @@ func (app *application) Start() error {
 
 	//app.setup()
 
-	err := app.remote.SignIn("rdnt", "1234")
+	err := app.remote.SignIn()
 	if err != nil {
 		return err
 	}
@@ -102,12 +101,9 @@ func New(opts ...Option) (*application, error) {
 		return nil, ErrInvalidKeystoreService
 	}
 
-	rc, err := remote.New(app.keystores, app.remoteAddress)
-	if err != nil {
-		return nil, err
+	if app.remote == nil {
+		return nil, fmt.Errorf("invalid remote")
 	}
-
-	app.remote = rc
 
 	return app, nil
 }
@@ -211,7 +207,7 @@ func (app *application) setup() {
 		return
 	}
 
-	err = app.remote.SignIn("rdnt", "1234")
+	err = app.remote.SignIn()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -245,4 +241,8 @@ func (app *application) setup() {
 	//	fmt.Println(err)
 	//	return
 	//}
+}
+
+func (app *application) syncKeystore() {
+	//panic("not implemented")
 }

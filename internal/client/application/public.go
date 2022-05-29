@@ -10,8 +10,8 @@ import (
 	"myst/internal/client/application/domain/keystore"
 )
 
-func (app *application) SignIn(username, password string) error {
-	return app.remote.SignIn(username, password)
+func (app *application) SignIn() error {
+	return app.remote.SignIn()
 }
 
 func (app *application) SignOut() error {
@@ -44,10 +44,6 @@ func (app *application) UpdateKeystoreEntry(keystoreId string, entryId string, p
 
 func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 	return app.keystores.DeleteKeystoreEntry(keystoreId, entryId)
-}
-
-func (app *application) KeystoreKey(keystoreId string) ([]byte, error) {
-	return app.keystores.KeystoreKey(keystoreId)
 }
 
 func (app *application) Keystores() (map[string]keystore.Keystore, error) {
@@ -106,10 +102,9 @@ func (app *application) CreateInvitation(keystoreId string, inviteeId string) (i
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
 	k, err := app.keystores.Keystore(keystoreId)
 	if err != nil {
-		return invitation.Invitation{}, err
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	// TODO: do this separately
 	k, err = app.remote.CreateKeystore(k)
 	if err != nil {
 		return invitation.Invitation{}, err
@@ -144,7 +139,12 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 }
 
 func (app *application) FinalizeInvitation(id string) (invitation.Invitation, error) {
-	inv, err := app.remote.FinalizeInvitation(id)
+	k, err := app.keystores.Keystore(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
+	}
+
+	inv, err := app.remote.FinalizeInvitation(k.RemoteId, k.Key)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
 	}

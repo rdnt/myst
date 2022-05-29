@@ -16,7 +16,7 @@ import (
 	"github.com/mattn/go-isatty"
 )
 
-var EnableDebug bool
+var EnableDebug bool = true
 var mux sync.Mutex
 
 const (

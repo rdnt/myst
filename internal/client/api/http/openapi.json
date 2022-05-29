@@ -545,11 +545,15 @@
         "type": "object",
         "required": [
           "id",
+          "remoteId",
           "name",
           "entries"
         ],
         "properties": {
           "id": {
+            "type": "string"
+          },
+          "remoteId": {
             "type": "string"
           },
           "name": {

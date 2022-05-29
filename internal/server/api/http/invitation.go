@@ -1,21 +1,17 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"myst/internal/server/api/http/generated"
-	"myst/pkg/config"
 )
 
 func (api *API) CreateInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
-	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	fmt.Println(config.Debug)
 	log.Println("SERVER Creating invitation", userId, keystoreId)
 
 	var params generated.CreateInvitationRequest

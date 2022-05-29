@@ -151,6 +151,21 @@ func (s *service) Keystore(id string) (keystore.Keystore, error) {
 	return k, err
 }
 
+func (s *service) KeystoreByRemoteId(id string) (keystore.Keystore, error) {
+	ks, err := s.keystores.Keystores()
+	if err != nil {
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystores")
+	}
+
+	for _, k2 := range ks {
+		if k2.RemoteId == id {
+			return k2, nil
+		}
+	}
+
+	return keystore.Keystore{}, errors.New("keystore not found")
+}
+
 func (s *service) Keystores() (map[string]keystore.Keystore, error) {
 	ks, err := s.keystores.Keystores()
 	if err != nil {

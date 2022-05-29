@@ -47,24 +47,6 @@ jobs:
       matrix:
         go-version: [ 1.18 ]
     steps:
-      - name: Checkout code
-        id: checkout-code
-        uses: actions/checkout@v2
-      - name: Cache go modules
-        id: cache-go-modules
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go-
-      - name: Install Go ${{ matrix.go-version }}
-        id: install-go
-        uses: actions/setup-go@v1
-        with:
-          go-version: ${{ matrix.go-version }}
-      - name: Download go modules
-        id: download-go-modules
-        run: go mod download
       - name: Build client
         id: build-client
         run: go build ./cmd/client

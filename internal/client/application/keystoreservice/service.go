@@ -24,7 +24,6 @@ type KeystoreRepository interface {
 	Authenticate(password string) error
 	Initialize(password string) error
 	HealthCheck()
-	KeystoreKey(keystoreId string) ([]byte, error)
 }
 
 type service struct {
@@ -86,7 +85,7 @@ func (s *service) UpdateKeystoreEntry(keystoreId, entryId string, password, note
 
 	entries[e.Id] = e
 
-	k.SetEntries(entries)
+	k.Entries = entries
 
 	return e, s.UpdateKeystore(k)
 }
@@ -104,22 +103,13 @@ func (s *service) DeleteKeystoreEntry(keystoreId, entryId string) error {
 	}
 
 	delete(entries, entryId)
-	k.SetEntries(entries)
+	k.Entries = entries
 
 	return s.UpdateKeystore(k)
 }
 
 func (s *service) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	return s.keystores.CreateKeystore(k)
-}
-
-func (s *service) KeystoreKey(keystoreId string) ([]byte, error) {
-	b, err := s.keystores.KeystoreKey(keystoreId)
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get keystore key")
-	}
-
-	return b, nil
 }
 
 func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {
@@ -132,7 +122,7 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 
 	entries := k.Entries
 	entries[e.Id] = e
-	k.SetEntries(entries)
+	k.Entries = entries
 
 	return e, s.keystores.UpdateKeystore(k)
 }
@@ -148,6 +138,7 @@ func (s *service) CreateFirstKeystore(k keystore.Keystore, password string) (key
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to create keystore")
 	}
 
+	logger.Printf("@@@@@@@@@@############### %#v\n", k)
 	return k, nil
 }
 

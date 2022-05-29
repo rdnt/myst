@@ -15,25 +15,20 @@ var (
 )
 
 type Keystore struct {
-	Id      string
-	Name    string
-	Version int
-	Entries map[string]entry.Entry
+	Id       string
+	RemoteId string
+	Name     string
+	Version  int
+	Entries  map[string]entry.Entry
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
 
-func (k *Keystore) SetName(name string) {
-	k.Name = name
+	Key []byte
 }
 
 func (k *Keystore) IncrementVersion() {
 	k.Version++
-}
-
-func (k *Keystore) SetEntries(entries map[string]entry.Entry) {
-	k.Entries = entries
 }
 
 func New(opts ...Option) Keystore {

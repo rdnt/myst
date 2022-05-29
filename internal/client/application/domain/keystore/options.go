@@ -12,6 +12,12 @@ func WithId(id string) Option {
 	}
 }
 
+func WithRemoteId(remoteId string) Option {
+	return func(k *Keystore) {
+		k.RemoteId = remoteId
+	}
+}
+
 func WithName(name string) Option {
 	return func(k *Keystore) {
 		k.Name = name

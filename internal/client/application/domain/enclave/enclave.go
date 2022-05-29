@@ -37,6 +37,7 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 		return err
 	}
 
+	// TODO: remove this
 	key = []byte("hi :D                           ")
 
 	e.keystores[k.Id] = k
@@ -49,18 +50,20 @@ func (e *Enclave) Keys() map[string][]byte {
 	return e.keys
 }
 
-func (e *Enclave) Keystores() map[string]keystore.Keystore {
-	return e.keystores
-}
+func (e *Enclave) Keystores() (map[string]keystore.Keystore, error) {
+	ks := map[string]keystore.Keystore{}
 
-func (e *Enclave) KeystoreIds() []string {
-	ids := []string{}
+	for _, k := range e.keystores {
+		keystoreKey, ok := e.keys[k.Id]
+		if !ok {
+			return nil, fmt.Errorf("keystore key not found")
+		}
 
-	for _, id := range e.keystores {
-		ids = append(ids, id.Id)
+		k.Key = keystoreKey
+		ks[k.Id] = k
 	}
 
-	return ids
+	return ks, nil
 }
 
 func (e *Enclave) Keystore(id string) (keystore.Keystore, error) {
@@ -68,6 +71,13 @@ func (e *Enclave) Keystore(id string) (keystore.Keystore, error) {
 	if !ok {
 		return keystore.Keystore{}, fmt.Errorf("keystore not found")
 	}
+
+	keystoreKey, ok := e.keys[id]
+	if !ok {
+		return keystore.Keystore{}, fmt.Errorf("keystore key not found")
+	}
+
+	k.Key = keystoreKey
 
 	return k, nil
 }

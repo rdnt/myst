@@ -105,16 +105,10 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 	return inv, nil
 }
 
-func (r *remote) FinalizeInvitation(invitationId string) (invitation.Invitation, error) {
+func (r *remote) FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error) {
 	inv, err := r.getInvitation(invitationId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
-	}
-
-	// TODO: this should be LOCAL keystoreId, while the function only receives remote one
-	keystoreKey, err := r.keystores.KeystoreKey(inv.KeystoreId)
-	if err != nil {
-		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore key")
 	}
 
 	if inv.Status != "accepted" || inv.InviteeKey == nil {

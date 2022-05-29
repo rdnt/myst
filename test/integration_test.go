@@ -38,6 +38,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	ks := *createksres.JSON201
 	s.Require().Equal(ks.Name, k1name)
+	s.T().Logf("Keystore created: %#v\n", ks)
 
 	_, err = s.client1.CreateEntryWithResponse(ctx, ks.Id, clientgen.CreateEntryJSONRequestBody{
 		Website:  "example.com",
@@ -49,6 +50,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	restKeystore, err := s.client1.KeystoreWithResponse(ctx, ks.Id)
 	s.Require().NoError(err)
+	s.Require().NotNil(restKeystore.JSON200)
 
 	s.T().Log("@@@@", *restKeystore.JSON200)
 

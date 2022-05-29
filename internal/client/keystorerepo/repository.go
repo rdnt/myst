@@ -134,7 +134,7 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 		return nil, err
 	}
 
-	return e.Keystores(), nil
+	return e.Keystores()
 }
 
 func (r *Repository) DeleteKeystore(id string) error {
@@ -308,27 +308,27 @@ func (r *Repository) updateKeystore(k keystore.Keystore) error {
 	return r.sealAndWrite(b, r.key, e.Salt())
 }
 
-func (r *Repository) KeystoreKey(keystoreId string) ([]byte, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	if r.key == nil {
-		return nil, fmt.Errorf("authentication required")
-	}
-
-	e, err := r.enclave(r.key)
-	if err != nil {
-		return nil, err
-	}
-
-	keys := e.Keys()
-	b, ok := keys[keystoreId]
-	if !ok {
-		return nil, fmt.Errorf("keystore key not found")
-	}
-
-	return b, nil
-}
+//func (r *Repository) KeystoreKey(keystoreId string) ([]byte, error) {
+//	r.mux.Lock()
+//	defer r.mux.Unlock()
+//
+//	if r.key == nil {
+//		return nil, fmt.Errorf("authentication required")
+//	}
+//
+//	e, err := r.enclave(r.key)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	keys := e.Keys()
+//	b, ok := keys[keystoreId]
+//	if !ok {
+//		return nil, fmt.Errorf("keystore key not found")
+//	}
+//
+//	return b, nil
+//}
 
 func (r *Repository) startHealthCheck() {
 	ticker := time.NewTicker(20 * time.Second)

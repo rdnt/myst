@@ -57,8 +57,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s._server = s.setupServer(ports[0])
-	s._client1 = s.setupClient("http://"+s._server.address, ports[1])
-	s._client2 = s.setupClient("http://"+s._server.address, ports[2])
+	s._client1 = s.setupClient("http://"+s._server.address, "rdnt", "1234", ports[1])
+	s._client2 = s.setupClient("http://"+s._server.address, "abcd", "5678", ports[2])
 
 	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NotNil(res.JSON201)
 	s.Require().Equal(user, (*res.JSON201).Username)
 
-	err = s._client1.app.SignIn(user, pass)
+	err = s._client1.app.SignIn()
 	s.Require().NoError(err)
 
 	user, pass = "abcd", "5678"
@@ -91,7 +91,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NotNil(res.JSON201)
 	s.Require().Equal(user, (*res.JSON201).Username)
 
-	err = s._client2.app.SignIn(user, pass)
+	err = s._client2.app.SignIn()
 	s.Require().NoError(err)
 }
 

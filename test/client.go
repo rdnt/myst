@@ -8,6 +8,7 @@ import (
 	"myst/internal/client/application"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
+	"myst/internal/client/remote"
 )
 
 type Client struct {
@@ -16,7 +17,7 @@ type Client struct {
 	address string
 }
 
-func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Client {
+func (s *IntegrationTestSuite) setupClient(serverAddress string, username, password string, port int) *Client {
 	client := &Client{}
 
 	var err error
@@ -37,9 +38,16 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 	)
 	s.Require().NoError(err)
 
+	rem, err := remote.New(
+		remote.WithAddress(serverAddress),
+		remote.WithUsername(username),
+		remote.WithPassword(password),
+	)
+	s.Require().NoError(err)
+
 	client.app, err = application.New(
 		application.WithKeystoreService(keystoreService),
-		application.WithRemoteAddress(serverAddress),
+		application.WithRemote(rem),
 	)
 	s.Require().NoError(err)
 

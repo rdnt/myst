@@ -15,7 +15,8 @@
         "editor.fontSize": 19,
         "terminal.integrated.fontFamily": "Hack, monospace",
         "terminal.integrated.fontSize": 19,
-        "workbench.startupEditor": "none"
+        "workbench.startupEditor": "none",
+        "git.autofetch": true
       },
       "extensions": [
         "GitHub.codespaces",

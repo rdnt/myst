@@ -28,7 +28,7 @@ type Remote interface {
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(invitationId string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error)
 	UpdateInvitation(inv invitation.Invitation) error
 	Invitations() (map[string]invitation.Invitation, error)
 	DeleteInvitation(id string) error
@@ -39,7 +39,7 @@ type Remote interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	SignIn(username, password string) error
+	SignIn() error
 	SignedIn() bool
 	SignOut() error
 
@@ -62,23 +62,28 @@ type Remote interface {
 }
 
 type remote struct {
-	client *generated.ClientWithResponses
-
-	keystores keystore.Service
-
-	bearerToken string
+	address  string
+	username string
+	password string
 
 	publicKey  []byte
 	privateKey []byte
+
+	client *generated.ClientWithResponses
+
+	bearerToken string
 }
 
-func New(keystoreService keystore.Service, address string) (Remote, error) {
+func New(opts ...Option) (Remote, error) {
 	r := &remote{
 		client:      nil,
 		bearerToken: "",
 		publicKey:   nil,
 		privateKey:  nil,
-		keystores:   keystoreService,
+	}
+
+	for _, opt := range opts {
+		opt(r)
 	}
 
 	pub, key, err := newKeypair()
@@ -87,7 +92,7 @@ func New(keystoreService keystore.Service, address string) (Remote, error) {
 	}
 
 	r.client, err = generated.NewClientWithResponses(
-		address+"/api",
+		r.address+"/api",
 		generated.WithRequestEditorFn(r.authenticate()),
 	)
 	if err != nil {
@@ -153,15 +158,15 @@ func New(keystoreService keystore.Service, address string) (Remote, error) {
 //	return k, nil
 //}
 
-func (r *remote) SignIn(username, password string) error {
+func (r *remote) SignIn() error {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
 		ctx, generated.LoginJSONRequestBody{
-			Username: username,
-			Password: password,
+			Username: r.username,
+			Password: r.password,
 		},
 	)
 	if err != nil {

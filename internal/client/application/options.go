@@ -2,6 +2,7 @@ package application
 
 import (
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/remote"
 )
 
 type Option func(app *application) error
@@ -13,9 +14,9 @@ func WithKeystoreService(service keystore.Service) Option {
 	}
 }
 
-func WithRemoteAddress(address string) Option {
+func WithRemote(remote remote.Remote) Option {
 	return func(app *application) error {
-		app.remoteAddress = address
+		app.remote = remote
 		return nil
 	}
 }

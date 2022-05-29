@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/pkg/errors"
+
 	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/crypto"
@@ -48,7 +50,11 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 	ks := map[string]JSONKeystore{}
 
-	for _, k := range e.Keystores() {
+	eks, err := e.Keystores()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get keystores")
+	}
+	for _, k := range eks {
 		ks[k.Id] = KeystoreToJSON(k)
 	}
 

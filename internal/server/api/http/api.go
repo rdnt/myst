@@ -66,9 +66,6 @@ func New(app application.Application) *API {
 		//p.Use(r)
 	}
 
-	// error 404 handling
-	r.NoRoute(NoRoute)
-
 	// Attach static serve middleware for / and /assets
 	r.Use(static.Serve("/", static.LocalFile("static", false)))
 	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))

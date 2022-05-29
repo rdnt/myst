@@ -73,6 +73,11 @@ func (app *application) Start() error {
 
 	//app.setup()
 
+	err := app.remote.SignIn("rdnt", "1234")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

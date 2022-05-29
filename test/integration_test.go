@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -67,6 +68,14 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	ks2 := *createksres2.JSON201
 	s.Require().Equal(ks2.Name, k2name)
 
+	// ###
+
+	res, err := s.server.KeystoresWithResponse(context.Background())
+	s.Require().NoError(err)
+	fmt.Println("@@@@@@@!!!!!!!!!!!!!!!!!!!!", string(res.Body))
+
+	// ###
+
 	s.T().Log("Creating invitation", ks.Id)
 	createinvres, err := s.client1.CreateInvitationWithResponse(ctx, ks.Id, clientgen.CreateInvitationJSONRequestBody{
 		InviteeId: "abcd",
@@ -93,6 +102,8 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	restInv = *acceptResponse.JSON200
 	s.Require().Equal(restInv.Status, clientgen.InvitationStatusAccepted)
 	s.Require().NotNil(restInv.InviteeKey)
+
+	fmt.Println("INVID", restInv.Id)
 
 	inv, err := s._client1.app.FinalizeInvitation(restInv.Id)
 	s.Require().NoError(err)

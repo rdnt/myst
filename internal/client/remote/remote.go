@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
@@ -154,9 +155,11 @@ func New(keystoreService keystore.Service, address string) (Remote, error) {
 
 func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
-		context.Background(), generated.LoginJSONRequestBody{
+		ctx, generated.LoginJSONRequestBody{
 			Username: username,
 			Password: password,
 		},

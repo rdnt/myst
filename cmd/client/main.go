@@ -1,18 +1,40 @@
 package main
 
 import (
+	"fmt"
+
 	"myst/internal/client/api/http"
 	"myst/internal/client/application"
 	"myst/internal/client/application/keystoreservice"
 	"myst/internal/client/keystorerepo"
 	"myst/pkg/config"
 	"myst/pkg/logger"
+
+	"github.com/namsral/flag"
 )
+
+type Config struct {
+	RemoteAddress string
+	Port          int
+}
+
+func parseFlags() Config {
+	cfg := Config{}
+
+	flag.StringVar(&cfg.RemoteAddress, "remote", "http://localhost:8080", "URL address of the remote server")
+	flag.IntVar(&cfg.Port, "port", 8081, "Port the client should listen on")
+
+	flag.Parse()
+
+	return cfg
+}
 
 var log = logger.New("client", logger.Red)
 
 func main() {
 	logger.EnableDebug = config.Debug
+
+	cfg := parseFlags()
 
 	//rem, err := remote.New("http://localhost:8080")
 	//if err != nil {
@@ -33,7 +55,7 @@ func main() {
 
 	app, err := application.New(
 		application.WithKeystoreService(keystoreService),
-		application.WithRemoteAddress("http://localhost:8080"),
+		application.WithRemoteAddress(cfg.RemoteAddress),
 	)
 	if err != nil {
 		panic(err)
@@ -41,7 +63,7 @@ func main() {
 
 	api := http.New(app)
 
-	err = api.Run(":8081")
+	err = api.Run(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
 		panic(err)
 	}

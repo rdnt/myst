@@ -42,6 +42,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    z-index: 1;
 
     .body {
       position: relative;

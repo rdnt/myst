@@ -447,7 +447,11 @@ func New(app application.Application) *API {
 					return true
 				},
 				AllowedHeaders: []string{"*"},
-				AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
+				AllowedOrigins: []string{
+					"http://localhost:80",
+					"http://localhost:8082",
+					"http://localhost:9092",
+				},
 				//// TODO allow more methods (DELETE?)
 				AllowedMethods: []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 				//// TODO expose ratelimiting headers

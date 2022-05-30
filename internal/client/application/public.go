@@ -1,8 +1,6 @@
 package application
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"myst/internal/client/application/domain/entry"
@@ -47,44 +45,44 @@ func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 }
 
 func (app *application) Keystores() (map[string]keystore.Keystore, error) {
-	fmt.Println("SYNCING WITH REMOTE")
-
-	rks, err := app.remote.Keystores()
-	if err != nil {
-		return nil, err
-	}
-
-	log.Debug("remote: ", rks)
+	//fmt.Println("SYNCING WITH REMOTE")
+	//
+	//rks, err := app.remote.Keystores()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//log.Debug("remote: ", rks)
 
 	ks, err := app.keystores.Keystores()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get keystores")
 	}
 
-	log.Debug("local: ", ks)
+	//log.Debug("local: ", ks)
 
-	for _, k := range rks {
-		if _, ok := ks[k.Id]; !ok {
-			log.Debugln("syncing from remote to local (create)", k.Id)
-			k, err = app.keystores.CreateKeystore(k)
-			if err != nil {
-				return nil, errors.WithMessage(err, "failed to create keystore")
-			}
-			log.Debugln("synced from remote to local (create)", k.Id)
+	//for _, k := range rks {
+	//	if _, ok := ks[k.Id]; !ok {
+	//		log.Debugln("syncing from remote to local (create)", k.Id)
+	//		k, err = app.keystores.CreateKeystore(k)
+	//		if err != nil {
+	//			return nil, errors.WithMessage(err, "failed to create keystore")
+	//		}
+	//		log.Debugln("synced from remote to local (create)", k.Id)
+	//
+	//		ks[k.Id] = k
+	//	} else {
+	//		log.Debugln("synced from remote to local (update)", k.Id)
+	//		err = app.keystores.UpdateKeystore(k)
+	//		if err != nil {
+	//			return nil, errors.WithMessage(err, "failed to update keystore")
+	//		}
+	//
+	//		log.Debugln("synced from remote to local (update)", k.Id)
+	//	}
+	//}
 
-			ks[k.Id] = k
-		} else {
-			log.Debugln("synced from remote to local (update)", k.Id)
-			err = app.keystores.UpdateKeystore(k)
-			if err != nil {
-				return nil, errors.WithMessage(err, "failed to update keystore")
-			}
-
-			log.Debugln("synced from remote to local (update)", k.Id)
-		}
-	}
-
-	log.Debug("final: ", ks)
+	//log.Debug("final: ", ks)
 
 	return ks, nil
 }

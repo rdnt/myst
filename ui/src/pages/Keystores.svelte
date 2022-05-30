@@ -15,7 +15,10 @@
       // TODO: maybe select default keystore once that functionality is implemented
       // keystore = keystores[0];
       // keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      navigate("/keystore/" + keystores[0].id);
+      if (keystores.length > 0 ) {
+        navigate("/keystore/" + keystores[0].id);
+      }
+
     }
   });
 

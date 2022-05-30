@@ -19,6 +19,7 @@ type Config struct {
 	RemoteUsername string
 	RemotePassword string
 	Port           int
+	DataDir        string
 }
 
 func parseFlags() Config {
@@ -29,6 +30,8 @@ func parseFlags() Config {
 
 	flag.StringVar(&cfg.RemoteUsername, "username", "", "Username used to get authorized to the remote server")
 	flag.StringVar(&cfg.RemotePassword, "password", "", "Password used to get authorized to the remote server")
+
+	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
 
 	flag.Parse()
 
@@ -47,7 +50,7 @@ func main() {
 	//	panic(err)
 	//}
 
-	keystoreRepo, err := keystorerepo.New("data")
+	keystoreRepo, err := keystorerepo.New(cfg.DataDir)
 	if err != nil {
 		panic(err)
 	}

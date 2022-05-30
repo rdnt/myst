@@ -1,13 +1,16 @@
 <script lang="ts">
+  import CreateEntryModal from "@/components/CreateEntryModal.svelte";
   import CreateInvitationModal from "@/components/CreateInvitationModal.svelte";
   import Entry from "@/components/Entry.svelte";
   import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
   import Link from "@/components/Link.svelte";
+  import {getKeystores} from "@/stores/keystores";
   import {useFocus, useParams} from "svelte-navigator";
 
   export let keystore;
 
   let showCreateInvitationModal: boolean = false;
+  let showCreateEntryModal: boolean = false;
 
   const params = useParams();
   const registerFocus = useFocus();
@@ -19,6 +22,13 @@
   function onInvitationCreated(e: { id: string }) {
     console.log("onInvitationCreated", e);
     showCreateInvitationModal = false
+    getKeystores()
+  }
+
+  function onEntryCreated(e: {id: string}) {
+    console.log("onEntryCreated", e);
+    showCreateEntryModal = false;
+    getKeystores()
   }
 </script>
 
@@ -26,6 +36,7 @@
   <div class="entries" use:registerFocus>
     <div class="entries-list-header">
       <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
+      <button on:click={() => showCreateEntryModal = true} class="button"><span class="icon"></span>Create Entry</button>
     </div>
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
@@ -54,6 +65,9 @@
 
 <CreateInvitationModal bind:show={showCreateInvitationModal} {keystore}
                        on:created={(e) => {onInvitationCreated(e.detail)}}/>
+
+<CreateEntryModal bind:show={showCreateEntryModal} {keystore}
+                  on:created={(e) => {onEntryCreated(e.detail)}}/>
 
 <style lang="scss">
   .entries-list {

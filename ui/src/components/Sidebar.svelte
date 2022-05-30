@@ -1,8 +1,26 @@
 <script lang="ts">
   import api from "@/api";
+  import type {Invitation} from "@/api";
+  import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import Link from "@/components/Link.svelte";
 
   export let keystores;
+
+  let invitation: Invitation;
+  let showAcceptInvitationModal: boolean = false;
+
+  function acceptInvitation() {
+    api.acceptInvitation({
+      invitationId: invitation.id
+    }).then(() => {
+      showAcceptInvitationModal = false;
+    });
+  }
+
+  function showAcceptInvitationModalFunc(inv: Invitation) {
+    invitation = inv;
+    showAcceptInvitationModal = true;
+  }
 </script>
 
 <div class="sidebar">
@@ -17,9 +35,17 @@
 
   {#await api.getInvitations() then invitations}
     {JSON.stringify(invitations, null, 2)}
+
+    {#each invitations as inv}
+      <button on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>
+    {/each}
+
   {/await}
 </div>
 
+{#if invitation}
+  <AcceptInvitationModal bind:show={showAcceptInvitationModal} {invitation} on:submit={() => {acceptInvitation()}}/>
+{/if}
 <style lang="scss">
   .sidebar {
     background-color: #0a0e11;

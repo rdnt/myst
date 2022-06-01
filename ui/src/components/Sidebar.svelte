@@ -30,7 +30,9 @@
     <div class="rel">
       <Link path="/sharing">
         Sharing
-        <div class="badge">{$invitations.length + 2}</div>
+        {#if $invitations.length > 0}
+          <div class="badge">{$invitations.length}</div>
+        {/if}
       </Link>
 
 <!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->

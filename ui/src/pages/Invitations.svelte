@@ -2,7 +2,7 @@
   import api from "@/api";
   import type {Invitation} from "@/api";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
-  import {invitations} from "@/stores/invitations";
+  import {myInvitations} from "@/stores/invitations";
 
   export let show: boolean;
 
@@ -24,7 +24,7 @@
 </script>
 
 <div class="invitations-list" class:show={show}>
-  {#each $invitations as inv}
+  {#each $myInvitations as inv}
     <div class="invitation">
       <div class="details">
         <div>{inv.inviterId}</div>

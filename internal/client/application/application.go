@@ -8,6 +8,7 @@ import (
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/user"
 	"myst/internal/client/remote"
 	"myst/pkg/logger"
 )
@@ -26,6 +27,7 @@ type Application interface {
 	// remote
 	SignIn() error
 	SignOut() error
+	CurrentUser() *user.User
 	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	//Keystore(id string) (*generated.Keystore, error)
 	//Keystores() ([]*generated.Keystore, error)

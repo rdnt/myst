@@ -37,7 +37,7 @@ type Application interface {
 	CreateUser(username, password string) (user.User, error)
 	AuthorizeUser(userId, password string) error
 	User(userId string) (*user.User, error)
-	//CreateAccount(username, password string) (*user.User, error)
+	//CreateAccount(username, password string) (*user.CurrentUser, error)
 }
 
 type application struct {

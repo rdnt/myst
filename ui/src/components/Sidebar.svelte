@@ -1,18 +1,13 @@
 <script lang="ts">
-  import api from "@/api";
-  import type {Invitation} from "@/api";
-  import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import Link from "@/components/Link.svelte";
-  import Invitations from "@/pages/Invitations.svelte";
-  import {getInvitations, invitations} from "@/stores/invitations";
+  import {myInvitations} from "@/stores/invitations";
   import {onMount} from "svelte";
 
   export let keystores;
 
-  let showInvitations: boolean = false;
-
   onMount(() => {
-    getInvitations()
+
+
   })
 </script>
 
@@ -30,7 +25,9 @@
     <div class="rel">
       <Link path="/sharing">
         Sharing
-        <div class="badge">{$invitations.length + 2}</div>
+        {#if $myInvitations.length > 0}
+          <div class="badge">{$myInvitations.length}</div>
+        {/if}
       </Link>
 
 <!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->

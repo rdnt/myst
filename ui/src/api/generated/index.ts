@@ -18,5 +18,6 @@ export type { Keystore } from './models/Keystore';
 export type { Keystores } from './models/Keystores';
 export type { UnlockKeystoreRequest } from './models/UnlockKeystoreRequest';
 export type { UpdateEntryRequest } from './models/UpdateEntryRequest';
+export type { User } from './models/User';
 
 export { DefaultService } from './services/DefaultService';

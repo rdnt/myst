@@ -8,6 +8,7 @@ import (
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/user"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
 
@@ -41,7 +42,7 @@ type Remote interface {
 
 	SignIn() error
 	SignedIn() bool
-	UserId() string
+	CurrentUser() *user.User
 	SignOut() error
 
 	// keystores
@@ -67,22 +68,22 @@ type remote struct {
 	username string
 	password string
 
+	client *generated.ClientWithResponses
+
 	publicKey  []byte
 	privateKey []byte
 
-	client *generated.ClientWithResponses
-
 	bearerToken string
-	userId      string
+	user        *user.User
 }
 
 func New(opts ...Option) (Remote, error) {
 	r := &remote{
 		client:      nil,
-		bearerToken: "",
-		userId:      "",
 		publicKey:   nil,
 		privateKey:  nil,
+		bearerToken: "",
+		user:        nil,
 	}
 
 	for _, opt := range opts {
@@ -180,14 +181,17 @@ func (r *remote) SignIn() error {
 		return ErrInvalidResponse
 	}
 
-	authz := *res.JSON200
+	authres := *res.JSON200
 
-	if authz.Token == "" {
+	if authres.Token == "" {
 		return errors.New("invalid token")
 	}
 
-	r.bearerToken = authz.Token
-	r.userId = authz.UserId
+	r.bearerToken = authres.Token
+	r.user = &user.User{
+		Id:       authres.UserId,
+		Username: r.username,
+	}
 
 	fmt.Println("Signed in.")
 
@@ -198,15 +202,15 @@ func (r *remote) SignedIn() bool {
 	return r.bearerToken != ""
 }
 
-func (r *remote) UserId() string {
-	return r.userId
+func (r *remote) CurrentUser() *user.User {
+	return r.user
 }
 
 func (r *remote) SignOut() error {
 	fmt.Println("Signing out from remote...")
 
 	r.bearerToken = ""
-	r.userId = ""
+	r.user = nil
 
 	fmt.Println("Signed out.")
 

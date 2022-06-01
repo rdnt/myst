@@ -64,6 +64,37 @@
         }
       }
     },
+    "/user": {
+      "get": {
+        "description": "Returns the currently signed in user",
+        "operationId": "CurrentUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/keystores": {
       "post": {
         "description": "Creates a new encrypted keystore with the given password",
@@ -667,6 +698,21 @@
           "status",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username"
         ]
       },
       "Error": {

@@ -12,6 +12,7 @@ import type { Invitations } from '../models/Invitations';
 import type { Keystore } from '../models/Keystore';
 import type { Keystores } from '../models/Keystores';
 import type { UpdateEntryRequest } from '../models/UpdateEntryRequest';
+import type { User } from '../models/User';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -47,6 +48,22 @@ requestBody: AuthenticateRequest,
             url: '/authenticate',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Returns the currently signed in user
+     * @returns User OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static currentUser(): CancelablePromise<User | Error> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/user',
+            errors: {
+                404: `Not Found`,
+            },
         });
     }
 

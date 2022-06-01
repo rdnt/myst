@@ -135,6 +135,9 @@ type ClientInterface interface {
 	CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CurrentUser request
+	CurrentUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) AuthenticateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -331,6 +334,18 @@ func (c *Client) CreateKeystoreWithBody(ctx context.Context, contentType string,
 
 func (c *Client) CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateKeystoreRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CurrentUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCurrentUserRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -793,6 +808,33 @@ func NewCreateKeystoreRequestWithBody(server string, contentType string, body io
 	return req, nil
 }
 
+// NewCurrentUserRequest generates requests for CurrentUser
+func NewCurrentUserRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -881,6 +923,9 @@ type ClientWithResponsesInterface interface {
 	CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
 
 	CreateKeystoreWithResponse(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
+
+	// CurrentUser request
+	CurrentUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*CurrentUserResponse, error)
 }
 
 type AuthenticateResponse struct {
@@ -1155,6 +1200,29 @@ func (r CreateKeystoreResponse) StatusCode() int {
 	return 0
 }
 
+type CurrentUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r CurrentUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CurrentUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // AuthenticateWithBodyWithResponse request with arbitrary body returning *AuthenticateResponse
 func (c *ClientWithResponses) AuthenticateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error) {
 	rsp, err := c.AuthenticateWithBody(ctx, contentType, body, reqEditors...)
@@ -1301,6 +1369,15 @@ func (c *ClientWithResponses) CreateKeystoreWithResponse(ctx context.Context, bo
 		return nil, err
 	}
 	return ParseCreateKeystoreResponse(rsp)
+}
+
+// CurrentUserWithResponse request returning *CurrentUserResponse
+func (c *ClientWithResponses) CurrentUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*CurrentUserResponse, error) {
+	rsp, err := c.CurrentUser(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCurrentUserResponse(rsp)
 }
 
 // ParseAuthenticateResponse parses an HTTP response from a AuthenticateWithResponse call
@@ -1655,6 +1732,39 @@ func ParseCreateKeystoreResponse(rsp *http.Response) (*CreateKeystoreResponse, e
 			return nil, err
 		}
 		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCurrentUserResponse parses an HTTP response from a CurrentUserWithResponse call
+func ParseCurrentUserResponse(rsp *http.Response) (*CurrentUserResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CurrentUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error

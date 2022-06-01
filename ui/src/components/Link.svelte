@@ -3,7 +3,7 @@
 
   export let path: string = '';
   const location = useLocation();
-  let active;
+  export let active;
   $: active = $location.pathname.startsWith(path);
 </script>
 

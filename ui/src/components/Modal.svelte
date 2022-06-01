@@ -12,7 +12,7 @@
 
 {#if show}
   <div class="modal">
-    <div class="overlay"></div>
+    <div class="overlay" on:click={() => {show = false}}></div>
     <div transition:fade={{delay: 0, duration: 180, ease: 'in'}} class="body">
       <div class="header">
         <slot name="header"></slot>
@@ -36,7 +36,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    height: -webkit-fill-available;
     padding: 50px 0;
     display: flex;
     flex-direction: row;
@@ -71,7 +70,6 @@
       left: 0;
       width: 100%;
       height: 100%;
-      height: -webkit-fill-available;
       background: #000;
       transition: opacity .18s ease;
       opacity: .85;

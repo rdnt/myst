@@ -3,62 +3,65 @@
   import type {Invitation} from "@/api";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import Link from "@/components/Link.svelte";
+  import Invitations from "@/pages/Invitations.svelte";
+  import {getInvitations, invitations} from "@/stores/invitations";
+  import {onMount} from "svelte";
 
   export let keystores;
 
-  let invitation: Invitation;
-  let showAcceptInvitationModal: boolean = false;
+  let showInvitations: boolean = false;
 
-  function acceptInvitation() {
-    api.acceptInvitation({
-      invitationId: invitation.id
-    }).then(() => {
-      showAcceptInvitationModal = false;
-    });
-  }
-
-  function showAcceptInvitationModalFunc(inv: Invitation) {
-    invitation = inv;
-    showAcceptInvitationModal = true;
-  }
+  onMount(() => {
+    getInvitations()
+  })
 </script>
 
 <div class="sidebar">
   <h4>Myst</h4>
-  <div class="keystores-list">
+  <div class="list">
     <h5>Keystores</h5>
     {#each keystores as keystore}
       <Link path="/keystore/{keystore.id}">{keystore.name}</Link>
     {/each}
   </div>
 
+  <div class="list bottom">
+    <h5>More</h5>
+    <div class="rel">
+      <Link path="/sharing">
+        Sharing
+        <div class="badge">{$invitations.length + 2}</div>
+      </Link>
 
-  {#await api.getInvitations() then invitations}
-    {JSON.stringify(invitations, null, 2)}
+<!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->
+<!--        Invitations-->
+<!--        {#if $invitations.length > 0 || true}-->
+<!--          <div class="badge">{$invitations.length + 2}</div>-->
+<!--        {/if}-->
+<!--      </Link>-->
+    </div>
+    <h5 class="version">v0.0.0-0123456</h5>
+  </div>
 
-    {#each invitations as inv}
-      <button on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>
-    {/each}
-
-  {/await}
 </div>
 
-{#if invitation}
-  <AcceptInvitationModal bind:show={showAcceptInvitationModal} {invitation} on:submit={() => {acceptInvitation()}}/>
-{/if}
 <style lang="scss">
   .sidebar {
+    position: relative;
     background-color: #0a0e11;
     height: 100%;
     padding: 20px;
     box-sizing: border-box;
-    flex-basis: 250px;
+    flex-basis: 300px;
+    display: flex;
+    flex-direction: column;
 
     h4 {
       font-weight: 700;
       font-size: 2rem;
-      margin: 10px 0 60px;
       padding: 0 20px;
+      margin: 0;
+      margin-bottom: 40px;
     }
 
     h5 {
@@ -72,36 +75,60 @@
       letter-spacing: .5px;
     }
 
-    .keystores-list {
+    .rel {
+      position: relative;
+      width: 100%;
+    }
+
+    .version {
+      margin-top: 40px;
+      opacity: .75;
+      font-weight: 500;
+      text-transform: none;
+    }
+
+    .list {
       display: flex;
       flex-direction: column;
+      flex-wrap: wrap;
+      margin: 0;
+      margin-top: 20px;
 
-      :global(.link a) {
+      &.bottom {
+        bottom: 0;
+        margin-top: auto;
+      }
+
+      :global(.link a), :global(.link button) {
+        margin: 0;
+        line-height: 1.4;
+        background-color: transparent;
+        border: none;
         color: inherit;
         text-decoration: none;
         display: flex;
+        width: 100%;
         align-items: center;
         border-radius: 5px;
         position: relative;
-        color: #fff;
         cursor: pointer;
-        height: 22px;
         padding: 10px 20px 10px 20px;
         font-size: 1.1rem;
         white-space: nowrap;
         text-overflow: ellipsis;
-        margin-bottom: 2px;
-        text-decoration: none;
+        font-weight: 500;
+        box-sizing: border-box;
 
         &:hover {
           background-color: rgba(#1e2328, .75);
         }
       }
 
-      :global(.link.active a) {
+      :global(.link.active a), :global(.link.active button) {
         font-weight: 500;
         color: #00edb1;
         background-color: #0c1d19;
+        background-color: rgba(#1e2328, .75);
 
         &:after {
           content: '';
@@ -115,5 +142,10 @@
         }
       }
     }
+  }
+
+  .badge {
+    margin-left: auto;
+    font-weight: bold;
   }
 </style>

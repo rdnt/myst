@@ -53,6 +53,21 @@ func (api *API) Authenticate(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (api *API) CurrentUser(c *gin.Context) {
+	u := api.app.CurrentUser()
+	if u == nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK, generated.User{
+			Id:       u.Id,
+			Username: u.Username,
+		},
+	)
+}
+
 func (api *API) CreateKeystore(c *gin.Context) {
 	var req generated.CreateKeystoreRequest
 

@@ -6,10 +6,15 @@ import (
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/user"
 )
 
 func (app *application) SignIn() error {
 	return app.remote.SignIn()
+}
+
+func (app *application) CurrentUser() *user.User {
+	return app.remote.CurrentUser()
 }
 
 func (app *application) SignOut() error {

@@ -148,7 +148,7 @@ func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invit
 //		}
 //	}
 //
-//	u, err := s.userRepo.User(userId)
+//	u, err := s.userRepo.CurrentUser(userId)
 //	if err != nil {
 //		return nil, err
 //	}

@@ -90,6 +90,12 @@ type UpdateEntryRequest struct {
 	Password *string `json:"password,omitempty"`
 }
 
+// User defines model for User.
+type User struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+}
+
 // AuthenticateJSONBody defines parameters for Authenticate.
 type AuthenticateJSONBody AuthenticateRequest
 

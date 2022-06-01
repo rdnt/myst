@@ -6,8 +6,9 @@
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {invitations} from "@/stores/invitations";
+  import {getInvitations, invitations} from "@/stores/invitations";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
+  import {getCurrentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -29,10 +30,11 @@
   // const interval = setInterval(healthCheck, 1000);
   // onDestroy(() => clearInterval(interval));
 
-  function initialize() {
+  const initialize = () => {
     // return $keystores;
 
     getKeystores().then((response) => {
+
       onboarding = response.length == 0;
       login = false
 
@@ -55,10 +57,14 @@
     }).finally(() => {
       ready = true;
     });
+
   }
 
-  onMount(async () => {
+  onMount(() => {
     initialize()
+
+    getCurrentUser()
+    getInvitations()
   });
 </script>
 

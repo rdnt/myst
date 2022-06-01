@@ -4,7 +4,9 @@
   import Messages from "@/components/Messages.svelte";
   import OnboardingForm from "@/components/OnboardingForm.svelte";
   import Sidebar from "@/components/Sidebar.svelte";
+  import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
+  import {invitations} from "@/stores/invitations";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
@@ -81,6 +83,10 @@
 
         <Route path="/keystore/:keystoreId/entry/:entryId">
           <Keystores keystores={$keystores}/>
+        </Route>
+
+        <Route path="/sharing">
+          <Invitations invitations={$invitations}/>
         </Route>
       </main>
     {/if}

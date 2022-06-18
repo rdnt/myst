@@ -41,8 +41,10 @@
     <h5>Incoming Invitations</h5>
     {#each incomingInvitations as inv}
       <div class="invitation">
-        <span class="icon" style={{'background-color': colorHash(inv.inviterId)}}>
-          <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
+        <span class="icon">
+          <span style="background-color: {colorHash(inv.inviterId)}">
+            {inv.inviterId.slice(0, 2).toUpperCase()}
+          </span>
         </span>
         <div class="info">
           <span class="name">
@@ -66,7 +68,9 @@
     {#each outgoingInvitations as inv}
       <div class="invitation">
         <span class="icon">
-          <span>{inv.inviteeId.slice(0, 2).toUpperCase()}</span>
+          <span style="background-color: {colorHash(inv.inviteeId)}">
+            {inv.inviteeId.slice(0, 2).toUpperCase()}
+          </span>
         </span>
         <div class="info">
           <span class="name">

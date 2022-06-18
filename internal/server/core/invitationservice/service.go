@@ -44,6 +44,7 @@ func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []b
 
 	return s.invitationRepo.Create(
 		invitation.WithKeystoreId(store.Id),
+		invitation.WithKeystoreName(store.Name),
 		invitation.WithInviterId(inviter.Id),
 		invitation.WithInviteeId(invitee.Id),
 		invitation.WithInviterKey(inviterKey),

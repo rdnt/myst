@@ -33,6 +33,7 @@ type Application interface {
 	UserKeystores(userId string) ([]*keystore.Keystore, error)
 	UserInvitations(userId string) ([]invitation.Invitation, error)
 	UserKeystore(userId, keystoreId string) (*keystore.Keystore, error)
+	Keystore(keystoreId string) (*keystore.Keystore, error)
 
 	CreateUser(username, password string) (user.User, error)
 	AuthorizeUser(userId, password string) error

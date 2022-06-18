@@ -21,12 +21,13 @@ func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 
 func ToJSONInvitation(inv invitation.Invitation) generated.Invitation {
 	gen := generated.Invitation{
-		Id:         inv.Id,
-		KeystoreId: inv.KeystoreId,
-		InviterId:  inv.InviterId,
-		InviteeId:  inv.InviteeId,
-		CreatedAt:  inv.CreatedAt.Unix(),
-		UpdatedAt:  inv.UpdatedAt.Unix(),
+		Id:           inv.Id,
+		KeystoreId:   inv.KeystoreId,
+		KeystoreName: inv.KeystoreName,
+		InviterId:    inv.InviterId,
+		InviteeId:    inv.InviteeId,
+		CreatedAt:    inv.CreatedAt.Unix(),
+		UpdatedAt:    inv.UpdatedAt.Unix(),
 	}
 
 	if inv.InviterKey != nil {

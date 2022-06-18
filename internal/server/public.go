@@ -69,6 +69,15 @@ func (app *application) UserKeystore(userId, keystoreId string) (*keystore.Keyst
 	return k, nil
 }
 
+func (app *application) Keystore(keystoreId string) (*keystore.Keystore, error) {
+	k, err := app.Keystores.Keystore(keystoreId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get user keystore")
+	}
+
+	return k, nil
+}
+
 func (app *application) CreateUser(username, password string) (user.User, error) {
 	return app.Users.CreateUser(user.WithUsername(username), user.WithPassword(password))
 }

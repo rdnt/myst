@@ -5,6 +5,7 @@
 export type Invitation = {
     id: string;
     keystoreId: string;
+    keystoreName: string;
     inviterId: string;
     inviteeId: string;
     inviterKey: string;

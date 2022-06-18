@@ -18,16 +18,17 @@ var (
 )
 
 type Invitation struct {
-	Id          string
-	InviterId   string
-	KeystoreId  string
-	InviteeId   string
-	InviterKey  []byte
-	InviteeKey  []byte
-	KeystoreKey []byte
-	Status      Status
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Id           string
+	InviterId    string
+	KeystoreId   string
+	KeystoreName string
+	InviteeId    string
+	InviterKey   []byte
+	InviteeKey   []byte
+	KeystoreKey  []byte
+	Status       Status
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func New(opts ...Option) (*Invitation, error) {

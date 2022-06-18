@@ -677,6 +677,9 @@
           "keystoreId": {
             "type": "string"
           },
+          "keystoreName": {
+            "type": "string"
+          },
           "inviterId": {
             "type": "string"
           },
@@ -716,6 +719,7 @@
         "required": [
           "id",
           "keystoreId",
+          "keystoreName",
           "inviterId",
           "inviteeId",
           "inviterKey",

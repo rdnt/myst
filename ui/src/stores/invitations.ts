@@ -1,51 +1,27 @@
 import type {Invitation} from "@/api";
 import api, {ApiError} from "@/api";
-import {currentUser} from "@/stores/user";
-import {derived, readable} from "svelte/store";
+import {readable} from "svelte/store";
 
-let setInvitations;
-export const invitations = readable<Invitation[]>([], (set) => {
+const updateInvitations = (setFunc) => {
   api.getInvitations().then((invs: Invitation[]) => {
     invs = invs.sort((a, b) => {
       return a.id < b.id ? 1 : -1;
     })
 
-    set(invs)
+    setFunc(invs)
   }).catch((e: ApiError) => {
     console.error(e)
-    set([])
+    setFunc([])
   })
+}
+
+export const invitations = readable<Invitation[]>([], (set) => {
+  updateInvitations(set)
+
+  let interval = window.setInterval(() => {updateInvitations(set)}, 1000)
 
   return () => {
+    window.clearInterval(interval)
     set([]);
   }
 });
-
-// export const invitations = derived([invitations, currentUser], ([invitations, currentUser]) => {
-//   return invitations.filter((inv) => currentUser ? inv.inviteeId === currentUser.id : false)
-// }, []);
-
-let setInvitationFunc;
-export const invitation = readable<Invitation>(undefined, (set) => {
-  setInvitationFunc = set
-
-  return () => {
-    // set(undefined);
-  }
-});
-
-export const getInvitation = (id: string) => {
-  return api.getInvitation({invitationId: id}).then((inv: Invitation) => {
-    if (setInvitationFunc) {
-      setInvitationFunc(inv);
-    }
-
-    return Promise.resolve(inv)
-  }).catch((error: Response) => {
-    if (setInvitationFunc) {
-      setInvitationFunc(undefined);
-    }
-
-    return Promise.reject(error)
-  });
-}

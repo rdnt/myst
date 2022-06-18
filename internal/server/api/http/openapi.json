@@ -565,6 +565,7 @@
 					"inviteeId",
 					"inviterKey",
 					"inviteeKey",
+					"keystoreName",
 					"keystoreKey",
 					"status",
 					"createdAt",
@@ -590,6 +591,9 @@
 					"inviteeKey": {
 						"type": "string",
 						"format": "byte"
+					},
+					"keystoreName": {
+						"type": "string"
 					},
 					"keystoreKey": {
 						"type": "string",

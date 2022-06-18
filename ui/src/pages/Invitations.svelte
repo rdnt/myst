@@ -5,6 +5,9 @@
   import {invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
+  import ColorHash from 'color-hash'
+
+  const ch = new ColorHash({lightness: 0.5, saturation: 0.5});
 
   const registerFocus = useFocus();
 
@@ -27,6 +30,10 @@
     invitation = inv;
     showAcceptInvitationModal = true;
   }
+
+  function colorHash(s: string): string {
+    return ch.hex(s)+'66';
+  }
 </script>
 
 <div class="invitations-list" use:registerFocus>
@@ -34,16 +41,16 @@
     <h5>Incoming Invitations</h5>
     {#each incomingInvitations as inv}
       <div class="invitation">
-      <span class="icon">
-        <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
-      </span>
+        <span class="icon" style={{'background-color': colorHash(inv.inviterId)}}>
+          <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
+        </span>
         <div class="info">
-        <span class="name">
-          {inv.keystoreId}
-        </span>
+          <span class="name">
+            {inv.keystoreName}
+          </span>
           <span class="user">
-          Invited by <strong>{inv.inviterId}</strong>
-        </span>
+            Invited by <strong>{inv.inviterId}</strong>
+          </span>
         </div>
         <div class="actions">
           <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>
@@ -63,7 +70,7 @@
         </span>
         <div class="info">
           <span class="name">
-            {inv.keystoreId}
+            {inv.keystoreName}
           </span>
           <span class="user">
             Invited <strong>{inv.inviteeId}</strong>
@@ -82,7 +89,7 @@
     {#each pastInvitations as inv}
       <div class="invitation">
         <span class="icon">
-          <span>
+          <span style="background-color: {colorHash(inv.inviterId === $currentUser.id ? inv.inviteeId : inv.inviterId)}">
             {#if inv.inviterId === $currentUser.id}
               {inv.inviteeId.slice(0, 2).toUpperCase()}
             {:else}
@@ -92,10 +99,18 @@
         </span>
         <div class="info">
           <span class="name">
-            {inv.keystoreId}
+            {inv.keystoreName}
           </span>
           <span class="user">
-            {#if inv.status === 'finalized'}
+            {#if inv.status === 'accepted'}
+              {#if inv.inviterId === $currentUser.id}
+                Invitation accepted.
+                Waiting for <strong>{inv.inviteeId}</strong> to come online.
+              {:else}
+                Invitation accepted.
+                Waiting for <strong>{inv.inviterId}</strong> to come online.
+              {/if}
+            {:else if inv.status === 'finalized'}
               {#if inv.inviterId === $currentUser.id}
                 Shared with <strong>{inv.inviteeId}</strong>
               {:else}
@@ -124,7 +139,7 @@
 {/if}
 
 {#if invitation}
-  <Invitation {invitation}/>
+  <!--  <Invitation {invitation}/>-->
 {/if}
 
 
@@ -231,21 +246,21 @@
 
       img {
         display: block;
-        width: 32px;
-        height: 32px;
+        width: 48px;
+        height: 48px;
         vertical-align: baseline;
       }
 
       span {
-        width: 32px;
-        height: 32px;
+        width: 48px;
+        height: 48px;
         display: inline-flex;
         justify-content: center;
         align-items: center;
         font-weight: bold;
         border-radius: 50%;
         background-color: rgba(#aabbcc, .1);
-        font-size: .8rem;
+        font-size: 1rem;
       }
     }
 

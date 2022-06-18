@@ -8,8 +8,9 @@
 
   const registerFocus = useFocus();
 
-  $: incomingInvitations = $invitations.filter((inv) => $currentUser ? inv.inviteeId === $currentUser.id : false)
-  $: outgoingInvitations = $invitations.filter((inv) => $currentUser ? inv.inviterId === $currentUser.id : false)
+  $: incomingInvitations = $invitations.filter((inv) => inv.inviteeId === $currentUser.id && inv.status === 'pending');
+  $: outgoingInvitations = $invitations.filter((inv) => inv.inviterId === $currentUser.id && inv.status === 'pending');
+  $: pastInvitations = $invitations.filter((inv) => inv.status !== 'pending')
 
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
@@ -29,88 +30,93 @@
 </script>
 
 <div class="invitations-list" use:registerFocus>
-  <h5>Incoming invitations</h5>
-  {#each incomingInvitations as inv}
-    <div class="invitation">
+  {#if incomingInvitations.length > 0}
+    <h5>Incoming Invitations</h5>
+    {#each incomingInvitations as inv}
+      <div class="invitation">
       <span class="icon">
         <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
       </span>
-      <div class="info">
+        <div class="info">
         <span class="name">
           {inv.keystoreId}
         </span>
-        <span class="user">
+          <span class="user">
           Invited by <strong>{inv.inviterId}</strong>
         </span>
+        </div>
+        <div class="actions">
+          <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>
+        </div>
       </div>
-      <!--      <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-    </div>
-    <div class="invitation">
-      <span class="icon">
-        <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
-      </span>
-      <div class="info">
-        <span class="name">
-          {inv.keystoreId}
+    {/each}
+    <br>
+  {/if}
+
+  {#if outgoingInvitations.length > 0}
+    <h5>Outgoing Invitations</h5>
+
+    {#each outgoingInvitations as inv}
+      <div class="invitation">
+        <span class="icon">
+          <span>{inv.inviteeId.slice(0, 2).toUpperCase()}</span>
         </span>
-        <span class="user">
-          Invited by <strong>{inv.inviterId}</strong>
-        </span>
+        <div class="info">
+          <span class="name">
+            {inv.keystoreId}
+          </span>
+          <span class="user">
+            Invited <strong>{inv.inviteeId}</strong>
+          </span>
+        </div>
+        <div class="actions">
+          <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
+        </div>
       </div>
-      <!--      <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-    </div>
-    <div class="invitation">
-      <span class="icon">
-        <span>{inv.inviterId.slice(0, 2).toUpperCase()}</span>
-      </span>
-      <div class="info">
-        <span class="name">
-          {inv.keystoreId}
+    {/each}
+    <br>
+  {/if}
+
+  {#if pastInvitations.length > 0}
+    <h5>Past Invitations</h5>
+    {#each pastInvitations as inv}
+      <div class="invitation">
+        <span class="icon">
+          <span>
+            {#if inv.inviterId === $currentUser.id}
+              {inv.inviteeId.slice(0, 2).toUpperCase()}
+            {:else}
+              {inv.inviterId.slice(0, 2).toUpperCase()}
+            {/if}
+          </span>
         </span>
-        <span class="user">
-          Invited by <strong>{inv.inviterId}</strong>
-        </span>
+        <div class="info">
+          <span class="name">
+            {inv.keystoreId}
+          </span>
+          <span class="user">
+            {#if inv.status === 'finalized'}
+              {#if inv.inviterId === $currentUser.id}
+                Shared with <strong>{inv.inviteeId}</strong>
+              {:else}
+                Being shared by <strong>{inv.inviterId}</strong>
+              {/if}
+            {:else if inv.status === 'rejected'}
+              {#if inv.inviterId === $currentUser.id}
+                Rejected invitation from <strong>{inv.inviteeId}</strong>
+              {:else}
+                Invitation rejected by <strong>{inv.inviterId}</strong>
+              {/if}
+            {/if}
+          </span>
+        </div>
+        <div class="actions">
+          <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
+        </div>
       </div>
-      <!--      <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-    </div>
-  {:else}
-    -
-  {/each}
-  <br>
-  <br>
-  <h5>Outgoing invitations</h5>
-  {#each outgoingInvitations as inv}
-    <div class="invitation">
-      <span class="icon">
-        <span>{inv.inviteeId.slice(0, 2).toUpperCase()}</span>
-      </span>
-      <div class="info">
-        <span class="name">
-          {inv.keystoreId}
-        </span>
-        <span class="user">
-          Shared with <strong>{inv.inviteeId}</strong>
-        </span>
-      </div>
-      <!--      <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-    </div>
-    <div class="invitation">
-      <span class="icon">
-        <span>{inv.inviteeId.slice(0, 2).toUpperCase()}</span>
-      </span>
-      <div class="info">
-        <span class="name">
-          {inv.keystoreId}
-        </span>
-        <span class="user">
-          Shared with <strong>{inv.inviteeId}</strong>
-        </span>
-      </div>
-      <!--      <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-    </div>
-  {:else}
-    -
-  {/each}
+    {/each}
+    <br>
+  {/if}
 </div>
 
 {#if invitation}
@@ -145,7 +151,7 @@
     background-color: #111519;
     border-radius: 5px;
     min-height: 400px;
-    flex-basis: 50%;
+    flex-basis: 100%;
     z-index: 1;
     //opacity: 0;
     //transform: scale(0.98);
@@ -180,6 +186,10 @@
     .info {
       display: flex;
       flex-direction: column;
+    }
+
+    .actions {
+      margin-left: auto;
     }
 
     &.header {

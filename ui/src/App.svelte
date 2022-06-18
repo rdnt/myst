@@ -7,6 +7,7 @@
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
+  import {currentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -71,7 +72,7 @@
       <OnboardingForm on:created={initialize}/>
     {:else if login}
       <LoginForm on:login={initialize}/>
-    {:else}
+    {:else if $currentUser}
       <Sidebar keystores={$keystores}/>
       <main>
         <Route>

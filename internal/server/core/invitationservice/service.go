@@ -23,6 +23,10 @@ type service struct {
 }
 
 func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error) {
+	if inviterId == inviteeId {
+		return nil, errors.New("inviter cannot be the same as invitee")
+	}
+
 	store, err := s.keystoreRepo.Keystore(keystoreId)
 	if err != nil {
 		return nil, err

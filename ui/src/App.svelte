@@ -87,7 +87,7 @@
           <Keystores keystores={$keystores}/>
         </Route>
 
-        <Route path="/sharing">
+        <Route path="/invitations">
           <Invitations/>
         </Route>
       </main>

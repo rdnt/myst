@@ -1,6 +1,8 @@
 <script lang="ts">
   import Link from "@/components/Link.svelte";
+  import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
+  import {currentUser} from "@/stores/user";
   import {onMount} from "svelte";
 
   export let keystores;
@@ -13,6 +15,8 @@
 
 <div class="sidebar">
   <h4>Myst</h4>
+  <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+
   <div class="list">
     <h5>Keystores</h5>
     {#each keystores as keystore}
@@ -21,14 +25,15 @@
   </div>
 
   <div class="list bottom">
-    <h5>More</h5>
+    <h5>Sync</h5>
     <div class="rel">
-      <Link path="/sharing">
-        Sharing
+      <Link path="/invitations">
+        Invitations
         {#if $invitations.length > 0}
           <div class="badge">{$invitations.length}</div>
         {/if}
       </Link>
+
 
 <!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->
 <!--        Invitations-->
@@ -47,7 +52,7 @@
     position: relative;
     background-color: #0a0e11;
     height: 100%;
-    padding: 20px;
+    padding: 14px;
     box-sizing: border-box;
     flex-basis: 300px;
     display: flex;
@@ -56,20 +61,38 @@
     h4 {
       font-weight: 700;
       font-size: 2rem;
-      padding: 0 20px;
+      padding: 0 16px;
       margin: 0;
-      margin-bottom: 40px;
+      margin-top: 12px;
     }
 
     h5 {
       height: 20px;
-      padding: 0 20px;
-      margin: 0 0 10px;
+      padding: 0 16px;
+      margin: 0 0 16px;
       color: #8a8f9f;
       text-transform: uppercase;
       font-size: .85rem;
       font-weight: 600;
       letter-spacing: .5px;
+
+      strong {
+        font-weight: 700;
+      }
+    }
+
+    h6 {
+      height: 20px;
+      padding: 0 16px;
+      color: #8a8f9f;
+      margin: 10px 0 10px;
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: 40px;
+
+      strong {
+        font-weight: 600;
+      }
     }
 
     .rel {
@@ -109,7 +132,7 @@
         border-radius: 5px;
         position: relative;
         cursor: pointer;
-        padding: 10px 20px 10px 20px;
+        padding: 10px 16px 10px 16px;
         font-size: 1.1rem;
         white-space: nowrap;
         text-overflow: ellipsis;

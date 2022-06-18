@@ -2,12 +2,10 @@
   import api from "@/api";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import Invitation from "@/components/Invitation.svelte";
+  import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
-  import ColorHash from 'color-hash'
-
-  const ch = new ColorHash({lightness: 0.5, saturation: 0.5});
 
   const registerFocus = useFocus();
 
@@ -30,10 +28,6 @@
     invitation = inv;
     showAcceptInvitationModal = true;
   }
-
-  function colorHash(s: string): string {
-    return ch.hex(s)+'66';
-  }
 </script>
 
 <div class="invitations-list" use:registerFocus>
@@ -42,7 +36,7 @@
     {#each incomingInvitations as inv}
       <div class="invitation">
         <span class="icon">
-          <span style="background-color: {colorHash(inv.inviterId)}">
+          <span style="background-color: {hash(inv.inviterId)}">
             {inv.inviterId.slice(0, 2).toUpperCase()}
           </span>
         </span>
@@ -68,7 +62,7 @@
     {#each outgoingInvitations as inv}
       <div class="invitation">
         <span class="icon">
-          <span style="background-color: {colorHash(inv.inviteeId)}">
+          <span style="background-color: {hash(inv.inviteeId)}">
             {inv.inviteeId.slice(0, 2).toUpperCase()}
           </span>
         </span>
@@ -93,7 +87,7 @@
     {#each pastInvitations as inv}
       <div class="invitation">
         <span class="icon">
-          <span style="background-color: {colorHash(inv.inviterId === $currentUser.id ? inv.inviteeId : inv.inviterId)}">
+          <span style="background-color: {hash(inv.inviterId === $currentUser.id ? inv.inviteeId : inv.inviterId)}">
             {#if inv.inviterId === $currentUser.id}
               {inv.inviteeId.slice(0, 2).toUpperCase()}
             {:else}

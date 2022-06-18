@@ -1,6 +1,6 @@
 <script lang="ts">
   import Link from "@/components/Link.svelte";
-  import {myInvitations} from "@/stores/invitations";
+  import {invitations} from "@/stores/invitations";
   import {onMount} from "svelte";
 
   export let keystores;
@@ -25,8 +25,8 @@
     <div class="rel">
       <Link path="/sharing">
         Sharing
-        {#if $myInvitations.length > 0}
-          <div class="badge">{$myInvitations.length}</div>
+        {#if $invitations.length > 0}
+          <div class="badge">{$invitations.length}</div>
         {/if}
       </Link>
 

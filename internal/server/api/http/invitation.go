@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +37,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(inv))
+	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
 }
 
 func (api *API) Invitation(c *gin.Context) {
@@ -51,7 +52,7 @@ func (api *API) Invitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(inv))
+	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
 }
 
 func (api *API) AcceptInvitation(c *gin.Context) {
@@ -79,7 +80,7 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(inv))
+	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
 }
 
 func (api *API) FinalizeInvitation(c *gin.Context) {
@@ -107,7 +108,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(inv))
+	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
 }
 
 func (api *API) Invitations(c *gin.Context) {
@@ -119,6 +120,8 @@ func (api *API) Invitations(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println(invs)
 
 	gen := []generated.Invitation{}
 

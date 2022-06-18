@@ -51,7 +51,7 @@ func (app *application) UserKeystores(userId string) ([]*keystore.Keystore, erro
 	return keystores, nil
 }
 
-func (app *application) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+func (app *application) UserInvitations(userId string) ([]invitation.Invitation, error) {
 	invs, err := app.Invitations.UserInvitations(userId, nil)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")

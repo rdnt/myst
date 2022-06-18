@@ -19,7 +19,7 @@ func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 	}
 }
 
-func ToJSONInvitation(inv *invitation.Invitation) generated.Invitation {
+func ToJSONInvitation(inv invitation.Invitation) generated.Invitation {
 	gen := generated.Invitation{
 		Id:         inv.Id,
 		KeystoreId: inv.KeystoreId,

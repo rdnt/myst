@@ -31,7 +31,7 @@ type Application interface {
 	GetInvitation(invitationId string) (*invitation.Invitation, error)
 	CreateKeystore(name, ownerId string, payload []byte) (*keystore.Keystore, error)
 	UserKeystores(userId string) ([]*keystore.Keystore, error)
-	UserInvitations(userId string) ([]*invitation.Invitation, error)
+	UserInvitations(userId string) ([]invitation.Invitation, error)
 	UserKeystore(userId, keystoreId string) (*keystore.Keystore, error)
 
 	CreateUser(username, password string) (user.User, error)

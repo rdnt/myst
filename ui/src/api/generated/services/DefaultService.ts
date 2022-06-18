@@ -261,6 +261,26 @@ invitationId?: string,
     }
 
     /**
+     * Returns an invitation
+     * @returns Invitation Invitation
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static getInvitation({
+invitationId,
+}: {
+invitationId?: string,
+}): CancelablePromise<Invitation | Error> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/invitation/{invitationId}',
+            path: {
+                'invitationId': invitationId,
+            },
+        });
+    }
+
+    /**
      * Get all keystore invitations
      * @returns Invitations Invitations
      * @returns Error Error

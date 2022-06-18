@@ -15,7 +15,7 @@ type Repository interface {
 	Invitations() ([]*Invitation, error)
 	Delete(id string) error
 
-	UserInvitations(userId string) ([]*Invitation, error)
+	UserInvitations(userId string) ([]Invitation, error)
 	UserInvitation(userId, invitationId string) (*Invitation, error)
 }
 
@@ -31,7 +31,7 @@ type Service interface {
 	Accept(invitationId string, inviteeKey []byte) (*Invitation, error)
 	Finalize(invitationId string, keystoreKey []byte) (*Invitation, error)
 
-	UserInvitations(userId string, opts *UserInvitationsOptions) ([]*Invitation, error)
+	UserInvitations(userId string, opts *UserInvitationsOptions) ([]Invitation, error)
 	UserInvitation(userId, invitationId string) (*Invitation, error)
 
 	//UserKeystores(userId string) ([]*keystore.Keystore, error)

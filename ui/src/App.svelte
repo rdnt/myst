@@ -6,9 +6,7 @@
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {getInvitations, invitations} from "@/stores/invitations";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {getCurrentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -62,9 +60,6 @@
 
   onMount(() => {
     initialize()
-
-    getCurrentUser()
-    getInvitations()
   });
 </script>
 
@@ -92,7 +87,7 @@
         </Route>
 
         <Route path="/sharing">
-          <Invitations invitations={$invitations}/>
+          <Invitations/>
         </Route>
       </main>
     {/if}

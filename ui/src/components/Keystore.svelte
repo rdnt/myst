@@ -98,6 +98,7 @@
         min-height: 20px;
         text-decoration: none;
         margin-bottom: 2px;
+        cursor: default;
 
         .info {
           display: flex;
@@ -188,7 +189,7 @@
           }
 
           &:active {
-            background-color: rgba(#2d2f36, .75);
+            background-color: lighten(#191e23, 2%);
             color: rgb(215, 216, 219);
             opacity: 1;
           }

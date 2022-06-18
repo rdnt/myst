@@ -95,7 +95,7 @@ type UserInvitationsOptions struct {
 // UserInvitations returns all the invitations this user has access to. These include:
 // - invitations where the user is the inviter
 // - invitations where the user is the invitee
-func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]*invitation.Invitation, error) {
+func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
 	u, err := s.userRepo.User(userId)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 		return nil, errors.WithMessage(err, "failed to get user invitations")
 	}
 
-	invitations := []*invitation.Invitation{}
+	invitations := []invitation.Invitation{}
 	for _, inv := range invs {
 		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
 			continue

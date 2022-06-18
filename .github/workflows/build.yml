@@ -23,7 +23,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules
@@ -54,7 +54,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules
@@ -85,7 +85,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules

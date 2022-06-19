@@ -1,8 +1,10 @@
 <script lang="ts">
   import api from "@/api";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
+  import DeclineInvitationModal from "@/components/DeclineInvitationModal.svelte";
   import Invitation from "@/components/Invitation.svelte";
   import {hash} from "@/lib/color-hash";
+  import {format} from "@/lib/date";
   import {invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
@@ -15,6 +17,7 @@
 
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
+  let showDeclineInvitationModal: boolean = false;
 
   function acceptInvitation() {
     api.acceptInvitation({
@@ -24,9 +27,22 @@
     });
   }
 
+  function declineInvitation() {
+    api.declineOrCancelInvitation({
+      invitationId: invitation.id
+    }).then(() => {
+      showDeclineInvitationModal = false;
+    });
+  }
+
   function showAcceptInvitationModalFunc(inv: Invitation) {
     invitation = inv;
     showAcceptInvitationModal = true;
+  }
+
+  function showDeclineInvitationModalFunc(inv: Invitation) {
+    invitation = inv;
+    showDeclineInvitationModal = true;
   }
 </script>
 
@@ -49,7 +65,8 @@
           </span>
         </div>
         <div class="actions">
-          <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>
+          <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
+          <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
         </div>
       </div>
     {/each}
@@ -75,7 +92,7 @@
           </span>
         </div>
         <div class="actions">
-          <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
+          <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete Invitation</button>
         </div>
       </div>
     {/each}
@@ -102,23 +119,27 @@
           <span class="user">
             {#if inv.status === 'accepted'}
               {#if inv.inviterId === $currentUser.id}
-                Invitation accepted.
-                Waiting for <strong>{inv.inviteeId}</strong> to come online.
+                Invitation accepted at {format(inv.acceptedAt)}.
+                Waiting for <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> to come online.
               {:else}
-                Invitation accepted.
-                Waiting for <strong>{inv.inviterId}</strong> to come online.
+                Invitation accepted at {format(inv.acceptedAt)}.
+                Waiting for <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> to come online.
               {/if}
             {:else if inv.status === 'finalized'}
               {#if inv.inviterId === $currentUser.id}
-                Shared with <strong>{inv.inviteeId}</strong>
+                Shared with <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> since {format(inv.acceptedAt)}
               {:else}
-                Being shared by <strong>{inv.inviterId}</strong>
+                Being shared by <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> since {format(inv.acceptedAt)}
               {/if}
-            {:else if inv.status === 'rejected'}
+            {:else if inv.status === 'deleted'}
               {#if inv.inviterId === $currentUser.id}
-                Rejected invitation from <strong>{inv.inviteeId}</strong>
+                Invitation to <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> deleted {format(inv.deletedAt)}
+              {/if}
+            {:else if inv.status === 'declined'}
+              {#if inv.inviterId === $currentUser.id}
+                Invitation declined by <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> {format(inv.declinedAt)}
               {:else}
-                Invitation rejected by <strong>{inv.inviterId}</strong>
+                Declined invitation from <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> {format(inv.declinedAt)}
               {/if}
             {/if}
           </span>
@@ -134,6 +155,7 @@
 
 {#if invitation}
   <AcceptInvitationModal bind:show={showAcceptInvitationModal} {invitation} on:submit={() => {acceptInvitation()}}/>
+  <DeclineInvitationModal bind:show={showDeclineInvitationModal} {invitation} on:submit={() => {declineInvitation()}}/>
 {/if}
 
 {#if invitation}

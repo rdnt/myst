@@ -48,6 +48,7 @@ type Application interface {
 
 	CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
+	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 }

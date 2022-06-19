@@ -16,7 +16,10 @@ func InvitationToRest(inv invitation.Invitation) generated.Invitation {
 		InviteeKey:   inv.InviteeKey,
 		KeystoreKey:  inv.KeystoreKey,
 		Status:       generated.InvitationStatus(inv.Status.String()),
-		CreatedAt:    inv.CreatedAt.Unix(),
-		UpdatedAt:    inv.UpdatedAt.Unix(),
+		CreatedAt:    inv.CreatedAt,
+		UpdatedAt:    inv.UpdatedAt,
+		AcceptedAt:   inv.AcceptedAt,
+		DeclinedAt:   inv.DeclinedAt,
+		DeletedAt:    inv.DeletedAt,
 	}
 }

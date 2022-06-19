@@ -16,6 +16,10 @@ func (app *application) AcceptInvitation(invitationId string, inviteeKey []byte)
 	return app.Invitations.Accept(invitationId, inviteeKey)
 }
 
+func (app *application) DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	return app.Invitations.DeclineOrCancelInvitation(userId, invitationId)
+}
+
 func (app *application) FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
 	return app.Invitations.Finalize(invitationId, keystoreKey)
 }

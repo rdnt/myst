@@ -33,6 +33,7 @@ type Service interface {
 
 	UserInvitations(userId string, opts *UserInvitationsOptions) ([]Invitation, error)
 	UserInvitation(userId, invitationId string) (*Invitation, error)
+	DeclineOrCancelInvitation(userId, invitationId string) (*Invitation, error)
 
 	//UserKeystores(userId string) ([]*keystore.Keystore, error)
 	//AcceptedUserInvitations(userId string) ([]*Invitation, error)

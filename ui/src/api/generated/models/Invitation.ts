@@ -11,7 +11,10 @@ export type Invitation = {
     inviterKey: string;
     inviteeKey: string;
     keystoreKey: string;
-    status: 'pending' | 'accepted' | 'rejected' | 'finalized';
-    createdAt: number;
-    updatedAt: number;
+    status: 'pending' | 'accepted' | 'declined' | 'deleted' | 'finalized';
+    createdAt: string;
+    updatedAt: string;
+    acceptedAt: string;
+    declinedAt: string;
+    deletedAt: string;
 };

@@ -261,6 +261,26 @@ invitationId?: string,
     }
 
     /**
+     * Declines/cancels an invitation
+     * @returns Invitation Invitation
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static declineOrCancelInvitation({
+invitationId,
+}: {
+invitationId?: string,
+}): CancelablePromise<Invitation | Error> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/invitation/{invitationId}',
+            path: {
+                'invitationId': invitationId,
+            },
+        });
+    }
+
+    /**
      * Returns an invitation
      * @returns Invitation Invitation
      * @returns Error Error

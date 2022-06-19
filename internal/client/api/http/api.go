@@ -340,6 +340,19 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	Success(c, InvitationToRest(inv))
 }
 
+func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	inv, err := api.app.DeclineOrCancelInvitation(invitationId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
+}
+
 func (api *API) FinalizeInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 

@@ -5,7 +5,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let password: string = '';
+  let password: string = '12345678';
   $: passwordValid = password.length >= 8;
 
   let error: boolean = false;

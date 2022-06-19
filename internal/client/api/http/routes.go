@@ -16,6 +16,7 @@ func (api *API) initRoutes(r *gin.RouterGroup) {
 	r.GET("/invitations", api.GetInvitations)
 	r.POST("/keystore/:keystoreId/invitations", api.CreateInvitation)
 	r.PATCH("/invitation/:invitationId", api.AcceptInvitation)
+	r.DELETE("/invitation/:invitationId", api.DeclineOrCancelInvitation)
 	r.POST("/invitation/:invitationId", api.FinalizeInvitation)
 	r.GET("/user", api.CurrentUser)
 }

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -83,6 +82,22 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
 }
 
+func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
+	userId := CurrentUser(c)
+	invitationId := c.Param("invitationId")
+
+	inv, err := api.app.DeclineOrCancelInvitation(
+		userId, invitationId,
+	)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
+}
+
 func (api *API) FinalizeInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
@@ -120,8 +135,6 @@ func (api *API) Invitations(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Println(invs)
 
 	gen := []generated.Invitation{}
 

@@ -352,6 +352,32 @@
 					}
 				}
 			},
+			"delete": {
+				"description": "Declines/cancels an invitation",
+				"operationId": "DeclineOrCancelInvitation",
+				"responses": {
+					"200": {
+						"description": "Invitation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Invitation"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
 			"post": {
 				"description": "Finalizes an invitation",
 				"operationId": "FinalizeInvitation",
@@ -423,12 +449,12 @@
 						"type": "string"
 					},
 					"createdAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
 					},
 					"updatedAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
 					}
 				}
 			},
@@ -547,12 +573,12 @@
 						"type": "integer"
 					},
 					"createdAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
 					},
 					"updatedAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
 					}
 				}
 			},
@@ -569,7 +595,10 @@
 					"keystoreKey",
 					"status",
 					"createdAt",
-					"updatedAt"
+					"updatedAt",
+					"acceptedAt",
+					"declinedAt",
+					"deletedAt"
 				],
 				"properties": {
 					"id": {
@@ -600,15 +629,34 @@
 						"format": "byte"
 					},
 					"status": {
-						"type": "string"
+						"type": "string",
+						"enum": [
+							"pending",
+							"accepted",
+							"declined",
+							"deleted",
+							"finalized"
+						]
 					},
 					"createdAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
 					},
 					"updatedAt": {
-						"type": "integer",
-						"format": "int64"
+						"type": "string",
+						"format": "date-time"
+					},
+					"acceptedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"declinedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"deletedAt": {
+						"type": "string",
+						"format": "date-time"
 					}
 				}
 			},

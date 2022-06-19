@@ -74,6 +74,36 @@ func (s *service) Accept(invitationId string, inviteeKey []byte) (*invitation.In
 	return inv, nil
 }
 
+func (s *service) DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	inv, err := s.invitationRepo.Invitation(invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if userId != inv.InviterId && userId != inv.InviteeId {
+		return nil, errors.New("unauthorized")
+	}
+
+	if userId == inv.InviterId {
+		err = inv.Delete()
+		if err != nil {
+			return nil, err
+		}
+	} else if userId == inv.InviteeId {
+		err = inv.Decline()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = s.invitationRepo.Update(inv)
+	if err != nil {
+		return nil, err
+	}
+
+	return inv, nil
+}
+
 func (s *service) Finalize(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
 	inv, err := s.invitationRepo.Invitation(invitationId)
 	if err != nil {
@@ -113,6 +143,9 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 
 	invitations := []invitation.Invitation{}
 	for _, inv := range invs {
+		if inv.Deleted() && inv.InviteeId == userId {
+			continue
+		}
 		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
 			continue
 		}

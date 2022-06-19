@@ -141,6 +141,15 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 	return inv, err
 }
 
+func (app *application) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
+	inv, err := app.remote.DeclineOrCancelInvitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to decline or cancel invitation")
+	}
+
+	return inv, err
+}
+
 func (app *application) FinalizeInvitation(id string) (invitation.Invitation, error) {
 	inv, err := app.remote.Invitation(id)
 	if err != nil {

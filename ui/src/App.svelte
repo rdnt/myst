@@ -1,14 +1,14 @@
 <script lang="ts">
   import api from "@/api";
+  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import LoginForm from "@/components/LoginForm.svelte";
   import Messages from "@/components/Messages.svelte";
   import OnboardingForm from "@/components/OnboardingForm.svelte";
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {getInvitations, invitations} from "@/stores/invitations";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {getCurrentUser} from "@/stores/user";
+  import {currentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -17,6 +17,7 @@
   let login = false;
 
   let keystore = null;
+  let showCreateKeystoreModal: boolean = false;
 
   const healthCheck = () => {
     api.healthCheck().then(() => {
@@ -62,9 +63,6 @@
 
   onMount(() => {
     initialize()
-
-    getCurrentUser()
-    getInvitations()
   });
 </script>
 
@@ -76,8 +74,8 @@
       <OnboardingForm on:created={initialize}/>
     {:else if login}
       <LoginForm on:login={initialize}/>
-    {:else}
-      <Sidebar keystores={$keystores}/>
+    {:else if $currentUser}
+      <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
       <main>
         <Route>
           <Keystores keystores={$keystores}/>
@@ -91,8 +89,8 @@
           <Keystores keystores={$keystores}/>
         </Route>
 
-        <Route path="/sharing">
-          <Invitations invitations={$invitations}/>
+        <Route path="/invitations">
+          <Invitations/>
         </Route>
       </main>
     {/if}
@@ -100,6 +98,8 @@
 </Router>
 
 <Messages/>
+
+<CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
 <style lang="scss">
   $bg: #0a0e11;
@@ -126,6 +126,7 @@
       max-height: 100vh;
       //max-height: -webkit-fill-available;
       //max-height: 100%;
+      overflow-x: hidden;
     }
 
     * {

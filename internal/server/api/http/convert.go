@@ -1,11 +1,10 @@
 package http
 
 import (
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/user"
-
 	"myst/internal/server/api/http/generated"
+	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/keystore"
+	"myst/internal/server/core/domain/user"
 )
 
 func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
@@ -14,52 +13,35 @@ func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
 		Name:      k.Name,
 		OwnerId:   k.OwnerId,
 		Payload:   k.Payload,
-		CreatedAt: k.CreatedAt.Unix(),
-		UpdatedAt: k.UpdatedAt.Unix(),
+		CreatedAt: k.CreatedAt,
+		UpdatedAt: k.UpdatedAt,
 	}
 }
 
-func ToJSONInvitation(inv *invitation.Invitation) generated.Invitation {
-	gen := generated.Invitation{
-		Id:         inv.Id,
-		KeystoreId: inv.KeystoreId,
-		InviterId:  inv.InviterId,
-		InviteeId:  inv.InviteeId,
-		CreatedAt:  inv.CreatedAt.Unix(),
-		UpdatedAt:  inv.UpdatedAt.Unix(),
+func ToJSONInvitation(inv invitation.Invitation) generated.Invitation {
+	return generated.Invitation{
+		Id:           inv.Id,
+		KeystoreId:   inv.KeystoreId,
+		KeystoreName: inv.KeystoreName,
+		InviterId:    inv.InviterId,
+		InviteeId:    inv.InviteeId,
+		Status:       generated.InvitationStatus(inv.Status.String()),
+		InviterKey:   inv.InviterKey,
+		InviteeKey:   inv.InviteeKey,
+		KeystoreKey:  inv.KeystoreKey,
+		CreatedAt:    inv.CreatedAt,
+		UpdatedAt:    inv.UpdatedAt,
+		AcceptedAt:   inv.AcceptedAt,
+		DeclinedAt:   inv.DeclinedAt,
+		DeletedAt:    inv.DeletedAt,
 	}
-
-	if inv.InviterKey != nil {
-		key := inv.InviterKey
-		gen.InviterKey = key
-	}
-
-	if inv.InviteeKey != nil {
-		key := inv.InviteeKey
-		gen.InviteeKey = key
-	}
-
-	if inv.KeystoreKey != nil {
-		key := inv.KeystoreKey
-		gen.KeystoreKey = key
-	}
-
-	if inv.Finalized() {
-		gen.Status = "finalized"
-	} else if inv.Accepted() {
-		gen.Status = "accepted"
-	} else {
-		gen.Status = "pending"
-	}
-
-	return gen
 }
 
 func ToJSONUser(u user.User) generated.User {
 	return generated.User{
 		Id:        u.Id,
 		Username:  u.Username,
-		CreatedAt: u.CreatedAt.Unix(),
-		UpdatedAt: u.UpdatedAt.Unix(),
+		CreatedAt: u.CreatedAt,
+		UpdatedAt: u.UpdatedAt,
 	}
 }

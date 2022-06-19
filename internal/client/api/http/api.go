@@ -119,6 +119,19 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	)
 }
 
+func (api *API) DeleteKeystore(c *gin.Context) {
+	keystoreId := c.Param("keystoreId")
+
+	err := api.app.DeleteKeystore(keystoreId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 //func (api *API) UnlockKeystore(c *gin.Context) {
 //	keystoreId := c.Param("keystoreId")
 //
@@ -331,6 +344,19 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	inv, err := api.app.AcceptInvitation(invitationId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
+}
+
+func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	inv, err := api.app.DeclineOrCancelInvitation(invitationId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)

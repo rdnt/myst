@@ -98,11 +98,20 @@ type ClientInterface interface {
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeclineOrCancelInvitation request
+	DeclineOrCancelInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetInvitation request
+	GetInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// AcceptInvitation request
 	AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetInvitations request
 	GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteKeystore request
+	DeleteKeystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -176,6 +185,30 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
+func (c *Client) DeclineOrCancelInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeclineOrCancelInvitationRequest(c.Server, invitationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetInvitationRequest(c.Server, invitationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAcceptInvitationRequest(c.Server, invitationId)
 	if err != nil {
@@ -190,6 +223,18 @@ func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqE
 
 func (c *Client) GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetInvitationsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteKeystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteKeystoreRequest(c.Server, keystoreId)
 	if err != nil {
 		return nil, err
 	}
@@ -423,6 +468,74 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewDeclineOrCancelInvitationRequest generates requests for DeclineOrCancelInvitation
+func NewDeclineOrCancelInvitationRequest(server string, invitationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/invitation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetInvitationRequest generates requests for GetInvitation
+func NewGetInvitationRequest(server string, invitationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/invitation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewAcceptInvitationRequest generates requests for AcceptInvitation
 func NewAcceptInvitationRequest(server string, invitationId string) (*http.Request, error) {
 	var err error
@@ -477,6 +590,40 @@ func NewGetInvitationsRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteKeystoreRequest generates requests for DeleteKeystore
+func NewDeleteKeystoreRequest(server string, keystoreId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/keystore/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -886,11 +1033,20 @@ type ClientWithResponsesInterface interface {
 	// HealthCheck request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
+	// DeclineOrCancelInvitation request
+	DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error)
+
+	// GetInvitation request
+	GetInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error)
+
 	// AcceptInvitation request
 	AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
 
 	// GetInvitations request
 	GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error)
+
+	// DeleteKeystore request
+	DeleteKeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*DeleteKeystoreResponse, error)
 
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
@@ -971,6 +1127,52 @@ func (r HealthCheckResponse) StatusCode() int {
 	return 0
 }
 
+type DeclineOrCancelInvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeclineOrCancelInvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeclineOrCancelInvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetInvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetInvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetInvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type AcceptInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1011,6 +1213,28 @@ func (r GetInvitationsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetInvitationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteKeystoreResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteKeystoreResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteKeystoreResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1249,6 +1473,24 @@ func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEd
 	return ParseHealthCheckResponse(rsp)
 }
 
+// DeclineOrCancelInvitationWithResponse request returning *DeclineOrCancelInvitationResponse
+func (c *ClientWithResponses) DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error) {
+	rsp, err := c.DeclineOrCancelInvitation(ctx, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeclineOrCancelInvitationResponse(rsp)
+}
+
+// GetInvitationWithResponse request returning *GetInvitationResponse
+func (c *ClientWithResponses) GetInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error) {
+	rsp, err := c.GetInvitation(ctx, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetInvitationResponse(rsp)
+}
+
 // AcceptInvitationWithResponse request returning *AcceptInvitationResponse
 func (c *ClientWithResponses) AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error) {
 	rsp, err := c.AcceptInvitation(ctx, invitationId, reqEditors...)
@@ -1265,6 +1507,15 @@ func (c *ClientWithResponses) GetInvitationsWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetInvitationsResponse(rsp)
+}
+
+// DeleteKeystoreWithResponse request returning *DeleteKeystoreResponse
+func (c *ClientWithResponses) DeleteKeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*DeleteKeystoreResponse, error) {
+	rsp, err := c.DeleteKeystore(ctx, keystoreId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteKeystoreResponse(rsp)
 }
 
 // KeystoreWithResponse request returning *KeystoreResponse
@@ -1422,6 +1673,72 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 	return response, nil
 }
 
+// ParseDeclineOrCancelInvitationResponse parses an HTTP response from a DeclineOrCancelInvitationWithResponse call
+func ParseDeclineOrCancelInvitationResponse(rsp *http.Response) (*DeclineOrCancelInvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeclineOrCancelInvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetInvitationResponse parses an HTTP response from a GetInvitationWithResponse call
+func ParseGetInvitationResponse(rsp *http.Response) (*GetInvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetInvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseAcceptInvitationResponse parses an HTTP response from a AcceptInvitationWithResponse call
 func ParseAcceptInvitationResponse(rsp *http.Response) (*AcceptInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1476,6 +1793,32 @@ func ParseGetInvitationsResponse(rsp *http.Response) (*GetInvitationsResponse, e
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteKeystoreResponse parses an HTTP response from a DeleteKeystoreWithResponse call
+func ParseDeleteKeystoreResponse(rsp *http.Response) (*DeleteKeystoreResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteKeystoreResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

@@ -16,6 +16,10 @@ func (app *application) AcceptInvitation(invitationId string, inviteeKey []byte)
 	return app.Invitations.Accept(invitationId, inviteeKey)
 }
 
+func (app *application) DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	return app.Invitations.DeclineOrCancelInvitation(userId, invitationId)
+}
+
 func (app *application) FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
 	return app.Invitations.Finalize(invitationId, keystoreKey)
 }
@@ -51,7 +55,7 @@ func (app *application) UserKeystores(userId string) ([]*keystore.Keystore, erro
 	return keystores, nil
 }
 
-func (app *application) UserInvitations(userId string) ([]*invitation.Invitation, error) {
+func (app *application) UserInvitations(userId string) ([]invitation.Invitation, error) {
 	invs, err := app.Invitations.UserInvitations(userId, nil)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")
@@ -62,6 +66,15 @@ func (app *application) UserInvitations(userId string) ([]*invitation.Invitation
 
 func (app *application) UserKeystore(userId, keystoreId string) (*keystore.Keystore, error) {
 	k, err := app.Keystores.UserKeystore(userId, keystoreId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to get user keystore")
+	}
+
+	return k, nil
+}
+
+func (app *application) Keystore(keystoreId string) (*keystore.Keystore, error) {
+	k, err := app.Keystores.Keystore(keystoreId)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user keystore")
 	}

@@ -1,6 +1,8 @@
 package application
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 func (app *application) sync() error {
 	log.Println("Sync started.")

@@ -113,6 +113,7 @@ func (api *API) initRoutes(g *gin.RouterGroup) {
 	sec.GET("/invitation/:invitationId", api.Invitation)
 	sec.PATCH("/invitation/:invitationId", api.AcceptInvitation)
 	sec.POST("/invitation/:invitationId", api.FinalizeInvitation)
+	sec.DELETE("/invitation/:invitationId", api.DeclineOrCancelInvitation)
 	sec.GET("/invitations", api.Invitations)
 }
 

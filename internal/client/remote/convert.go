@@ -2,7 +2,6 @@ package remote
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -14,38 +13,27 @@ import (
 	"myst/pkg/logger"
 )
 
-func InvitationToJSON(inv invitation.Invitation) generated.Invitation {
-	return generated.Invitation{
-		Id:          inv.Id,
-		InviterId:   inv.InviterId,
-		KeystoreId:  inv.KeystoreId,
-		InviteeId:   inv.InviteeId,
-		InviterKey:  inv.InviterKey,
-		InviteeKey:  inv.InviteeKey,
-		KeystoreKey: inv.KeystoreKey,
-		Status:      inv.Status.String(),
-		CreatedAt:   inv.CreatedAt.Unix(),
-		UpdatedAt:   inv.UpdatedAt.Unix(),
-	}
-}
-
 func InvitationFromJSON(gen generated.Invitation) (invitation.Invitation, error) {
-	status, err := invitation.StatusFromString(gen.Status)
+	status, err := invitation.StatusFromString(string(gen.Status))
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "invalid status")
 	}
 
 	return invitation.Invitation{
-		Id:          gen.Id,
-		InviterId:   gen.InviterId,
-		KeystoreId:  gen.KeystoreId,
-		InviteeId:   gen.InviteeId,
-		InviterKey:  gen.InviterKey,
-		InviteeKey:  gen.InviteeKey,
-		KeystoreKey: gen.KeystoreKey,
-		Status:      status,
-		CreatedAt:   time.Unix(gen.CreatedAt, 0),
-		UpdatedAt:   time.Unix(gen.CreatedAt, 0),
+		Id:           gen.Id,
+		InviterId:    gen.InviterId,
+		KeystoreId:   gen.KeystoreId,
+		KeystoreName: gen.KeystoreName,
+		InviteeId:    gen.InviteeId,
+		InviterKey:   gen.InviterKey,
+		InviteeKey:   gen.InviteeKey,
+		KeystoreKey:  gen.KeystoreKey,
+		Status:       status,
+		CreatedAt:    gen.CreatedAt,
+		UpdatedAt:    gen.CreatedAt,
+		AcceptedAt:   gen.AcceptedAt,
+		DeclinedAt:   gen.DeclinedAt,
+		DeletedAt:    gen.DeletedAt,
 	}, nil
 }
 

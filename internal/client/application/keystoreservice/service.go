@@ -112,6 +112,10 @@ func (s *service) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	return s.keystores.CreateKeystore(k)
 }
 
+func (s *service) DeleteKeystore(id string) error {
+	return s.keystores.DeleteKeystore(id)
+}
+
 func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {
 	k, err := s.keystores.Keystore(keystoreId)
 	if err != nil {

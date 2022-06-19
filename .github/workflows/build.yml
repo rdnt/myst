@@ -14,16 +14,16 @@ jobs:
       - name: Checkout repository
         id: checkout-repository
         uses: actions/checkout@v3
-          - name: Cache go modules
-            id: cache-go-modules
-            uses: actions/cache@v2
-            with:
-              path: ~/go/pkg/mod
-              key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-              restore-keys: ${{ runner.os }}-go-
+      - name: Cache go modules
+        id: cache-go-modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules
@@ -54,7 +54,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules
@@ -69,6 +69,9 @@ jobs:
   test:
     name: Run integration & package unit tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ 1.18 ]
     needs:
       - build-server
       - build-client
@@ -85,7 +88,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
       - name: Install Go ${{ matrix.go-version }}
         id: install-go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Download go modules

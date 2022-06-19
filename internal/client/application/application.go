@@ -39,6 +39,7 @@ type Application interface {
 	Authenticate(password string) error
 	CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	DeleteKeystore(id string) error
 	Keystore(id string) (keystore.Keystore, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
@@ -48,6 +49,7 @@ type Application interface {
 
 	CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
+	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 }

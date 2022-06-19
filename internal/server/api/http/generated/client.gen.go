@@ -100,6 +100,9 @@ type ClientInterface interface {
 
 	Register(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeclineOrCancelInvitation request
+	DeclineOrCancelInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetInvitation request
 	GetInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -171,6 +174,18 @@ func (c *Client) RegisterWithBody(ctx context.Context, contentType string, body 
 
 func (c *Client) Register(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRegisterRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeclineOrCancelInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeclineOrCancelInvitationRequest(c.Server, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -401,6 +416,40 @@ func NewRegisterRequestWithBody(server string, contentType string, body io.Reade
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeclineOrCancelInvitationRequest generates requests for DeclineOrCancelInvitation
+func NewDeclineOrCancelInvitationRequest(server string, invitationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/invitation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -761,6 +810,9 @@ type ClientWithResponsesInterface interface {
 
 	RegisterWithResponse(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*RegisterResponse, error)
 
+	// DeclineOrCancelInvitation request
+	DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error)
+
 	// GetInvitation request
 	GetInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error)
 
@@ -834,6 +886,29 @@ func (r RegisterResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r RegisterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeclineOrCancelInvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeclineOrCancelInvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeclineOrCancelInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1058,6 +1133,15 @@ func (c *ClientWithResponses) RegisterWithResponse(ctx context.Context, body Reg
 	return ParseRegisterResponse(rsp)
 }
 
+// DeclineOrCancelInvitationWithResponse request returning *DeclineOrCancelInvitationResponse
+func (c *ClientWithResponses) DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error) {
+	rsp, err := c.DeclineOrCancelInvitation(ctx, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeclineOrCancelInvitationResponse(rsp)
+}
+
 // GetInvitationWithResponse request returning *GetInvitationResponse
 func (c *ClientWithResponses) GetInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error) {
 	rsp, err := c.GetInvitation(ctx, invitationId, reqEditors...)
@@ -1215,6 +1299,39 @@ func ParseRegisterResponse(rsp *http.Response) (*RegisterResponse, error) {
 			return nil, err
 		}
 		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeclineOrCancelInvitationResponse parses an HTTP response from a DeclineOrCancelInvitationWithResponse call
+func ParseDeclineOrCancelInvitationResponse(rsp *http.Response) (*DeclineOrCancelInvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeclineOrCancelInvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error

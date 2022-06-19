@@ -23,6 +23,10 @@ type service struct {
 }
 
 func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error) {
+	if inviterId == inviteeId {
+		return nil, errors.New("inviter cannot be the same as invitee")
+	}
+
 	store, err := s.keystoreRepo.Keystore(keystoreId)
 	if err != nil {
 		return nil, err
@@ -40,6 +44,7 @@ func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []b
 
 	return s.invitationRepo.Create(
 		invitation.WithKeystoreId(store.Id),
+		invitation.WithKeystoreName(store.Name),
 		invitation.WithInviterId(inviter.Id),
 		invitation.WithInviteeId(invitee.Id),
 		invitation.WithInviterKey(inviterKey),
@@ -59,6 +64,36 @@ func (s *service) Accept(invitationId string, inviteeKey []byte) (*invitation.In
 	err = inv.Accept(inviteeKey)
 	if err != nil {
 		return nil, err
+	}
+
+	err = s.invitationRepo.Update(inv)
+	if err != nil {
+		return nil, err
+	}
+
+	return inv, nil
+}
+
+func (s *service) DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+	inv, err := s.invitationRepo.Invitation(invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if userId != inv.InviterId && userId != inv.InviteeId {
+		return nil, errors.New("unauthorized")
+	}
+
+	if userId == inv.InviterId {
+		err = inv.Delete()
+		if err != nil {
+			return nil, err
+		}
+	} else if userId == inv.InviteeId {
+		err = inv.Decline()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = s.invitationRepo.Update(inv)
@@ -95,7 +130,7 @@ type UserInvitationsOptions struct {
 // UserInvitations returns all the invitations this user has access to. These include:
 // - invitations where the user is the inviter
 // - invitations where the user is the invitee
-func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]*invitation.Invitation, error) {
+func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
 	u, err := s.userRepo.User(userId)
 	if err != nil {
 		return nil, err
@@ -106,8 +141,11 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 		return nil, errors.WithMessage(err, "failed to get user invitations")
 	}
 
-	invitations := []*invitation.Invitation{}
+	invitations := []invitation.Invitation{}
 	for _, inv := range invs {
+		if inv.Deleted() && inv.InviteeId == userId {
+			continue
+		}
 		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
 			continue
 		}

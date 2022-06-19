@@ -19,6 +19,7 @@ type Repository interface {
 
 type Service interface {
 	CreateKeystore(k Keystore) (Keystore, error)
+	DeleteKeystore(id string) error
 	CreateFirstKeystore(k Keystore, password string) (Keystore, error)
 	Keystore(id string) (Keystore, error)
 	KeystoreByRemoteId(id string) (Keystore, error)

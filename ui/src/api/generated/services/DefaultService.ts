@@ -121,6 +121,27 @@ keystoreId: string,
     }
 
     /**
+     * Delete a keystore
+     * @returns any OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static deleteKeystore({
+keystoreId,
+}: {
+/** unique identifier for a keystore **/
+keystoreId: string,
+}): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/keystore/{keystoreId}',
+            path: {
+                'keystoreId': keystoreId,
+            },
+        });
+    }
+
+    /**
      * Creates a new entry and adds it to the keystore
      * @returns Entry Entry
      * @returns Error Error
@@ -253,6 +274,46 @@ invitationId?: string,
 }): CancelablePromise<Invitation | Error> {
         return __request(OpenAPI, {
             method: 'PATCH',
+            url: '/invitation/{invitationId}',
+            path: {
+                'invitationId': invitationId,
+            },
+        });
+    }
+
+    /**
+     * Declines/cancels an invitation
+     * @returns Invitation Invitation
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static declineOrCancelInvitation({
+invitationId,
+}: {
+invitationId?: string,
+}): CancelablePromise<Invitation | Error> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/invitation/{invitationId}',
+            path: {
+                'invitationId': invitationId,
+            },
+        });
+    }
+
+    /**
+     * Returns an invitation
+     * @returns Invitation Invitation
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static getInvitation({
+invitationId,
+}: {
+invitationId?: string,
+}): CancelablePromise<Invitation | Error> {
+        return __request(OpenAPI, {
+            method: 'GET',
             url: '/invitation/{invitationId}',
             path: {
                 'invitationId': invitationId,

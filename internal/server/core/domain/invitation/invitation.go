@@ -15,19 +15,25 @@ var (
 	//ErrAlreadyFinalized = errors.New("invitation already finalized")
 	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
 	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
+	ErrCannotDecline  = errors.New("cannot decline non-pending invitation")
+	ErrCannotCancel   = errors.New("cannot cancel non-pending invitation")
 )
 
 type Invitation struct {
-	Id          string
-	InviterId   string
-	KeystoreId  string
-	InviteeId   string
-	InviterKey  []byte
-	InviteeKey  []byte
-	KeystoreKey []byte
-	Status      Status
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Id           string
+	InviterId    string
+	KeystoreId   string
+	KeystoreName string
+	InviteeId    string
+	InviterKey   []byte
+	InviteeKey   []byte
+	KeystoreKey  []byte
+	Status       Status
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	AcceptedAt   time.Time
+	DeclinedAt   time.Time
+	DeletedAt    time.Time
 }
 
 func New(opts ...Option) (*Invitation, error) {
@@ -61,6 +67,14 @@ func (i *Invitation) Finalized() bool {
 	return i.Status == Finalized
 }
 
+func (i *Invitation) Declined() bool {
+	return i.Status == Declined
+}
+
+func (i *Invitation) Deleted() bool {
+	return i.Status == Deleted
+}
+
 func (i *Invitation) String() string {
 	return fmt.Sprintln(i.Id, i.InviteeKey, i.KeystoreKey, i.InviteeId, i.Status)
 }
@@ -72,6 +86,7 @@ func (i *Invitation) Accept(inviteeKey []byte) error {
 
 	i.InviteeKey = inviteeKey
 	i.Status = Accepted
+	i.AcceptedAt = time.Now()
 
 	return nil
 }
@@ -83,6 +98,28 @@ func (i *Invitation) Finalize(keystoreKey []byte) error {
 
 	i.KeystoreKey = keystoreKey
 	i.Status = Finalized
+
+	return nil
+}
+
+func (i *Invitation) Decline() error {
+	if i.Status != Pending {
+		return ErrCannotDecline
+	}
+
+	i.Status = Declined
+	i.DeclinedAt = time.Now()
+
+	return nil
+}
+
+func (i *Invitation) Delete() error {
+	if i.Status != Pending {
+		return ErrCannotCancel
+	}
+
+	i.Status = Deleted
+	i.DeletedAt = time.Now()
 
 	return nil
 }

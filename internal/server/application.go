@@ -27,12 +27,14 @@ type Application interface {
 	Stop() error
 	CreateInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error)
 	AcceptInvitation(invitationId string, inviteeKey []byte) (*invitation.Invitation, error)
+	DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error)
 	FinalizeInvitation(invitationId string, keystoreKey []byte) (*invitation.Invitation, error)
 	GetInvitation(invitationId string) (*invitation.Invitation, error)
 	CreateKeystore(name, ownerId string, payload []byte) (*keystore.Keystore, error)
 	UserKeystores(userId string) ([]*keystore.Keystore, error)
-	UserInvitations(userId string) ([]*invitation.Invitation, error)
+	UserInvitations(userId string) ([]invitation.Invitation, error)
 	UserKeystore(userId, keystoreId string) (*keystore.Keystore, error)
+	Keystore(keystoreId string) (*keystore.Keystore, error)
 
 	CreateUser(username, password string) (user.User, error)
 	AuthorizeUser(userId, password string) error

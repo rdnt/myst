@@ -105,6 +105,30 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 	return inv, nil
 }
 
+func (r *remote) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
+	if !r.SignedIn() {
+		return invitation.Invitation{}, ErrSignedOut
+	}
+
+	res, err := r.client.DeclineOrCancelInvitationWithResponse(
+		context.Background(), id,
+	)
+	if err != nil {
+		return invitation.Invitation{}, err
+	}
+
+	if res.JSON200 == nil {
+		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	}
+
+	inv, err := InvitationFromJSON(*res.JSON200)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
+	}
+
+	return inv, nil
+}
+
 func (r *remote) FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error) {
 	inv, err := r.getInvitation(invitationId)
 	if err != nil {

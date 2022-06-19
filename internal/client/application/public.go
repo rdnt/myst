@@ -29,6 +29,10 @@ func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, 
 	return app.keystores.CreateKeystore(k)
 }
 
+func (app *application) DeleteKeystore(id string) error {
+	return app.keystores.DeleteKeystore(id)
+}
+
 func (app *application) Keystore(id string) (keystore.Keystore, error) {
 	return app.keystores.Keystore(id)
 }
@@ -136,6 +140,15 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 	inv, err := app.remote.AcceptInvitation(id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to accept invitation")
+	}
+
+	return inv, err
+}
+
+func (app *application) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
+	inv, err := app.remote.DeclineOrCancelInvitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to decline or cancel invitation")
 	}
 
 	return inv, err

@@ -70,7 +70,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	user, pass := "rdnt", "1234"
+	user, pass := "rdnttest", "1234"
 
 	res, err := s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
 	s.Require().NoError(err)
@@ -83,7 +83,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	err = s._client1.app.SignIn()
 	s.Require().NoError(err)
 
-	user, pass = "abcd", "5678"
+	user, pass = "abcdtest", "5678"
 
 	res, err = s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
 	s.Require().NoError(err)

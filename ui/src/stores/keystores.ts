@@ -13,7 +13,7 @@ export const keystores = readable<Keystore[]>([], (set) => {
   // });
 
   return () => {
-    set([]);
+    // set([]);
   }
 });
 

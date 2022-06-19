@@ -160,20 +160,20 @@
       }
     },
     "/keystore/{keystoreId}": {
+      "parameters": [
+        {
+          "name": "keystoreId",
+          "in": "path",
+          "required": true,
+          "description": "unique identifier for a keystore",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
         "description": "Get a keystore if it exists and return it",
         "operationId": "Keystore",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "required": true,
-            "description": "unique identifier for a keystore",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Keystore",
@@ -184,6 +184,25 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a keystore",
+        "operationId": "DeleteKeystore",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "default": {
             "description": "Error",
@@ -463,6 +482,58 @@
             }
           }
         }
+      },
+      "delete": {
+        "description": "Declines/cancels an invitation",
+        "operationId": "DeclineOrCancelInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Returns an invitation",
+        "operationId": "GetInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/invitations": {
@@ -651,6 +722,9 @@
           "keystoreId": {
             "type": "string"
           },
+          "keystoreName": {
+            "type": "string"
+          },
           "inviterId": {
             "type": "string"
           },
@@ -674,22 +748,36 @@
             "enum": [
               "pending",
               "accepted",
-              "rejected",
+              "declined",
+              "deleted",
               "finalized"
             ]
           },
           "createdAt": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "date-time"
           },
           "updatedAt": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "date-time"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "declinedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
           "id",
           "keystoreId",
+          "keystoreName",
           "inviterId",
           "inviteeId",
           "inviterKey",
@@ -697,7 +785,10 @@
           "keystoreKey",
           "status",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "acceptedAt",
+          "declinedAt",
+          "deletedAt"
         ]
       },
       "User": {

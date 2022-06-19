@@ -16,7 +16,7 @@ export const messages = readable<Message[]>([], (set) => {
   setMessagesFunc = set
 
   return () => {
-    setMessagesFunc([]);
+    // setMessagesFunc([]);
   }
 });
 

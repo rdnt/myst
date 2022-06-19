@@ -1,9 +1,16 @@
 <script lang="ts">
+  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import Link from "@/components/Link.svelte";
-  import {myInvitations} from "@/stores/invitations";
+  import {hash} from "@/lib/color-hash";
+  import {invitations} from "@/stores/invitations";
+  import {getKeystores} from "@/stores/keystores";
+  import {currentUser} from "@/stores/user";
   import {onMount} from "svelte";
 
   export let keystores;
+  export let showCreateKeystoreModal: boolean;
+
+  $: newInvitationsCount = $invitations.filter(inv => inv.inviteeId === $currentUser.id && inv.status === 'pending').length;
 
   onMount(() => {
 
@@ -13,22 +20,29 @@
 
 <div class="sidebar">
   <h4>Myst</h4>
+  <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+
   <div class="list">
-    <h5>Keystores</h5>
+    <h5 style="display: flex">
+      Keystores
+      <span style="position: relative;margin-left: auto;font-size:1.4rem;top:-9px;font-weight: bold;" on:click={() => {showCreateKeystoreModal = true}}>＋</span>
+    </h5>
+
     {#each keystores as keystore}
       <Link path="/keystore/{keystore.id}">{keystore.name}</Link>
     {/each}
   </div>
 
   <div class="list bottom">
-    <h5>More</h5>
+    <h5>Sync</h5>
     <div class="rel">
-      <Link path="/sharing">
-        Sharing
-        {#if $myInvitations.length > 0}
-          <div class="badge">{$myInvitations.length}</div>
+      <Link path="/invitations">
+        Invitations
+        {#if newInvitationsCount > 0}
+          <div class="badge">{newInvitationsCount}</div>
         {/if}
       </Link>
+
 
 <!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->
 <!--        Invitations-->
@@ -47,29 +61,48 @@
     position: relative;
     background-color: #0a0e11;
     height: 100%;
-    padding: 20px;
+    padding: 12px 18px;
     box-sizing: border-box;
     flex-basis: 300px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 
     h4 {
       font-weight: 700;
       font-size: 2rem;
-      padding: 0 20px;
+      padding: 0 12px;
       margin: 0;
-      margin-bottom: 40px;
+      margin-top: 12px;
     }
 
     h5 {
       height: 20px;
-      padding: 0 20px;
-      margin: 0 0 10px;
+      padding: 0 12px;
+      margin: 0 0 12px;
       color: #8a8f9f;
       text-transform: uppercase;
       font-size: .85rem;
       font-weight: 600;
       letter-spacing: .5px;
+
+      strong {
+        font-weight: 700;
+      }
+    }
+
+    h6 {
+      height: 20px;
+      padding: 0 12px;
+      color: #8a8f9f;
+      margin: 10px 0 10px;
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: 40px;
+
+      strong {
+        font-weight: 600;
+      }
     }
 
     .rel {
@@ -93,6 +126,7 @@
 
       &.bottom {
         bottom: 0;
+        padding-top: 48px;
         margin-top: auto;
       }
 
@@ -109,7 +143,7 @@
         border-radius: 5px;
         position: relative;
         cursor: pointer;
-        padding: 10px 20px 10px 20px;
+        padding: 10px 12px;
         font-size: 1.1rem;
         white-space: nowrap;
         text-overflow: ellipsis;

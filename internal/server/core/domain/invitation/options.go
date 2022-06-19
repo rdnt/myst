@@ -16,6 +16,13 @@ func WithKeystoreId(id string) Option {
 	}
 }
 
+func WithKeystoreName(name string) Option {
+	return func(i *Invitation) error {
+		i.KeystoreName = name
+		return nil
+	}
+}
+
 func WithInviteeId(id string) Option {
 	return func(i *Invitation) error {
 		i.InviteeId = id

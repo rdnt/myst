@@ -1,28 +1,23 @@
-import api from "@/api";
+import api, {ApiError} from "@/api";
 import type {Invitation, User} from "@/api";
 import {readable} from "svelte/store";
 
-let setCurrentUser;
-export const currentUser = readable<User>(undefined, (set) => {
-  setCurrentUser = set
+const getCurrentUser = (setFunc) => {
+  api.currentUser().then((u: User) => {
+    setFunc(u)
+  }).catch((e: ApiError) => {
+    console.error(e)
+    setFunc(null)
+  })
+}
+
+export const currentUser = readable<User | null>(null, (set) => {
+  getCurrentUser(set)
+
+  let interval = window.setInterval(() => {getCurrentUser(set)}, 10000)
 
   return () => {
-    set(undefined);
+    window.clearInterval(interval)
+    set(null);
   }
 });
-
-export const getCurrentUser = () => {
-  return api.currentUser().then((u: User) => {
-    if (setCurrentUser) {
-      setCurrentUser(u);
-    }
-
-    return Promise.resolve(u)
-  }).catch((error: Response) => {
-    if (setCurrentUser) {
-      setCurrentUser(undefined);
-    }
-
-    return Promise.reject(error)
-  });
-}

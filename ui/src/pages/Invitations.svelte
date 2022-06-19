@@ -149,7 +149,11 @@
           </span>
           </div>
           <div class="actions">
-            <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
+            {#if inv.inviterId === $currentUser.id}
+              <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
+            {:else}
+              <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
+            {/if}
           </div>
         </div>
       {/each}

@@ -1,11 +1,14 @@
 <script lang="ts">
+  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import Link from "@/components/Link.svelte";
   import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
+  import {getKeystores} from "@/stores/keystores";
   import {currentUser} from "@/stores/user";
   import {onMount} from "svelte";
 
   export let keystores;
+  export let showCreateKeystoreModal: boolean;
 
   $: newInvitationsCount = $invitations.filter(inv => inv.inviteeId === $currentUser.id && inv.status === 'pending').length;
 
@@ -20,7 +23,11 @@
   <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
 
   <div class="list">
-    <h5>Keystores</h5>
+    <h5 style="display: flex">
+      Keystores
+      <span style="position: relative;margin-left: auto;font-size:1.4rem;top:-9px;font-weight: bold;" on:click={() => {showCreateKeystoreModal = true}}>＋</span>
+    </h5>
+
     {#each keystores as keystore}
       <Link path="/keystore/{keystore.id}">{keystore.name}</Link>
     {/each}
@@ -59,6 +66,7 @@
     flex-basis: 300px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 
     h4 {
       font-weight: 700;
@@ -118,6 +126,7 @@
 
       &.bottom {
         bottom: 0;
+        padding-top: 48px;
         margin-top: auto;
       }
 

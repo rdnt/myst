@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/api";
+  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import LoginForm from "@/components/LoginForm.svelte";
   import Messages from "@/components/Messages.svelte";
   import OnboardingForm from "@/components/OnboardingForm.svelte";
@@ -16,6 +17,7 @@
   let login = false;
 
   let keystore = null;
+  let showCreateKeystoreModal: boolean = false;
 
   const healthCheck = () => {
     api.healthCheck().then(() => {
@@ -73,7 +75,7 @@
     {:else if login}
       <LoginForm on:login={initialize}/>
     {:else if $currentUser}
-      <Sidebar keystores={$keystores}/>
+      <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
       <main>
         <Route>
           <Keystores keystores={$keystores}/>
@@ -96,6 +98,8 @@
 </Router>
 
 <Messages/>
+
+<CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
 <style lang="scss">
   $bg: #0a0e11;

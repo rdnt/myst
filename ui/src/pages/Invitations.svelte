@@ -5,14 +5,14 @@
   import Invitation from "@/components/Invitation.svelte";
   import {hash} from "@/lib/color-hash";
   import {format} from "@/lib/date";
-  import {invitations} from "@/stores/invitations";
+  import {getInvitations, invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
 
   const registerFocus = useFocus();
 
   $: incomingInvitations = $invitations.filter((inv) => inv.inviteeId === $currentUser.id && inv.status === 'pending');
-  $: outgoingInvitations = $invitations.filter((inv) => inv.inviterId === $currentUser.id && inv.status === 'pending');
+  $: outgoingInvitations = $invitations.filter((inv) => inv.inviterId === $currentUser.id && (inv.status === 'pending'));
   $: pastInvitations = $invitations.filter((inv) => inv.status !== 'pending')
 
   let invitation: Invitation;
@@ -24,6 +24,7 @@
       invitationId: invitation.id
     }).then(() => {
       showAcceptInvitationModal = false;
+      getInvitations();
     });
   }
 
@@ -32,6 +33,7 @@
       invitationId: invitation.id
     }).then(() => {
       showDeclineInvitationModal = false;
+      getInvitations();
     });
   }
 
@@ -48,61 +50,64 @@
 
 <div class="invitations-list" use:registerFocus>
   {#if incomingInvitations.length > 0}
-    <h5>Incoming Invitations</h5>
-    {#each incomingInvitations as inv}
-      <div class="invitation">
-        <span class="icon">
-          <span style="background-color: {hash(inv.inviterId)}">
-            {inv.inviterId.slice(0, 2).toUpperCase()}
+    <div class="section">
+      <h5>Incoming Invitations</h5>
+      {#each incomingInvitations as inv}
+        <div class="invitation">
+          <span class="icon">
+            <span style="background-color: {hash(inv.inviterId)}">
+              {inv.inviterId.slice(0, 2).toUpperCase()}
+            </span>
           </span>
-        </span>
-        <div class="info">
-          <span class="name">
-            {inv.keystoreName}
-          </span>
-          <span class="user">
-            Invited by <strong>{inv.inviterId}</strong>
-          </span>
+          <div class="info">
+            <span class="name">
+              {inv.keystoreName}
+            </span>
+            <span class="user">
+              Invited by <strong>{inv.inviterId}</strong>
+            </span>
+          </div>
+          <div class="actions">
+            <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
+            <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
+          </div>
         </div>
-        <div class="actions">
-          <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
-          <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
-        </div>
-      </div>
-    {/each}
-    <br>
+      {/each}
+    </div>
   {/if}
 
   {#if outgoingInvitations.length > 0}
-    <h5>Outgoing Invitations</h5>
+    <div class="section">
+      <h5>Outgoing Invitations</h5>
 
-    {#each outgoingInvitations as inv}
-      <div class="invitation">
-        <span class="icon">
-          <span style="background-color: {hash(inv.inviteeId)}">
-            {inv.inviteeId.slice(0, 2).toUpperCase()}
+      {#each outgoingInvitations as inv}
+        <div class="invitation">
+          <span class="icon">
+            <span style="background-color: {hash(inv.inviteeId)}">
+              {inv.inviteeId.slice(0, 2).toUpperCase()}
+            </span>
           </span>
-        </span>
-        <div class="info">
-          <span class="name">
-            {inv.keystoreName}
-          </span>
-          <span class="user">
-            Invited <strong>{inv.inviteeId}</strong>
-          </span>
+          <div class="info">
+            <span class="name">
+              {inv.keystoreName}
+            </span>
+            <span class="user">
+              Invited <strong>{inv.inviteeId}</strong>
+            </span>
+          </div>
+          <div class="actions">
+            <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete Invitation</button>
+          </div>
         </div>
-        <div class="actions">
-          <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete Invitation</button>
-        </div>
-      </div>
-    {/each}
-    <br>
+      {/each}
+    </div>
   {/if}
 
   {#if pastInvitations.length > 0}
-    <h5>Past Invitations</h5>
-    {#each pastInvitations as inv}
-      <div class="invitation">
+    <div class="section">
+      <h5>Past Invitations</h5>
+      {#each pastInvitations as inv}
+        <div class="invitation">
         <span class="icon">
           <span style="background-color: {hash(inv.inviterId === $currentUser.id ? inv.inviteeId : inv.inviterId)}">
             {#if inv.inviterId === $currentUser.id}
@@ -112,17 +117,16 @@
             {/if}
           </span>
         </span>
-        <div class="info">
+          <div class="info">
           <span class="name">
             {inv.keystoreName}
           </span>
-          <span class="user">
+            <span class="user">
             {#if inv.status === 'accepted'}
               {#if inv.inviterId === $currentUser.id}
-                Invitation accepted at {format(inv.acceptedAt)}.
-                Waiting for <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> to come online.
+                Shared with <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> since {format(inv.acceptedAt)}
               {:else}
-                Invitation accepted at {format(inv.acceptedAt)}.
+                Invitation accepted {format(inv.acceptedAt)}.
                 Waiting for <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> to come online.
               {/if}
             {:else if inv.status === 'finalized'}
@@ -143,13 +147,13 @@
               {/if}
             {/if}
           </span>
+          </div>
+          <div class="actions">
+            <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
+          </div>
         </div>
-        <div class="actions">
-          <!--        <button class="button" on:click={() => {showAcceptInvitationModalFunc(inv)}}>accept</button>-->
-        </div>
-      </div>
-    {/each}
-    <br>
+      {/each}
+    </div>
   {/if}
 </div>
 
@@ -169,12 +173,20 @@
   h5 {
     height: 20px;
     padding: 0 16px;
-    margin: 0 0 16px;
+    margin: 12px 0 12px;
     color: #8a8f9f;
     text-transform: uppercase;
     font-size: .85rem;
     font-weight: 600;
     letter-spacing: .5px;
+  }
+
+  .section {
+    margin-bottom: 36px;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
   }
 
   .invitations-list {
@@ -194,8 +206,9 @@
     //transition: .15s ease;
     transform-origin: bottom left;
     padding: 20px;
-    padding-top: 30px;
     box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
 
     //&.show {
     //  opacity: 1;

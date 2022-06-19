@@ -7,6 +7,8 @@
 
   export let keystores;
 
+  $: newInvitationsCount = $invitations.filter(inv => inv.inviteeId === $currentUser.id && inv.status === 'pending').length;
+
   onMount(() => {
 
 
@@ -29,8 +31,8 @@
     <div class="rel">
       <Link path="/invitations">
         Invitations
-        {#if $invitations.length > 0}
-          <div class="badge">{$invitations.length}</div>
+        {#if newInvitationsCount > 0}
+          <div class="badge">{newInvitationsCount}</div>
         {/if}
       </Link>
 
@@ -52,7 +54,7 @@
     position: relative;
     background-color: #0a0e11;
     height: 100%;
-    padding: 14px;
+    padding: 12px 18px;
     box-sizing: border-box;
     flex-basis: 300px;
     display: flex;
@@ -61,15 +63,15 @@
     h4 {
       font-weight: 700;
       font-size: 2rem;
-      padding: 0 16px;
+      padding: 0 12px;
       margin: 0;
       margin-top: 12px;
     }
 
     h5 {
       height: 20px;
-      padding: 0 16px;
-      margin: 0 0 16px;
+      padding: 0 12px;
+      margin: 0 0 12px;
       color: #8a8f9f;
       text-transform: uppercase;
       font-size: .85rem;
@@ -83,7 +85,7 @@
 
     h6 {
       height: 20px;
-      padding: 0 16px;
+      padding: 0 12px;
       color: #8a8f9f;
       margin: 10px 0 10px;
       font-size: .9rem;
@@ -132,7 +134,7 @@
         border-radius: 5px;
         position: relative;
         cursor: pointer;
-        padding: 10px 16px 10px 16px;
+        padding: 10px 12px;
         font-size: 1.1rem;
         white-space: nowrap;
         text-overflow: ellipsis;

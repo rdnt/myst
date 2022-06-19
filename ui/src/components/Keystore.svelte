@@ -4,6 +4,7 @@
   import Entry from "@/components/Entry.svelte";
   import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
   import Link from "@/components/Link.svelte";
+  import {getInvitations} from "@/stores/invitations";
   import {getKeystores} from "@/stores/keystores";
   import {useFocus, useParams} from "svelte-navigator";
 
@@ -22,7 +23,7 @@
   function onInvitationCreated(e: { id: string }) {
     console.log("onInvitationCreated", e);
     showCreateInvitationModal = false
-    getKeystores()
+    getInvitations()
   }
 
   function onEntryCreated(e: {id: string}) {

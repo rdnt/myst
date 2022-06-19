@@ -2,26 +2,38 @@ import type {Invitation} from "@/api";
 import api, {ApiError} from "@/api";
 import {readable} from "svelte/store";
 
-const getInvitations = (setFunc) => {
+let setFunc
+export const getInvitations = () => {
   api.getInvitations().then((invs: Invitation[]) => {
     invs = invs.sort((a, b) => {
       return a.id < b.id ? 1 : -1;
     })
 
-    setFunc(invs)
+    if (setFunc) {
+      setFunc(invs)
+    }
+
+    return Promise.resolve(invs)
   }).catch((e: ApiError) => {
     console.error(e)
-    setFunc([])
+
+    if (setFunc) {
+      setFunc([])
+    }
+
+    return Promise.reject(e)
   })
 }
 
 export const invitations = readable<Invitation[]>([], (set) => {
-  getInvitations(set)
+  setFunc = set
+  getInvitations()
 
-  let interval = window.setInterval(() => {getInvitations(set)}, 10000)
+  let interval = window.setInterval(getInvitations, 1000)
 
   return () => {
     window.clearInterval(interval)
-    set([]);
+    setFunc([]);
+    setFunc = undefined
   }
 });

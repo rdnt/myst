@@ -122,6 +122,7 @@
       max-height: 100vh;
       //max-height: -webkit-fill-available;
       //max-height: 100%;
+      overflow-x: hidden;
     }
 
     * {

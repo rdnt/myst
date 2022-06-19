@@ -1,17 +1,21 @@
 <script lang="ts">
+  import api from "@/api";
   import CreateEntryModal from "@/components/CreateEntryModal.svelte";
   import CreateInvitationModal from "@/components/CreateInvitationModal.svelte";
+  import DeleteKeystoreModal from "@/components/DeleteKeystoreModal.svelte";
   import Entry from "@/components/Entry.svelte";
   import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
   import Link from "@/components/Link.svelte";
   import {getInvitations} from "@/stores/invitations";
   import {getKeystores} from "@/stores/keystores";
+  import {showMessage} from "@/stores/messages";
   import {useFocus, useParams} from "svelte-navigator";
 
   export let keystore;
 
   let showCreateInvitationModal: boolean = false;
   let showCreateEntryModal: boolean = false;
+  let showDeleteKeystoreModal: boolean = false;
 
   const params = useParams();
   const registerFocus = useFocus();
@@ -31,6 +35,14 @@
     showCreateEntryModal = false;
     getKeystores()
   }
+
+  function deleteKeystore() {
+    api.deleteKeystore({keystoreId: keystore.id}).then(() => {
+      showMessage("Keystore deleted");
+      showDeleteKeystoreModal = false;
+      getKeystores();
+    });
+  }
 </script>
 
 <div class="entries-list">
@@ -38,6 +50,7 @@
     <div class="entries-list-header">
       <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
       <button on:click={() => showCreateEntryModal = true} class="button"><span class="icon"></span>Create Entry</button>
+      <button on:click={() => showDeleteKeystoreModal = true} class="button"><span class="icon"></span>Delete Keystore</button>
     </div>
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
@@ -63,6 +76,9 @@
 {:else}
   <EntryPlaceholder/>
 {/if}
+
+<DeleteKeystoreModal bind:show={showDeleteKeystoreModal}
+                       on:submit={(e) => {deleteKeystore()}}/>
 
 <CreateInvitationModal bind:show={showCreateInvitationModal} {keystore}
                        on:created={(e) => {onInvitationCreated(e.detail)}}/>

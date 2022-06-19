@@ -110,6 +110,9 @@ type ClientInterface interface {
 	// GetInvitations request
 	GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteKeystore request
+	DeleteKeystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -220,6 +223,18 @@ func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqE
 
 func (c *Client) GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetInvitationsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteKeystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteKeystoreRequest(c.Server, keystoreId)
 	if err != nil {
 		return nil, err
 	}
@@ -575,6 +590,40 @@ func NewGetInvitationsRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteKeystoreRequest generates requests for DeleteKeystore
+func NewDeleteKeystoreRequest(server string, keystoreId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/keystore/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -996,6 +1045,9 @@ type ClientWithResponsesInterface interface {
 	// GetInvitations request
 	GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error)
 
+	// DeleteKeystore request
+	DeleteKeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*DeleteKeystoreResponse, error)
+
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
 
@@ -1161,6 +1213,28 @@ func (r GetInvitationsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetInvitationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteKeystoreResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteKeystoreResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteKeystoreResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1433,6 +1507,15 @@ func (c *ClientWithResponses) GetInvitationsWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetInvitationsResponse(rsp)
+}
+
+// DeleteKeystoreWithResponse request returning *DeleteKeystoreResponse
+func (c *ClientWithResponses) DeleteKeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*DeleteKeystoreResponse, error) {
+	rsp, err := c.DeleteKeystore(ctx, keystoreId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteKeystoreResponse(rsp)
 }
 
 // KeystoreWithResponse request returning *KeystoreResponse
@@ -1710,6 +1793,32 @@ func ParseGetInvitationsResponse(rsp *http.Response) (*GetInvitationsResponse, e
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteKeystoreResponse parses an HTTP response from a DeleteKeystoreWithResponse call
+func ParseDeleteKeystoreResponse(rsp *http.Response) (*DeleteKeystoreResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteKeystoreResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

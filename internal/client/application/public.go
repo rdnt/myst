@@ -29,6 +29,10 @@ func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, 
 	return app.keystores.CreateKeystore(k)
 }
 
+func (app *application) DeleteKeystore(id string) error {
+	return app.keystores.DeleteKeystore(id)
+}
+
 func (app *application) Keystore(id string) (keystore.Keystore, error) {
 	return app.keystores.Keystore(id)
 }

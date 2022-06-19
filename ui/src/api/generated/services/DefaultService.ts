@@ -121,6 +121,27 @@ keystoreId: string,
     }
 
     /**
+     * Delete a keystore
+     * @returns any OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static deleteKeystore({
+keystoreId,
+}: {
+/** unique identifier for a keystore **/
+keystoreId: string,
+}): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/keystore/{keystoreId}',
+            path: {
+                'keystoreId': keystoreId,
+            },
+        });
+    }
+
+    /**
      * Creates a new entry and adds it to the keystore
      * @returns Entry Entry
      * @returns Error Error

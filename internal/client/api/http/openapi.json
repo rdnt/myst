@@ -160,20 +160,20 @@
       }
     },
     "/keystore/{keystoreId}": {
+      "parameters": [
+        {
+          "name": "keystoreId",
+          "in": "path",
+          "required": true,
+          "description": "unique identifier for a keystore",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
         "description": "Get a keystore if it exists and return it",
         "operationId": "Keystore",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "required": true,
-            "description": "unique identifier for a keystore",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Keystore",
@@ -184,6 +184,25 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a keystore",
+        "operationId": "DeleteKeystore",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "default": {
             "description": "Error",

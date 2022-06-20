@@ -64,7 +64,7 @@
               {inv.keystoreName}
             </span>
             <span class="user">
-              Invited by <strong>{inv.inviterId}</strong>
+              Invited by <strong>{inv.inviterId}</strong> {format(inv.createdAt)}
             </span>
           </div>
           <div class="actions">
@@ -92,7 +92,7 @@
               {inv.keystoreName}
             </span>
             <span class="user">
-              Invited <strong>{inv.inviteeId}</strong>
+              Invited <strong>{inv.inviteeId}</strong> {format(inv.createdAt)}
             </span>
           </div>
           <div class="actions">
@@ -149,10 +149,12 @@
           </span>
           </div>
           <div class="actions">
-            {#if inv.inviterId === $currentUser.id}
-              <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
-            {:else}
-              <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
+            {#if inv.status === 'finalized' || inv.status === 'accepted'}
+              {#if inv.inviterId === $currentUser.id}
+                <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
+              {:else}
+                <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
+              {/if}
             {/if}
           </div>
         </div>

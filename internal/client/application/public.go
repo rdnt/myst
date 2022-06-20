@@ -101,7 +101,17 @@ func (app *application) UpdateKeystore(k keystore.Keystore) error {
 }
 
 func (app *application) Authenticate(password string) error {
-	return app.keystores.Authenticate(password)
+	err := app.keystores.Authenticate(password)
+	if err != nil {
+		return err
+	}
+
+	err = app.remote.SignIn()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (app *application) CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error) {

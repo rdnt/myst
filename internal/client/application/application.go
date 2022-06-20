@@ -86,13 +86,6 @@ func New(opts ...Option) (*application, error) {
 func (app *application) Start() error {
 	defer log.Print("App started")
 
-	//app.setup()
-
-	err := app.remote.SignIn()
-	if err != nil {
-		return err
-	}
-
 	go func() {
 		for {
 			err := app.sync()
@@ -215,11 +208,11 @@ func (app *application) setup() {
 		return
 	}
 
-	err = app.remote.SignIn()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	//err = app.remote.SignIn()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 
 	//key, err := app.keystores.KeystoreKey(k1.Id())
 	//if err != nil {

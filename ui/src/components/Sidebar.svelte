@@ -149,6 +149,7 @@
         text-overflow: ellipsis;
         font-weight: 500;
         box-sizing: border-box;
+        margin-bottom: 4px;
 
         &:hover {
           background-color: rgba(#1e2328, .75);

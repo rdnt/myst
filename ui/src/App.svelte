@@ -8,7 +8,7 @@
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {currentUser} from "@/stores/user";
+  import {currentUser, getCurrentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -57,6 +57,7 @@
       console.log(error)
     }).finally(() => {
       ready = true;
+      getCurrentUser()
     });
 
   }

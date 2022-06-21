@@ -1,7 +1,6 @@
 import api, {ApiError} from "@/api";
 import type {User} from "@/api";
-import {messages} from "@/stores/messages";
-import {get, readable} from "svelte/store";
+import {readable} from "svelte/store";
 
 let setFunc
 export const getCurrentUser = () => {

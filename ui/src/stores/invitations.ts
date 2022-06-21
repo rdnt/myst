@@ -34,7 +34,7 @@ export const invitations = readable<Invitation[]>([], (set) => {
   setFunc = set
   getInvitations()
 
-  let interval = window.setInterval(getInvitations, 1000)
+  let interval = window.setInterval(getInvitations, 60000)
 
   return () => {
     window.clearInterval(interval)

@@ -88,6 +88,13 @@ func (app *application) Start() error {
 
 	go func() {
 		for {
+			if !app.remote.SignedIn() {
+				err := app.remote.SignIn()
+				if err != nil {
+					log.Error(err)
+				}
+			}
+
 			err := app.sync()
 			if err != nil {
 				log.Error(err)

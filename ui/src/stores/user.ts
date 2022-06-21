@@ -25,7 +25,7 @@ export const currentUser = readable<User>(null, (set) => {
   setFunc = set
   getCurrentUser()
 
-  let interval = window.setInterval(getCurrentUser, 1000)
+  let interval = window.setInterval(getCurrentUser, 60000)
 
   return () => {
     window.clearInterval(interval)

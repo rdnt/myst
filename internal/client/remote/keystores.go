@@ -63,13 +63,13 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	return k, nil
 }
 
-func (r *remote) Keystore(id string) (keystore.Keystore, error) {
+func (r *remote) Keystore(remoteID string) (keystore.Keystore, error) {
 	if !r.SignedIn() {
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
 	res, err := r.client.KeystoreWithResponse(
-		context.Background(), id,
+		context.Background(), remoteID,
 	)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "failed to create keystore")
@@ -86,7 +86,7 @@ func (r *remote) Keystore(id string) (keystore.Keystore, error) {
 
 	var keystoreKey []byte
 	for _, inv := range invs {
-		if inv.KeystoreId == id && inv.Finalized() {
+		if inv.KeystoreId == remoteID && inv.Finalized() {
 			symKey, err := curve25519.X25519(r.privateKey, inv.InviterKey)
 			if err != nil {
 				return keystore.Keystore{}, errors.Wrap(err, "failed to create asymmetric key")
@@ -133,15 +133,15 @@ func (r *remote) Keystores() (map[string]keystore.Keystore, error) {
 	restKeystores := *res.JSON200
 	keystores := make(map[string]keystore.Keystore)
 
-	for _, restKeystore := range restKeystores {
-		invs, err := r.Invitations()
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get invitations")
-		}
+	invs, err := r.Invitations()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get invitations")
+	}
 
+	for _, restKeystore := range restKeystores {
 		var keystoreKey []byte
 		for _, inv := range invs {
-			if inv.KeystoreId == restKeystore.Id && inv.Finalized() {
+			if restKeystore.OwnerId != r.CurrentUser().Id && inv.KeystoreId == restKeystore.Id && inv.Finalized() {
 				symKey, err := curve25519.X25519(r.privateKey, inv.InviterKey)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to create asymmetric key")
@@ -159,7 +159,7 @@ func (r *remote) Keystores() (map[string]keystore.Keystore, error) {
 		}
 
 		if keystoreKey == nil {
-			panic(err)
+			continue
 		}
 
 		k, err := KeystoreFromJSON(restKeystore, keystoreKey)

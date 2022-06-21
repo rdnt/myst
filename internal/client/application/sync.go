@@ -8,6 +8,10 @@ func (app *application) sync() error {
 	log.Println("Sync started.")
 	defer log.Print("Sync finished.")
 
+	if !app.remote.SignedIn() {
+		return errors.New("signed out")
+	}
+
 	invs, err := app.remote.Invitations()
 	if err != nil {
 		return errors.WithMessage(err, "failed to get invitations from remote")
@@ -26,6 +30,13 @@ func (app *application) sync() error {
 			log.Print("Invitation ", inv.Id, " finalized.")
 		}
 	}
+
+	ks, err := app.remote.Keystores()
+	if err != nil {
+		return err
+	}
+
+	log.Debug(ks)
 
 	return nil
 }

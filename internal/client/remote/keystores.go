@@ -116,8 +116,19 @@ func (r *remote) Keystore(remoteID string) (keystore.Keystore, error) {
 }
 
 func (r *remote) UpdateKeystore(k keystore.Keystore) error {
-	//TODO implement me
-	panic("implement me")
+	rk, err := r.Keystore(k.RemoteId)
+	if err != nil {
+		return err
+	}
+
+	if rk.Version == k.Version {
+		return errors.New("keystore is already up to date")
+	} else if rk.Version > k.Version {
+		return errors.New("keystore upstream is more recent")
+	}
+
+	// TODO
+	return nil
 }
 
 func (r *remote) Keystores() (map[string]keystore.Keystore, error) {

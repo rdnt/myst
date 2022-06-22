@@ -54,29 +54,23 @@ func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 }
 
 func (app *application) Keystores() (map[string]keystore.Keystore, error) {
-	//fmt.Println("SYNCING WITH REMOTE")
-	//
-	rks, err := app.remote.Keystores()
-	if err != nil {
-		return nil, err
-	}
-	//
-	//log.Debug("remote: ", rks)
-
 	ks, err := app.keystores.Keystores()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get keystores")
 	}
 
-	//log.Debug("local: ", ks)
+	if app.remote.SignedIn() {
+		rks, err := app.remote.Keystores()
+		if err != nil {
+			return nil, err
+		}
 
-	for _, rk := range rks {
-		if _, ok := ks[rk.Id]; !ok {
-			ks[rk.Id] = rk
+		for _, rk := range rks {
+			if _, ok := ks[rk.Id]; !ok {
+				ks[rk.Id] = rk
+			}
 		}
 	}
-
-	//log.Debug("final: ", ks)
 
 	return ks, nil
 }

@@ -27,8 +27,9 @@ type AcceptInvitationRequest struct {
 
 // AuthorizationResponse defines model for AuthorizationResponse.
 type AuthorizationResponse struct {
-	Token  string `json:"token"`
-	UserId string `json:"userId"`
+	Id       string `json:"id"`
+	Token    string `json:"token"`
+	Username string `json:"username"`
 }
 
 // CreateInvitationRequest defines model for CreateInvitationRequest.
@@ -96,14 +97,6 @@ type LoginRequest struct {
 type RegisterRequest struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
-}
-
-// User defines model for User.
-type User struct {
-	CreatedAt time.Time `json:"createdAt"`
-	Id        string    `json:"id"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Username  string    `json:"username"`
 }
 
 // LoginJSONBody defines parameters for Login.

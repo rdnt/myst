@@ -23,8 +23,10 @@ type KeystoreRepository interface {
 	keystore.Repository
 	Authenticate(password string) error
 	Initialize(password string) error
-	SyncKeypair() (publicKey, privateKey []byte, err error)
-	UpdateSyncKeypair(publicKey, privateKey []byte) error
+	Keypair() (publicKey, privateKey []byte, err error)
+	SetKeypair(publicKey, privateKey []byte) error
+	UserInfo() (username, password string, err error)
+	SetUserInfo(username, password string) error
 	HealthCheck()
 }
 
@@ -203,11 +205,18 @@ func (s *service) HealthCheck() {
 	s.keystores.HealthCheck()
 }
 
-func (s *service) SyncKeypair() (publicKey, privateKey []byte, err error) {
-	return s.keystores.SyncKeypair()
+func (s *service) Keypair() (publicKey, privateKey []byte, err error) {
+	return s.keystores.Keypair()
 }
 
-func (s *service) UpdateSyncKeypair(publicKey, privateKey []byte) error {
-	//TODO implement me
-	panic("implement me")
+func (s *service) SetKeypair(publicKey, privateKey []byte) error {
+	return s.keystores.SetKeypair(publicKey, privateKey)
+}
+
+func (s *service) UserInfo() (username, password string, err error) {
+	return s.keystores.UserInfo()
+}
+
+func (s *service) SetUserInfo(username, password string) error {
+	return s.keystores.SetUserInfo(username, password)
 }

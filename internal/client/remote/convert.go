@@ -63,7 +63,7 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 
 	logger.Error("DECRYPTEEEED", string(decryptedKeystorePayload))
 
-	var jk keystorerepo.JSONKeystore
+	var jk keystorerepo.Keystore
 
 	err = json.Unmarshal(decryptedKeystorePayload, &jk)
 	if err != nil {

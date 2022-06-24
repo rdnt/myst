@@ -9,11 +9,12 @@ import (
 	"myst/internal/client/application/domain/user"
 )
 
-func (app *application) SignIn() error {
+func (app *application) SignIn(username, password string) error {
+
 	return app.remote.SignIn()
 }
 
-func (app *application) Register(username, password string) error {
+func (app *application) Register(username, password string) (user.User, error) {
 	return app.remote.Register(username, password)
 }
 

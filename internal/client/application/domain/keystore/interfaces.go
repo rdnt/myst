@@ -31,6 +31,6 @@ type Service interface {
 	UpdateKeystore(k Keystore) error
 	Authenticate(password string) error
 	HealthCheck()
-	SyncKeypair() (publicKey, privateKey []byte, err error)
-	UpdateSyncKeypair(publicKey, privateKey []byte) error
+	Keypair() (publicKey, privateKey []byte, err error)
+	SetKeypair(publicKey, privateKey []byte) error
 }

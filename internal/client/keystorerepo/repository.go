@@ -18,6 +18,10 @@ import (
 
 var log = logger.New("keystorerepo", logger.Green)
 
+var (
+	ErrNotSet = errors.New("not set")
+)
+
 type Repository struct {
 	mux             sync.Mutex
 	path            string
@@ -226,24 +230,6 @@ func (r *Repository) Initialize(password string) error {
 	return nil
 }
 
-func (r *Repository) UpdateSyncKeypair(publicKey, privateKey []byte) error {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	if r.key == nil {
-		return fmt.Errorf("authentication required")
-	}
-
-	e, err := r.enclave(r.key)
-	if err != nil {
-		return err
-	}
-
-	e.SetSyncKeypair(publicKey, privateKey)
-
-	return r.sealAndWrite(e)
-}
-
 func (r *Repository) Authenticate(password string) error {
 	r.mux.Lock()
 
@@ -376,7 +362,7 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 	return os.WriteFile(r.enclavePath(), b, 0600)
 }
 
-func (r *Repository) SyncKeypair() (publicKey, privateKey []byte, err error) {
+func (r *Repository) Keypair() (publicKey, privateKey []byte, err error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -389,5 +375,71 @@ func (r *Repository) SyncKeypair() (publicKey, privateKey []byte, err error) {
 		return nil, nil, err
 	}
 
-	return e.SyncKeypair()
+	publicKey, privateKey, err = e.Keypair()
+	if err == enclave.ErrNotSet {
+		return nil, nil, ErrNotSet
+	} else if err != nil {
+		return nil, nil, err
+	}
+
+	return publicKey, privateKey, nil
+}
+
+func (r *Repository) SetKeypair(publicKey, privateKey []byte) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	if r.key == nil {
+		return fmt.Errorf("authentication required")
+	}
+
+	e, err := r.enclave(r.key)
+	if err != nil {
+		return err
+	}
+
+	e.SetKeypair(publicKey, privateKey)
+
+	return r.sealAndWrite(e)
+}
+
+func (r *Repository) UserInfo() (username, password string, err error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	if r.key == nil {
+		return "", "", fmt.Errorf("authentication required")
+	}
+
+	e, err := r.enclave(r.key)
+	if err != nil {
+		return "", "", err
+	}
+
+	username, password, err = e.UserInfo()
+	if err == enclave.ErrNotSet {
+		return "", "", ErrNotSet
+	} else if err != nil {
+		return "", "", err
+	}
+
+	return username, password, nil
+}
+
+func (r *Repository) SetUserInfo(username, password string) error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	if r.key == nil {
+		return fmt.Errorf("authentication required")
+	}
+
+	e, err := r.enclave(r.key)
+	if err != nil {
+		return err
+	}
+
+	e.SetUserInfo(username, password)
+
+	return r.sealAndWrite(e)
 }

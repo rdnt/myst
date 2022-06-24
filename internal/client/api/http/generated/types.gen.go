@@ -25,12 +25,6 @@ type AuthenticateRequest struct {
 	Password string `json:"password"`
 }
 
-// AuthorizationResponse defines model for AuthorizationResponse.
-type AuthorizationResponse struct {
-	Id    string `json:"id"`
-	Token string `json:"token"`
-}
-
 // CreateEntryRequest defines model for CreateEntryRequest.
 type CreateEntryRequest struct {
 	Notes    string `json:"notes"`

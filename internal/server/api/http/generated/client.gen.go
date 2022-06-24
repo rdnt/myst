@@ -872,7 +872,7 @@ func (r LoginResponse) StatusCode() int {
 type RegisterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *User
+	JSON201      *AuthorizationResponse
 	JSONDefault  *Error
 }
 
@@ -1294,7 +1294,7 @@ func ParseRegisterResponse(rsp *http.Response) (*RegisterResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest User
+		var dest AuthorizationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -45,7 +45,7 @@ type Remote interface {
 	SignedIn() bool
 	CurrentUser() *user.User
 	SignOut() error
-	Register(username, password string) error
+	Register(username, password string) (user.User, error)
 
 	// keystores
 	//UploadKeystore(id string) (*generated.Keystore, error)
@@ -176,17 +176,19 @@ func (r *remote) SignIn() error {
 		return ErrInvalidResponse
 	}
 
-	authres := *res.JSON200
+	resp := *res.JSON200
 
-	if authres.Token == "" {
+	if resp.Token == "" {
 		return errors.New("invalid token")
 	}
 
-	r.bearerToken = authres.Token
-	r.user = &user.User{
-		Id:       authres.UserId,
+	u := user.User{
+		Id:       resp.Id,
 		Username: r.username,
 	}
+
+	r.user = &u
+	r.bearerToken = resp.Token
 
 	fmt.Println("Signed in.")
 
@@ -212,8 +214,8 @@ func (r *remote) SignOut() error {
 	return nil
 }
 
-func (r *remote) Register(username, password string) error {
-	fmt.Println("Signing in to remote...")
+func (r *remote) Register(username, password string) (user.User, error) {
+	fmt.Println("Registering to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -224,29 +226,31 @@ func (r *remote) Register(username, password string) error {
 		},
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to sign in")
+		return user.User{}, errors.Wrap(err, "failed to sign in")
 	}
 
 	if res.JSON201 == nil {
-		return ErrInvalidResponse
+		return user.User{}, ErrInvalidResponse
 	}
 
-	//resp := *res.JSON201
+	resp := *res.JSON201
 
 	// TODO: properly sign in after registration
-	//if resp.Token == "" {
-	//	return errors.New("invalid token")
-	//}
+	if resp.Token == "" {
+		return user.User{}, errors.New("invalid token")
+	}
 
-	//r.bearerToken = authres.Token
-	//r.user = &user.User{
-	//	Id:       authres.UserId,
-	//	Username: r.username,
-	//}
+	u := user.User{
+		Id:       resp.Id,
+		Username: r.username,
+	}
+
+	r.user = &u
+	r.bearerToken = resp.Token
 
 	fmt.Println("Registered.")
 
-	return nil
+	return u, nil
 }
 
 func newKeypair() ([]byte, []byte, error) {

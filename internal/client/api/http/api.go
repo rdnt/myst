@@ -33,26 +33,6 @@ type API struct {
 	app application.Application
 }
 
-func (api *API) Authenticate(c *gin.Context) {
-	var req generated.AuthenticateRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	if err := api.app.Authenticate(req.Password); err == application.ErrAuthenticationFailed {
-		c.Status(http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	c.Status(http.StatusOK)
-}
-
 func (api *API) CurrentUser(c *gin.Context) {
 	u := api.app.CurrentUser()
 	if u == nil {

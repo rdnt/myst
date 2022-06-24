@@ -4,7 +4,6 @@ import (
 	"myst/internal/server/api/http/generated"
 	"myst/internal/server/core/domain/invitation"
 	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
 )
 
 func ToJSONKeystore(k *keystore.Keystore) generated.Keystore {
@@ -34,14 +33,5 @@ func ToJSONInvitation(inv invitation.Invitation) generated.Invitation {
 		AcceptedAt:   inv.AcceptedAt,
 		DeclinedAt:   inv.DeclinedAt,
 		DeletedAt:    inv.DeletedAt,
-	}
-}
-
-func ToJSONUser(u user.User) generated.User {
-	return generated.User{
-		Id:        u.Id,
-		Username:  u.Username,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
 	}
 }

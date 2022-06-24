@@ -25,10 +25,10 @@ type Application interface {
 	Stop() error
 
 	// remote
-	SignIn() error
+	SignIn(username, password string) error
 	SignOut() error
 	CurrentUser() *user.User
-	Register(username, password string) error
+	Register(username, password string) (user.User, error)
 	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	//Keystore(id string) (*generated.Keystore, error)
 	//Keystores() ([]*generated.Keystore, error)

@@ -7,12 +7,19 @@ import (
 	"myst/pkg/crypto"
 )
 
+var (
+	ErrNotSet = fmt.Errorf("not set")
+)
+
 type Enclave struct {
-	salt       []byte
-	keystores  map[string]keystore.Keystore
-	keys       map[string][]byte
-	publicKey  []byte
-	privateKey []byte
+	salt      []byte
+	keystores map[string]keystore.Keystore
+	keys      map[string][]byte
+
+	Username   string
+	Password   string
+	PublicKey  []byte
+	PrivateKey []byte
 }
 
 func New(opts ...Option) (*Enclave, error) {
@@ -48,9 +55,14 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 	return nil
 }
 
-func (e *Enclave) SetSyncKeypair(publicKey, privateKey []byte) {
-	e.publicKey = publicKey
-	e.privateKey = privateKey
+func (e *Enclave) SetKeypair(publicKey, privateKey []byte) {
+	e.PublicKey = publicKey
+	e.PrivateKey = privateKey
+}
+
+func (e *Enclave) SetUserInfo(username, password string) {
+	e.Username = username
+	e.Password = password
 }
 
 func (e *Enclave) Keys() map[string][]byte {
@@ -106,10 +118,18 @@ func (e *Enclave) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (e *Enclave) SyncKeypair() ([]byte, []byte, error) {
-	if e.publicKey == nil || e.privateKey == nil {
-		return nil, nil, fmt.Errorf("keypair not set")
+func (e *Enclave) Keypair() ([]byte, []byte, error) {
+	if e.PublicKey == nil || e.PrivateKey == nil {
+		return nil, nil, ErrNotSet
 	}
 
-	return e.publicKey, e.privateKey, nil
+	return e.PublicKey, e.PrivateKey, nil
+}
+
+func (e *Enclave) UserInfo() (string, string, error) {
+	if e.Username == "" || e.Password == "" {
+		return "", "", ErrNotSet
+	}
+
+	return e.Username, e.Password, nil
 }

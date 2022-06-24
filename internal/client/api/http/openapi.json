@@ -80,7 +80,7 @@
         },
         "responses": {
           "201": {
-            "description": "Successfully signed up",
+            "description": "Successfully registered",
             "content": {
               "application/json": {
                 "schema": {
@@ -118,14 +118,7 @@
         },
         "responses": {
           "200": {
-            "description": "Authorization Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthorizationResponse"
-                }
-              }
-            }
+            "description": "Successfully logged in"
           },
           "default": {
             "description": "Error",

@@ -48,7 +48,7 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 }
 
 func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
-	ks := map[string]JSONKeystore{}
+	ks := map[string]Keystore{}
 
 	eks, err := e.Keystores()
 	if err != nil {
@@ -58,11 +58,18 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 		ks[k.Id] = KeystoreToJSON(k)
 	}
 
-	return json.Marshal(JSONEnclave{Keystores: ks, Keys: e.Keys()})
+	return json.Marshal(Enclave{
+		Keystores:  ks,
+		Keys:       e.Keys(),
+		Username:   e.Username,
+		Password:   e.Password,
+		PublicKey:  e.PublicKey,
+		PrivateKey: e.PrivateKey,
+	})
 }
 
 func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
-	e := &JSONEnclave{}
+	e := &Enclave{}
 
 	err := json.Unmarshal(b, e)
 	if err != nil {
@@ -83,6 +90,10 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 	return enclave.New(
 		enclave.WithKeystores(ks),
 		enclave.WithSalt(salt),
+		enclave.WithUsername(e.Username),
+		enclave.WithPassword(e.Password),
+		enclave.WithPublicKey(e.PublicKey),
+		enclave.WithPrivateKey(e.PrivateKey),
 	)
 }
 

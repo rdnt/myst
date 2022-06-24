@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AuthenticateRequest } from '../models/AuthenticateRequest';
-import type { AuthorizationResponse } from '../models/AuthorizationResponse';
 import type { CreateEntryRequest } from '../models/CreateEntryRequest';
 import type { CreateInvitationRequest } from '../models/CreateInvitationRequest';
 import type { CreateKeystoreRequest } from '../models/CreateKeystoreRequest';
@@ -57,7 +56,7 @@ requestBody: AuthenticateRequest,
     /**
      * Registers a new account
      * @returns Error Error
-     * @returns User Successfully signed up
+     * @returns User Successfully registered
      * @throws ApiError
      */
     public static register({
@@ -75,7 +74,7 @@ requestBody: RegisterRequest,
 
     /**
      * Logs in to the remote
-     * @returns AuthorizationResponse Authorization Response
+     * @returns any Successfully logged in
      * @returns Error Error
      * @throws ApiError
      */
@@ -83,7 +82,7 @@ requestBody: RegisterRequest,
 requestBody,
 }: {
 requestBody: LoginRequest,
-}): CancelablePromise<AuthorizationResponse | Error> {
+}): CancelablePromise<any | Error> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/auth/login',

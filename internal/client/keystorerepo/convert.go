@@ -5,14 +5,17 @@ import (
 	"myst/internal/client/application/domain/keystore"
 )
 
-type JSONEnclave struct {
-	Keystores  map[string]JSONKeystore `json:"keystores"`
-	Keys       map[string][]byte       `json:"keys"`
-	PublicKey  []byte                  `json:"publicKey"`
-	PrivateKey []byte                  `json:"privateKey"`
+type Enclave struct {
+	Keystores map[string]Keystore `json:"keystores"`
+	Keys      map[string][]byte   `json:"keys"`
+
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	PublicKey  []byte `json:"publicKey"`
+	PrivateKey []byte `json:"privateKey"`
 }
 
-type JSONKeystore struct {
+type Keystore struct {
 	Id       string      `json:"id"`
 	RemoteId string      `json:"remoteId"`
 	Name     string      `json:"name"`
@@ -28,7 +31,7 @@ type JSONEntry struct {
 	Notes    string `json:"notes"`
 }
 
-func KeystoreToJSON(k keystore.Keystore) JSONKeystore {
+func KeystoreToJSON(k keystore.Keystore) Keystore {
 	entries := []JSONEntry{}
 
 	for _, e := range k.Entries {
@@ -41,7 +44,7 @@ func KeystoreToJSON(k keystore.Keystore) JSONKeystore {
 		})
 	}
 
-	return JSONKeystore{
+	return Keystore{
 		Id:       k.Id,
 		RemoteId: k.RemoteId,
 		Name:     k.Name,
@@ -50,7 +53,7 @@ func KeystoreToJSON(k keystore.Keystore) JSONKeystore {
 	}
 }
 
-func KeystoreFromJSON(k JSONKeystore) (keystore.Keystore, error) {
+func KeystoreFromJSON(k Keystore) (keystore.Keystore, error) {
 	entries := make(map[string]entry.Entry, len(k.Entries))
 
 	for _, e := range k.Entries {

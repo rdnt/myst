@@ -26,7 +26,16 @@ func (api *API) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, ToJSONUser(u))
+	token, err := api.loginUser(u.Username)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(http.StatusOK, generated.AuthorizationResponse{
+		Id:       u.Id,
+		Username: u.Username,
+		Token:    token,
+	})
 }
 
 func (api *API) Login(c *gin.Context) {
@@ -46,8 +55,9 @@ func (api *API) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, generated.AuthorizationResponse{
-		Token:  token,
-		UserId: params.Username, // TODO: query user on login and return proper UserID (uuid)
+		Id:       params.Username, // TODO: query user on login and return proper UserID (uuid)
+		Username: params.Username,
+		Token:    token,
 	})
 }
 

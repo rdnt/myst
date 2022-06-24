@@ -38,11 +38,11 @@
 				},
 				"responses": {
 					"201": {
-						"description": "User created",
+						"description": "Authorization response",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/User"
+									"$ref": "#/components/schemas/AuthorizationResponse"
 								}
 							}
 						}
@@ -76,7 +76,7 @@
 				},
 				"responses": {
 					"200": {
-						"description": "Authentication Token",
+						"description": "Authorization response",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -433,31 +433,6 @@
 					}
 				}
 			},
-			"User": {
-				"type": "object",
-				"required": [
-					"id",
-					"username",
-					"createdAt",
-					"updatedAt"
-				],
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"username": {
-						"type": "string"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				}
-			},
 			"LoginRequest": {
 				"type": "object",
 				"required": [
@@ -476,16 +451,20 @@
 			"AuthorizationResponse": {
 				"type": "object",
 				"properties": {
-					"token": {
+					"id": {
 						"type": "string"
 					},
-					"userId": {
+					"username": {
+						"type": "string"
+					},
+					"token": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"token",
-					"userId"
+					"id",
+					"username",
+					"token"
 				]
 			},
 			"CreateInvitationRequest": {

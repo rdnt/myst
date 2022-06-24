@@ -7,6 +7,8 @@ import (
 func (api *API) initRoutes(r *gin.RouterGroup) {
 	r.GET("/health", api.HealthCheck)
 	r.POST("/authenticate", api.Authenticate)
+	r.POST("/auth/login", api.Login)
+	r.POST("/auth/register", api.Register)
 	r.POST("/keystores", api.CreateKeystore)
 	r.GET("/keystores", api.Keystores)
 	r.GET("/keystore/:keystoreId", api.Keystore)

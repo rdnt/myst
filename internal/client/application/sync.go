@@ -31,12 +31,5 @@ func (app *application) sync() error {
 		}
 	}
 
-	ks, err := app.remote.Keystores()
-	if err != nil {
-		return err
-	}
-
-	log.Debug(ks)
-
 	return nil
 }

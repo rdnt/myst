@@ -13,6 +13,10 @@ func (app *application) SignIn() error {
 	return app.remote.SignIn()
 }
 
+func (app *application) Register(username, password string) error {
+	return app.remote.Register(username, password)
+}
+
 func (app *application) CurrentUser() *user.User {
 	return app.remote.CurrentUser()
 }

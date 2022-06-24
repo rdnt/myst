@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AuthenticateRequest } from '../models/AuthenticateRequest';
+import type { AuthorizationResponse } from '../models/AuthorizationResponse';
 import type { CreateEntryRequest } from '../models/CreateEntryRequest';
 import type { CreateInvitationRequest } from '../models/CreateInvitationRequest';
 import type { CreateKeystoreRequest } from '../models/CreateKeystoreRequest';
@@ -11,6 +12,8 @@ import type { Invitation } from '../models/Invitation';
 import type { Invitations } from '../models/Invitations';
 import type { Keystore } from '../models/Keystore';
 import type { Keystores } from '../models/Keystores';
+import type { LoginRequest } from '../models/LoginRequest';
+import type { RegisterRequest } from '../models/RegisterRequest';
 import type { UpdateEntryRequest } from '../models/UpdateEntryRequest';
 import type { User } from '../models/User';
 
@@ -46,6 +49,44 @@ requestBody: AuthenticateRequest,
         return __request(OpenAPI, {
             method: 'POST',
             url: '/authenticate',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Registers a new account
+     * @returns Error Error
+     * @returns User Successfully signed up
+     * @throws ApiError
+     */
+    public static register({
+requestBody,
+}: {
+requestBody: RegisterRequest,
+}): CancelablePromise<Error | User> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/register',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Logs in to the remote
+     * @returns AuthorizationResponse Authorization Response
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static login({
+requestBody,
+}: {
+requestBody: LoginRequest,
+}): CancelablePromise<AuthorizationResponse | Error> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/login',
             body: requestBody,
             mediaType: 'application/json',
         });

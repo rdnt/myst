@@ -6,8 +6,10 @@ import (
 )
 
 type JSONEnclave struct {
-	Keystores map[string]JSONKeystore `json:"keystores"`
-	Keys      map[string][]byte       `json:"keys"`
+	Keystores  map[string]JSONKeystore `json:"keystores"`
+	Keys       map[string][]byte       `json:"keys"`
+	PublicKey  []byte                  `json:"publicKey"`
+	PrivateKey []byte                  `json:"privateKey"`
 }
 
 type JSONKeystore struct {

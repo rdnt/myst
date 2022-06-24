@@ -25,6 +25,12 @@ type AuthenticateRequest struct {
 	Password string `json:"password"`
 }
 
+// AuthorizationResponse defines model for AuthorizationResponse.
+type AuthorizationResponse struct {
+	Id    string `json:"id"`
+	Token string `json:"token"`
+}
+
 // CreateEntryRequest defines model for CreateEntryRequest.
 type CreateEntryRequest struct {
 	Notes    string `json:"notes"`
@@ -94,6 +100,18 @@ type Keystore struct {
 // Keystores defines model for Keystores.
 type Keystores []Keystore
 
+// LoginRequest defines model for LoginRequest.
+type LoginRequest struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// RegisterRequest defines model for RegisterRequest.
+type RegisterRequest struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
 // UpdateEntryRequest defines model for UpdateEntryRequest.
 type UpdateEntryRequest struct {
 	Notes    *string `json:"notes,omitempty"`
@@ -105,6 +123,12 @@ type User struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
 }
+
+// LoginJSONBody defines parameters for Login.
+type LoginJSONBody LoginRequest
+
+// RegisterJSONBody defines parameters for Register.
+type RegisterJSONBody RegisterRequest
 
 // AuthenticateJSONBody defines parameters for Authenticate.
 type AuthenticateJSONBody AuthenticateRequest
@@ -120,6 +144,12 @@ type CreateInvitationJSONBody CreateInvitationRequest
 
 // CreateKeystoreJSONBody defines parameters for CreateKeystore.
 type CreateKeystoreJSONBody CreateKeystoreRequest
+
+// LoginJSONRequestBody defines body for Login for application/json ContentType.
+type LoginJSONRequestBody LoginJSONBody
+
+// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+type RegisterJSONRequestBody RegisterJSONBody
 
 // AuthenticateJSONRequestBody defines body for Authenticate for application/json ContentType.
 type AuthenticateJSONRequestBody AuthenticateJSONBody

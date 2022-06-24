@@ -26,9 +26,3 @@ func WithSalt(salt []byte) Option {
 		return nil
 	}
 }
-
-func WithKeystore(k keystore.Keystore) Option {
-	return func(e *Enclave) error {
-		return e.AddKeystore(k)
-	}
-}

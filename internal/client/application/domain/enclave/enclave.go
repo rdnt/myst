@@ -8,9 +8,11 @@ import (
 )
 
 type Enclave struct {
-	salt      []byte
-	keystores map[string]keystore.Keystore
-	keys      map[string][]byte
+	salt       []byte
+	keystores  map[string]keystore.Keystore
+	keys       map[string][]byte
+	publicKey  []byte
+	privateKey []byte
 }
 
 func New(opts ...Option) (*Enclave, error) {
@@ -44,6 +46,11 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 	e.keys[k.Id] = key
 
 	return nil
+}
+
+func (e *Enclave) SetSyncKeypair(publicKey, privateKey []byte) {
+	e.publicKey = publicKey
+	e.privateKey = privateKey
 }
 
 func (e *Enclave) Keys() map[string][]byte {
@@ -97,4 +104,12 @@ func (e *Enclave) DeleteKeystore(id string) error {
 	delete(e.keys, id)
 
 	return nil
+}
+
+func (e *Enclave) SyncKeypair() ([]byte, []byte, error) {
+	if e.publicKey == nil || e.privateKey == nil {
+		return nil, nil, fmt.Errorf("keypair not set")
+	}
+
+	return e.publicKey, e.privateKey, nil
 }

@@ -24,7 +24,7 @@
 	"paths": {
 		"/auth/register": {
 			"post": {
-				"description": "Registers a new users",
+				"description": "Registers a new user",
 				"operationId": "Register",
 				"requestBody": {
 					"required": true,

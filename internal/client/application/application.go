@@ -28,6 +28,7 @@ type Application interface {
 	SignIn() error
 	SignOut() error
 	CurrentUser() *user.User
+	Register(username, password string) error
 	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	//Keystore(id string) (*generated.Keystore, error)
 	//Keystores() ([]*generated.Keystore, error)
@@ -93,12 +94,15 @@ func (app *application) Start() error {
 				if err != nil {
 					log.Error(err)
 				}
+
+				if app.remote.SignedIn() {
+					err := app.sync()
+					if err != nil {
+						log.Error(err)
+					}
+				}
 			}
 
-			err := app.sync()
-			if err != nil {
-				log.Error(err)
-			}
 			time.Sleep(10 * time.Second)
 		}
 	}()

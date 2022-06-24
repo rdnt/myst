@@ -45,6 +45,7 @@ type Remote interface {
 	SignedIn() bool
 	CurrentUser() *user.User
 	SignOut() error
+	Register(username, password string) error
 
 	// keystores
 	//UploadKeystore(id string) (*generated.Keystore, error)
@@ -91,11 +92,7 @@ func New(opts ...Option) (Remote, error) {
 		opt(r)
 	}
 
-	pub, key, err := newKeypair()
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to generate public/private keypair")
-	}
-
+	var err error
 	r.client, err = generated.NewClientWithResponses(
 		r.address+"/api",
 		generated.WithRequestEditorFn(r.authenticate()),
@@ -103,9 +100,6 @@ func New(opts ...Option) (Remote, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create remote client")
 	}
-
-	r.publicKey = pub
-	r.privateKey = key
 
 	return r, nil
 }
@@ -214,6 +208,43 @@ func (r *remote) SignOut() error {
 	r.user = nil
 
 	fmt.Println("Signed out.")
+
+	return nil
+}
+
+func (r *remote) Register(username, password string) error {
+	fmt.Println("Signing in to remote...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res, err := r.client.RegisterWithResponse(
+		ctx, generated.RegisterJSONRequestBody{
+			Username: username,
+			Password: password,
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to sign in")
+	}
+
+	if res.JSON201 == nil {
+		return ErrInvalidResponse
+	}
+
+	//resp := *res.JSON201
+
+	// TODO: properly sign in after registration
+	//if resp.Token == "" {
+	//	return errors.New("invalid token")
+	//}
+
+	//r.bearerToken = authres.Token
+	//r.user = &user.User{
+	//	Id:       authres.UserId,
+	//	Username: r.username,
+	//}
+
+	fmt.Println("Registered.")
 
 	return nil
 }

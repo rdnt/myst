@@ -31,7 +31,7 @@ func (api *API) Register(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(http.StatusOK, generated.AuthorizationResponse{
+	c.JSON(http.StatusCreated, generated.AuthorizationResponse{
 		Id:       u.Id,
 		Username: u.Username,
 		Token:    token,

@@ -12,13 +12,14 @@ import (
 )
 
 type Client struct {
-	dir     string
-	app     application.Application
-	address string
+	dir            string
+	app            application.Application
+	address        string
+	masterPassword string
 }
 
-func (s *IntegrationTestSuite) setupClient(serverAddress string, username, password string, port int) *Client {
-	client := &Client{}
+func (s *IntegrationTestSuite) setupClient(serverAddress string, masterPassword, username, password string, port int) *Client {
+	client := &Client{masterPassword: masterPassword}
 
 	var err error
 	client.dir, err = os.MkdirTemp("", "myst-client-data-*")
@@ -40,8 +41,6 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, username, passw
 
 	rem, err := remote.New(
 		remote.WithAddress(serverAddress),
-		remote.WithUsername(username),
-		remote.WithPassword(password),
 	)
 	s.Require().NoError(err)
 
@@ -51,8 +50,14 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, username, passw
 	)
 	s.Require().NoError(err)
 
-	api := http.New(client.app)
+	err = client.app.CreateEnclave(masterPassword)
+	s.Require().NoError(err)
+
+	api := http.New(client.app, nil)
 	client.address = fmt.Sprintf("localhost:%d", port)
+
+	err = client.app.SignIn(username, password)
+	s.Require().NoError(err)
 
 	go func() {
 		err = api.Run(client.address)

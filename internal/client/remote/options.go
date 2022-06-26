@@ -7,15 +7,3 @@ func WithAddress(address string) Option {
 		r.address = address
 	}
 }
-
-func WithPublicKey(publicKey []byte) Option {
-	return func(r *remote) {
-		r.publicKey = publicKey
-	}
-}
-
-func WithPrivateKey(privateKey []byte) Option {
-	return func(r *remote) {
-		r.privateKey = privateKey
-	}
-}

@@ -57,8 +57,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s._server = s.setupServer(ports[0])
-	s._client1 = s.setupClient("http://"+s._server.address, "rdnt", "1234", ports[1])
-	s._client2 = s.setupClient("http://"+s._server.address, "abcd", "5678", ports[2])
+	s._client1 = s.setupClient("http://"+s._server.address, "rdntmasterpass", "rdnt", "1234", ports[1])
+	s._client2 = s.setupClient("http://"+s._server.address, "abcdmasterpass", "abcd", "5678", ports[2])
 
 	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
@@ -70,7 +70,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	user, pass := "rdnttest", "1234"
+	user, pass := "rdnt", "1234"
 
 	res, err := s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
 	s.Require().NoError(err)
@@ -80,10 +80,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NotNil(res.JSON201)
 	s.Require().Equal(user, (*res.JSON201).Username)
 
-	err = s._client1.app.SignIn()
+	err = s._client1.app.SignIn(user, pass)
 	s.Require().NoError(err)
 
-	user, pass = "abcdtest", "5678"
+	user, pass = "abcd", "5678"
 
 	res, err = s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
 	s.Require().NoError(err)
@@ -91,7 +91,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NotNil(res.JSON201)
 	s.Require().Equal(user, (*res.JSON201).Username)
 
-	err = s._client2.app.SignIn()
+	err = s._client2.app.SignIn(user, pass)
 	s.Require().NoError(err)
 }
 

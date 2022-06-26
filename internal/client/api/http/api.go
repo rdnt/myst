@@ -550,7 +550,7 @@ func New(app application.Application, ui fs.FS) *API {
 	r.NoRoute(NoRoute)
 
 	// serve the UI
-	if config.Debug {
+	if config.Debug || ui == nil {
 		r.Use(static.Serve("/", static.LocalFile("static", false)))
 	} else {
 		r.Use(static.Serve("/", EmbedFolder(ui, "static")))

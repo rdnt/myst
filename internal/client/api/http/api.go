@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
+	"io/fs"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gin-contrib/static"
 
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/application"
@@ -16,7 +19,6 @@ import (
 	"myst/pkg/config"
 	"myst/pkg/logger"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	//prometheus "github.com/zsais/go-gin-prometheus"
@@ -497,7 +499,7 @@ func (api *API) HealthCheck(_ *gin.Context) {
 }
 
 func (api *API) Run(addr string) error {
-	log.Println("starting app on port :8081")
+	log.Println("starting app on", addr)
 
 	api.app.Start()
 
@@ -505,7 +507,7 @@ func (api *API) Run(addr string) error {
 	return api.Engine.Run(addr)
 }
 
-func New(app application.Application) *API {
+func New(app application.Application, ui fs.FS) *API {
 	api := new(API)
 
 	api.app = app
@@ -547,8 +549,12 @@ func New(app application.Application) *API {
 	// error 404 handling
 	r.NoRoute(NoRoute)
 
-	// Attach static serve middleware
-	r.Use(static.Serve("/", static.LocalFile("static", false)))
+	// serve the UI
+	if config.Debug {
+		r.Use(static.Serve("/", static.LocalFile("static", false)))
+	} else {
+		r.Use(static.Serve("/", EmbedFolder(ui, "static")))
+	}
 
 	r.Use(
 		cors.New(
@@ -579,4 +585,26 @@ func New(app application.Application) *API {
 	api.initRoutes(r.Group("api"))
 
 	return api
+}
+
+type embedFileSystem struct {
+	http.FileSystem
+}
+
+func (e embedFileSystem) Exists(prefix string, path string) bool {
+	_, err := e.Open(path)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func EmbedFolder(fsEmbed fs.FS, targetPath string) static.ServeFileSystem {
+	fsys, err := fs.Sub(fsEmbed, targetPath)
+	if err != nil {
+		panic(err)
+	}
+	return embedFileSystem{
+		FileSystem: http.FS(fsys),
+	}
 }

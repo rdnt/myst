@@ -118,7 +118,7 @@ func (api *API) initRoutes(g *gin.RouterGroup) {
 }
 
 func (api *API) Run(addr string) error {
-	log.Println("starting app on port :8080")
+	log.Println("starting app on", addr)
 
 	api.app.Start()
 

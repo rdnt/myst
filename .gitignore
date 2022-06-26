@@ -15,6 +15,10 @@
 /static
 *.mst
 *.exe
+*.myst
+myst.exe
+mystd
+cmd/client/static/*
 
 .idea
 .vscode

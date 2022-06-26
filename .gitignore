@@ -19,6 +19,7 @@
 myst.exe
 mystd
 cmd/client/static/*
+!cmd/client/static/.gitkeep
 
 .idea
 .vscode

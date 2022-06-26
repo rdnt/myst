@@ -1,6 +1,8 @@
 package http
 
 import (
+	"bytes"
+	"encoding/csv"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -142,6 +144,54 @@ func (api *API) Enclave(c *gin.Context) {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (api *API) Import(c *gin.Context) {
+
+	keystoreName := "All"
+	b := []byte("")
+
+	csvReader := csv.NewReader(bytes.NewReader(b))
+
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	k, err := api.app.CreateKeystore(keystore.New(keystore.WithName(keystoreName)))
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	for _, row := range records {
+		if len(row) != 4 {
+			continue
+		}
+
+		website := row[0]
+		//url := row[1]
+		username := row[2]
+		password := row[3]
+
+		_, err := api.app.CreateKeystoreEntry(
+			k.Id,
+			entry.WithWebsite(website),
+			entry.WithUsername(username),
+			entry.WithPassword(password),
+		)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
+
 	}
 
 	c.JSON(http.StatusOK, nil)

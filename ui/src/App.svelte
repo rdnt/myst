@@ -38,7 +38,7 @@
       onboarding = false
       login = false
 
-      getKeystores().then(keystores=> {
+      getKeystores().then(keystores => {
         if (keystores.length > 0) {
           keystore = keystores[0];
         }

@@ -8,6 +8,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AuthenticateRequest } from './models/AuthenticateRequest';
 export type { AuthorizationResponse } from './models/AuthorizationResponse';
+export type { CreateEnclaveRequest } from './models/CreateEnclaveRequest';
 export type { CreateEntryRequest } from './models/CreateEntryRequest';
 export type { CreateInvitationRequest } from './models/CreateInvitationRequest';
 export type { CreateKeystoreRequest } from './models/CreateKeystoreRequest';

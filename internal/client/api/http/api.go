@@ -112,6 +112,41 @@ func (api *API) DeleteKeystore(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+func (api *API) CreateEnclave(c *gin.Context) {
+	var req generated.CreateEnclaveRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = api.app.CreateEnclave(req.Password)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (api *API) Enclave(c *gin.Context) {
+	err := api.app.Enclave()
+	if errors.Is(err, keystoreservice.ErrInitializationRequired) {
+		Error(c, http.StatusNotFound, err)
+		return
+	} else if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+		Error(c, http.StatusUnauthorized, err)
+		return
+	} else if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 //func (api *API) UnlockKeystore(c *gin.Context) {
 //	keystoreId := c.Param("keystoreId")
 //
@@ -362,7 +397,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 func (api *API) Keystores(c *gin.Context) {
 	ks, err := api.app.Keystores()
 	if errors.Is(err, keystoreservice.ErrInitializationRequired) {
-		Success(c, []generated.Keystore{})
+		Error(c, http.StatusNotFound, err)
 		return
 	} else if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
 		Error(c, http.StatusUnauthorized, err)

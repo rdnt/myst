@@ -1,9 +1,7 @@
 <script lang="ts">
-  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import Link from "@/components/Link.svelte";
   import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
-  import {getKeystores} from "@/stores/keystores";
   import {currentUser} from "@/stores/user";
   import {onMount} from "svelte";
 
@@ -14,13 +12,14 @@
 
   onMount(() => {
 
-
   })
 </script>
 
 <div class="sidebar">
   <h4>Myst</h4>
-  <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+  {#if $currentUser}
+    <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+  {/if}
 
   <div class="list">
     <h5 style="display: flex">

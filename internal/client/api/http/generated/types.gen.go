@@ -25,6 +25,11 @@ type AuthenticateRequest struct {
 	Password string `json:"password"`
 }
 
+// CreateEnclaveRequest defines model for CreateEnclaveRequest.
+type CreateEnclaveRequest struct {
+	Password string `json:"password"`
+}
+
 // CreateEntryRequest defines model for CreateEntryRequest.
 type CreateEntryRequest struct {
 	Notes    string `json:"notes"`
@@ -127,6 +132,9 @@ type RegisterJSONBody RegisterRequest
 // AuthenticateJSONBody defines parameters for Authenticate.
 type AuthenticateJSONBody AuthenticateRequest
 
+// CreateEnclaveJSONBody defines parameters for CreateEnclave.
+type CreateEnclaveJSONBody CreateEnclaveRequest
+
 // CreateEntryJSONBody defines parameters for CreateEntry.
 type CreateEntryJSONBody CreateEntryRequest
 
@@ -147,6 +155,9 @@ type RegisterJSONRequestBody RegisterJSONBody
 
 // AuthenticateJSONRequestBody defines body for Authenticate for application/json ContentType.
 type AuthenticateJSONRequestBody AuthenticateJSONBody
+
+// CreateEnclaveJSONRequestBody defines body for CreateEnclave for application/json ContentType.
+type CreateEnclaveJSONRequestBody CreateEnclaveJSONBody
 
 // CreateEntryJSONRequestBody defines body for CreateEntry for application/json ContentType.
 type CreateEntryJSONRequestBody CreateEntryJSONBody

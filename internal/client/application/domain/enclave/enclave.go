@@ -46,9 +46,6 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 		return err
 	}
 
-	// TODO: remove this
-	key = []byte("hi :D                           ")
-
 	e.keystores[k.Id] = k
 	e.keys[k.Id] = key
 

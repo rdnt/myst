@@ -8,14 +8,14 @@ func WithAddress(address string) Option {
 	}
 }
 
-func WithUsername(username string) Option {
+func WithPublicKey(publicKey []byte) Option {
 	return func(r *remote) {
-		r.username = username
+		r.publicKey = publicKey
 	}
 }
 
-func WithPassword(password string) Option {
+func WithPrivateKey(privateKey []byte) Option {
 	return func(r *remote) {
-		r.password = password
+		r.privateKey = privateKey
 	}
 }

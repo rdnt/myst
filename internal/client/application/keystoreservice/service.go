@@ -22,12 +22,13 @@ var (
 type KeystoreRepository interface {
 	keystore.Repository
 	Authenticate(password string) error
-	Initialize(password string) error
+	CreateEnclave(password string) error
 	Keypair() (publicKey, privateKey []byte, err error)
 	SetKeypair(publicKey, privateKey []byte) error
 	UserInfo() (username, password string, err error)
 	SetUserInfo(username, password string) error
 	HealthCheck()
+	Enclave() error
 }
 
 type service struct {
@@ -136,7 +137,7 @@ func (s *service) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (
 }
 
 func (s *service) CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) {
-	err := s.keystores.Initialize(password)
+	err := s.keystores.CreateEnclave(password)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to initialize enclave")
 	}
@@ -148,6 +149,14 @@ func (s *service) CreateFirstKeystore(k keystore.Keystore, password string) (key
 
 	logger.Printf("@@@@@@@@@@############### %#v\n", k)
 	return k, nil
+}
+
+func (s *service) CreateEnclave(password string) error {
+	return s.keystores.CreateEnclave(password)
+}
+
+func (s *service) Enclave() error {
+	return s.keystores.Enclave()
 }
 
 func (s *service) Keystore(id string) (keystore.Keystore, error) {

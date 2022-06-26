@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	debug                 = false
+	debug                 = true
 	DefaultArgon2IdParams = Argon2IdParams{
 		Memory:      64 * 1024,
 		Time:        1,
@@ -104,7 +104,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if len(key) != 32 {
 		return nil, fmt.Errorf("invalid key length")
 	}
-	// Initialize the AES cipher
+	// CreateEnclave the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) < aes.BlockSize*2 {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
-	// Initialize the AES cipher
+	// CreateEnclave the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

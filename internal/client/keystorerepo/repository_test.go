@@ -13,7 +13,7 @@ func TestRepository(t *testing.T) {
 	repo, err := keystorerepo.New(t.TempDir())
 	assert.NoError(t, err)
 
-	err = repo.Initialize("12345678")
+	err = repo.CreateEnclave("12345678")
 	assert.NoError(t, err)
 
 	err = repo.Authenticate("12345678")

@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AuthenticateRequest } from '../models/AuthenticateRequest';
+import type { CreateEnclaveRequest } from '../models/CreateEnclaveRequest';
 import type { CreateEntryRequest } from '../models/CreateEntryRequest';
 import type { CreateInvitationRequest } from '../models/CreateInvitationRequest';
 import type { CreateKeystoreRequest } from '../models/CreateKeystoreRequest';
@@ -31,6 +32,38 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/health',
+        });
+    }
+
+    /**
+     * Sets up the myst enclave with a master password
+     * @returns any OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static createEnclave({
+requestBody,
+}: {
+requestBody: CreateEnclaveRequest,
+}): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/enclave',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Check if the Myst enclave is set up
+     * @returns any OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static enclave(): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/enclave',
         });
     }
 

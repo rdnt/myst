@@ -11,13 +11,15 @@ export const getCurrentUser = () => {
 
     return Promise.resolve(u)
   }).catch((e: ApiError) => {
-    console.error(e)
+    // console.error(e)
 
     if (setFunc) {
       setFunc(null)
     }
 
-    return Promise.reject(e)
+    // TODO: catch 404, but reject if another error
+    return
+    // return Promise.reject(e)
   })
 }
 

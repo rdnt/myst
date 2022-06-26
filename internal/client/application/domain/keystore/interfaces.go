@@ -12,7 +12,7 @@ type Repository interface {
 	DeleteKeystore(id string) error
 
 	Authenticate(password string) error
-	Initialize(password string) error
+	CreateEnclave(password string) error
 	HealthCheck()
 	//KeystoreKey(keystoreId string) ([]byte, error)
 }
@@ -33,4 +33,8 @@ type Service interface {
 	HealthCheck()
 	Keypair() (publicKey, privateKey []byte, err error)
 	SetKeypair(publicKey, privateKey []byte) error
+	UserInfo() (username, password string, err error)
+	SetUserInfo(username, password string) error
+	CreateEnclave(password string) error
+	Enclave() error
 }

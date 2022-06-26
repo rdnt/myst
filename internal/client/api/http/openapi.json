@@ -33,6 +33,56 @@
         }
       }
     },
+    "/enclave": {
+      "post": {
+        "description": "Sets up the myst enclave with a master password",
+        "operationId": "CreateEnclave",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEnclaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Check if the Myst enclave is set up",
+        "operationId": "Enclave",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/authenticate": {
       "post": {
         "description": "Attempts to authenticate the user",
@@ -649,6 +699,17 @@
             "type": "string"
           }
         }
+      },
+      "CreateEnclaveRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ]
       },
       "UnlockKeystoreRequest": {
         "type": "object",

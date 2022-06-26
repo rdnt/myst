@@ -41,11 +41,11 @@ type Remote interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	SignIn() error
+	SignIn(username, password string) error
+	Register(username, password string) (user.User, error)
+	SignOut() error
 	SignedIn() bool
 	CurrentUser() *user.User
-	SignOut() error
-	Register(username, password string) (user.User, error)
 
 	// keystores
 	//UploadKeystore(id string) (*generated.Keystore, error)
@@ -66,14 +66,11 @@ type Remote interface {
 }
 
 type remote struct {
-	address  string
-	username string
-	password string
-
-	client *generated.ClientWithResponses
-
+	address    string
 	publicKey  []byte
 	privateKey []byte
+
+	client *generated.ClientWithResponses
 
 	bearerToken string
 	user        *user.User
@@ -82,8 +79,6 @@ type remote struct {
 func New(opts ...Option) (Remote, error) {
 	r := &remote{
 		client:      nil,
-		publicKey:   nil,
-		privateKey:  nil,
 		bearerToken: "",
 		user:        nil,
 	}
@@ -157,15 +152,15 @@ func New(opts ...Option) (Remote, error) {
 //	return k, nil
 //}
 
-func (r *remote) SignIn() error {
+func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
 		ctx, generated.LoginJSONRequestBody{
-			Username: r.username,
-			Password: r.password,
+			Username: username,
+			Password: password,
 		},
 	)
 	if err != nil {
@@ -184,7 +179,7 @@ func (r *remote) SignIn() error {
 
 	u := user.User{
 		Id:       resp.Id,
-		Username: r.username,
+		Username: resp.Username,
 	}
 
 	r.user = &u
@@ -242,7 +237,7 @@ func (r *remote) Register(username, password string) (user.User, error) {
 
 	u := user.User{
 		Id:       resp.Id,
-		Username: r.username,
+		Username: resp.Username,
 	}
 
 	r.user = &u

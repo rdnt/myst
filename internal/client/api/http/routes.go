@@ -22,4 +22,6 @@ func (api *API) initRoutes(r *gin.RouterGroup) {
 	r.DELETE("/invitation/:invitationId", api.DeclineOrCancelInvitation)
 	r.POST("/invitation/:invitationId", api.FinalizeInvitation)
 	r.GET("/user", api.CurrentUser)
+	r.POST("/enclave", api.CreateEnclave)
+	r.GET("/enclave", api.Enclave)
 }

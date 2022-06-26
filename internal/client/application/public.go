@@ -7,15 +7,25 @@ import (
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/domain/user"
+	"myst/internal/client/keystorerepo"
 )
 
 func (app *application) SignIn(username, password string) error {
-
-	return app.remote.SignIn()
+	panic("implement me")
 }
 
 func (app *application) Register(username, password string) (user.User, error) {
-	return app.remote.Register(username, password)
+	u, err := app.remote.Register(username, password)
+	if err != nil {
+		return user.User{}, errors.WithMessage(err, "failed to register")
+	}
+
+	err = app.keystores.SetUserInfo(u.Username, password)
+	if err != nil {
+		return user.User{}, errors.WithMessage(err, "failed to set user info")
+	}
+
+	return u, nil
 }
 
 func (app *application) CurrentUser() *user.User {
@@ -28,6 +38,14 @@ func (app *application) SignOut() error {
 
 func (app *application) CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) {
 	return app.keystores.CreateFirstKeystore(k, password)
+}
+
+func (app *application) CreateEnclave(password string) error {
+	return app.keystores.CreateEnclave(password)
+}
+
+func (app *application) Enclave() error {
+	return app.keystores.Enclave()
 }
 
 func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
@@ -90,8 +108,13 @@ func (app *application) Authenticate(password string) error {
 		return err
 	}
 
-	err = app.remote.SignIn()
-	if err != nil {
+	username, password, err := app.keystores.UserInfo()
+	if err == nil {
+		err = app.remote.SignIn(username, password)
+		if err != nil {
+			return err
+		}
+	} else if err != keystorerepo.ErrNotSet {
 		return err
 	}
 

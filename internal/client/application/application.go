@@ -39,6 +39,8 @@ type Application interface {
 	// keystores
 	Authenticate(password string) error
 	CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) // TODO: should this be determined during 'CreateKeystore()'?
+	CreateEnclave(password string) error
+	Enclave() error
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	DeleteKeystore(id string) error
 	Keystore(id string) (keystore.Keystore, error)
@@ -90,17 +92,17 @@ func (app *application) Start() error {
 	go func() {
 		for {
 			if !app.remote.SignedIn() {
-				err := app.remote.SignIn()
-				if err != nil {
-					log.Error(err)
-				}
-
-				if app.remote.SignedIn() {
-					err := app.sync()
-					if err != nil {
-						log.Error(err)
-					}
-				}
+				//err := app.remote.SignIn()
+				//if err != nil {
+				//	log.Error(err)
+				//}
+				//
+				//if app.remote.SignedIn() {
+				//	err := app.sync()
+				//	if err != nil {
+				//		log.Error(err)
+				//	}
+				//}
 			}
 
 			time.Sleep(10 * time.Second)

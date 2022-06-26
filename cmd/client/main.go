@@ -15,11 +15,9 @@ import (
 )
 
 type Config struct {
-	RemoteAddress  string
-	RemoteUsername string
-	RemotePassword string
-	Port           int
-	DataDir        string
+	RemoteAddress string
+	Port          int
+	DataDir       string
 }
 
 func parseFlags() Config {
@@ -27,9 +25,6 @@ func parseFlags() Config {
 
 	flag.StringVar(&cfg.RemoteAddress, "remote", "http://localhost:8080", "URL address of the remote server")
 	flag.IntVar(&cfg.Port, "port", 8081, "Port the client should listen on")
-
-	flag.StringVar(&cfg.RemoteUsername, "username", "", "Username used to get authorized to the remote server")
-	flag.StringVar(&cfg.RemotePassword, "password", "", "Password used to get authorized to the remote server")
 
 	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
 
@@ -64,8 +59,6 @@ func main() {
 
 	remote, err := remote.New(
 		remote.WithAddress(cfg.RemoteAddress),
-		remote.WithUsername(cfg.RemoteUsername),
-		remote.WithPassword(cfg.RemotePassword),
 	)
 	if err != nil {
 		panic(err)

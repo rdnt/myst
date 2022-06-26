@@ -35,7 +35,7 @@ package remote_test
 //	err = r2.SignIn(user2, pass2)
 //	assert.NoError(t, err)
 //
-//	err = repo.Initialize("12345678")
+//	err = repo.CreateEnclave("12345678")
 //	assert.NoError(t, err)
 //
 //	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test-keystore")))

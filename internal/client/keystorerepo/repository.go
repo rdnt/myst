@@ -141,6 +141,24 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	return e.Keystores()
 }
 
+func (r *Repository) Enclave() error {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	_, err := os.ReadFile(r.enclavePath())
+	if errors.Is(err, os.ErrNotExist) {
+		return keystoreservice.ErrInitializationRequired
+	} else if err != nil {
+		return err
+	}
+
+	if r.key == nil {
+		return keystoreservice.ErrAuthenticationRequired
+	}
+
+	return nil
+}
+
 func (r *Repository) DeleteKeystore(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
@@ -197,8 +215,8 @@ func (r *Repository) createKeystore(k keystore.Keystore) (keystore.Keystore, err
 	return k, nil
 }
 
-// Initialize initializes the enclave with the given password
-func (r *Repository) Initialize(password string) error {
+// CreateEnclave initializes the enclave with the given password
+func (r *Repository) CreateEnclave(password string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -209,13 +227,22 @@ func (r *Repository) Initialize(password string) error {
 		return err
 	}
 
-	// TODO: check if enclave is already created, if it is, return error
-	e, err := enclave.New(enclave.WithSalt(salt))
+	key := crypto.Argon2Id([]byte(password), salt)
 	if err != nil {
 		return err
 	}
 
-	key := crypto.Argon2Id([]byte(password), salt)
+	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
+	if err != nil {
+		return err
+	}
+
+	// TODO: check if enclave is already created, if it is, return error
+	e, err := enclave.New(
+		enclave.WithSalt(salt),
+		enclave.WithPublicKey(publicKey),
+		enclave.WithPrivateKey(privateKey),
+	)
 	if err != nil {
 		return err
 	}

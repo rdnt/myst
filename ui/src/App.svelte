@@ -8,7 +8,7 @@
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {currentUser, getCurrentUser} from "@/stores/user";
+  import {getCurrentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 
@@ -34,30 +34,41 @@
   const initialize = () => {
     // return $keystores;
 
-    getKeystores().then((response) => {
-
-      onboarding = response.length == 0;
+    api.enclave().then((response) => {
+      onboarding = false
       login = false
 
-      if (response.length > 0) {
-        //
-        // keystores = response.sort((a, b) => {
-        //   return a.id < b.id ? 1 : -1;
-        // });
+      getKeystores().then(keystores=> {
+        if (keystores.length > 0) {
+          keystore = keystores[0];
+        }
+      })
+      // console.log(response)
 
-        keystore = response[0];
-      }
+      // onboarding = response.length == 0;
+      // login = false
+      //
+      // if (response.length > 0) {
+      //   //
+      //   // keystores = response.sort((a, b) => {
+      //   //   return a.id < b.id ? 1 : -1;
+      //   // });
+      //
+      //   keystore = response[0];
+      // }
 
     }).catch((error: Response) => {
-      if (error.status == 401) {
+      if (error.status == 404) {
+        onboarding = true;
+        return
+      } else if (error.status == 401) {
         login = true;
         return
+      } else {
+        console.error(error);
       }
-
-      console.log(error)
     }).finally(() => {
       ready = true;
-      getCurrentUser()
     });
 
   }
@@ -72,10 +83,10 @@
     <span>Loading...</span>
   {:else}
     {#if onboarding}
-      <OnboardingForm on:created={initialize}/>
+      <OnboardingForm on:initialized={initialize}/>
     {:else if login}
       <LoginForm on:login={initialize}/>
-    {:else if $currentUser}
+    {:else}
       <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
       <main>
         <Route>

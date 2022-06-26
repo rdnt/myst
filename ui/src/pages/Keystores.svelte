@@ -10,13 +10,11 @@
   let keystore;
 
   onMount(() => {
-    console.log('keystore mount')
     if (!$params.keystoreId) {
-      // TODO: always select first
+      // TODO: always select first (right now it's buggy on login)
       // TODO: maybe select default keystore once that functionality is implemented
       // keystore = keystores[0];
       // keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      console.log(keystores)
       if (keystores.length > 0 ) {
         navigate("/keystore/" + keystores[0].id);
       }

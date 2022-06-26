@@ -1,22 +1,18 @@
 <script lang="ts">
   import api from "@/api";
-  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import LoginForm from "@/components/LoginForm.svelte";
   import Messages from "@/components/Messages.svelte";
   import OnboardingForm from "@/components/OnboardingForm.svelte";
-  import Sidebar from "@/components/Sidebar.svelte";
-  import Invitations from "@/pages/Invitations.svelte";
-  import Keystores from "@/pages/Keystores.svelte";
-  import {getKeystores, keystores} from "@/stores/keystores.ts";
+  import Main from "@/pages/Main.svelte";
+  import {getKeystores} from "@/stores/keystores.ts";
   import {onMount} from 'svelte';
-  import {Route, Router} from "svelte-navigator";
+  import {Router} from "svelte-navigator";
 
   let onboarding = false;
   let ready = false;
   let login = false;
 
   let keystore = null;
-  let showCreateKeystoreModal: boolean = false;
 
   const healthCheck = () => {
     api.healthCheck().then(() => {
@@ -36,6 +32,8 @@
     api.enclave().then((response) => {
       onboarding = false
       login = false
+
+      // checkIfInitialized()
 
       getKeystores().then(keystores => {
         if (keystores.length > 0) {
@@ -86,31 +84,13 @@
     {:else if login}
       <LoginForm on:login={initialize}/>
     {:else}
-      <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
-      <main>
-        <Route>
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/keystore/:keystoreId">
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/keystore/:keystoreId/entry/:entryId">
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/invitations">
-          <Invitations/>
-        </Route>
-      </main>
+      <Main/>
     {/if}
   {/if}
 </Router>
 
 <Messages/>
 
-<CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
 <style lang="scss">
   $bg: #0a0e11;

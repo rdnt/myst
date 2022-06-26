@@ -1,6 +1,5 @@
 <script lang="ts">
   import api from "@/api";
-  import InputField from "@/components/InputField.svelte";
   import Link from "@/components/Link.svelte";
   import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
@@ -9,6 +8,7 @@
 
   export let keystores;
   export let showCreateKeystoreModal: boolean;
+  export let showAuthModal: boolean;
 
   let username, password: string;
 
@@ -34,20 +34,13 @@
 
 <div class="sidebar">
   <h4>Myst</h4>
-  {#if $currentUser === undefined}
-    <InputField bind:value={username} label="Username"/>
-    <InputField bind:value={password} label="Password"/>
-    <button on:click={() => login()}>Login</button>
-  {:else if $currentUser === null}
-    Disconnected
-  {:else}
-    <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
-  {/if}
+
 
   <div class="list">
     <h5 style="display: flex">
       Keystores
-      <span style="position: relative;margin-left: auto;font-size:1.4rem;top:-9px;font-weight: bold;" on:click={() => {showCreateKeystoreModal = true}}>＋</span>
+      <span style="position: relative;margin-left: auto;font-size:1.4rem;top:-9px;font-weight: bold;"
+            on:click={() => {showCreateKeystoreModal = true}}>＋</span>
     </h5>
 
     {#each keystores as keystore}
@@ -55,24 +48,40 @@
     {/each}
   </div>
 
+
   <div class="list bottom">
-    <h5>Sync</h5>
-    <div class="rel">
-      <Link path="/invitations">
-        Invitations
-        {#if newInvitationsCount > 0}
-          <div class="badge">{newInvitationsCount}</div>
-        {/if}
-      </Link>
+
+    {#if $currentUser}
+      <h5>Sync</h5>
+      <div class="rel">
+        <Link path="/invitations">
+          Invitations
+          {#if newInvitationsCount > 0}
+            <div class="badge">{newInvitationsCount}</div>
+          {/if}
+        </Link>
 
 
-<!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->
-<!--        Invitations-->
-<!--        {#if $invitations.length > 0 || true}-->
-<!--          <div class="badge">{$invitations.length + 2}</div>-->
-<!--        {/if}-->
-<!--      </Link>-->
-    </div>
+        <!--      <Link active={showInvitations} on:click={() => showInvitations = !showInvitations}>-->
+        <!--        Invitations-->
+        <!--        {#if $invitations.length > 0 || true}-->
+        <!--          <div class="badge">{$invitations.length + 2}</div>-->
+        <!--        {/if}-->
+        <!--      </Link>-->
+      </div>
+    {/if}
+    {#if $currentUser === undefined}
+      <h6>
+        <span class="auth-link btn" on:click={() => showAuthModal = true}>Sign in</span>
+        <span class="auth-link">or</span>
+        <span class="auth-link btn" on:click={() => showAuthModal = true}>Register</span>
+      </h6>
+    {:else if $currentUser === null}
+      Disconnected
+    {:else}
+      <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+    {/if}
+
     <h5 class="version">v0.0.0-0123456</h5>
   </div>
 
@@ -96,6 +105,7 @@
       padding: 0 12px;
       margin: 0;
       margin-top: 12px;
+      margin-bottom: 32px;
     }
 
     h5 {
@@ -130,10 +140,10 @@
     .rel {
       position: relative;
       width: 100%;
+      margin-bottom: 40px;
     }
 
     .version {
-      margin-top: 40px;
       opacity: .75;
       font-weight: 500;
       text-transform: none;
@@ -201,5 +211,43 @@
   .badge {
     margin-left: auto;
     font-weight: bold;
+  }
+
+  .auth-link {
+    cursor: default;
+    font-weight: 600;
+    color: #cacfdf;
+
+    &.btn {
+      color: #fff !important;
+      text-decoration: underline;
+    }
+  }
+
+  $accent: #00edb1;
+  button {
+    outline: none;
+    border: none;
+    height: 48px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0 40px;
+    border-radius: 5px;
+    margin: 0 5px;
+    background-color: rgba(#202228, 1);
+    color: #fff;
+
+    &.disabled {
+      background-color: #161819;
+    }
+
+    &.green {
+      background-color: #002e23;
+      color: $accent;
+
+      &.disabled {
+        background-color: #0c1d19;
+      }
+    }
   }
 </style>

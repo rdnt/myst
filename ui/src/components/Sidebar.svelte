@@ -1,4 +1,6 @@
 <script lang="ts">
+  import api from "@/api";
+  import InputField from "@/components/InputField.svelte";
   import Link from "@/components/Link.svelte";
   import {hash} from "@/lib/color-hash";
   import {invitations} from "@/stores/invitations";
@@ -8,16 +10,37 @@
   export let keystores;
   export let showCreateKeystoreModal: boolean;
 
+  let username, password: string;
+
   $: newInvitationsCount = $invitations.filter(inv => inv.inviteeId === $currentUser.id && inv.status === 'pending').length;
 
   onMount(() => {
 
   })
+
+  function login() {
+    if (!username || !password) {
+      return;
+    }
+
+    api.login({
+      requestBody: {
+        username,
+        password
+      }
+    })
+  }
 </script>
 
 <div class="sidebar">
   <h4>Myst</h4>
-  {#if $currentUser}
+  {#if $currentUser === undefined}
+    <InputField bind:value={username} label="Username"/>
+    <InputField bind:value={password} label="Password"/>
+    <button on:click={() => login()}>Login</button>
+  {:else if $currentUser === null}
+    Disconnected
+  {:else}
     <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
   {/if}
 

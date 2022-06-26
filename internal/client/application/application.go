@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
@@ -27,7 +28,7 @@ type Application interface {
 	// remote
 	SignIn(username, password string) error
 	SignOut() error
-	CurrentUser() *user.User
+	CurrentUser() (*user.User, error)
 	Register(username, password string) (user.User, error)
 	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
 	//Keystore(id string) (*generated.Keystore, error)
@@ -58,7 +59,7 @@ type Application interface {
 }
 
 type application struct {
-	keystores   keystore.Service
+	keystores   enclave.KeystoreService
 	invitations invitation.Service
 
 	remote remote.Remote

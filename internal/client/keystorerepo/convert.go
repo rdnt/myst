@@ -8,7 +8,11 @@ import (
 type Enclave struct {
 	Keystores map[string]Keystore `json:"keystores"`
 	Keys      map[string][]byte   `json:"keys"`
+	Remote    *Remote             `json:"remote,omitempty"`
+}
 
+type Remote struct {
+	Address    string `json:"address"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
 	PublicKey  []byte `json:"publicKey"`

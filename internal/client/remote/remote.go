@@ -26,6 +26,7 @@ var (
 
 // Remote is a remote repository that holds upstream keystores/invitations
 type Remote interface {
+	Address() string
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)

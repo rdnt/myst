@@ -1,17 +1,39 @@
 package application
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 
+	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/domain/user"
-	"myst/internal/client/keystorerepo"
 )
 
 func (app *application) SignIn(username, password string) error {
-	panic("implement me")
+	rem, err := app.keystores.Remote()
+	if errors.Is(err, enclave.ErrRemoteNotSet) {
+		err = app.keystores.SetRemote(app.remote.Address(), username, password)
+		if err != nil {
+			return errors.WithMessage(err, "failed to set user info")
+		}
+
+		rem, err = app.keystores.Remote()
+	}
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(rem.Address, app.remote.Address())
+
+	if rem.Address != app.remote.Address() {
+		return fmt.Errorf("remote address mismatch")
+	}
+
+	return app.remote.SignIn(username, password)
 }
 
 func (app *application) Register(username, password string) (user.User, error) {
@@ -20,16 +42,27 @@ func (app *application) Register(username, password string) (user.User, error) {
 		return user.User{}, errors.WithMessage(err, "failed to register")
 	}
 
-	err = app.keystores.SetUserInfo(u.Username, password)
+	err = app.keystores.SetRemote(app.remote.Address(), username, password)
 	if err != nil {
 		return user.User{}, errors.WithMessage(err, "failed to set user info")
+	}
+
+	err = app.remote.SignIn(username, password)
+	if err != nil {
+		return user.User{}, err
 	}
 
 	return u, nil
 }
 
-func (app *application) CurrentUser() *user.User {
-	return app.remote.CurrentUser()
+func (app *application) CurrentUser() (*user.User, error) {
+	_, err := app.keystores.Remote()
+	if err != nil {
+		return nil, err
+
+	}
+
+	return app.remote.CurrentUser(), nil
 }
 
 func (app *application) SignOut() error {
@@ -46,6 +79,10 @@ func (app *application) CreateEnclave(password string) error {
 
 func (app *application) Enclave() error {
 	return app.keystores.Enclave()
+}
+
+func (app *application) Remote() (enclave.Remote, error) {
+	return app.keystores.Remote()
 }
 
 func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
@@ -108,13 +145,13 @@ func (app *application) Authenticate(password string) error {
 		return err
 	}
 
-	username, password, err := app.keystores.UserInfo()
+	remote, err := app.keystores.Remote()
 	if err == nil {
-		err = app.remote.SignIn(username, password)
+		err = app.remote.SignIn(remote.Username, remote.Password)
 		if err != nil {
 			return err
 		}
-	} else if err != keystorerepo.ErrNotSet {
+	} else if err != enclave.ErrRemoteNotSet {
 		return err
 	}
 

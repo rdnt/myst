@@ -56,6 +56,10 @@ func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitat
 	return inv, nil
 }
 
+func (r *remote) Address() string {
+	return r.address
+}
+
 func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 	res, err := r.client.InvitationsWithResponse(context.Background())
 	if err != nil {

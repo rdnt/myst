@@ -11,19 +11,22 @@ export const getCurrentUser = () => {
 
     return Promise.resolve(u)
   }).catch((e: ApiError) => {
-    // console.error(e)
-
-    if (setFunc) {
-      setFunc(null)
+    if (e.status === 404) {
+      if (setFunc) {
+        setFunc(undefined)
+      }
+    } else if (e.status === 401) {
+      if (setFunc) {
+        setFunc(null)
+      }
+    } else {
+      console.log(e)
+      return Promise.reject(e)
     }
-
-    // TODO: catch 404, but reject if another error
-    return
-    // return Promise.reject(e)
   })
 }
 
-export const currentUser = readable<User>(null, (set) => {
+export const currentUser = readable<User>(undefined, (set) => {
   setFunc = set
   getCurrentUser()
 

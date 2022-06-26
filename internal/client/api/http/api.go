@@ -9,6 +9,7 @@ import (
 
 	"myst/internal/client/api/http/generated"
 	"myst/internal/client/application"
+	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/keystoreservice"
@@ -36,9 +37,12 @@ type API struct {
 }
 
 func (api *API) CurrentUser(c *gin.Context) {
-	u := api.app.CurrentUser()
-	if u == nil {
+	u, err := api.app.CurrentUser()
+	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		c.Status(http.StatusNotFound)
+		return
+	} else if u == nil {
+		c.Status(http.StatusUnauthorized)
 		return
 	}
 

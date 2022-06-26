@@ -8,7 +8,6 @@
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {getCurrentUser} from "@/stores/user";
   import {onMount} from 'svelte';
   import {Route, Router} from "svelte-navigator";
 

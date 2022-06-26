@@ -3,6 +3,7 @@ package keystoreservice
 import (
 	"strings"
 
+	"myst/internal/client/application/domain/enclave"
 	"myst/internal/client/application/domain/entry"
 	"myst/internal/client/application/domain/keystore"
 	"myst/pkg/logger"
@@ -22,20 +23,18 @@ var (
 type KeystoreRepository interface {
 	keystore.Repository
 	Authenticate(password string) error
-	CreateEnclave(password string) error
-	Keypair() (publicKey, privateKey []byte, err error)
-	SetKeypair(publicKey, privateKey []byte) error
-	UserInfo() (username, password string, err error)
-	SetUserInfo(username, password string) error
 	HealthCheck()
+	CreateEnclave(password string) error
 	Enclave() error
+	SetRemote(address, username, password string) error
+	Remote() (enclave.Remote, error)
 }
 
 type service struct {
 	keystores KeystoreRepository
 }
 
-func New(opts ...Option) (keystore.Service, error) {
+func New(opts ...Option) (enclave.KeystoreService, error) {
 	s := &service{}
 
 	for _, opt := range opts {
@@ -214,18 +213,10 @@ func (s *service) HealthCheck() {
 	s.keystores.HealthCheck()
 }
 
-func (s *service) Keypair() (publicKey, privateKey []byte, err error) {
-	return s.keystores.Keypair()
+func (s *service) SetRemote(address, username, password string) error {
+	return s.keystores.SetRemote(address, username, password)
 }
 
-func (s *service) SetKeypair(publicKey, privateKey []byte) error {
-	return s.keystores.SetKeypair(publicKey, privateKey)
-}
-
-func (s *service) UserInfo() (username, password string, err error) {
-	return s.keystores.UserInfo()
-}
-
-func (s *service) SetUserInfo(username, password string) error {
-	return s.keystores.SetUserInfo(username, password)
+func (s *service) Remote() (enclave.Remote, error) {
+	return s.keystores.Remote()
 }

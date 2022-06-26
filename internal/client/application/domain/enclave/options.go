@@ -27,33 +27,9 @@ func WithSalt(salt []byte) Option {
 	}
 }
 
-func WithUsername(username string) Option {
+func WithRemote(remote *Remote) Option {
 	return func(e *Enclave) error {
-		e.Username = username
-
-		return nil
-	}
-}
-
-func WithPassword(password string) Option {
-	return func(e *Enclave) error {
-		e.Password = password
-
-		return nil
-	}
-}
-
-func WithPublicKey(publicKey []byte) Option {
-	return func(e *Enclave) error {
-		e.PublicKey = publicKey
-
-		return nil
-	}
-}
-
-func WithPrivateKey(privateKey []byte) Option {
-	return func(e *Enclave) error {
-		e.PrivateKey = privateKey
+		e.remote = remote
 
 		return nil
 	}

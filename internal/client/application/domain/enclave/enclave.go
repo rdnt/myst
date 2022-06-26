@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrNotSet = fmt.Errorf("not set")
+	ErrRemoteNotSet = fmt.Errorf("remote not set")
 )
 
 type Enclave struct {
@@ -16,6 +16,11 @@ type Enclave struct {
 	keystores map[string]keystore.Keystore
 	keys      map[string][]byte
 
+	remote *Remote
+}
+
+type Remote struct {
+	Address    string
 	Username   string
 	Password   string
 	PublicKey  []byte
@@ -50,16 +55,6 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 	e.keys[k.Id] = key
 
 	return nil
-}
-
-func (e *Enclave) SetKeypair(publicKey, privateKey []byte) {
-	e.PublicKey = publicKey
-	e.PrivateKey = privateKey
-}
-
-func (e *Enclave) SetUserInfo(username, password string) {
-	e.Username = username
-	e.Password = password
 }
 
 func (e *Enclave) Keys() map[string][]byte {
@@ -115,18 +110,10 @@ func (e *Enclave) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (e *Enclave) Keypair() ([]byte, []byte, error) {
-	if e.PublicKey == nil || e.PrivateKey == nil {
-		return nil, nil, ErrNotSet
-	}
-
-	return e.PublicKey, e.PrivateKey, nil
+func (e *Enclave) SetRemote(r Remote) {
+	e.remote = &r
 }
 
-func (e *Enclave) UserInfo() (string, string, error) {
-	if e.Username == "" || e.Password == "" {
-		return "", "", ErrNotSet
-	}
-
-	return e.Username, e.Password, nil
+func (e *Enclave) Remote() *Remote {
+	return e.remote
 }

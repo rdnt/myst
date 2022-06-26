@@ -58,13 +58,22 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 		ks[k.Id] = KeystoreToJSON(k)
 	}
 
+	var jrem *Remote
+	rem := e.Remote()
+	if rem != nil {
+		jrem = &Remote{
+			Address:    rem.Address,
+			Username:   rem.Username,
+			Password:   rem.Password,
+			PublicKey:  rem.PublicKey,
+			PrivateKey: rem.PrivateKey,
+		}
+	}
+
 	return json.Marshal(Enclave{
-		Keystores:  ks,
-		Keys:       e.Keys(),
-		Username:   e.Username,
-		Password:   e.Password,
-		PublicKey:  e.PublicKey,
-		PrivateKey: e.PrivateKey,
+		Keystores: ks,
+		Keys:      e.Keys(),
+		Remote:    jrem,
 	})
 }
 
@@ -87,13 +96,22 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 		ks[k.Id] = k
 	}
 
+	var rem *enclave.Remote
+	jrem := e.Remote
+	if jrem != nil {
+		rem = &enclave.Remote{
+			Address:    jrem.Address,
+			Username:   jrem.Username,
+			Password:   jrem.Password,
+			PublicKey:  jrem.PublicKey,
+			PrivateKey: jrem.PrivateKey,
+		}
+	}
+
 	return enclave.New(
 		enclave.WithKeystores(ks),
 		enclave.WithSalt(salt),
-		enclave.WithUsername(e.Username),
-		enclave.WithPassword(e.Password),
-		enclave.WithPublicKey(e.PublicKey),
-		enclave.WithPrivateKey(e.PrivateKey),
+		enclave.WithRemote(rem),
 	)
 }
 

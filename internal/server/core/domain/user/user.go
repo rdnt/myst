@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -16,12 +17,13 @@ type User struct {
 	Id        string
 	Username  string
 	Password  string
+	PublicKey []byte
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (u *User) String() string {
-	return fmt.Sprintln(u.Id, u.Username, "****", u.CreatedAt, u.UpdatedAt)
+func (u User) String() string {
+	return fmt.Sprintln(u.Id, u.Username, "****", hex.EncodeToString(u.PublicKey))
 }
 
 func New(opts ...Option) (User, error) {

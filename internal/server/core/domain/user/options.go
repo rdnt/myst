@@ -4,7 +4,6 @@ type Option func(*User)
 
 func WithUsername(username string) Option {
 	return func(u *User) {
-		u.Id = username // TODO: remove
 		u.Username = username
 	}
 }
@@ -12,5 +11,11 @@ func WithUsername(username string) Option {
 func WithPassword(password string) Option {
 	return func(u *User) {
 		u.Password = password
+	}
+}
+
+func WithPublicKey(publicKey []byte) Option {
+	return func(u *User) {
+		u.PublicKey = publicKey
 	}
 }

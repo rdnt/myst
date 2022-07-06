@@ -106,10 +106,8 @@ type ClientInterface interface {
 	// GetInvitation request
 	GetInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AcceptInvitation request with any body
-	AcceptInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	AcceptInvitation(ctx context.Context, invitationId string, body AcceptInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AcceptInvitation request
+	AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// FinalizeInvitation request with any body
 	FinalizeInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -134,6 +132,9 @@ type ClientInterface interface {
 	CreateKeystoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserByUsername request
+	UserByUsername(ctx context.Context, params *UserByUsernameParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) LoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -208,20 +209,8 @@ func (c *Client) GetInvitation(ctx context.Context, invitationId string, reqEdit
 	return c.Client.Do(req)
 }
 
-func (c *Client) AcceptInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAcceptInvitationRequestWithBody(c.Server, invitationId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, body AcceptInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAcceptInvitationRequest(c.Server, invitationId, body)
+func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAcceptInvitationRequest(c.Server, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -330,6 +319,18 @@ func (c *Client) CreateKeystoreWithBody(ctx context.Context, contentType string,
 
 func (c *Client) CreateKeystore(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateKeystoreRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserByUsername(ctx context.Context, params *UserByUsernameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserByUsernameRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -488,19 +489,8 @@ func NewGetInvitationRequest(server string, invitationId string) (*http.Request,
 	return req, nil
 }
 
-// NewAcceptInvitationRequest calls the generic AcceptInvitation builder with application/json body
-func NewAcceptInvitationRequest(server string, invitationId string, body AcceptInvitationJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewAcceptInvitationRequestWithBody(server, invitationId, "application/json", bodyReader)
-}
-
-// NewAcceptInvitationRequestWithBody generates requests for AcceptInvitation with any type of body
-func NewAcceptInvitationRequestWithBody(server string, invitationId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewAcceptInvitationRequest generates requests for AcceptInvitation
+func NewAcceptInvitationRequest(server string, invitationId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -525,12 +515,10 @@ func NewAcceptInvitationRequestWithBody(server string, invitationId string, cont
 		return nil, err
 	}
 
-	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	req, err := http.NewRequest("PATCH", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
-
-	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -757,6 +745,53 @@ func NewCreateKeystoreRequestWithBody(server string, contentType string, body io
 	return req, nil
 }
 
+// NewUserByUsernameRequest generates requests for UserByUsername
+func NewUserByUsernameRequest(server string, params *UserByUsernameParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Username != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -816,10 +851,8 @@ type ClientWithResponsesInterface interface {
 	// GetInvitation request
 	GetInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*GetInvitationResponse, error)
 
-	// AcceptInvitation request with any body
-	AcceptInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
-
-	AcceptInvitationWithResponse(ctx context.Context, invitationId string, body AcceptInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
+	// AcceptInvitation request
+	AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
 
 	// FinalizeInvitation request with any body
 	FinalizeInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error)
@@ -844,6 +877,9 @@ type ClientWithResponsesInterface interface {
 	CreateKeystoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
 
 	CreateKeystoreWithResponse(ctx context.Context, body CreateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateKeystoreResponse, error)
+
+	// UserByUsername request
+	UserByUsernameWithResponse(ctx context.Context, params *UserByUsernameParams, reqEditors ...RequestEditorFn) (*UserByUsernameResponse, error)
 }
 
 type LoginResponse struct {
@@ -1033,7 +1069,7 @@ func (r KeystoreResponse) StatusCode() int {
 type CreateInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Invitation
+	JSON201      *Invitation
 	JSONDefault  *Error
 }
 
@@ -1099,6 +1135,29 @@ func (r CreateKeystoreResponse) StatusCode() int {
 	return 0
 }
 
+type UserByUsernameResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r UserByUsernameResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserByUsernameResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // LoginWithBodyWithResponse request with arbitrary body returning *LoginResponse
 func (c *ClientWithResponses) LoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*LoginResponse, error) {
 	rsp, err := c.LoginWithBody(ctx, contentType, body, reqEditors...)
@@ -1151,17 +1210,9 @@ func (c *ClientWithResponses) GetInvitationWithResponse(ctx context.Context, inv
 	return ParseGetInvitationResponse(rsp)
 }
 
-// AcceptInvitationWithBodyWithResponse request with arbitrary body returning *AcceptInvitationResponse
-func (c *ClientWithResponses) AcceptInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error) {
-	rsp, err := c.AcceptInvitationWithBody(ctx, invitationId, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAcceptInvitationResponse(rsp)
-}
-
-func (c *ClientWithResponses) AcceptInvitationWithResponse(ctx context.Context, invitationId string, body AcceptInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error) {
-	rsp, err := c.AcceptInvitation(ctx, invitationId, body, reqEditors...)
+// AcceptInvitationWithResponse request returning *AcceptInvitationResponse
+func (c *ClientWithResponses) AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error) {
+	rsp, err := c.AcceptInvitation(ctx, invitationId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -1244,6 +1295,15 @@ func (c *ClientWithResponses) CreateKeystoreWithResponse(ctx context.Context, bo
 		return nil, err
 	}
 	return ParseCreateKeystoreResponse(rsp)
+}
+
+// UserByUsernameWithResponse request returning *UserByUsernameResponse
+func (c *ClientWithResponses) UserByUsernameWithResponse(ctx context.Context, params *UserByUsernameParams, reqEditors ...RequestEditorFn) (*UserByUsernameResponse, error) {
+	rsp, err := c.UserByUsername(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserByUsernameResponse(rsp)
 }
 
 // ParseLoginResponse parses an HTTP response from a LoginWithResponse call
@@ -1524,12 +1584,12 @@ func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationRespons
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
 		var dest Invitation
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
-		response.JSON200 = &dest
+		response.JSON201 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
@@ -1592,6 +1652,39 @@ func ParseCreateKeystoreResponse(rsp *http.Response) (*CreateKeystoreResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest Keystore
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserByUsernameResponse parses an HTTP response from a UserByUsernameWithResponse call
+func ParseUserByUsernameResponse(rsp *http.Response) (*UserByUsernameResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserByUsernameResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

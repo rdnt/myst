@@ -18,20 +18,20 @@ var (
 )
 
 type Invitation struct {
-	Id           string
-	KeystoreId   string
-	KeystoreName string
-	InviterId    string
-	InviteeId    string
-	InviterKey   []byte
-	InviteeKey   []byte
-	KeystoreKey  []byte
-	Status       Status
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	AcceptedAt   time.Time
-	DeclinedAt   time.Time
-	DeletedAt    time.Time
+	Id                   string
+	KeystoreId           string
+	KeystoreName         string
+	InviterId            string
+	InviteeId            string
+	InviterPublicKey     []byte
+	InviteePublicKey     []byte
+	EncryptedKeystoreKey []byte
+	Status               Status
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+	AcceptedAt           time.Time
+	DeclinedAt           time.Time
+	DeletedAt            time.Time
 }
 
 func New(opts ...Option) Invitation {
@@ -62,5 +62,12 @@ func (i Invitation) Finalized() bool {
 }
 
 func (i Invitation) String() string {
-	return fmt.Sprintln(i.Id, i.KeystoreId, i.InviterId, i.InviteeId, i.Status, base64.StdEncoding.EncodeToString(i.InviterKey), base64.StdEncoding.EncodeToString(i.InviteeKey), base64.StdEncoding.EncodeToString(i.KeystoreKey))
+	return fmt.Sprintln(
+		i.Id,
+		i.KeystoreId, i.InviterId, i.InviteeId,
+		i.Status,
+		base64.StdEncoding.EncodeToString(i.InviterPublicKey),
+		base64.StdEncoding.EncodeToString(i.InviteePublicKey),
+		base64.StdEncoding.EncodeToString(i.EncryptedKeystoreKey),
+	)
 }

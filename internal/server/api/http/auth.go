@@ -19,22 +19,24 @@ func (api *API) Register(c *gin.Context) {
 		return
 	}
 
-	u, err := api.app.CreateUser(req.Username, req.Password)
+	u, err := api.app.CreateUser(req.Username, req.Password, req.PublicKey)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	token, err := api.loginUser(u.Username)
+	token, err := api.loginUser(u.Id)
 	if err != nil {
 		panic(err)
 	}
 
 	c.JSON(http.StatusCreated, generated.AuthorizationResponse{
-		Id:       u.Id,
-		Username: u.Username,
-		Token:    token,
+		User: generated.User{
+			Id:       u.Id,
+			Username: u.Username,
+		},
+		Token: token,
 	})
 }
 
@@ -45,23 +47,38 @@ func (api *API) Login(c *gin.Context) {
 		panic(err)
 	}
 
+	u, err := api.app.UserByUsername(params.Username)
+	if err != nil {
+		panic(err)
+	}
+
+	// TODO: proper password hash check
 	if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
 		panic("invalid username or password")
 	}
 
-	token, err := api.loginUser(params.Username)
+	err = api.app.DebugUpdateUserPublicKey(u.Id, params.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Error("public key updated", params.PublicKey)
+
+	token, err := api.loginUser(u.Id)
 	if err != nil {
 		panic(err)
 	}
 
 	c.JSON(http.StatusOK, generated.AuthorizationResponse{
-		Id:       params.Username, // TODO: query user on login and return proper UserID (uuid)
-		Username: params.Username,
-		Token:    token,
+		User: generated.User{
+			Id:       u.Id,
+			Username: u.Username,
+		},
+		Token: token,
 	})
 }
 
-func (api *API) loginUser(username string) (string, error) {
+func (api *API) loginUser(userId string) (string, error) {
 	now := time.Now()
 
 	exp := now.Unix() + int64(jwtCookieLifetime)
@@ -74,7 +91,7 @@ func (api *API) loginUser(username string) (string, error) {
 			"exp": exp,
 			"iat": iat,
 			"nbf": nbf,
-			"usr": username,
+			"usr": userId,
 		},
 	)
 
@@ -84,4 +101,31 @@ func (api *API) loginUser(username string) (string, error) {
 	}
 
 	return token.SignedString(key)
+}
+
+type UserByUsernameRequest struct {
+	Username *string `form:"username"`
+}
+
+func (api *API) User(c *gin.Context) {
+	var req UserByUsernameRequest
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if req.Username == nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	u, err := api.app.UserByUsername(*req.Username)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, UserToJSON(u))
 }

@@ -79,7 +79,7 @@
     {:else if $currentUser === null}
       Disconnected
     {:else}
-      <h6>Signed in as <strong style="color: {hash($currentUser.id)}">{$currentUser.id}</strong></h6>
+      <h6>Signed in as <strong style="color: {hash($currentUser.username)}">{$currentUser.username}</strong></h6>
     {/if}
 
     <h5 class="version">v0.0.0-0123456</h5>

@@ -10,14 +10,16 @@ var (
 
 type Repository interface {
 	CreateUser(opts ...Option) (User, error)
-	User(id string) (*User, error)
+	User(id string) (User, error)
+	UserByUsername(username string) (User, error)
 	UpdateUser(*User) error
-	Users() ([]*User, error)
+	Users() ([]User, error)
 	DeleteUser(id string) error
 }
 
 type Service interface {
-	CreateUser(opts ...Option) (User, error)
-	AuthorizeUser(u *User, password string) error
-	User(id string) (*User, error)
+	CreateUser(username, password string, publicKey []byte) (User, error)
+	AuthorizeUser(username, password string) error
+	User(id string) (User, error)
+	UserByUsername(username string) (User, error)
 }

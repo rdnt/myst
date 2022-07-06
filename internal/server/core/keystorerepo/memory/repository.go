@@ -12,45 +12,45 @@ type Repository struct {
 	keystores map[string]keystore.Keystore
 }
 
-func (r *Repository) Create(opts ...keystore.Option) (*keystore.Keystore, error) {
+func (r *Repository) CreateKeystore(opts ...keystore.Option) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	k, err := keystore.New(opts...)
 	if err != nil {
-		return nil, err
+		return keystore.Keystore{}, err
 	}
 
-	r.keystores[k.Id] = *k
+	r.keystores[k.Id] = k
 
 	return k, nil
 }
 
-func (r *Repository) Keystore(id string) (*keystore.Keystore, error) {
+func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	k, ok := r.keystores[id]
 	if !ok {
-		return nil, keystore.ErrNotFound
+		return keystore.Keystore{}, keystore.ErrNotFound
 	}
 
-	return &k, nil
+	return k, nil
 }
 
-func (r *Repository) Keystores() ([]*keystore.Keystore, error) {
+func (r *Repository) Keystores() ([]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	keystores := make([]*keystore.Keystore, 0, len(r.keystores))
+	keystores := make([]keystore.Keystore, 0, len(r.keystores))
 	for _, k := range r.keystores {
-		keystores = append(keystores, &k)
+		keystores = append(keystores, k)
 	}
 
 	return keystores, nil
 }
 
-func (r *Repository) Update(s *keystore.Keystore) error {
+func (r *Repository) UpdateKeystore(s *keystore.Keystore) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -63,7 +63,7 @@ func (r *Repository) Update(s *keystore.Keystore) error {
 	return nil
 }
 
-func (r *Repository) Delete(id string) error {
+func (r *Repository) DeleteKeystore(id string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -71,19 +71,19 @@ func (r *Repository) Delete(id string) error {
 	return nil
 }
 
-func (r *Repository) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+func (r *Repository) UserKeystores(userId string) ([]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	ks := []*keystore.Keystore{}
+	ks := []keystore.Keystore{}
 
 	for _, k := range r.keystores {
 		if k.OwnerId == userId {
-			ks = append(ks, &k)
+			ks = append(ks, k)
 		} else {
 			for _, uid := range k.ViewerIds {
 				if uid == userId {
-					ks = append(ks, &k)
+					ks = append(ks, k)
 				}
 			}
 		}
@@ -92,25 +92,25 @@ func (r *Repository) UserKeystores(userId string) ([]*keystore.Keystore, error) 
 	return ks, nil
 }
 
-func (r *Repository) UserKeystore(userId, keystoreId string) (*keystore.Keystore, error) {
+func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	for _, k := range r.keystores {
 		if k.Id == keystoreId {
 			if k.OwnerId == userId {
-				return &k, nil
+				return k, nil
 			}
 
 			for _, uid := range k.ViewerIds {
 				if uid == userId {
-					return &k, nil
+					return k, nil
 				}
 			}
 		}
 	}
 
-	return nil, keystore.ErrNotFound
+	return keystore.Keystore{}, keystore.ErrNotFound
 }
 
 func New() keystore.Repository {

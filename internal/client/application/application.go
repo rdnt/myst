@@ -30,12 +30,12 @@ type Application interface {
 	SignOut() error
 	CurrentUser() (*user.User, error)
 	Register(username, password string) (user.User, error)
-	//CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
-	//Keystore(id string) (*generated.Keystore, error)
-	//Keystores() ([]*generated.Keystore, error)
-	//CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
-	//AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
-	//FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
+	// CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
+	// Keystore(id string) (*generated.Keystore, error)
+	// Keystores() ([]*generated.Keystore, error)
+	// CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
+	// AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
+	// FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
 
 	// keystores
 	Authenticate(password string) error
@@ -51,7 +51,7 @@ type Application interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	HealthCheck()
 
-	CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error)
+	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
@@ -92,18 +92,22 @@ func (app *application) Start() error {
 
 	go func() {
 		for {
-			if !app.remote.SignedIn() {
-				//err := app.remote.SignIn()
-				//if err != nil {
+			if app.remote.SignedIn() {
+				err := app.sync()
+				if err != nil {
+					log.Error(err)
+				}
+				// err := app.remote.SignIn()
+				// if err != nil {
 				//	log.Error(err)
-				//}
+				// }
 				//
-				//if app.remote.SignedIn() {
+				// if app.remote.SignedIn() {
 				//	err := app.sync()
 				//	if err != nil {
 				//		log.Error(err)
 				//	}
-				//}
+				// }
 			}
 
 			time.Sleep(10 * time.Second)
@@ -222,38 +226,38 @@ func (app *application) setup() {
 		return
 	}
 
-	//err = app.remote.SignIn()
-	//if err != nil {
+	// err = app.remote.SignIn()
+	// if err != nil {
 	//	fmt.Println(err)
 	//	return
-	//}
+	// }
 
-	//key, err := app.keystores.KeystoreKey(k1.Id())
-	//if err != nil {
+	// key, err := app.keystores.EncryptedKeystoreKey(k1.Id())
+	// if err != nil {
 	//	fmt.Println(err)
 	//	return
-	//}
+	// }
 
 	// TODO: fix application debug initialization
-	//sk, err := app.remote.UploadKeystore(
+	// sk, err := app.remote.UploadKeystore(
 	//	k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
-	//)
-	//if err != nil {
+	// )
+	// if err != nil {
 	//	fmt.Println(err)
 	//	return
-	//}
+	// }
 	//
-	//_, err = app.remote.Keystore(
+	// _, err = app.remote.Keystore(
 	//	sk.Id,
-	//)
-	//if err != nil {
+	// )
+	// if err != nil {
 	//	fmt.Println(err)
 	//	return
-	//}
+	// }
 	//
-	//_, err = app.remote.Keystores()
-	//if err != nil {
+	// _, err = app.remote.Keystores()
+	// if err != nil {
 	//	fmt.Println(err)
 	//	return
-	//}
+	// }
 }

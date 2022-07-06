@@ -22,102 +22,100 @@ type service struct {
 	invitationRepo invitation.Repository
 }
 
-func (s *service) Create(keystoreId, inviterId, inviteeId string, inviterKey []byte) (*invitation.Invitation, error) {
+func (s *service) CreateInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (invitation.Invitation, error) {
 	if inviterId == inviteeId {
-		return nil, errors.New("inviter cannot be the same as invitee")
+		return invitation.Invitation{}, errors.New("inviter cannot be the same as invitee")
 	}
 
-	store, err := s.keystoreRepo.Keystore(keystoreId)
+	k, err := s.keystoreRepo.Keystore(keystoreId)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
-	inviter, err := s.userRepo.User(inviterId)
-	if err != nil {
-		return nil, err
-	}
+	//inviter, err := s.userRepo.User(inviterId)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//invitee, err := s.userRepo.User(inviteeId)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	invitee, err := s.userRepo.User(inviteeId)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.invitationRepo.Create(
-		invitation.WithKeystoreId(store.Id),
-		invitation.WithKeystoreName(store.Name),
-		invitation.WithInviterId(inviter.Id),
-		invitation.WithInviteeId(invitee.Id),
-		invitation.WithInviterKey(inviterKey),
+	return s.invitationRepo.CreateInvitation(
+		invitation.WithKeystoreId(k.Id),
+		invitation.WithInviterId(inviterId),
+		invitation.WithInviteeId(inviteeId),
 	)
 }
 
-func (s *service) Invitation(id string) (*invitation.Invitation, error) {
+func (s *service) Invitation(id string) (invitation.Invitation, error) {
 	return s.invitationRepo.Invitation(id)
 }
 
-func (s *service) Accept(invitationId string, inviteeKey []byte) (*invitation.Invitation, error) {
+func (s *service) AcceptInvitation(invitationId string, inviteeKey []byte) (invitation.Invitation, error) {
 	inv, err := s.invitationRepo.Invitation(invitationId)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	err = inv.Accept(inviteeKey)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
-	err = s.invitationRepo.Update(inv)
+	err = s.invitationRepo.UpdateInvitation(&inv)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	return inv, nil
 }
 
-func (s *service) DeclineOrCancelInvitation(userId, invitationId string) (*invitation.Invitation, error) {
+func (s *service) DeclineOrCancelInvitation(userId, invitationId string) (invitation.Invitation, error) {
 	inv, err := s.invitationRepo.Invitation(invitationId)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	if userId != inv.InviterId && userId != inv.InviteeId {
-		return nil, errors.New("unauthorized")
+		return invitation.Invitation{}, errors.New("unauthorized")
 	}
 
 	if userId == inv.InviterId {
 		err = inv.Delete()
 		if err != nil {
-			return nil, err
+			return invitation.Invitation{}, err
 		}
 	} else if userId == inv.InviteeId {
 		err = inv.Decline()
 		if err != nil {
-			return nil, err
+			return invitation.Invitation{}, err
 		}
 	}
 
-	err = s.invitationRepo.Update(inv)
+	err = s.invitationRepo.UpdateInvitation(&inv)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	return inv, nil
 }
 
-func (s *service) Finalize(invitationId string, keystoreKey []byte) (*invitation.Invitation, error) {
+func (s *service) FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error) {
 	inv, err := s.invitationRepo.Invitation(invitationId)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	err = inv.Finalize(keystoreKey)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
-	err = s.invitationRepo.Update(inv)
+	err = s.invitationRepo.UpdateInvitation(&inv)
 	if err != nil {
-		return nil, err
+		return invitation.Invitation{}, err
 	}
 
 	return inv, nil
@@ -130,20 +128,20 @@ type UserInvitationsOptions struct {
 // UserInvitations returns all the invitations this user has access to. These include:
 // - invitations where the user is the inviter
 // - invitations where the user is the invitee
-func (s *service) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
-	u, err := s.userRepo.User(userId)
-	if err != nil {
-		return nil, err
-	}
+func (s *service) UserInvitations(deviceId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
+	//u, err := s.userRepo.User(userId)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	invs, err := s.invitationRepo.UserInvitations(u.Id)
+	invs, err := s.invitationRepo.UserInvitations(deviceId)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")
 	}
 
 	invitations := []invitation.Invitation{}
 	for _, inv := range invs {
-		if inv.Deleted() && inv.InviteeId == userId {
+		if inv.Deleted() && inv.InviteeId == deviceId {
 			continue
 		}
 		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
@@ -157,13 +155,8 @@ func (s *service) UserInvitations(userId string, opts *invitation.UserInvitation
 }
 
 // UserInvitation returns an invitation that a user has access to.
-func (s *service) UserInvitation(userId, invitationId string) (*invitation.Invitation, error) {
-	u, err := s.userRepo.User(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.invitationRepo.UserInvitation(u.Id, invitationId)
+func (s *service) UserInvitation(userId, invitationId string) (invitation.Invitation, error) {
+	return s.invitationRepo.UserInvitation(userId, invitationId)
 }
 
 //func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {

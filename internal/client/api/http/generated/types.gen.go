@@ -40,7 +40,7 @@ type CreateEntryRequest struct {
 
 // CreateInvitationRequest defines model for CreateInvitationRequest.
 type CreateInvitationRequest struct {
-	InviteeId string `json:"inviteeId"`
+	Invitee string `json:"invitee"`
 }
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
@@ -66,20 +66,20 @@ type Error struct {
 
 // Invitation defines model for Invitation.
 type Invitation struct {
-	AcceptedAt   time.Time        `json:"acceptedAt"`
-	CreatedAt    time.Time        `json:"createdAt"`
-	DeclinedAt   time.Time        `json:"declinedAt"`
-	DeletedAt    time.Time        `json:"deletedAt"`
-	Id           string           `json:"id"`
-	InviteeId    string           `json:"inviteeId"`
-	InviteeKey   []byte           `json:"inviteeKey"`
-	InviterId    string           `json:"inviterId"`
-	InviterKey   []byte           `json:"inviterKey"`
-	KeystoreId   string           `json:"keystoreId"`
-	KeystoreKey  []byte           `json:"keystoreKey"`
-	KeystoreName string           `json:"keystoreName"`
-	Status       InvitationStatus `json:"status"`
-	UpdatedAt    time.Time        `json:"updatedAt"`
+	AcceptedAt           time.Time        `json:"acceptedAt"`
+	CreatedAt            time.Time        `json:"createdAt"`
+	DeclinedAt           time.Time        `json:"declinedAt"`
+	DeletedAt            time.Time        `json:"deletedAt"`
+	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
+	Id                   string           `json:"id"`
+	InviteeId            string           `json:"inviteeId"`
+	InviteePublicKey     []byte           `json:"inviteePublicKey"`
+	InviterId            string           `json:"inviterId"`
+	InviterPublicKey     []byte           `json:"inviterPublicKey"`
+	KeystoreId           string           `json:"keystoreId"`
+	KeystoreName         string           `json:"keystoreName"`
+	Status               InvitationStatus `json:"status"`
+	UpdatedAt            time.Time        `json:"updatedAt"`
 }
 
 // InvitationStatus defines model for Invitation.Status.

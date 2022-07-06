@@ -308,7 +308,7 @@ func (r *Repository) updateKeystore(k keystore.Keystore) error {
 	return r.sealAndWrite(e)
 }
 
-//func (r *Repository) KeystoreKey(keystoreId string) ([]byte, error) {
+//func (r *Repository) EncryptedKeystoreKey(keystoreId string) ([]byte, error) {
 //	r.mux.Lock()
 //	defer r.mux.Unlock()
 //
@@ -460,7 +460,7 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 //	return r.sealAndWrite(e)
 //}
 
-func (r *Repository) SetRemote(address, username, password string) error {
+func (r *Repository) SetRemote(address, username, password string, publicKey, privateKey []byte) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -469,11 +469,6 @@ func (r *Repository) SetRemote(address, username, password string) error {
 	}
 
 	e, err := r.enclave(r.key)
-	if err != nil {
-		return err
-	}
-
-	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
 	if err != nil {
 		return err
 	}

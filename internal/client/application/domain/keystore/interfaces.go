@@ -10,5 +10,5 @@ type Repository interface {
 	Authenticate(password string) error
 	CreateEnclave(password string) error
 	HealthCheck()
-	//KeystoreKey(keystoreId string) ([]byte, error)
+	//EncryptedKeystoreKey(keystoreId string) ([]byte, error)
 }

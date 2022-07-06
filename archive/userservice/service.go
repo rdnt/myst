@@ -3,6 +3,8 @@ package userservice
 import (
 	"errors"
 
+	"myst/internal/server/core/domain/device"
+
 	"myst/internal/server/core/domain/keystore"
 	"myst/internal/server/core/domain/user"
 
@@ -12,22 +14,28 @@ import (
 var (
 	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
 	ErrInvalidUserRepository     = errors.New("invalid user repository")
+	ErrInvalidDeviceRepository   = errors.New("invalid device repository")
 )
 
 type service struct {
 	userRepo     user.Repository
 	keystoreRepo keystore.Repository
+	deviceRepo   device.Repository
+}
+
+func (s *service) UserDevices(userId string) (map[string]device.Device, error) {
+	return s.deviceRepo.UserDevices(userId)
 }
 
 func (s *service) CreateUser(opts ...user.Option) (user.User, error) {
 	return s.userRepo.CreateUser(opts...)
 }
 
-func (s *service) AuthorizeUser(u *user.User, password string) error {
+func (s *service) AuthorizeUser(u user.User, password string) error {
 	panic("implement me")
 }
 
-func (s *service) User(id string) (*user.User, error) {
+func (s *service) User(id string) (user.User, error) {
 	return s.userRepo.User(id)
 }
 
@@ -48,6 +56,10 @@ func New(opts ...Option) (user.Service, error) {
 
 	if s.userRepo == nil {
 		return nil, ErrInvalidUserRepository
+	}
+
+	if s.deviceRepo == nil {
+		return nil, ErrInvalidDeviceRepository
 	}
 
 	return s, nil

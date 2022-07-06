@@ -829,10 +829,10 @@
       "CreateInvitationRequest": {
         "type": "object",
         "required": [
-          "inviteeId"
+          "invitee"
         ],
         "properties": {
-          "inviteeId": {
+          "invitee": {
             "type": "string"
           }
         }
@@ -861,15 +861,15 @@
           "inviteeId": {
             "type": "string"
           },
-          "inviterKey": {
+          "inviterPublicKey": {
             "type": "string",
             "format": "byte"
           },
-          "inviteeKey": {
+          "inviteePublicKey": {
             "type": "string",
             "format": "byte"
           },
-          "keystoreKey": {
+          "encryptedKeystoreKey": {
             "type": "string",
             "format": "byte"
           },
@@ -910,9 +910,9 @@
           "keystoreName",
           "inviterId",
           "inviteeId",
-          "inviterKey",
-          "inviteeKey",
-          "keystoreKey",
+          "inviterPublicKey",
+          "inviteePublicKey",
+          "encryptedKeystoreKey",
           "status",
           "createdAt",
           "updatedAt",

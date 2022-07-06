@@ -20,22 +20,16 @@ const (
 	InvitationStatusPending InvitationStatus = "pending"
 )
 
-// AcceptInvitationRequest defines model for AcceptInvitationRequest.
-type AcceptInvitationRequest struct {
-	PublicKey []byte `json:"publicKey"`
-}
-
 // AuthorizationResponse defines model for AuthorizationResponse.
 type AuthorizationResponse struct {
-	Id       string `json:"id"`
-	Token    string `json:"token"`
-	Username string `json:"username"`
+	Token string `json:"token"`
+	User  User   `json:"user"`
 }
 
 // CreateInvitationRequest defines model for CreateInvitationRequest.
 type CreateInvitationRequest struct {
 	InviteeId string `json:"inviteeId"`
-	PublicKey []byte `json:"publicKey"`
+	InviterId string `json:"inviterId"`
 }
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
@@ -57,20 +51,20 @@ type FinalizeInvitationRequest struct {
 
 // Invitation defines model for Invitation.
 type Invitation struct {
-	AcceptedAt   time.Time        `json:"acceptedAt"`
-	CreatedAt    time.Time        `json:"createdAt"`
-	DeclinedAt   time.Time        `json:"declinedAt"`
-	DeletedAt    time.Time        `json:"deletedAt"`
-	Id           string           `json:"id"`
-	InviteeId    string           `json:"inviteeId"`
-	InviteeKey   []byte           `json:"inviteeKey"`
-	InviterId    string           `json:"inviterId"`
-	InviterKey   []byte           `json:"inviterKey"`
-	KeystoreId   string           `json:"keystoreId"`
-	KeystoreKey  []byte           `json:"keystoreKey"`
-	KeystoreName string           `json:"keystoreName"`
-	Status       InvitationStatus `json:"status"`
-	UpdatedAt    time.Time        `json:"updatedAt"`
+	AcceptedAt           time.Time        `json:"acceptedAt"`
+	CreatedAt            time.Time        `json:"createdAt"`
+	DeclinedAt           time.Time        `json:"declinedAt"`
+	DeletedAt            time.Time        `json:"deletedAt"`
+	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
+	Id                   string           `json:"id"`
+	InviteeId            string           `json:"inviteeId"`
+	InviteePublicKey     []byte           `json:"inviteePublicKey"`
+	InviterId            string           `json:"inviterId"`
+	InviterPublicKey     []byte           `json:"inviterPublicKey"`
+	KeystoreId           string           `json:"keystoreId"`
+	KeystoreName         string           `json:"keystoreName"`
+	Status               InvitationStatus `json:"status"`
+	UpdatedAt            time.Time        `json:"updatedAt"`
 }
 
 // InvitationStatus defines model for Invitation.Status.
@@ -89,13 +83,21 @@ type Keystore struct {
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Password  string `json:"password"`
+	PublicKey []byte `json:"publicKey"`
+	Username  string `json:"username"`
 }
 
 // RegisterRequest defines model for RegisterRequest.
 type RegisterRequest struct {
-	Password string `json:"password"`
+	Password  string `json:"password"`
+	PublicKey []byte `json:"publicKey"`
+	Username  string `json:"username"`
+}
+
+// User defines model for User.
+type User struct {
+	Id       string `json:"id"`
 	Username string `json:"username"`
 }
 
@@ -104,9 +106,6 @@ type LoginJSONBody LoginRequest
 
 // RegisterJSONBody defines parameters for Register.
 type RegisterJSONBody RegisterRequest
-
-// AcceptInvitationJSONBody defines parameters for AcceptInvitation.
-type AcceptInvitationJSONBody AcceptInvitationRequest
 
 // FinalizeInvitationJSONBody defines parameters for FinalizeInvitation.
 type FinalizeInvitationJSONBody FinalizeInvitationRequest
@@ -117,14 +116,16 @@ type CreateInvitationJSONBody CreateInvitationRequest
 // CreateKeystoreJSONBody defines parameters for CreateKeystore.
 type CreateKeystoreJSONBody CreateKeystoreRequest
 
+// UserByUsernameParams defines parameters for UserByUsername.
+type UserByUsernameParams struct {
+	Username *string `json:"username,omitempty"`
+}
+
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody LoginJSONBody
 
 // RegisterJSONRequestBody defines body for Register for application/json ContentType.
 type RegisterJSONRequestBody RegisterJSONBody
-
-// AcceptInvitationJSONRequestBody defines body for AcceptInvitation for application/json ContentType.
-type AcceptInvitationJSONRequestBody AcceptInvitationJSONBody
 
 // FinalizeInvitationJSONRequestBody defines body for FinalizeInvitation for application/json ContentType.
 type FinalizeInvitationJSONRequestBody FinalizeInvitationJSONBody

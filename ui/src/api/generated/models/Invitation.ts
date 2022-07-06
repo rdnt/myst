@@ -8,9 +8,9 @@ export type Invitation = {
     keystoreName: string;
     inviterId: string;
     inviteeId: string;
-    inviterKey: string;
-    inviteeKey: string;
-    keystoreKey: string;
+    inviterPublicKey: string;
+    inviteePublicKey: string;
+    encryptedKeystoreKey: string;
     status: 'pending' | 'accepted' | 'declined' | 'deleted' | 'finalized';
     createdAt: string;
     updatedAt: string;

@@ -36,7 +36,7 @@
     api.createInvitation({
       keystoreId: keystore.id,
       requestBody: {
-        inviteeId: user
+        invitee: user
       }
     }).then((inv: Invitation) => {
       showMessage("Invitation sent");

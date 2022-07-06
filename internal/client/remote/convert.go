@@ -7,6 +7,7 @@ import (
 
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
+	"myst/internal/client/application/domain/user"
 	"myst/internal/client/keystorerepo"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
@@ -20,25 +21,24 @@ func InvitationFromJSON(gen generated.Invitation) (invitation.Invitation, error)
 	}
 
 	return invitation.Invitation{
-		Id:           gen.Id,
-		InviterId:    gen.InviterId,
-		KeystoreId:   gen.KeystoreId,
-		KeystoreName: gen.KeystoreName,
-		InviteeId:    gen.InviteeId,
-		InviterKey:   gen.InviterKey,
-		InviteeKey:   gen.InviteeKey,
-		KeystoreKey:  gen.KeystoreKey,
-		Status:       status,
-		CreatedAt:    gen.CreatedAt,
-		UpdatedAt:    gen.CreatedAt,
-		AcceptedAt:   gen.AcceptedAt,
-		DeclinedAt:   gen.DeclinedAt,
-		DeletedAt:    gen.DeletedAt,
+		Id:                   gen.Id,
+		InviterId:            gen.InviterId,
+		KeystoreId:           gen.KeystoreId,
+		KeystoreName:         gen.KeystoreName,
+		InviteeId:            gen.InviteeId,
+		InviterPublicKey:     gen.InviterPublicKey,
+		InviteePublicKey:     gen.InviteePublicKey,
+		EncryptedKeystoreKey: gen.EncryptedKeystoreKey,
+		Status:               status,
+		CreatedAt:            gen.CreatedAt,
+		UpdatedAt:            gen.CreatedAt,
+		AcceptedAt:           gen.AcceptedAt,
+		DeclinedAt:           gen.DeclinedAt,
+		DeletedAt:            gen.DeletedAt,
 	}, nil
 }
 
 func KeystoreToJSON(k keystore.Keystore) generated.Keystore {
-
 	return generated.Keystore{
 		Id:      k.Id,
 		Name:    k.Name,
@@ -46,13 +46,20 @@ func KeystoreToJSON(k keystore.Keystore) generated.Keystore {
 	}
 }
 
+func UserFromJSON(u generated.User) user.User {
+	return user.User{
+		Id:       u.Id,
+		Username: u.Username,
+	}
+}
+
 func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keystore, error) {
-	//CreatedAt
-	//Id
-	//Name
-	//OwnerId
-	//Payload
-	//UpdatedAt
+	// CreatedAt
+	// Id
+	// Name
+	// OwnerId
+	// Payload
+	// UpdatedAt
 
 	logger.Error("@@@@@@@@@@@@@@@@@@@@@@@@@@", string(keystoreKey))
 

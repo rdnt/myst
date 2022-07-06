@@ -9,10 +9,10 @@ import (
 )
 
 func (api *API) CreateInvitation(c *gin.Context) {
-	userId := CurrentUser(c)
+	//userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
-	log.Println("SERVER Creating invitation", userId, keystoreId)
+	log.Println("SERVER Creating invitation", keystoreId)
 
 	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
@@ -22,13 +22,10 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	inviterKey := params.PublicKey
-
 	inv, err := api.app.CreateInvitation(
 		keystoreId,
-		userId,
+		params.InviterId,
 		params.InviteeId,
-		inviterKey,
 	)
 	if err != nil {
 		log.Error(err)
@@ -36,42 +33,44 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
+	restInv, err := api.ToJSONInvitation(inv)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusCreated, restInv)
 }
 
 func (api *API) Invitation(c *gin.Context) {
+	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
-	// TODO: verify client is allowed to accept invitation for that keystore
-
-	inv, err := api.app.GetInvitation(invitationId)
+	inv, err := api.app.UserInvitation(userId, invitationId)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
-}
-
-func (api *API) AcceptInvitation(c *gin.Context) {
-	invitationId := c.Param("invitationId")
-
-	// TODO: verify client is allowed to accept invitation for that keystore
-
-	var params generated.AcceptInvitationRequest
-	err := c.ShouldBindJSON(&params)
+	restInv, err := api.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusBadRequest)
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	inviteeKey := params.PublicKey
+	c.JSON(http.StatusOK, restInv)
+}
+
+func (api *API) AcceptInvitation(c *gin.Context) {
+	userId := CurrentUser(c)
+	invitationId := c.Param("invitationId")
 
 	inv, err := api.app.AcceptInvitation(
+		userId,
 		invitationId,
-		inviteeKey,
 	)
 	if err != nil {
 		log.Error(err)
@@ -79,7 +78,14 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
+	restInv, err := api.ToJSONInvitation(inv)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
@@ -95,13 +101,18 @@ func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
+	restInv, err := api.ToJSONInvitation(inv)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (api *API) FinalizeInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
-
-	// TODO: verify client is allowed to accept invitation for that keystore
 
 	var params generated.FinalizeInvitationRequest
 	err := c.ShouldBindJSON(&params)
@@ -123,13 +134,20 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONInvitation(*inv))
+	restInv, err := api.ToJSONInvitation(inv)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (api *API) Invitations(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	invs, err := api.app.UserInvitations(userId)
+	invs, err := api.app.UserInvitations(userId, nil)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
@@ -139,7 +157,14 @@ func (api *API) Invitations(c *gin.Context) {
 	gen := []generated.Invitation{}
 
 	for _, inv := range invs {
-		gen = append(gen, ToJSONInvitation(inv))
+		restInv, err := api.ToJSONInvitation(inv)
+		if err != nil {
+			log.Error(err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		gen = append(gen, restInv)
 	}
 
 	c.JSON(http.StatusOK, gen)

@@ -31,6 +31,12 @@ func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 		return user.User{}, fmt.Errorf("already exists")
 	}
 
+	for _, u2 := range r.users {
+		if u2.User.Username == u.Username {
+			return user.User{}, fmt.Errorf("already exists")
+		}
+	}
+
 	ru := User{
 		User:         u,
 		passwordHash: "asd", // todo: generate hash
@@ -41,25 +47,38 @@ func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 	return ru.User, nil
 }
 
-func (r *Repository) User(id string) (*user.User, error) {
+func (r *Repository) User(id string) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	u, ok := r.users[id]
 	if !ok {
-		return nil, user.ErrNotFound
+		return user.User{}, user.ErrNotFound
 	}
 
-	return &u.User, nil
+	return u.User, nil
 }
 
-func (r *Repository) Users() ([]*user.User, error) {
+func (r *Repository) UserByUsername(username string) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	users := make([]*user.User, 0, len(r.users))
 	for _, u := range r.users {
-		users = append(users, &u.User)
+		if u.Username == username {
+			return u.User, nil
+		}
+	}
+
+	return user.User{}, user.ErrNotFound
+}
+
+func (r *Repository) Users() ([]user.User, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	users := make([]user.User, 0, len(r.users))
+	for _, u := range r.users {
+		users = append(users, u.User)
 	}
 
 	return users, nil

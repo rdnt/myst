@@ -10,6 +10,7 @@ import (
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/domain/user"
+	"myst/pkg/crypto"
 )
 
 func (app *application) SignIn(username, password string) error {
@@ -27,36 +28,48 @@ func (app *application) SignIn(username, password string) error {
 			return fmt.Errorf("remote address mismatch")
 		}
 
-		return app.remote.SignIn(username, password)
+		err = app.remote.SignIn(username, password)
+		if err != nil {
+			return err
+		}
 	}
 
-	addr := app.remote.Address()
-
-	err = app.remote.SignIn(username, password)
+	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
 	if err != nil {
 		return err
 	}
 
-	return app.keystores.SetRemote(addr, username, password)
+	_, err = app.remote.Register(username, password, rem.PublicKey)
+	if err != nil {
+		return err
+	}
+
+	err = app.keystores.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (app *application) Register(username, password string) (user.User, error) {
-	u, err := app.remote.Register(username, password)
-	if err != nil {
-		return user.User{}, errors.WithMessage(err, "failed to register")
-	}
-
-	err = app.keystores.SetRemote(app.remote.Address(), username, password)
-	if err != nil {
-		return user.User{}, errors.WithMessage(err, "failed to set user info")
-	}
-
-	err = app.remote.SignIn(username, password)
-	if err != nil {
-		return user.User{}, err
-	}
-
-	return u, nil
+	// u, err := app.remote.Register(username, password)
+	// if err != nil {
+	//	return user.User{}, errors.WithMessage(err, "failed to register")
+	// }
+	//
+	// err = app.keystores.SetRemote(app.remote.Address(), username, password)
+	// if err != nil {
+	//	return user.User{}, errors.WithMessage(err, "failed to set user info")
+	// }
+	//
+	// err = app.remote.SignIn(username, password)
+	// if err != nil {
+	//	return user.User{}, err
+	// }
+	//
+	// return u, nil
+	panic("implement me")
 }
 
 func (app *application) CurrentUser() (*user.User, error) {
@@ -124,7 +137,12 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	}
 
 	if app.remote.SignedIn() {
-		rks, err := app.remote.Keystores()
+		rem, err := app.keystores.Remote()
+		if err != nil {
+			return nil, errors.WithMessage(err, "failed to get remote")
+		}
+
+		rks, err := app.remote.Keystores(rem.PrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -171,7 +189,7 @@ func (app *application) Authenticate(password string) error {
 	return nil
 }
 
-func (app *application) CreateInvitation(keystoreId string, inviteeId string) (invitation.Invitation, error) {
+func (app *application) CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error) {
 	// TODO: needs refinement. app services should have access to the remote, not the other way around.
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
 	k, err := app.keystores.Keystore(keystoreId)
@@ -189,9 +207,16 @@ func (app *application) CreateInvitation(keystoreId string, inviteeId string) (i
 		return invitation.Invitation{}, err
 	}
 
+	invitee, err := app.remote.UserByUsername(inviteeUsername)
+	if err != nil {
+		return invitation.Invitation{}, err
+	}
+
+	fmt.Println(invitee)
+
 	inv := invitation.New(
 		invitation.WithKeystoreId(k.RemoteId),
-		invitation.WithInviteeId(inviteeId),
+		invitation.WithInviteeId(invitee.Id),
 	)
 
 	inv, err = app.remote.CreateInvitation(inv)
@@ -232,7 +257,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	inv, err = app.remote.FinalizeInvitation(id, k.Key)
+	inv, err = app.remote.FinalizeInvitation(id, k.Key, nil)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
 	}
@@ -244,10 +269,10 @@ func (app *application) Invitations() (map[string]invitation.Invitation, error) 
 	return app.remote.Invitations()
 }
 
-//func (app *application) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
+// func (app *application) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
 //	panic("implement me")
 //	//rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)
 //	//if err != nil {
 //	//	return nil, errors.WithMessage(err, "failed to create invitation")
 //	//}
-//}
+// }

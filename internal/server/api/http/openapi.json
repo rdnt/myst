@@ -22,6 +22,43 @@
 		}
 	],
 	"paths": {
+		"/user": {
+			"get": {
+				"description": "Get a user",
+				"operationId": "UserByUsername",
+				"parameters": [
+					{
+						"name": "username",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/auth/register": {
 			"post": {
 				"description": "Registers a new user",
@@ -257,7 +294,7 @@
 					}
 				],
 				"responses": {
-					"200": {
+					"201": {
 						"description": "Invitation",
 						"content": {
 							"application/json": {
@@ -319,16 +356,6 @@
 			"patch": {
 				"description": "Accepts an invitation",
 				"operationId": "AcceptInvitation",
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/AcceptInvitationRequest"
-							}
-						}
-					}
-				},
 				"responses": {
 					"200": {
 						"description": "Invitation",
@@ -422,7 +449,8 @@
 				"type": "object",
 				"required": [
 					"username",
-					"password"
+					"password",
+					"publicKey"
 				],
 				"properties": {
 					"username": {
@@ -430,6 +458,10 @@
 					},
 					"password": {
 						"type": "string"
+					},
+					"publicKey": {
+						"type": "string",
+						"format": "byte"
 					}
 				}
 			},
@@ -437,7 +469,8 @@
 				"type": "object",
 				"required": [
 					"username",
-					"password"
+					"password",
+					"publicKey"
 				],
 				"properties": {
 					"username": {
@@ -445,10 +478,29 @@
 					},
 					"password": {
 						"type": "string"
+					},
+					"publicKey": {
+						"type": "string",
+						"format": "byte"
 					}
 				}
 			},
 			"AuthorizationResponse": {
+				"type": "object",
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/User"
+					},
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user",
+					"token"
+				]
+			},
+			"User": {
 				"type": "object",
 				"properties": {
 					"id": {
@@ -456,42 +508,25 @@
 					},
 					"username": {
 						"type": "string"
-					},
-					"token": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"id",
-					"username",
-					"token"
+					"username"
 				]
 			},
 			"CreateInvitationRequest": {
 				"type": "object",
 				"required": [
-					"inviteeId",
-					"publicKey"
+					"inviterId",
+					"inviteeId"
 				],
 				"properties": {
-					"inviteeId": {
+					"inviterId": {
 						"type": "string"
 					},
-					"publicKey": {
-						"type": "string",
-						"format": "byte"
-					}
-				}
-			},
-			"AcceptInvitationRequest": {
-				"type": "object",
-				"required": [
-					"publicKey"
-				],
-				"properties": {
-					"publicKey": {
-						"type": "string",
-						"format": "byte"
+					"inviteeId": {
+						"type": "string"
 					}
 				}
 			},
@@ -566,12 +601,12 @@
 				"required": [
 					"id",
 					"keystoreId",
+					"keystoreName",
 					"inviterId",
 					"inviteeId",
-					"inviterKey",
-					"inviteeKey",
-					"keystoreName",
-					"keystoreKey",
+					"inviterPublicKey",
+					"inviteePublicKey",
+					"encryptedKeystoreKey",
 					"status",
 					"createdAt",
 					"updatedAt",
@@ -592,18 +627,18 @@
 					"inviteeId": {
 						"type": "string"
 					},
-					"inviterKey": {
+					"inviterPublicKey": {
 						"type": "string",
 						"format": "byte"
 					},
-					"inviteeKey": {
+					"inviteePublicKey": {
 						"type": "string",
 						"format": "byte"
 					},
 					"keystoreName": {
 						"type": "string"
 					},
-					"keystoreKey": {
+					"encryptedKeystoreKey": {
 						"type": "string",
 						"format": "byte"
 					},

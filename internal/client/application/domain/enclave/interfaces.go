@@ -21,6 +21,6 @@ type KeystoreService interface {
 	HealthCheck()
 	CreateEnclave(password string) error
 	Enclave() error
-	SetRemote(address, username, password string) error
+	SetRemote(address, username, password string, publicKey, privateKey []byte) error
 	Remote() (Remote, error)
 }

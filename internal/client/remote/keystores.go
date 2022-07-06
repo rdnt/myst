@@ -63,7 +63,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	return k, nil
 }
 
-func (r *remote) Keystore(remoteID string) (keystore.Keystore, error) {
+func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error) {
 	if !r.SignedIn() {
 		return keystore.Keystore{}, ErrSignedOut
 	}
@@ -79,35 +79,36 @@ func (r *remote) Keystore(remoteID string) (keystore.Keystore, error) {
 		return keystore.Keystore{}, fmt.Errorf("invalid response")
 	}
 
-	invs, err := r.Invitations()
-	if err != nil {
-		return keystore.Keystore{}, errors.Wrap(err, "failed to get invitations")
-	}
+	// TODO: do this on the application layer
+	//invs, err := r.Invitations()
+	//if err != nil {
+	//	return keystore.Keystore{}, errors.Wrap(err, "failed to get invitations")
+	//}
 
-	var keystoreKey []byte
-	for _, inv := range invs {
-		if inv.KeystoreId == remoteID && inv.Finalized() {
-			symKey, err := curve25519.X25519(r.privateKey, inv.InviterKey)
-			if err != nil {
-				return keystore.Keystore{}, errors.Wrap(err, "failed to create asymmetric key")
-			}
+	//var keystoreKey []byte
+	//for _, inv := range invs {
+	//	if inv.KeystoreId == remoteID && inv.Finalized() {
+	//		symKey, err := curve25519.X25519(privateKey, inv.InviterKey)
+	//		if err != nil {
+	//			return keystore.Keystore{}, errors.Wrap(err, "failed to create asymmetric key")
+	//		}
+	//
+	//		logger.Error("@@@ ###################### SYMMETRIC WHEN SYNC", string(symKey))
+	//
+	//		keystoreKey, err = crypto.AES256CBC_Decrypt(symKey, inv.EncryptedKeystoreKey)
+	//		if err != nil {
+	//			return keystore.Keystore{}, errors.Wrap(err, "failed to decrypt keystore key")
+	//		}
+	//
+	//		break
+	//	}
+	//}
 
-			logger.Error("@@@ ###################### SYMMETRIC WHEN SYNC", string(symKey))
+	//if keystoreKey == nil {
+	//	panic(err)
+	//}
 
-			keystoreKey, err = crypto.AES256CBC_Decrypt(symKey, inv.KeystoreKey)
-			if err != nil {
-				return keystore.Keystore{}, errors.Wrap(err, "failed to decrypt keystore key")
-			}
-
-			break
-		}
-	}
-
-	if keystoreKey == nil {
-		panic(err)
-	}
-
-	k, err := KeystoreFromJSON(*res.JSON200, keystoreKey)
+	k, err := KeystoreFromJSON(*res.JSON200, key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
 	}
@@ -116,22 +117,14 @@ func (r *remote) Keystore(remoteID string) (keystore.Keystore, error) {
 }
 
 func (r *remote) UpdateKeystore(k keystore.Keystore) error {
-	rk, err := r.Keystore(k.RemoteId)
-	if err != nil {
-		return err
-	}
-
-	if rk.Version == k.Version {
-		return errors.New("keystore is already up to date")
-	} else if rk.Version > k.Version {
-		return errors.New("keystore upstream is more recent")
-	}
-
-	// TODO
-	return nil
+	return r.UpdateKeystore(k)
 }
 
-func (r *remote) Keystores() (map[string]keystore.Keystore, error) {
+func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {
+	if !r.SignedIn() {
+		return map[string]keystore.Keystore{}, ErrSignedOut
+	}
+
 	res, err := r.client.KeystoresWithResponse(context.Background())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get keystores")
@@ -153,14 +146,14 @@ func (r *remote) Keystores() (map[string]keystore.Keystore, error) {
 		var keystoreKey []byte
 		for _, inv := range invs {
 			if restKeystore.OwnerId != r.CurrentUser().Id && inv.KeystoreId == restKeystore.Id && inv.Finalized() {
-				symKey, err := curve25519.X25519(r.privateKey, inv.InviterKey)
+				symKey, err := curve25519.X25519(privateKey, inv.InviterPublicKey)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to create asymmetric key")
 				}
 
 				logger.Error("@@@ ###################### SYMMETRIC WHEN SYNC", string(symKey))
 
-				keystoreKey, err = crypto.AES256CBC_Decrypt(symKey, inv.KeystoreKey)
+				keystoreKey, err = crypto.AES256CBC_Decrypt(symKey, inv.EncryptedKeystoreKey)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to decrypt keystore key")
 				}

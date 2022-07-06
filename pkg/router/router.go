@@ -49,7 +49,7 @@ func New(opts ...func()) *gin.Engine {
 	}
 
 	// Set gin mode
-	// Create gin router instance
+	// CreateInvitation gin router instance
 	r := gin.New()
 
 	// Do not redirect folders to trailing slash

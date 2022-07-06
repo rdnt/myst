@@ -36,19 +36,19 @@ func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitat
 
 	res, err := r.client.CreateInvitationWithResponse(
 		context.Background(), inv.KeystoreId, generated.CreateInvitationJSONRequestBody{
+			InviterId: r.user.Id,
 			InviteeId: inv.InviteeId,
-			PublicKey: r.publicKey,
 		},
 	)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
 
-	if res.JSON200 == nil {
+	if res.JSON201 == nil {
 		return invitation.Invitation{}, fmt.Errorf("invalid response")
 	}
 
-	inv, err = InvitationFromJSON(*res.JSON200)
+	inv, err = InvitationFromJSON(*res.JSON201)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
 	}
@@ -89,9 +89,7 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 	}
 
 	res, err := r.client.AcceptInvitationWithResponse(
-		context.Background(), invitationId, generated.AcceptInvitationJSONRequestBody{
-			PublicKey: r.publicKey,
-		},
+		context.Background(), invitationId,
 	)
 	if err != nil {
 		return invitation.Invitation{}, err
@@ -133,17 +131,17 @@ func (r *remote) DeclineOrCancelInvitation(id string) (invitation.Invitation, er
 	return inv, nil
 }
 
-func (r *remote) FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error) {
+func (r *remote) FinalizeInvitation(invitationId string, keystoreKey, privateKey []byte) (invitation.Invitation, error) {
 	inv, err := r.getInvitation(invitationId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
 	}
 
-	if inv.Status != "accepted" || inv.InviteeKey == nil {
+	if inv.Status != "accepted" {
 		return invitation.Invitation{}, errors.New("invitation has not been accepted")
 	}
 
-	asymKey, err := curve25519.X25519(r.privateKey, inv.InviteeKey)
+	asymKey, err := curve25519.X25519(privateKey, inv.InviteePublicKey)
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
 	}
@@ -184,14 +182,14 @@ func (r *remote) getInvitation(id string) (invitation.Invitation, error) {
 }
 
 //
-//func (r *remote) FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (invitation.Invitation, error) {
+// func (r *remote) FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (invitation.Invitation, error) {
 //	inv, err := r.client.Invitation(keystoreId, invitationId)
 //	if err != nil {
 //		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
 //	}
 //
 //	// TODO: this should be LOCAL keystoreId, while the function only receives remote one
-//	keystoreKey, err := r.keystores.KeystoreKey(localKeystoreId)
+//	keystoreKey, err := r.keystores.EncryptedKeystoreKey(localKeystoreId)
 //	if err != nil {
 //		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore key")
 //	}
@@ -217,4 +215,4 @@ func (r *remote) getInvitation(id string) (invitation.Invitation, error) {
 //	}
 //
 //	return inv, nil
-//}
+// }

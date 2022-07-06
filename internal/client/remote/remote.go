@@ -6,16 +6,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/curve25519"
+
 	"myst/internal/client/application/domain/invitation"
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/domain/user"
 	"myst/internal/server/api/http/generated"
 	"myst/pkg/crypto"
-
-	"github.com/pkg/errors"
-
-	"golang.org/x/crypto/curve25519"
-
 	"myst/pkg/enclave"
 )
 
@@ -31,45 +29,44 @@ type Remote interface {
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(invitationId string, keystoreKey []byte) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, keystoreKey, privateKey []byte) (invitation.Invitation, error)
 	UpdateInvitation(inv invitation.Invitation) error
 	Invitations() (map[string]invitation.Invitation, error)
 	DeleteInvitation(id string) error
 
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
-	Keystore(id string) (keystore.Keystore, error)
+	Keystore(id string, privateKey []byte) (keystore.Keystore, error)
 	UpdateKeystore(k keystore.Keystore) error
-	Keystores() (map[string]keystore.Keystore, error)
+	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
 	SignIn(username, password string) error
-	Register(username, password string) (user.User, error)
+	Register(username, password string, publicKey []byte) (user.User, error)
 	SignOut() error
 	SignedIn() bool
 	CurrentUser() *user.User
+	UserByUsername(username string) (user.User, error)
 
 	// keystores
-	//UploadKeystore(id string) (*generated.Keystore, error)
-	//Keystores() ([]keystore.Keystore, error)
+	// UploadKeystore(id string) (*generated.Keystore, error)
+	// Keystores() ([]keystore.Keystore, error)
 	//
-	//// invitations
-	//CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error)
-	//AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error)
+	// // invitations
+	// CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error)
+	// AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error)
 	//
-	//Invitation(id string) (invitation.Invitation, error)
-	//UpdateInvitation(k invitation.Invitation) error
-	//DeleteInvitation(id string) error
+	// Invitation(id string) (invitation.Invitation, error)
+	// UpdateInvitation(k invitation.Invitation) error
+	// DeleteInvitation(id string) error
 	//
-	//Invitations() ([]invitation.Invitation, error)
+	// Invitations() ([]invitation.Invitation, error)
 	//
-	//// TODO: refine to dynamically find local keystoreId
-	//FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
+	// // TODO: refine to dynamically find local keystoreId
+	// FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
 }
 
 type remote struct {
-	address    string
-	publicKey  []byte
-	privateKey []byte
+	address string
 
 	client *generated.ClientWithResponses
 
@@ -100,7 +97,7 @@ func New(opts ...Option) (Remote, error) {
 	return r, nil
 }
 
-//func (r *remote) UploadKeystore(id string) (keystore.Keystore, error) {
+// func (r *remote) UploadKeystore(id string) (keystore.Keystore, error) {
 //	if !r.SignedIn() {
 //		return keystore.Keystore{}, ErrSignedOut
 //	}
@@ -110,7 +107,7 @@ func New(opts ...Option) (Remote, error) {
 //		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
 //	}
 //
-//	keystoreKey, err := r.keystores.KeystoreKey(k.Id)
+//	keystoreKey, err := r.keystores.EncryptedKeystoreKey(k.Id)
 //	if err != nil {
 //		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore key")
 //	}
@@ -151,7 +148,7 @@ func New(opts ...Option) (Remote, error) {
 //	}
 //
 //	return k, nil
-//}
+// }
 
 func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
@@ -179,8 +176,8 @@ func (r *remote) SignIn(username, password string) error {
 	}
 
 	u := user.User{
-		Id:       resp.Id,
-		Username: resp.Username,
+		Id:       resp.User.Id,
+		Username: resp.User.Username,
 	}
 
 	r.user = &u
@@ -199,6 +196,30 @@ func (r *remote) CurrentUser() *user.User {
 	return r.user
 }
 
+func (r *remote) UserByUsername(username string) (user.User, error) {
+	if !r.SignedIn() {
+		return user.User{}, ErrSignedOut
+	}
+
+	res, err := r.client.UserByUsernameWithResponse(
+		context.Background(), &generated.UserByUsernameParams{Username: &username},
+	)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	if res.JSON200 == nil {
+		return user.User{}, fmt.Errorf("invalid response")
+	}
+
+	u := UserFromJSON(*res.JSON200)
+	if err != nil {
+		return user.User{}, errors.WithMessage(err, "failed to parse invitation")
+	}
+
+	return u, nil
+}
+
 func (r *remote) SignOut() error {
 	fmt.Println("Signing out from remote...")
 
@@ -210,15 +231,16 @@ func (r *remote) SignOut() error {
 	return nil
 }
 
-func (r *remote) Register(username, password string) (user.User, error) {
+func (r *remote) Register(username, password string, publicKey []byte) (user.User, error) {
 	fmt.Println("Registering to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.RegisterWithResponse(
 		ctx, generated.RegisterJSONRequestBody{
-			Username: username,
-			Password: password,
+			Username:  username,
+			Password:  password,
+			PublicKey: publicKey,
 		},
 	)
 	if err != nil {
@@ -237,8 +259,8 @@ func (r *remote) Register(username, password string) (user.User, error) {
 	}
 
 	u := user.User{
-		Id:       resp.Id,
-		Username: resp.Username,
+		Id:       resp.User.Id,
+		Username: resp.User.Username,
 	}
 
 	r.user = &u

@@ -21,14 +21,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	//prometheus "github.com/zsais/go-gin-prometheus"
+	// prometheus "github.com/zsais/go-gin-prometheus"
 )
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
 // TODO: remove redundant go:generate for old ui
-////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-////go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
+// //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
+// //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
 //go:generate openapi --input openapi.json --output ../../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
 
 var log = logger.New("router", logger.Cyan)
@@ -182,7 +182,7 @@ func (api *API) Import(c *gin.Context) {
 		}
 
 		website := row[0]
-		//url := row[1]
+		// url := row[1]
 		username := row[2]
 		password := row[3]
 
@@ -203,7 +203,7 @@ func (api *API) Import(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-//func (api *API) UnlockKeystore(c *gin.Context) {
+// func (api *API) UnlockKeystore(c *gin.Context) {
 //	keystoreId := c.Param("keystoreId")
 //
 //	var req generated.UnlockKeystoreRequest
@@ -242,7 +242,7 @@ func (api *API) Import(c *gin.Context) {
 //			Entries: entries,
 //		},
 //	)
-//}
+// }
 
 func (api *API) CreateEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
@@ -256,10 +256,10 @@ func (api *API) CreateEntry(c *gin.Context) {
 	}
 
 	k, err := api.app.Keystore(keystoreId)
-	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
 	//	Error(c, http.StatusForbidden, err)
 	//	return
-	//}
+	// }
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -294,13 +294,13 @@ func (api *API) Keystore(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	k, err := api.app.Keystore(keystoreId)
-	//if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
+	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
 	//	Error(c, http.StatusForbidden, err)
 	//	return
-	//} else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
+	// } else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
 	//	Error(c, http.StatusForbidden, err)
 	//	return
-	//}
+	// }
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -401,7 +401,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	inv, err := api.app.CreateInvitation(keystoreId, req.InviteeId)
+	inv, err := api.app.CreateInvitation(keystoreId, req.Invitee)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -542,8 +542,8 @@ func New(app application.Application, ui fs.FS) *API {
 
 	// metrics
 	if config.Debug {
-		//p := prometheus.NewPrometheus("gin")
-		//p.Use(r)
+		// p := prometheus.NewPrometheus("gin")
+		// p.Use(r)
 	}
 
 	// error 404 handling
@@ -568,15 +568,15 @@ func New(app application.Application, ui fs.FS) *API {
 					"http://localhost:8082",
 					"http://localhost:9092",
 				},
-				//// TODO allow more methods (DELETE?)
+				// // TODO allow more methods (DELETE?)
 				AllowedMethods: []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
-				//// TODO expose ratelimiting headers
-				//ExposedHeaders: []string{},
-				//// TODO check if we can disable this on release mode so that no
-				//// authorization tokens are passed on to the frontend.
-				//// No harm, but no need either.
-				//// Required to pass authentication headers on development environment
-				//AllowCredentials: true,
+				// // TODO expose ratelimiting headers
+				// ExposedHeaders: []string{},
+				// // TODO check if we can disable this on release mode so that no
+				// // authorization tokens are passed on to the frontend.
+				// // No harm, but no need either.
+				// // Required to pass authentication headers on development environment
+				// AllowCredentials: true,
 				Debug: false, // too verbose, only enable for testing CORS
 			},
 		),

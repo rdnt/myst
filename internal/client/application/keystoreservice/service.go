@@ -26,7 +26,7 @@ type KeystoreRepository interface {
 	HealthCheck()
 	CreateEnclave(password string) error
 	Enclave() error
-	SetRemote(address, username, password string) error
+	SetRemote(address, username, password string, publicKey, privateKey []byte) error
 	Remote() (enclave.Remote, error)
 }
 
@@ -213,8 +213,8 @@ func (s *service) HealthCheck() {
 	s.keystores.HealthCheck()
 }
 
-func (s *service) SetRemote(address, username, password string) error {
-	return s.keystores.SetRemote(address, username, password)
+func (s *service) SetRemote(address, username, password string, publicKey, privateKey []byte) error {
+	return s.keystores.SetRemote(address, username, password, publicKey, privateKey)
 }
 
 func (s *service) Remote() (enclave.Remote, error) {

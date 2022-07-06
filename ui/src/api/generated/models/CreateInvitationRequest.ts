@@ -3,5 +3,5 @@
 /* eslint-disable */
 
 export type CreateInvitationRequest = {
-    inviteeId: string;
+    invitee: string;
 };

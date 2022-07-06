@@ -120,7 +120,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Create a CBC Encrypter
+	// CreateInvitation a CBC Encrypter
 	mode := cipher.NewCBCEncrypter(block, iv)
 	// Encrypt the plaintext
 	ciphertext := make([]byte, len(plaintext))
@@ -159,7 +159,7 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext)%aes.BlockSize != 0 {
 		return nil, fmt.Errorf("ciphertext not multiple of blocksize")
 	}
-	// Create a CBC Decrypter
+	// CreateInvitation a CBC Decrypter
 	mode := cipher.NewCBCDecrypter(block, iv)
 	// Decrypt the ciphertext
 	plaintext := make([]byte, len(ciphertext))
@@ -206,15 +206,18 @@ func PKCS7Unpad(b []byte, blocksize int) ([]byte, error) {
 		return nil, ErrInvalidPKCS7Data
 	}
 	if len(b)%blocksize != 0 {
+		fmt.Println("invalid 1")
 		return nil, ErrInvalidPKCS7Padding
 	}
 	c := b[len(b)-1]
 	n := int(c)
 	if n == 0 || n > len(b) {
+		fmt.Println("invalid 2")
 		return nil, ErrInvalidPKCS7Padding
 	}
 	for i := 0; i < n; i++ {
 		if b[len(b)-n+i] != c {
+			fmt.Println("invalid 3")
 			return nil, ErrInvalidPKCS7Padding
 		}
 	}

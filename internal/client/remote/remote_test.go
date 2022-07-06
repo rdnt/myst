@@ -41,7 +41,7 @@ package remote_test
 //	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test-keystore")))
 //	assert.NoError(t, err)
 //
-//	//keystoreKey, err := repo.KeystoreKey(k.Id())
+//	//keystoreKey, err := repo.EncryptedKeystoreKey(k.Id())
 //	//assert.NoError(t, err)
 //
 //	genk, err := r1.CreateKeystore(k)

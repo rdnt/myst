@@ -5,11 +5,12 @@ package http
 
 import (
 	"io/ioutil"
+	"net/http"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	//prometheus "github.com/zsais/go-gin-prometheus"
+	// prometheus "github.com/zsais/go-gin-prometheus"
 
 	application "myst/internal/server"
 	"myst/pkg/config"
@@ -62,8 +63,8 @@ func New(app application.Application) *API {
 
 	// metrics
 	if config.Debug {
-		//p := prometheus.NewPrometheus("gin")
-		//p.Use(r)
+		// p := prometheus.NewPrometheus("gin")
+		// p.Use(r)
 	}
 
 	// Attach static serve middleware for / and /assets
@@ -76,16 +77,16 @@ func New(app application.Application) *API {
 				AllowOriginFunc: func(origin string) bool {
 					return true
 				},
-				//AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
-				//// TODO allow more methods (DELETE?)
-				//AllowedMethods: []string{http.MethodGet, http.MethodPost},
-				//// TODO expose ratelimiting headers
-				//ExposedHeaders: []string{},
-				//// TODO check if we can disable this on release mode so that no
-				//// authorization tokens are passed on to the frontend.
-				//// No harm, but no need either.
-				//// Required to pass authentication headers on development environment
-				//AllowCredentials: true,
+				// AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
+				// // TODO allow more methods (DELETE?)
+				// AllowedMethods: []string{http.MethodGet, http.MethodPost},
+				// // TODO expose ratelimiting headers
+				// ExposedHeaders: []string{},
+				// // TODO check if we can disable this on release mode so that no
+				// // authorization tokens are passed on to the frontend.
+				// // No harm, but no need either.
+				// // Required to pass authentication headers on development environment
+				// AllowCredentials: true,
 				Debug: false, // too verbose, only enable for testing CORS
 			},
 		),
@@ -97,12 +98,21 @@ func New(app application.Application) *API {
 }
 
 func (api *API) initRoutes(g *gin.RouterGroup) {
+	g.GET("/debug", func(c *gin.Context) {
+		data, err := api.app.Debug()
+		if err != nil {
+			panic(err)
+		}
+
+		c.JSON(http.StatusOK, data)
+	})
 	g.POST("/auth/login", api.Login)
 	g.POST("/auth/register", api.Register)
 
 	sec := g.Group("")
-	sec.Use(Authentication())
+	sec.Use(api.Authentication())
 
+	sec.GET("/user", api.User)
 	// keystore
 	sec.POST("/keystores", api.CreateKeystore)
 	sec.GET("/keystore/:keystoreId", api.Keystore)

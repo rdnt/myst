@@ -135,9 +135,9 @@ func MethodColor(method string) logger.Color {
 	}
 }
 
-func Authentication() gin.HandlerFunc {
+func (api *API) Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := TokenAuthentication(c)
+		err := api.TokenAuthentication(c)
 		if err != nil {
 			c.JSON(403, gin.H{"error": "Forbidden"})
 			c.Abort()
@@ -147,7 +147,7 @@ func Authentication() gin.HandlerFunc {
 	}
 }
 
-func TokenAuthentication(c *gin.Context) error {
+func (api *API) TokenAuthentication(c *gin.Context) error {
 	auth := c.GetHeader("Authorization")
 	if auth == "" {
 		return fmt.Errorf("authentication required")
@@ -199,16 +199,21 @@ func TokenAuthentication(c *gin.Context) error {
 		return fmt.Errorf("authentication failed")
 	}
 
-	username, ok := claims["usr"].(string)
+	userId, ok := claims["usr"].(string)
 	if !ok {
 		return fmt.Errorf("authentication failed")
 	}
 
-	if username != "rdnt" && username != "abcd" {
+	u, err := api.app.User(userId)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	if u.Username != "rdnt" && u.Username != "abcd" {
 		return fmt.Errorf("authentication failed")
 	}
 
-	c.Set("userId", username)
+	c.Set("userId", u.Id)
 
 	return nil
 }

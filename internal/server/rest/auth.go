@@ -1,4 +1,4 @@
-package http
+package rest
 
 import (
 	"encoding/base64"
@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 )
 
-func (api *API) Register(c *gin.Context) {
+func (api *Server) Register(c *gin.Context) {
 	var req generated.RegisterRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -40,7 +40,7 @@ func (api *API) Register(c *gin.Context) {
 	})
 }
 
-func (api *API) Login(c *gin.Context) {
+func (api *Server) Login(c *gin.Context) {
 	var params generated.LoginRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
@@ -78,7 +78,7 @@ func (api *API) Login(c *gin.Context) {
 	})
 }
 
-func (api *API) loginUser(userId string) (string, error) {
+func (api *Server) loginUser(userId string) (string, error) {
 	now := time.Now()
 
 	exp := now.Unix() + int64(jwtCookieLifetime)
@@ -107,7 +107,7 @@ type UserByUsernameRequest struct {
 	Username *string `form:"username"`
 }
 
-func (api *API) User(c *gin.Context) {
+func (api *Server) User(c *gin.Context) {
 	var req UserByUsernameRequest
 	err := c.ShouldBindQuery(&req)
 	if err != nil {

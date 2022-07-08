@@ -1,16 +1,10 @@
-package userrepo
+package memdb
 
 import (
 	"fmt"
-	"sync"
 
-	"myst/internal/server/core/domain/user"
+	"myst/internal/server/application/domain/user"
 )
-
-type Repository struct {
-	mux   sync.Mutex
-	users map[string]User
-}
 
 type User struct {
 	user.User
@@ -109,10 +103,4 @@ func (r *Repository) DeleteUser(id string) error {
 
 	delete(r.users, id)
 	return nil
-}
-
-func New() user.Repository {
-	return &Repository{
-		users: map[string]User{},
-	}
 }

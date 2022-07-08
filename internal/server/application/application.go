@@ -1,10 +1,9 @@
 package application
 
 import (
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
-
+	"myst/internal/server/application/domain/invitation"
+	"myst/internal/server/application/domain/keystore"
+	"myst/internal/server/application/domain/user"
 	"myst/pkg/logger"
 )
 
@@ -60,7 +59,7 @@ func WithInvitationRepository(repo invitation.Repository) Option {
 func (app *application) Start() error {
 	log.Print("App started")
 
-	//app.setup()
+	// app.setup()
 
 	return nil
 }

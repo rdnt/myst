@@ -1,10 +1,10 @@
 package userservice
 
 import (
-	"myst/internal/server/core/domain/device"
+	"myst/internal/server/applicationrefactor/domain/device"
 
-	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
+	"myst/internal/server/application/domain/keystore"
+	"myst/internal/server/application/domain/user"
 )
 
 type Option func(s *service) error

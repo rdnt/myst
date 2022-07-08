@@ -62,9 +62,9 @@ type Invitation struct {
 	InviterId            string           `json:"inviterId"`
 	InviterPublicKey     []byte           `json:"inviterPublicKey"`
 	KeystoreId           string           `json:"keystoreId"`
-	KeystoreName         string           `json:"keystoreName"`
-	Status               InvitationStatus `json:"status"`
-	UpdatedAt            time.Time        `json:"updatedAt"`
+	KeystoreName string           `json:"keystoreName"`
+	Status       InvitationStatus `json:"status"`
+	UpdatedAt    time.Time        `json:"updatedAt"`
 }
 
 // InvitationStatus defines model for Invitation.Status.
@@ -121,17 +121,17 @@ type UserByUsernameParams struct {
 	Username *string `json:"username,omitempty"`
 }
 
-// LoginJSONRequestBody defines body for Login for application/json ContentType.
+// LoginJSONRequestBody defines body for Login for applicationrefactor/json ContentType.
 type LoginJSONRequestBody LoginJSONBody
 
-// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+// RegisterJSONRequestBody defines body for Register for applicationrefactor/json ContentType.
 type RegisterJSONRequestBody RegisterJSONBody
 
-// FinalizeInvitationJSONRequestBody defines body for FinalizeInvitation for application/json ContentType.
+// FinalizeInvitationJSONRequestBody defines body for FinalizeInvitation for applicationrefactor/json ContentType.
 type FinalizeInvitationJSONRequestBody FinalizeInvitationJSONBody
 
-// CreateInvitationJSONRequestBody defines body for CreateInvitation for application/json ContentType.
+// CreateInvitationJSONRequestBody defines body for CreateInvitation for applicationrefactor/json ContentType.
 type CreateInvitationJSONRequestBody CreateInvitationJSONBody
 
-// CreateKeystoreJSONRequestBody defines body for CreateKeystore for application/json ContentType.
+// CreateKeystoreJSONRequestBody defines body for CreateKeystore for applicationrefactor/json ContentType.
 type CreateKeystoreJSONRequestBody CreateKeystoreJSONBody

@@ -11,7 +11,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
-	//ginprometheus "github.com/zsais/go-gin-prometheus"
+	// ginprometheus "github.com/zsais/go-gin-prometheus"
 
 	"myst/pkg/logger"
 	"myst/pkg/rest"
@@ -44,7 +44,7 @@ func New(opts ...func()) *gin.Engine {
 	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
-		//gin.SetMode(gin.ReleaseMode)
+		// gin.SetMode(gin.ReleaseMode)
 		gin.SetMode(gin.DebugMode)
 	}
 
@@ -62,15 +62,15 @@ func New(opts ...func()) *gin.Engine {
 
 	// metrics (only enable if debugging)
 	if debug {
-		//p := ginprometheus.NewPrometheus("gin")
-		//p.Use(r)
+		// p := ginprometheus.NewPrometheus("gin")
+		// p.Use(r)
 	}
 
 	// error 404 handling
 	r.NoRoute(
 		func(c *gin.Context) {
 			if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-				// serve a json 404 error if it's an API call
+				// serve a json 404 error if it's an Server call
 				data := rest.NewErrorResponse(404, "Route not found")
 				c.JSON(404, data)
 				c.Abort()
@@ -92,7 +92,7 @@ func New(opts ...func()) *gin.Engine {
 // RecoveryHandler sends a 500 response if a panic occurs during serving
 func RecoveryHandler(c *gin.Context, err interface{}) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// If error occurred in an API route print JSON error response
+		// If error occurred in an Server route print JSON error response
 		data := rest.NewErrorResponse(500, nil)
 		c.JSON(500, data)
 		c.Abort()

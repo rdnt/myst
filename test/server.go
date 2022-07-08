@@ -5,11 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	application "myst/internal/server"
-	"myst/internal/server/api/http"
-	invitationrepo "myst/internal/server/core/invitationrepo/memory"
-	keystorerepo "myst/internal/server/core/keystorerepo/memory"
-	userrepo "myst/internal/server/core/userrepo/memory"
+	"myst/internal/server/application"
+	"myst/internal/server/database/invitationrepo/memory"
+	"myst/internal/server/database/keystorerepo/memory"
+	"myst/internal/server/database/userrepo/memory"
 )
 
 type Server struct {
@@ -21,9 +20,9 @@ type Server struct {
 func (s *IntegrationTestSuite) setupServer(port int) *Server {
 	server := &Server{}
 
-	keystoreRepo := keystorerepo.New()
-	userRepo := userrepo.New()
-	invitationRepo := invitationrepo.New()
+	keystoreRepo := keystorerepo.keystorerepo.New()
+	userRepo := userrepo.userrepo.New()
+	invitationRepo := invitationrepo.invitationrepo.New()
 
 	var err error
 	server.app, err = application.New(
@@ -45,5 +44,5 @@ func (s *IntegrationTestSuite) setupServer(port int) *Server {
 }
 
 func (s *IntegrationTestSuite) teardownServer(server *Server) {
-	//server.server.Close()
+	// server.server.Close()
 }

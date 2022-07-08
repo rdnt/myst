@@ -142,7 +142,7 @@ const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptions): Pr
     const additionalHeaders = await resolve(options, config.HEADERS);
 
     const headers = Object.entries({
-        Accept: 'application/json',
+        Accept: 'applicationrefactor/json',
         ...additionalHeaders,
         ...options.headers,
     })
@@ -165,11 +165,11 @@ const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptions): Pr
         if (options.mediaType) {
             headers['Content-Type'] = options.mediaType;
         } else if (isBlob(options.body)) {
-            headers['Content-Type'] = options.body.type || 'application/octet-stream';
+            headers['Content-Type'] = options.body.type || 'applicationrefactor/octet-stream';
         } else if (isString(options.body)) {
             headers['Content-Type'] = 'text/plain';
         } else if (!isFormData(options.body)) {
-            headers['Content-Type'] = 'application/json';
+            headers['Content-Type'] = 'applicationrefactor/json';
         }
     }
 
@@ -231,7 +231,7 @@ const getResponseBody = async (response: Response): Promise<any> => {
         try {
             const contentType = response.headers.get('Content-Type');
             if (contentType) {
-                const isJSON = contentType.toLowerCase().startsWith('application/json');
+                const isJSON = contentType.toLowerCase().startsWith('applicationrefactor/json');
                 if (isJSON) {
                     return await response.json();
                 } else {

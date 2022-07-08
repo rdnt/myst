@@ -9,8 +9,9 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 
-	clientGenerated "myst/internal/client/api/http/generated"
-	"myst/internal/server/api/http/generated"
+	clientGenerated "myst/internal/client/api/rest/generated"
+
+	"myst/internal/server/rest/generated"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/testing/capture"
@@ -20,7 +21,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 	capture *capture.Capture
 
-	//mini *miniredis.Miniredis
+	// mini *miniredis.Miniredis
 
 	_server  *Server
 	_client1 *Client
@@ -64,8 +65,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
 	s.client2, err = clientGenerated.NewClientWithResponses("http://" + s._client2.address + "/api")
 
-	//s.mini, err = miniredis.Run()
-	//s.Require().NoError(err)
+	// s.mini, err = miniredis.Run()
+	// s.Require().NoError(err)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -96,7 +97,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	//s.mini.Close()
+	// s.mini.Close()
 
 	s.teardownClient(s._client1)
 	s.teardownClient(s._client2)
@@ -105,21 +106,21 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	// if verbose is enabled, print logger output
 	if testing.Verbose() {
 		fmt.Println()
-		//fmt.Printf("\n%s\n", output)
+		// fmt.Printf("\n%s\n", output)
 	} else {
 		fmt.Println()
 	}
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	//s.capture.Start()
+	// s.capture.Start()
 
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
 	// start next tests with a flushed database
-	//s.mini.FlushDB()
-	//output := s.capture.Stop()
+	// s.mini.FlushDB()
+	// output := s.capture.Stop()
 
 	if !testing.Verbose() {
 		// show progress
@@ -133,7 +134,7 @@ func (s *IntegrationTestSuite) TearDownTest() {
 	} else {
 		// if verbose is enabled, print logger output
 		if testing.Verbose() {
-			//fmt.Printf("%s", output)
+			// fmt.Printf("%s", output)
 		} else {
 			fmt.Println()
 		}

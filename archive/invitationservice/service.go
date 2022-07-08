@@ -1,9 +1,9 @@
 package invitationservice
 
 import (
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
+	"myst/internal/server/application/domain/invitation"
+	"myst/internal/server/application/domain/keystore"
+	"myst/internal/server/application/domain/user"
 	"myst/pkg/logger"
 
 	"github.com/pkg/errors"
@@ -32,15 +32,15 @@ func (s *service) CreateInvitation(keystoreId, inviterId, inviteeId string, invi
 		return invitation.Invitation{}, err
 	}
 
-	//inviter, err := s.userRepo.User(inviterId)
-	//if err != nil {
+	// inviter, err := s.userRepo.User(inviterId)
+	// if err != nil {
 	//	return nil, err
-	//}
+	// }
 	//
-	//invitee, err := s.userRepo.User(inviteeId)
-	//if err != nil {
+	// invitee, err := s.userRepo.User(inviteeId)
+	// if err != nil {
 	//	return nil, err
-	//}
+	// }
 
 	return s.invitationRepo.CreateInvitation(
 		invitation.WithKeystoreId(k.Id),
@@ -129,10 +129,10 @@ type UserInvitationsOptions struct {
 // - invitations where the user is the inviter
 // - invitations where the user is the invitee
 func (s *service) UserInvitations(deviceId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
-	//u, err := s.userRepo.User(userId)
-	//if err != nil {
+	// u, err := s.userRepo.User(userId)
+	// if err != nil {
 	//	return nil, err
-	//}
+	// }
 
 	invs, err := s.invitationRepo.UserInvitations(deviceId)
 	if err != nil {
@@ -159,7 +159,7 @@ func (s *service) UserInvitation(userId, invitationId string) (invitation.Invita
 	return s.invitationRepo.UserInvitation(userId, invitationId)
 }
 
-//func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
+// func (s *service) UserKeystores(userId string) ([]*keystore.Keystore, error) {
 //	invs, err := s.UserInvitations(userId)
 //	if err != nil {
 //		return nil, errors.WithMessage(err, "failed to get user invitations")
@@ -190,7 +190,7 @@ func (s *service) UserInvitation(userId, invitationId string) (invitation.Invita
 //	}
 //
 //	return append(keystores, ks...), nil
-//}
+// }
 
 func New(opts ...Option) (invitation.Service, error) {
 	s := &service{}

@@ -1,4 +1,4 @@
-package http
+package rest
 
 import (
 	"encoding/base64"
@@ -12,14 +12,15 @@ import (
 	"github.com/go-errors/errors"
 	"github.com/golang-jwt/jwt"
 
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
+
 	"myst/pkg/logger"
 	"myst/pkg/regex"
 )
 
 func NoRoute(c *gin.Context) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// serve a json 404 error if it's an API call
+		// serve a json 404 error if it's an Server call
 		resp := generated.Error{
 			Code:    "not-found",
 			Message: http.StatusText(http.StatusNotFound),
@@ -51,7 +52,7 @@ func Recovery(c *gin.Context) {
 // recoveryHandler sends a 500 response if a panic occurs during serving
 func recoveryHandler(c *gin.Context, err interface{}) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// If error occurred in an API route print JSON error response
+		// If error occurred in an Server route print JSON error response
 		log.Error(err)
 
 		resp := generated.Error{
@@ -135,7 +136,7 @@ func MethodColor(method string) logger.Color {
 	}
 }
 
-func (api *API) Authentication() gin.HandlerFunc {
+func (api *Server) Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := api.TokenAuthentication(c)
 		if err != nil {
@@ -147,7 +148,7 @@ func (api *API) Authentication() gin.HandlerFunc {
 	}
 }
 
-func (api *API) TokenAuthentication(c *gin.Context) error {
+func (api *Server) TokenAuthentication(c *gin.Context) error {
 	auth := c.GetHeader("Authorization")
 	if auth == "" {
 		return fmt.Errorf("authentication required")

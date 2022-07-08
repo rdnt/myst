@@ -3,7 +3,7 @@ package application
 import (
 	"github.com/pkg/errors"
 
-	"myst/internal/server/core/domain/invitation"
+	"myst/internal/server/application/domain/invitation"
 )
 
 func (app *application) CreateInvitation(keystoreId, inviterId, inviteeId string) (invitation.Invitation, error) {

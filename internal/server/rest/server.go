@@ -1,4 +1,4 @@
-package http
+package rest
 
 //go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
 //go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
@@ -12,7 +12,7 @@ import (
 	cors "github.com/rs/cors/wrapper/gin"
 	// prometheus "github.com/zsais/go-gin-prometheus"
 
-	application "myst/internal/server"
+	"myst/internal/server/application"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 )
@@ -23,13 +23,13 @@ var (
 	jwtSecretKey      = "dzl6JEMmRilKQE1jUWZUalduWnI0dTd4IUElRCpHLUs=" //  TODO: os.Getenv("JWT_SECRET_KEY")
 )
 
-type API struct {
+type Server struct {
 	*gin.Engine
 	app application.Application
 }
 
-func New(app application.Application) *API {
-	api := new(API)
+func NewServer(app application.Application) *Server {
+	api := new(Server)
 
 	api.app = app
 
@@ -79,7 +79,7 @@ func New(app application.Application) *API {
 				},
 				// AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
 				// // TODO allow more methods (DELETE?)
-				// AllowedMethods: []string{http.MethodGet, http.MethodPost},
+				// AllowedMethods: []string{rest.MethodGet, rest.MethodPost},
 				// // TODO expose ratelimiting headers
 				// ExposedHeaders: []string{},
 				// // TODO check if we can disable this on release mode so that no
@@ -97,7 +97,7 @@ func New(app application.Application) *API {
 	return api
 }
 
-func (api *API) initRoutes(g *gin.RouterGroup) {
+func (api *Server) initRoutes(g *gin.RouterGroup) {
 	g.GET("/debug", func(c *gin.Context) {
 		data, err := api.app.Debug()
 		if err != nil {
@@ -127,7 +127,7 @@ func (api *API) initRoutes(g *gin.RouterGroup) {
 	sec.GET("/invitations", api.Invitations)
 }
 
-func (api *API) Run(addr string) error {
+func (api *Server) Run(addr string) error {
 	log.Println("starting app on", addr)
 
 	api.app.Start()

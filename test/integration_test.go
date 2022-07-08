@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	clientgen "myst/internal/client/api/http/generated"
+	clientgen "myst/internal/client/api/rest/generated"
 	"myst/pkg/optional"
 
-	//servergen "myst/internal/server/api/http/generated"
+	//servergen "myst/internal/server/api/rest/generated"
 	"myst/pkg/testing/capture"
 )
 

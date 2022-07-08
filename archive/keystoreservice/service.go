@@ -3,9 +3,8 @@ package keystoreservice
 import (
 	"errors"
 
-	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
-
+	"myst/internal/server/application/domain/keystore"
+	"myst/internal/server/application/domain/user"
 	"myst/pkg/logger"
 )
 
@@ -40,18 +39,18 @@ func (s *service) Keystores() ([]keystore.Keystore, error) {
 	return s.keystoreRepo.Keystores()
 }
 
-//func (s *service) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
+// func (s *service) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
 //	u, err := s.userRepo.User(userId)
 //	if err != nil {
 //		return keystore.Keystore{}, err
 //	}
 //
 //	return s.keystoreRepo.UserKeystore(u.Id, keystoreId)
-//}
+// }
 //
-//func (s *service) UserKeystores(userId string) ([]keystore.Keystore, error) {
+// func (s *service) UserKeystores(userId string) ([]keystore.Keystore, error) {
 //	return s.keystoreRepo.UserKeystores(u.Id)
-//}
+// }
 
 func New(opts ...Option) (keystore.Service, error) {
 	s := &service{}

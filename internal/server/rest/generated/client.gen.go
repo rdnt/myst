@@ -341,7 +341,7 @@ func (c *Client) UserByUsername(ctx context.Context, params *UserByUsernameParam
 	return c.Client.Do(req)
 }
 
-// NewLoginRequest calls the generic Login builder with application/json body
+// NewLoginRequest calls the generic Login builder with applicationrefactor/json body
 func NewLoginRequest(server string, body LoginJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -349,7 +349,7 @@ func NewLoginRequest(server string, body LoginJSONRequestBody) (*http.Request, e
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewLoginRequestWithBody(server, "application/json", bodyReader)
+	return NewLoginRequestWithBody(server, "applicationrefactor/json", bodyReader)
 }
 
 // NewLoginRequestWithBody generates requests for Login with any type of body
@@ -381,7 +381,7 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	return req, nil
 }
 
-// NewRegisterRequest calls the generic Register builder with application/json body
+// NewRegisterRequest calls the generic Register builder with applicationrefactor/json body
 func NewRegisterRequest(server string, body RegisterJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -389,7 +389,7 @@ func NewRegisterRequest(server string, body RegisterJSONRequestBody) (*http.Requ
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewRegisterRequestWithBody(server, "application/json", bodyReader)
+	return NewRegisterRequestWithBody(server, "applicationrefactor/json", bodyReader)
 }
 
 // NewRegisterRequestWithBody generates requests for Register with any type of body
@@ -523,7 +523,7 @@ func NewAcceptInvitationRequest(server string, invitationId string) (*http.Reque
 	return req, nil
 }
 
-// NewFinalizeInvitationRequest calls the generic FinalizeInvitation builder with application/json body
+// NewFinalizeInvitationRequest calls the generic FinalizeInvitation builder with applicationrefactor/json body
 func NewFinalizeInvitationRequest(server string, invitationId string, body FinalizeInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -531,7 +531,7 @@ func NewFinalizeInvitationRequest(server string, invitationId string, body Final
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewFinalizeInvitationRequestWithBody(server, invitationId, "application/json", bodyReader)
+	return NewFinalizeInvitationRequestWithBody(server, invitationId, "applicationrefactor/json", bodyReader)
 }
 
 // NewFinalizeInvitationRequestWithBody generates requests for FinalizeInvitation with any type of body
@@ -631,7 +631,7 @@ func NewKeystoreRequest(server string, keystoreId string) (*http.Request, error)
 	return req, nil
 }
 
-// NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
+// NewCreateInvitationRequest calls the generic CreateInvitation builder with applicationrefactor/json body
 func NewCreateInvitationRequest(server string, keystoreId string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -639,7 +639,7 @@ func NewCreateInvitationRequest(server string, keystoreId string, body CreateInv
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateInvitationRequestWithBody(server, keystoreId, "application/json", bodyReader)
+	return NewCreateInvitationRequestWithBody(server, keystoreId, "applicationrefactor/json", bodyReader)
 }
 
 // NewCreateInvitationRequestWithBody generates requests for CreateInvitation with any type of body
@@ -705,7 +705,7 @@ func NewKeystoresRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateKeystoreRequest calls the generic CreateKeystore builder with application/json body
+// NewCreateKeystoreRequest calls the generic CreateKeystore builder with applicationrefactor/json body
 func NewCreateKeystoreRequest(server string, body CreateKeystoreJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -713,7 +713,7 @@ func NewCreateKeystoreRequest(server string, body CreateKeystoreJSONRequestBody)
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateKeystoreRequestWithBody(server, "application/json", bodyReader)
+	return NewCreateKeystoreRequestWithBody(server, "applicationrefactor/json", bodyReader)
 }
 
 // NewCreateKeystoreRequestWithBody generates requests for CreateKeystore with any type of body

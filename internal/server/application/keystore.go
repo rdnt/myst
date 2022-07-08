@@ -3,8 +3,8 @@ package application
 import (
 	"github.com/pkg/errors"
 
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/keystore"
+	"myst/internal/server/application/domain/invitation"
+	"myst/internal/server/application/domain/keystore"
 )
 
 func (app *application) CreateKeystore(name, ownerId string, payload []byte) (keystore.Keystore, error) {

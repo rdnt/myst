@@ -147,26 +147,26 @@ type CreateInvitationJSONBody CreateInvitationRequest
 // CreateKeystoreJSONBody defines parameters for CreateKeystore.
 type CreateKeystoreJSONBody CreateKeystoreRequest
 
-// LoginJSONRequestBody defines body for Login for application/json ContentType.
+// LoginJSONRequestBody defines body for Login for applicationrefactor/json ContentType.
 type LoginJSONRequestBody LoginJSONBody
 
-// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+// RegisterJSONRequestBody defines body for Register for applicationrefactor/json ContentType.
 type RegisterJSONRequestBody RegisterJSONBody
 
-// AuthenticateJSONRequestBody defines body for Authenticate for application/json ContentType.
+// AuthenticateJSONRequestBody defines body for Authenticate for applicationrefactor/json ContentType.
 type AuthenticateJSONRequestBody AuthenticateJSONBody
 
-// CreateEnclaveJSONRequestBody defines body for CreateEnclave for application/json ContentType.
+// CreateEnclaveJSONRequestBody defines body for CreateEnclave for applicationrefactor/json ContentType.
 type CreateEnclaveJSONRequestBody CreateEnclaveJSONBody
 
-// CreateEntryJSONRequestBody defines body for CreateEntry for application/json ContentType.
+// CreateEntryJSONRequestBody defines body for CreateEntry for applicationrefactor/json ContentType.
 type CreateEntryJSONRequestBody CreateEntryJSONBody
 
-// UpdateEntryJSONRequestBody defines body for UpdateEntry for application/json ContentType.
+// UpdateEntryJSONRequestBody defines body for UpdateEntry for applicationrefactor/json ContentType.
 type UpdateEntryJSONRequestBody UpdateEntryJSONBody
 
-// CreateInvitationJSONRequestBody defines body for CreateInvitation for application/json ContentType.
+// CreateInvitationJSONRequestBody defines body for CreateInvitation for applicationrefactor/json ContentType.
 type CreateInvitationJSONRequestBody CreateInvitationJSONBody
 
-// CreateKeystoreJSONRequestBody defines body for CreateKeystore for application/json ContentType.
+// CreateKeystoreJSONRequestBody defines body for CreateKeystore for applicationrefactor/json ContentType.
 type CreateKeystoreJSONRequestBody CreateKeystoreJSONBody

@@ -1,16 +1,10 @@
-package invitationrepo
+package memdb
 
 import (
 	"fmt"
-	"sync"
 
-	"myst/internal/server/core/domain/invitation"
+	"myst/internal/server/application/domain/invitation"
 )
-
-type Repository struct {
-	mux         sync.Mutex
-	invitations map[string]invitation.Invitation
-}
 
 func (r *Repository) UserInvitations(userId string) ([]invitation.Invitation, error) {
 	r.mux.Lock()
@@ -111,10 +105,4 @@ func (r *Repository) Delete(id string) error {
 
 	delete(r.invitations, id)
 	return nil
-}
-
-func New() invitation.Repository {
-	return &Repository{
-		invitations: make(map[string]invitation.Invitation),
-	}
 }

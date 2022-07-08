@@ -9,7 +9,7 @@ import (
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/application/domain/user"
 	"myst/internal/client/keystorerepo"
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 	"myst/pkg/crypto"
 	"myst/pkg/logger"
 )

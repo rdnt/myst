@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
@@ -72,7 +72,7 @@ func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
 	if handlerName == "" {
 		return
 	}
-	//log.Printf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
+	// log.Printf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
 	log.Printf("%-7s %-50s\n", httpMethod, absolutePath)
 }
 

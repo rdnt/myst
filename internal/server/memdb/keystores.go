@@ -1,16 +1,10 @@
-package keystorerepo
+package memdb
 
 import (
 	"fmt"
-	"sync"
 
-	"myst/internal/server/core/domain/keystore"
+	"myst/internal/server/application/domain/keystore"
 )
-
-type Repository struct {
-	mux       sync.Mutex
-	keystores map[string]keystore.Keystore
-}
 
 func (r *Repository) CreateKeystore(opts ...keystore.Option) (keystore.Keystore, error) {
 	r.mux.Lock()
@@ -111,10 +105,4 @@ func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore,
 	}
 
 	return keystore.Keystore{}, keystore.ErrNotFound
-}
-
-func New() keystore.Repository {
-	return &Repository{
-		keystores: make(map[string]keystore.Keystore),
-	}
 }

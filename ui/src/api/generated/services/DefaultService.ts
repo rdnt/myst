@@ -50,7 +50,7 @@ requestBody: CreateEnclaveRequest,
             method: 'POST',
             url: '/enclave',
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -82,7 +82,7 @@ requestBody: AuthenticateRequest,
             method: 'POST',
             url: '/authenticate',
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -101,7 +101,7 @@ requestBody: RegisterRequest,
             method: 'POST',
             url: '/auth/register',
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -120,7 +120,7 @@ requestBody: LoginRequest,
             method: 'POST',
             url: '/auth/login',
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -155,7 +155,7 @@ requestBody: CreateKeystoreRequest,
             method: 'POST',
             url: '/keystores',
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -235,7 +235,7 @@ requestBody: CreateEntryRequest,
                 'keystoreId': keystoreId,
             },
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -283,7 +283,7 @@ requestBody: UpdateEntryRequest,
                 'entryId': entryId,
             },
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 
@@ -330,7 +330,7 @@ keystoreId?: string,
                 'keystoreId': keystoreId,
             },
             body: requestBody,
-            mediaType: 'application/json',
+            mediaType: 'applicationrefactor/json',
         });
     }
 

@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"myst/internal/client/application/domain/invitation"
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 	"myst/pkg/crypto"
 	"myst/pkg/logger"
 )

@@ -1,14 +1,14 @@
-package http
+package rest
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 )
 
-func (api *API) CreateKeystore(c *gin.Context) {
+func (api *Server) CreateKeystore(c *gin.Context) {
 	userId := CurrentUser(c)
 
 	var req generated.CreateKeystoreRequest
@@ -25,7 +25,7 @@ func (api *API) CreateKeystore(c *gin.Context) {
 	c.JSON(http.StatusOK, ToJSONKeystore(k))
 }
 
-func (api *API) Keystore(c *gin.Context) {
+func (api *Server) Keystore(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
@@ -37,7 +37,7 @@ func (api *API) Keystore(c *gin.Context) {
 	c.JSON(http.StatusOK, ToJSONKeystore(k))
 }
 
-func (api *API) Keystores(c *gin.Context) {
+func (api *Server) Keystores(c *gin.Context) {
 	userId := CurrentUser(c)
 
 	ks, err := api.app.UserKeystores(userId)

@@ -1,10 +1,10 @@
-package http
+package rest
 
 import (
-	"myst/internal/server/api/http/generated"
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/keystore"
-	"myst/internal/server/core/domain/user"
+	"myst/internal/server/application/domain/invitation"
+	"myst/internal/server/application/domain/keystore"
+	"myst/internal/server/application/domain/user"
+	"myst/internal/server/rest/generated"
 )
 
 func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
@@ -18,7 +18,7 @@ func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
 	}
 }
 
-func (api *API) ToJSONInvitation(i invitation.Invitation) (generated.Invitation, error) {
+func (api *Server) ToJSONInvitation(i invitation.Invitation) (generated.Invitation, error) {
 	inviter, err := api.app.User(i.InviterId)
 	if err != nil {
 		return generated.Invitation{}, err

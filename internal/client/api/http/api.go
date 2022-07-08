@@ -210,17 +210,17 @@ func (api *API) Import(c *gin.Context) {
 //
 //	err := c.ShouldBindJSON(&req)
 //	if err != nil {
-//		Error(c, http.StatusBadRequest, err)
+//		Error(c, rest.StatusBadRequest, err)
 //		return
 //	}
 //
 //	k, err := api.app.UnlockKeystore(keystoreId, req.Password)
 //	//if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-//	//	Error(c, http.StatusForbidden, err)
+//	//	Error(c, rest.StatusForbidden, err)
 //	//	return
 //	//}
 //	if err != nil {
-//		Error(c, http.StatusInternalServerError, err)
+//		Error(c, rest.StatusInternalServerError, err)
 //		return
 //	}
 //
@@ -257,7 +257,7 @@ func (api *API) CreateEntry(c *gin.Context) {
 
 	k, err := api.app.Keystore(keystoreId)
 	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-	//	Error(c, http.StatusForbidden, err)
+	//	Error(c, rest.StatusForbidden, err)
 	//	return
 	// }
 	if err != nil {
@@ -295,10 +295,10 @@ func (api *API) Keystore(c *gin.Context) {
 
 	k, err := api.app.Keystore(keystoreId)
 	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-	//	Error(c, http.StatusForbidden, err)
+	//	Error(c, rest.StatusForbidden, err)
 	//	return
 	// } else if errors.Is(err, keystoreservice.ErrAuthenticationFailed) {
-	//	Error(c, http.StatusForbidden, err)
+	//	Error(c, rest.StatusForbidden, err)
 	//	return
 	// }
 	if err != nil {

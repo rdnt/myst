@@ -3,8 +3,8 @@ package application
 import (
 	"github.com/pkg/errors"
 
-	"myst/internal/server/core/domain/invitation"
-	"myst/internal/server/core/domain/user"
+	"myst/internal/server/application/domain/invitation"
+	"myst/internal/server/application/domain/user"
 )
 
 func (app *application) CreateUser(username, password string, publicKey []byte) (user.User, error) {

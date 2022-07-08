@@ -238,7 +238,7 @@ func (app *application) setup() {
 	//	return
 	// }
 
-	// TODO: fix application debug initialization
+	// TODO: fix applicationrefactor debug initialization
 	// sk, err := app.remote.UploadKeystore(
 	//	k1.Name(), key, k1, // TODO: send encrypted keystore with the keystore key (not with the password or the argon2id hash)
 	// )

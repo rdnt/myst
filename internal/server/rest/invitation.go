@@ -1,15 +1,15 @@
-package http
+package rest
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 )
 
-func (api *API) CreateInvitation(c *gin.Context) {
-	//userId := CurrentUser(c)
+func (api *Server) CreateInvitation(c *gin.Context) {
+	// userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
 	log.Println("SERVER Creating invitation", keystoreId)
@@ -43,7 +43,7 @@ func (api *API) CreateInvitation(c *gin.Context) {
 	c.JSON(http.StatusCreated, restInv)
 }
 
-func (api *API) Invitation(c *gin.Context) {
+func (api *Server) Invitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
@@ -64,7 +64,7 @@ func (api *API) Invitation(c *gin.Context) {
 	c.JSON(http.StatusOK, restInv)
 }
 
-func (api *API) AcceptInvitation(c *gin.Context) {
+func (api *Server) AcceptInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
@@ -88,7 +88,7 @@ func (api *API) AcceptInvitation(c *gin.Context) {
 	c.JSON(http.StatusOK, restInv)
 }
 
-func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
+func (api *Server) DeclineOrCancelInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
@@ -111,7 +111,7 @@ func (api *API) DeclineOrCancelInvitation(c *gin.Context) {
 	c.JSON(http.StatusOK, restInv)
 }
 
-func (api *API) FinalizeInvitation(c *gin.Context) {
+func (api *Server) FinalizeInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	var params generated.FinalizeInvitationRequest
@@ -144,7 +144,7 @@ func (api *API) FinalizeInvitation(c *gin.Context) {
 	c.JSON(http.StatusOK, restInv)
 }
 
-func (api *API) Invitations(c *gin.Context) {
+func (api *Server) Invitations(c *gin.Context) {
 	userId := CurrentUser(c)
 
 	invs, err := api.app.UserInvitations(userId, nil)

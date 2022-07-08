@@ -159,7 +159,7 @@ func (app *application) sync() error {
 	return nil
 }
 
-// func (app *application) syncKeystoreKeys() error {
+// func (app *applicationrefactor) syncKeystoreKeys() error {
 //	invs, err := app.remote.Invitations()
 //	if err != nil {
 //		return err

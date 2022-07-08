@@ -10,7 +10,7 @@ import (
 
 	"myst/internal/client/application/domain/keystore"
 	"myst/internal/client/keystorerepo"
-	"myst/internal/server/api/http/generated"
+	"myst/internal/server/rest/generated"
 	"myst/pkg/crypto"
 	"myst/pkg/logger"
 )
@@ -20,7 +20,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	//id := k.Id
+	// id := k.Id
 
 	jk := keystorerepo.KeystoreToJSON(k)
 
@@ -48,15 +48,15 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, fmt.Errorf("invalid response")
 	}
 
-	//err = r.keystores.UpdateKeystore(k)
-	//if err != nil {
+	// err = r.keystores.UpdateKeystore(k)
+	// if err != nil {
 	//	return keystore.Keystore{}, errors.Wrap(err, "failed to update keystore with remote id")
-	//}
+	// }
 
-	//k, err = KeystoreFromJSON(*res.JSON200, k.Key)
-	//if err != nil {
+	// k, err = KeystoreFromJSON(*res.JSON200, k.Key)
+	// if err != nil {
 	//	return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
-	//}
+	// }
 
 	k.RemoteId = (*res.JSON200).Id
 
@@ -79,14 +79,14 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 		return keystore.Keystore{}, fmt.Errorf("invalid response")
 	}
 
-	// TODO: do this on the application layer
-	//invs, err := r.Invitations()
-	//if err != nil {
+	// TODO: do this on the applicationrefactor layer
+	// invs, err := r.Invitations()
+	// if err != nil {
 	//	return keystore.Keystore{}, errors.Wrap(err, "failed to get invitations")
-	//}
+	// }
 
-	//var keystoreKey []byte
-	//for _, inv := range invs {
+	// var keystoreKey []byte
+	// for _, inv := range invs {
 	//	if inv.KeystoreId == remoteID && inv.Finalized() {
 	//		symKey, err := curve25519.X25519(privateKey, inv.InviterKey)
 	//		if err != nil {
@@ -102,11 +102,11 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 	//
 	//		break
 	//	}
-	//}
+	// }
 
-	//if keystoreKey == nil {
+	// if keystoreKey == nil {
 	//	panic(err)
-	//}
+	// }
 
 	k, err := KeystoreFromJSON(*res.JSON200, key)
 	if err != nil {
@@ -174,20 +174,20 @@ func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, err
 		keystores[k.Id] = k
 	}
 
-	//ks := map[string]keystore.Keystore{}
-	//for _, k := range *res.JSON200 {
+	// ks := map[string]keystore.Keystore{}
+	// for _, k := range *res.JSON200 {
 	//	k2, err := KeystoreFromJSON(k)
 	//	if err != nil {
 	//		return nil, errors.WithMessage(err, "failed to parse keystore")
 	//	}
 	//
 	//	ks[k2.Id] = k2
-	//}
+	// }
 
 	return keystores, nil
 }
 
 func (r *remote) DeleteKeystore(id string) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }

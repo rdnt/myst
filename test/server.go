@@ -5,10 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"myst/internal/server/application"
-	"myst/internal/server/database/invitationrepo/memory"
-	"myst/internal/server/database/keystorerepo/memory"
-	"myst/internal/server/database/userrepo/memory"
+	"myst/src/server/application"
+	"myst/src/server/repository"
+	"myst/src/server/rest"
 )
 
 type Server struct {
@@ -20,23 +19,21 @@ type Server struct {
 func (s *IntegrationTestSuite) setupServer(port int) *Server {
 	server := &Server{}
 
-	keystoreRepo := keystorerepo.keystorerepo.New()
-	userRepo := userrepo.userrepo.New()
-	invitationRepo := invitationrepo.invitationrepo.New()
+	repo := repository.New()
 
 	var err error
 	server.app, err = application.New(
-		application.WithKeystoreRepository(keystoreRepo),
-		application.WithUserRepository(userRepo),
-		application.WithInvitationRepository(invitationRepo),
+		application.WithKeystoreRepository(repo),
+		application.WithUserRepository(repo),
+		application.WithInvitationRepository(repo),
 	)
 	s.Require().NoError(err)
 
-	api := http.New(server.app)
+	srv := rest.NewServer(server.app)
 	server.address = fmt.Sprintf("localhost:%d", port)
 
 	go func() {
-		err = api.Run(server.address)
+		err = srv.Run(server.address)
 		s.Require().NoError(err)
 	}()
 

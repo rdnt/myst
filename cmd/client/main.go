@@ -4,13 +4,12 @@ import (
 	"embed"
 	"fmt"
 
-	"myst/internal/client/api/http"
-	"myst/internal/client/application"
-	"myst/internal/client/application/keystoreservice"
-	"myst/internal/client/keystorerepo"
-	"myst/internal/client/remote"
 	"myst/pkg/config"
 	"myst/pkg/logger"
+	"myst/src/client/application"
+	"myst/src/client/remote"
+	"myst/src/client/repository"
+	"myst/src/client/rest"
 
 	"github.com/namsral/flag"
 )
@@ -44,24 +43,17 @@ func main() {
 
 	cfg := parseFlags()
 
-	//rem, err := remote.New("http://localhost:8080")
-	//if err != nil {
+	// rem, err := remote.NewServer("http://localhost:8080")
+	// if err != nil {
 	//	panic(err)
-	//}
+	// }
 
-	keystoreRepo, err := keystorerepo.New(cfg.DataDir)
+	repo, err := repository.New(cfg.DataDir)
 	if err != nil {
 		panic(err)
 	}
 
-	keystoreService, err := keystoreservice.New(
-		keystoreservice.WithKeystoreRepository(keystoreRepo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	remote, err := remote.New(
+	rem, err := remote.New(
 		remote.WithAddress(cfg.RemoteAddress),
 	)
 	if err != nil {
@@ -69,16 +61,16 @@ func main() {
 	}
 
 	app, err := application.New(
-		application.WithKeystoreService(keystoreService),
-		application.WithRemote(remote),
+		application.WithKeystoreRepository(repo),
+		application.WithRemote(rem),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	api := http.New(app, static)
+	server := rest.NewServer(app, static)
 
-	err = api.Run(fmt.Sprintf(":%d", cfg.Port))
+	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
 		panic(err)
 	}

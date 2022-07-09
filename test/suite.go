@@ -9,12 +9,11 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 
-	clientGenerated "myst/internal/client/api/rest/generated"
-
-	"myst/internal/server/rest/generated"
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/testing/capture"
+	clientGenerated "myst/src/client/rest/generated"
+	"myst/src/server/rest/generated"
 )
 
 type IntegrationTestSuite struct {
@@ -79,7 +78,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	fmt.Println(string(res.Body))
 
 	s.Require().NotNil(res.JSON201)
-	s.Require().Equal(user, (*res.JSON201).Username)
+	s.Require().Equal(user, (*res.JSON201).User.Username)
 
 	err = s._client1.app.SignIn(user, pass)
 	s.Require().NoError(err)
@@ -90,7 +89,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s.Require().NotNil(res.JSON201)
-	s.Require().Equal(user, (*res.JSON201).Username)
+	s.Require().Equal(user, (*res.JSON201).User.Username)
 
 	err = s._client2.app.SignIn(user, pass)
 	s.Require().NoError(err)

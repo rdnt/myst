@@ -1,11 +1,11 @@
 package main
 
 import (
-	"myst/internal/server/application"
-	"myst/internal/server/memdb"
-	"myst/internal/server/rest"
 	"myst/pkg/config"
 	"myst/pkg/logger"
+	"myst/src/server/application"
+	"myst/src/server/repository"
+	"myst/src/server/rest"
 )
 
 var log = logger.New("app", logger.Red)
@@ -13,12 +13,12 @@ var log = logger.New("app", logger.Red)
 func main() {
 	logger.EnableDebug = config.Debug
 
-	mem := memdb.New()
+	repo := repository.New()
 
 	app, err := application.New(
-		application.WithKeystoreRepository(mem),
-		application.WithUserRepository(mem),
-		application.WithInvitationRepository(mem),
+		application.WithKeystoreRepository(repo),
+		application.WithUserRepository(repo),
+		application.WithInvitationRepository(repo),
 	)
 	if err != nil {
 		panic(err)

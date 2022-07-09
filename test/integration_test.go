@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	clientgen "myst/internal/client/api/rest/generated"
 	"myst/pkg/optional"
+	clientgen "myst/src/client/rest/generated"
 
-	//servergen "myst/internal/server/api/rest/generated"
+	// servergen "myst/internal/server/api/rest/generated"
 	"myst/pkg/testing/capture"
 )
 
@@ -78,7 +78,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	s.T().Log("Creating invitation", ks.Id)
 	createinvres, err := s.client1.CreateInvitationWithResponse(ctx, ks.Id, clientgen.CreateInvitationJSONRequestBody{
-		InviteeId: "abcd",
+		Invitee: "abcd",
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createinvres.JSON200)
@@ -101,7 +101,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	restInv = *acceptResponse.JSON200
 	s.Require().Equal(restInv.Status, clientgen.InvitationStatusAccepted)
-	s.Require().NotNil(restInv.InviteeKey)
+	s.Require().NotNil(restInv.InviteePublicKey)
 
 	fmt.Println("INVID", restInv.Id)
 
@@ -114,5 +114,5 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	// TODO: accept/decline keystore invitation
 
-	//time.Sleep(10 * time.Minute)
+	// time.Sleep(10 * time.Minute)
 }

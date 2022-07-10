@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0.0",
-    "title": "Myst REST API",
+    "title": "Myst Client REST API",
     "description": "",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
@@ -48,8 +48,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Enclave created"
           },
           "default": {
             "description": "Error",
@@ -383,49 +383,8 @@
             }
           }
         }
-      },
-      "get": {
-        "description": "Get the entries of a keystore",
-        "operationId": "KeystoreEntries",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "required": true,
-            "description": "unique identifier for a keystore",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Entries",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Entry"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
       }
     },
-
     "/keystore/{keystoreId}/entry/{entryId}": {
       "patch": {
         "description": "Update a keystore entry",
@@ -693,9 +652,6 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
-          },
-          "password": {
             "type": "string"
           }
         }

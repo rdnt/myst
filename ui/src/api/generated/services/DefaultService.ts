@@ -240,27 +240,6 @@ requestBody: CreateEntryRequest,
     }
 
     /**
-     * Get the entries of a keystore
-     * @returns Entry Entries
-     * @returns Error Error
-     * @throws ApiError
-     */
-    public static keystoreEntries({
-keystoreId,
-}: {
-/** unique identifier for a keystore **/
-keystoreId: string,
-}): CancelablePromise<Array<Entry> | Error> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/keystore/{keystoreId}/entries',
-            path: {
-                'keystoreId': keystoreId,
-            },
-        });
-    }
-
-    /**
      * Update a keystore entry
      * @returns Entry Entry
      * @returns Error Error

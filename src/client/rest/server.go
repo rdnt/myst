@@ -144,23 +144,13 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	var k keystore.Keystore
-	if req.Password != nil {
-		k, err = s.app.CreateKeystore(
-			keystore.New(keystore.WithName(req.Name)),
-		)
-		if err != nil {
-			log.Error(err)
-			Error(c, http.StatusInternalServerError, err)
-			return
-		}
-	} else {
-		k, err = s.app.CreateKeystore(keystore.New(keystore.WithName(req.Name)))
-		if err != nil {
-			log.Error(err)
-			Error(c, http.StatusInternalServerError, err)
-			return
-		}
+	k, err := s.app.CreateKeystore(
+		keystore.New(keystore.WithName(req.Name)),
+	)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
 	}
 
 	entries := []generated.Entry{}
@@ -195,7 +185,7 @@ func (s *Server) DeleteKeystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.Status(http.StatusOK)
 }
 
 func (s *Server) CreateEnclave(c *gin.Context) {
@@ -213,7 +203,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.Status(http.StatusCreated)
 }
 
 func (s *Server) Enclave(c *gin.Context) {
@@ -230,7 +220,7 @@ func (s *Server) Enclave(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.Status(http.StatusOK)
 }
 
 func (s *Server) Import(c *gin.Context) {
@@ -447,7 +437,7 @@ func (s *Server) DeleteEntry(c *gin.Context) {
 		return
 	}
 
-	Success(c, nil)
+	c.Status(http.StatusOK)
 }
 
 func (s *Server) GetInvitations(c *gin.Context) {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"myst/pkg/optional"
 	clientgen "myst/src/client/rest/generated"
 
 	// servergen "myst/internal/server/api/rest/generated"
@@ -28,8 +27,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	k1name := s.rand()
 
 	createksres, err := s.client1.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
-		Name:     k1name,
-		Password: optional.Ref(s._client1.masterPassword),
+		Name: k1name,
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createksres.JSON201)
@@ -52,8 +50,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	k2name := s.rand()
 
 	createksres2, err := s.client2.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
-		Name:     k2name,
-		Password: optional.Ref(s._client2.masterPassword),
+		Name: k2name,
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createksres2.JSON201)
@@ -88,7 +85,7 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 
 	restInv = *acceptResponse.JSON200
 	s.Require().Equal(restInv.Status, clientgen.Accepted)
-	s.Require().NotNil(restInv.InviteePublicKey)
+	s.Require().NotNil(restInv.Invitee.PublicKey)
 
 	inv, err := s._client1.app.FinalizeInvitation(restInv.Id)
 	s.Require().NoError(err)

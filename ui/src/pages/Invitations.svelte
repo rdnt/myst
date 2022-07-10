@@ -8,6 +8,7 @@
   import {getInvitations, invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
+  import {onMount} from "svelte";
 
   const registerFocus = useFocus();
 
@@ -46,6 +47,10 @@
     invitation = inv;
     showDeclineInvitationModal = true;
   }
+
+  onMount(() => {
+    getInvitations()
+  })
 </script>
 
 <div class="invitations-list" use:registerFocus>

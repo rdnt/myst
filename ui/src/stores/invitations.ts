@@ -6,7 +6,7 @@ import {get, readable} from "svelte/store";
 let setFunc
 export const getInvitations = () => {
   if (!get(currentUser)) {
-    return
+    return Promise.reject("no user")
   }
 
   return api.getInvitations().then((invs: Invitation[]) => {
@@ -35,7 +35,7 @@ export const invitations = readable<Invitation[]>([], (set) => {
 
   getInvitations()
 
-  let interval = window.setInterval(getInvitations, 60000)
+  let interval = window.setInterval(getInvitations, 10000)
 
   return () => {
     window.clearInterval(interval)

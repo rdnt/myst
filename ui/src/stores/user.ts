@@ -1,6 +1,7 @@
 import api, {ApiError} from "@/api";
 import type {User} from "@/api";
 import {readable} from "svelte/store";
+import {getInvitations} from "@/stores/invitations";
 
 let setFunc
 export const getCurrentUser = () => {
@@ -28,9 +29,11 @@ export const getCurrentUser = () => {
 
 export const currentUser = readable<User>(undefined, (set) => {
   setFunc = set
-  getCurrentUser()
+  getCurrentUser().then(() => {
+    getInvitations()
+  })
 
-  let interval = window.setInterval(getCurrentUser, 60000)
+  let interval = window.setInterval(getCurrentUser, 10000)
 
   return () => {
     window.clearInterval(interval)

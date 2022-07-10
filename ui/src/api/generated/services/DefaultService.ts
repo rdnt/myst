@@ -50,7 +50,7 @@ requestBody: CreateEnclaveRequest,
             method: 'POST',
             url: '/enclave',
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -82,7 +82,7 @@ requestBody: AuthenticateRequest,
             method: 'POST',
             url: '/authenticate',
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -101,7 +101,7 @@ requestBody: RegisterRequest,
             method: 'POST',
             url: '/auth/register',
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -120,7 +120,7 @@ requestBody: LoginRequest,
             method: 'POST',
             url: '/auth/login',
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -155,7 +155,7 @@ requestBody: CreateKeystoreRequest,
             method: 'POST',
             url: '/keystores',
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -216,8 +216,8 @@ keystoreId: string,
 
     /**
      * Creates a new entry and adds it to the keystore
-     * @returns Entry Entry
      * @returns Error Error
+     * @returns Entry Entry
      * @throws ApiError
      */
     public static createEntry({
@@ -227,7 +227,7 @@ requestBody,
 /** unique identifier for a keystore **/
 keystoreId: string,
 requestBody: CreateEntryRequest,
-}): CancelablePromise<Entry | Error> {
+}): CancelablePromise<Error | Entry> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/keystore/{keystoreId}/entries',
@@ -235,7 +235,7 @@ requestBody: CreateEntryRequest,
                 'keystoreId': keystoreId,
             },
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -283,7 +283,7 @@ requestBody: UpdateEntryRequest,
                 'entryId': entryId,
             },
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 
@@ -330,7 +330,7 @@ keystoreId?: string,
                 'keystoreId': keystoreId,
             },
             body: requestBody,
-            mediaType: 'applicationrefactor/json',
+            mediaType: 'application/json',
         });
     }
 

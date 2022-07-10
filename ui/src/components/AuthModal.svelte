@@ -31,7 +31,7 @@
       return;
     }
 
-    api.login({
+    api.register({
       requestBody: {
         username,
         password,

@@ -362,7 +362,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Entry",
             "content": {
               "application/json": {

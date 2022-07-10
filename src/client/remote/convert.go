@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/user"
@@ -61,14 +60,10 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 	// Payload
 	// UpdatedAt
 
-	logger.Error("@@@@@@@@@@@@@@@@@@@@@@@@@@", string(keystoreKey))
-
 	decryptedKeystorePayload, err := crypto.AES256CBC_Decrypt(keystoreKey, gen.Payload)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc decrypt failed when parsing keystore")
 	}
-
-	logger.Error("DECRYPTEEEED", string(decryptedKeystorePayload))
 
 	var jk repository.Keystore
 

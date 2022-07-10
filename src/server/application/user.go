@@ -16,7 +16,21 @@ func (app *application) CreateUser(username, password string, publicKey []byte) 
 }
 
 func (app *application) AuthorizeUser(username, password string) error {
-	panic("implement me")
+	u, err := app.users.UserByUsername(username)
+	if err != nil {
+		return err
+	}
+
+	ok, err := app.users.VerifyPassword(u.Id, password)
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return errors.New("invalid password")
+	}
+
+	return nil
 }
 
 func (app *application) User(userId string) (user.User, error) {

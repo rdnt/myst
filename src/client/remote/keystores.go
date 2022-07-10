@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/repository"
 	"myst/src/server/rest/generated"
@@ -44,8 +43,8 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, errors.Wrap(err, "failed to create keystore")
 	}
 
-	if res.JSON200 == nil {
-		return keystore.Keystore{}, fmt.Errorf("invalid response")
+	if res.JSON201 == nil {
+		return keystore.Keystore{}, fmt.Errorf("invalid response: %s", string(res.Body))
 	}
 
 	// err = r.keystores.UpdateKeystore(k)
@@ -58,7 +57,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	//	return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
 	// }
 
-	k.RemoteId = (*res.JSON200).Id
+	k.RemoteId = (*res.JSON201).Id
 
 	return k, nil
 }
@@ -150,8 +149,6 @@ func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, err
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to create asymmetric key")
 				}
-
-				logger.Error("@@@ ###################### SYMMETRIC WHEN SYNC", string(symKey))
 
 				keystoreKey, err = crypto.AES256CBC_Decrypt(symKey, inv.EncryptedKeystoreKey)
 				if err != nil {

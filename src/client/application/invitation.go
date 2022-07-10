@@ -1,8 +1,6 @@
 package application
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"myst/src/client/application/domain/invitation"
@@ -30,8 +28,6 @@ func (app *application) CreateInvitation(keystoreId string, inviteeUsername stri
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
-
-	fmt.Println(invitee)
 
 	inv := invitation.New(
 		invitation.WithKeystoreId(k.RemoteId),
@@ -71,12 +67,17 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
 	}
 
+	rem, err := app.keystores.Remote()
+	if err != nil {
+		return invitation.Invitation{}, err
+	}
+
 	k, err := app.KeystoreByRemoteId(inv.KeystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	inv, err = app.remote.FinalizeInvitation(id, k.Key, nil)
+	inv, err = app.remote.FinalizeInvitation(id, k.Key, rem.PrivateKey)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
 	}

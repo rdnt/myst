@@ -14,18 +14,30 @@ type Client struct {
 	dir            string
 	app            application.Application
 	address        string
+	username       string
+	password       string
 	masterPassword string
 }
 
-func (s *IntegrationTestSuite) setupClient(serverAddress string, masterPassword, username, password string, port int) *Client {
-	client := &Client{masterPassword: masterPassword}
+func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Client {
+	username, password, masterPassword := s.rand(), s.rand(), s.rand()
 
 	var err error
-	client.dir, err = os.MkdirTemp("", "myst-client-data-*")
+	dir, err := os.MkdirTemp("", "myst-client-data-*")
 	s.Require().NoError(err)
 
-	err = os.Chmod(client.dir, os.ModePerm)
+	err = os.Chmod(dir, os.ModePerm)
 	s.Require().NoError(err)
+
+	s.T().Log("Client starting...", serverAddress, port, dir, username, password, masterPassword)
+	defer s.T().Log("Client started", serverAddress, port, dir, username, password, masterPassword)
+
+	client := &Client{
+		dir:            dir,
+		username:       username,
+		password:       password,
+		masterPassword: masterPassword,
+	}
 
 	// rem, err := remote.NewServer("http://localhost:8080")
 	// s.Require().NoError(err)
@@ -50,8 +62,9 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, masterPassword,
 	srv := rest.NewServer(client.app, nil)
 	client.address = fmt.Sprintf("localhost:%d", port)
 
-	err = client.app.SignIn(username, password)
+	u, err := client.app.Register(username, password)
 	s.Require().NoError(err)
+	s.Require().Equal(username, u.Username)
 
 	go func() {
 		err = srv.Run(client.address)

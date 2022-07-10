@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"myst/pkg/logger"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
@@ -118,7 +117,6 @@ func (app *application) CreateFirstKeystore(k keystore.Keystore, password string
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to create keystore")
 	}
 
-	logger.Printf("@@@@@@@@@@############### %#v\n", k)
 	return k, nil
 }
 

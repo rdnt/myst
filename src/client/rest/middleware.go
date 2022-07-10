@@ -32,17 +32,19 @@ func NoRoute(c *gin.Context) {
 }
 
 // Recovery is a panic recovery middleware
-func Recovery(c *gin.Context) {
-	defer func() {
-		if err := recover(); err != nil {
-			httprequest, _ := httputil.DumpRequest(c.Request, false)
-			goErr := errors.Wrap(err, 3)
-			log.Errorf("Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
-			recoveryHandler(c, err)
-		}
-	}()
+func Recovery() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				httprequest, _ := httputil.DumpRequest(c.Request, false)
+				goErr := errors.Wrap(err, 0)
+				log.Errorf("Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
+				recoveryHandler(c, err)
+			}
+		}()
 
-	c.Next()
+		c.Next()
+	}
 }
 
 // recoveryHandler sends a 500 response if a panic occurs during serving

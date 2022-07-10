@@ -139,6 +139,7 @@ func (s *Server) Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := s.TokenAuthentication(c)
 		if err != nil {
+			log.Error(err)
 			c.JSON(403, gin.H{"error": "Forbidden"})
 			c.Abort()
 
@@ -207,10 +208,6 @@ func (s *Server) TokenAuthentication(c *gin.Context) error {
 	u, err := s.app.User(userId)
 	if err != nil {
 		return errors.New("user not found")
-	}
-
-	if u.Username != "rdnt" && u.Username != "abcd" {
-		return fmt.Errorf("authentication failed")
 	}
 
 	c.Set("userId", u.Id)

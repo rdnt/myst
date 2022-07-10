@@ -17,6 +17,9 @@ type Server struct {
 }
 
 func (s *IntegrationTestSuite) setupServer(port int) *Server {
+	s.T().Log("Server starting...", port)
+	defer s.T().Log("Server started", port)
+
 	server := &Server{}
 
 	repo := repository.New()

@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"myst/pkg/crypto"
 	"myst/src/server/application/domain/user"
 )
 
@@ -31,9 +32,14 @@ func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 		}
 	}
 
+	hash, err := crypto.HashPassword(u.Password)
+	if err != nil {
+		return user.User{}, err
+	}
+
 	ru := User{
 		User:         u,
-		passwordHash: "asd", // todo: generate hash
+		passwordHash: hash,
 	}
 
 	r.users[ru.Id] = ru
@@ -103,4 +109,16 @@ func (r *Repository) DeleteUser(id string) error {
 
 	delete(r.users, id)
 	return nil
+}
+
+func (r *Repository) VerifyPassword(userId, password string) (bool, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	u, ok := r.users[userId]
+	if !ok {
+		return false, user.ErrNotFound
+	}
+
+	return crypto.VerifyPassword(password, u.passwordHash)
 }

@@ -64,21 +64,21 @@ func (app *application) Start() error {
 	return nil
 }
 
-func (app *application) setup() {
-	u, err := app.CreateUser("rdnt", "1234", []byte("rdntPublicKey"))
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug(u)
-
-	u, err = app.CreateUser("abcd", "5678", []byte("abcdPublicKey"))
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug(u)
-}
+// func (app *application) setup() {
+// 	u, err := app.CreateUser("rdnt", "1234", []byte("rdntPublicKey"))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+//
+// 	log.Debug(u)
+//
+// 	u, err = app.CreateUser("abcd", "5678", []byte("abcdPublicKey"))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+//
+// 	log.Debug(u)
+// }
 
 func (app *application) Stop() error {
 	log.Print("App stopped")

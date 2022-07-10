@@ -22,7 +22,7 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		panic(err)
 	}
 
-	c.JSON(http.StatusOK, ToJSONKeystore(k))
+	c.JSON(http.StatusCreated, ToJSONKeystore(k))
 }
 
 func (s *Server) Keystore(c *gin.Context) {

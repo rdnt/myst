@@ -7,9 +7,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/curve25519"
 
-	"myst/pkg/crypto"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/user"
 	"myst/src/client/pkg/enclave"
@@ -106,7 +104,7 @@ func New(opts ...Option) (application.Remote, error) {
 //	return k, nil
 // }
 
-func (r *remote) SignIn(username, password string) error {
+func (r *remote) SignIn(username, password string) (user.User, error) {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -118,17 +116,17 @@ func (r *remote) SignIn(username, password string) error {
 		},
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to sign in")
+		return user.User{}, errors.Wrap(err, "failed to sign in")
 	}
 
 	if res.JSON200 == nil {
-		return ErrInvalidResponse
+		return user.User{}, ErrInvalidResponse
 	}
 
 	resp := *res.JSON200
 
 	if resp.Token == "" {
-		return errors.New("invalid token")
+		return user.User{}, errors.New("invalid token")
 	}
 
 	u := user.User{
@@ -141,7 +139,7 @@ func (r *remote) SignIn(username, password string) error {
 
 	fmt.Println("Signed in.")
 
-	return nil
+	return u, nil
 }
 
 func (r *remote) SignedIn() bool {
@@ -225,21 +223,6 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 	fmt.Println("Registered.")
 
 	return u, nil
-}
-
-func newKeypair() ([]byte, []byte, error) {
-	var pub [32]byte
-	var key [32]byte
-
-	b, err := crypto.GenerateRandomBytes(32)
-	if err != nil {
-		return nil, nil, err
-	}
-	copy(key[:], b)
-
-	curve25519.ScalarBaseMult(&pub, &key)
-
-	return pub[:], key[:], nil
 }
 
 func (r *remote) authenticate() generated.RequestEditorFn {

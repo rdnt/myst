@@ -15,6 +15,7 @@ type Repository interface {
 	UpdateUser(*User) error
 	Users() ([]User, error)
 	DeleteUser(id string) error
+	VerifyPassword(id, password string) (bool, error)
 }
 
 type Service interface {

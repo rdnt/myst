@@ -36,7 +36,7 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	if err := s.app.SignIn(req.Username, req.Password); err != nil {
+	if _, err := s.app.SignIn(req.Username, req.Password); err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
 		return

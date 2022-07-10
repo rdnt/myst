@@ -60,6 +60,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 
 	var jrem *Remote
 	rem := e.Remote()
+
 	if rem != nil {
 		jrem = &Remote{
 			Address:    rem.Address,
@@ -98,6 +99,7 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 
 	var rem *enclave.Remote
 	jrem := e.Remote
+
 	if jrem != nil {
 		rem = &enclave.Remote{
 			Address:    jrem.Address,

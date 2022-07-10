@@ -1,15 +1,14 @@
 package test
 
 import (
-	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 
 	"myst/pkg/config"
+	"myst/pkg/crypto"
 	"myst/pkg/logger"
 	"myst/pkg/testing/capture"
 	clientGenerated "myst/src/client/rest/generated"
@@ -47,6 +46,18 @@ func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInform
 	)
 }
 
+func (s *IntegrationTestSuite) rand(sizes ...int) string {
+	size := 32
+	if len(sizes) > 0 {
+		size = sizes[0]
+	}
+
+	str, err := crypto.GenerateRandomString(size)
+	s.Require().Nil(err)
+
+	return str
+}
+
 func (s *IntegrationTestSuite) SetupSuite() {
 	fmt.Println("Running integration_suite tests...")
 
@@ -57,8 +68,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s._server = s.setupServer(ports[0])
-	s._client1 = s.setupClient("http://"+s._server.address, "rdntmasterpass", "rdnt", "1234", ports[1])
-	s._client2 = s.setupClient("http://"+s._server.address, "abcdmasterpass", "abcd", "5678", ports[2])
+	s._client1 = s.setupClient("http://"+s._server.address, ports[1])
+	s._client2 = s.setupClient("http://"+s._server.address, ports[2])
 
 	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
@@ -66,33 +77,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	// s.mini, err = miniredis.Run()
 	// s.Require().NoError(err)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	user, pass := "rdnt", "1234"
-
-	res, err := s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
-	s.Require().NoError(err)
-
-	fmt.Println(string(res.Body))
-
-	s.Require().NotNil(res.JSON201)
-	s.Require().Equal(user, (*res.JSON201).User.Username)
-
-	err = s._client1.app.SignIn(user, pass)
-	s.Require().NoError(err)
-
-	user, pass = "abcd", "5678"
-
-	res, err = s.server.RegisterWithResponse(ctx, generated.RegisterJSONRequestBody{Username: user, Password: pass})
-	s.Require().NoError(err)
-
-	s.Require().NotNil(res.JSON201)
-	s.Require().Equal(user, (*res.JSON201).User.Username)
-
-	err = s._client2.app.SignIn(user, pass)
-	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {

@@ -23,8 +23,8 @@ import (
 	// prometheus "github.com/zsais/go-gin-prometheus"
 )
 
-//go:generate oapi-codegen -package generated -generate types -o generated/types.gen.go openapi.json
-//go:generate oapi-codegen -package generated -generate client -o generated/client.gen.go openapi.json
+//go:generate oapi-codegen --config oapi-codegen-models.yaml openapi.json
+//go:generate oapi-codegen --config oapi-codegen-client.yaml openapi.json
 // TODO: remove redundant go:generate for old ui
 // //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
 // //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
@@ -62,7 +62,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	gin.DebugPrintRouteFunc = PrintRoutes
 
 	// always use recovery middleware
-	r.Use(Recovery)
+	r.Use(gin.CustomRecovery(recoveryHandler))
 
 	// custom logging middleware
 	r.Use(LoggerMiddleware)
@@ -146,9 +146,8 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 
 	var k keystore.Keystore
 	if req.Password != nil {
-		k, err = s.app.CreateFirstKeystore(
+		k, err = s.app.CreateKeystore(
 			keystore.New(keystore.WithName(req.Name)),
-			*req.Password,
 		)
 		if err != nil {
 			log.Error(err)
@@ -358,15 +357,13 @@ func (s *Server) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	Success(
-		c, generated.Entry{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
-		},
-	)
+	c.JSON(http.StatusCreated, generated.Entry{
+		Id:       e.Id,
+		Website:  e.Website,
+		Username: e.Username,
+		Password: e.Password,
+		Notes:    e.Notes,
+	})
 }
 
 func (s *Server) Keystore(c *gin.Context) {

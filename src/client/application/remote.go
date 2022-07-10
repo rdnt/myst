@@ -9,63 +9,84 @@ import (
 	"myst/src/client/application/domain/user"
 )
 
-func (app *application) SignIn(username, password string) error {
+func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
 
 	rem, err := app.keystores.Remote()
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
-		return err
+		return user.User{}, err
 	}
 
 	if !mustInit {
 		if rem.Address != app.remote.Address() {
-			return fmt.Errorf("remote address mismatch")
+			return user.User{}, fmt.Errorf("remote address mismatch")
 		}
 
-		err = app.remote.SignIn(username, password)
+		_, err = app.remote.SignIn(username, password)
 		if err != nil {
-			return err
+			return user.User{}, err
 		}
 	}
 
 	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
 	if err != nil {
-		return err
+		return user.User{}, err
 	}
 
-	_, err = app.remote.Register(username, password, rem.PublicKey)
+	u, err := app.remote.Register(username, password, publicKey)
 	if err != nil {
-		return err
+		return user.User{}, err
 	}
 
 	err = app.keystores.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
-		return err
+		return user.User{}, err
 	}
 
-	return nil
+	return u, nil
 }
 
-func (app *application) Register(username, password string) (user.User, error) {
-	// u, err := app.remote.Register(username, password)
-	// if err != nil {
-	//	return user.User{}, errors.WithMessage(err, "failed to register")
-	// }
-	//
-	// err = app.keystores.SetRemote(app.remote.Address(), username, password)
-	// if err != nil {
-	//	return user.User{}, errors.WithMessage(err, "failed to set user info")
-	// }
-	//
-	// err = app.remote.SignIn(username, password)
-	// if err != nil {
-	//	return user.User{}, err
-	// }
-	//
-	// return u, nil
-	panic("implement me")
+func (app *application) SignIn(username, password string) (user.User, error) {
+	panic("disabled")
+
+	var mustInit bool
+
+	rem, err := app.keystores.Remote()
+	if errors.Is(err, enclave.ErrRemoteNotSet) {
+		mustInit = true
+	} else if err != nil {
+		return user.User{}, err
+	}
+
+	if !mustInit {
+		if rem.Address != app.remote.Address() {
+			return user.User{}, fmt.Errorf("remote address mismatch")
+		}
+
+		_, err = app.remote.SignIn(username, password)
+		if err != nil {
+			return user.User{}, err
+		}
+	}
+
+	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
+	if err != nil {
+		return user.User{}, err
+	}
+
+	u, err := app.remote.SignIn(username, password)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	err = app.keystores.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	return u, nil
 }
 
 func (app *application) CurrentUser() (*user.User, error) {
@@ -101,7 +122,7 @@ func (app *application) Authenticate(password string) error {
 			return fmt.Errorf("remote address mismatch")
 		}
 
-		err = app.remote.SignIn(rem.Username, rem.Password)
+		_, err = app.remote.SignIn(rem.Username, rem.Password)
 		if err != nil {
 			return err
 		}

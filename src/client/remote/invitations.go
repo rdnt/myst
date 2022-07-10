@@ -8,7 +8,6 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/server/rest/generated"
 )
@@ -45,7 +44,7 @@ func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitat
 	}
 
 	if res.JSON201 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
+		return invitation.Invitation{}, fmt.Errorf("invalid response: %s", string(res.Body))
 	}
 
 	inv, err = InvitationFromJSON(*res.JSON201)
@@ -145,8 +144,6 @@ func (r *remote) FinalizeInvitation(invitationId string, keystoreKey, privateKey
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
 	}
-
-	logger.Error("@@@ ###################### SYMMETRIC WHEN CREATE", string(asymKey))
 
 	// encrypt the keystore key with the asymmetric key
 	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(asymKey, keystoreKey)

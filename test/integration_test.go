@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -16,7 +15,6 @@ import (
 )
 
 func TestIntegration(t *testing.T) {
-	t.Log("Integration test")
 	s := &IntegrationTestSuite{
 		capture: capture.New(t),
 	}
@@ -27,25 +25,23 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	masterPassword := "12345678"
-	k1name := "my-keystore-1"
+	k1name := s.rand()
 
 	createksres, err := s.client1.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
 		Name:     k1name,
-		Password: optional.Ref(masterPassword),
+		Password: optional.Ref(s._client1.masterPassword),
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createksres.JSON201)
 
 	ks := *createksres.JSON201
 	s.Require().Equal(ks.Name, k1name)
-	s.T().Logf("Keystore created: %#v\n", ks)
 
 	_, err = s.client1.CreateEntryWithResponse(ctx, ks.Id, clientgen.CreateEntryJSONRequestBody{
-		Website:  "example.com",
-		Username: "xmpl",
-		Password: "1337",
-		Notes:    "blah blah blah",
+		Website:  s.rand(),
+		Username: s.rand(),
+		Password: s.rand(),
+		Notes:    s.rand(),
 	})
 	s.Require().NoError(err)
 
@@ -53,14 +49,11 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	s.Require().NoError(err)
 	s.Require().NotNil(restKeystore.JSON200)
 
-	s.T().Log("@@@@", *restKeystore.JSON200)
-
-	masterPassword2 := "87654321"
-	k2name := "my-keystore-2"
+	k2name := s.rand()
 
 	createksres2, err := s.client2.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
 		Name:     k2name,
-		Password: optional.Ref(masterPassword2),
+		Password: optional.Ref(s._client2.masterPassword),
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createksres2.JSON201)
@@ -68,17 +61,11 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	ks2 := *createksres2.JSON201
 	s.Require().Equal(ks2.Name, k2name)
 
-	// ###
-
-	res, err := s.server.KeystoresWithResponse(context.Background())
+	_, err = s.server.KeystoresWithResponse(context.Background())
 	s.Require().NoError(err)
-	fmt.Println("@@@@@@@!!!!!!!!!!!!!!!!!!!!", string(res.Body))
 
-	// ###
-
-	s.T().Log("Creating invitation", ks.Id)
 	createinvres, err := s.client1.CreateInvitationWithResponse(ctx, ks.Id, clientgen.CreateInvitationJSONRequestBody{
-		Invitee: "abcd",
+		Invitee: s._client2.username,
 	})
 	s.Require().NoError(err)
 	s.Require().NotNil(createinvres.JSON200)
@@ -100,19 +87,11 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 	s.Require().NotNil(acceptResponse.JSON200)
 
 	restInv = *acceptResponse.JSON200
-	s.Require().Equal(restInv.Status, clientgen.InvitationStatusAccepted)
+	s.Require().Equal(restInv.Status, clientgen.Accepted)
 	s.Require().NotNil(restInv.InviteePublicKey)
-
-	fmt.Println("INVID", restInv.Id)
 
 	inv, err := s._client1.app.FinalizeInvitation(restInv.Id)
 	s.Require().NoError(err)
 	s.Require().NotNil(acceptResponse.JSON200)
 	s.Require().Equal(inv.Id, restInv.Id)
-
-	s.T().Log(inv)
-
-	// TODO: accept/decline keystore invitation
-
-	// time.Sleep(10 * time.Minute)
 }

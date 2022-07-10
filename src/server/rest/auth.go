@@ -28,7 +28,9 @@ func (s *Server) Register(c *gin.Context) {
 
 	token, err := s.loginUser(u.Id)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusCreated, generated.AuthorizationResponse{
@@ -44,29 +46,44 @@ func (s *Server) Login(c *gin.Context) {
 	var params generated.LoginRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	u, err := s.app.UserByUsername(params.Username)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
-	// TODO: proper password hash check
-	if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
-		panic("invalid username or password")
+	// // TODO: proper password hash check
+	// if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
+	// 	panic("invalid username or password")
+	// }
+
+	err = s.app.AuthorizeUser(params.Username, params.Password)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	err = s.app.DebugUpdateUserPublicKey(u.Id, params.PublicKey)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	log.Error("public key updated", params.PublicKey)
 
 	token, err := s.loginUser(u.Id)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	c.JSON(http.StatusOK, generated.AuthorizationResponse{

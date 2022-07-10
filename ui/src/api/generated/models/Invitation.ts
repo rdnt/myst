@@ -2,14 +2,14 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Keystore } from './Keystore';
+import type { User } from './User';
+
 export type Invitation = {
     id: string;
-    keystoreId: string;
-    keystoreName: string;
-    inviterId: string;
-    inviteeId: string;
-    inviterPublicKey: string;
-    inviteePublicKey: string;
+    keystore: Keystore;
+    inviter: User;
+    invitee: User;
     encryptedKeystoreKey: string;
     status: 'pending' | 'accepted' | 'declined' | 'deleted' | 'finalized';
     createdAt: string;

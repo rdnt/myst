@@ -1,15 +1,20 @@
 package invitation
 
+import (
+	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/user"
+)
+
 type Option func(i *Invitation)
 
-func WithKeystoreId(id string) Option {
+func WithKeystore(k keystore.Keystore) Option {
 	return func(i *Invitation) {
-		i.KeystoreId = id
+		i.Keystore = k
 	}
 }
 
-func WithInviteeId(id string) Option {
+func WithInviteeUsername(username string) Option {
 	return func(i *Invitation) {
-		i.InviteeId = id
+		i.Invitee = user.User{Username: username}
 	}
 }

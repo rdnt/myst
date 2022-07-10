@@ -24,8 +24,7 @@ type AuthorizationResponse struct {
 
 // CreateInvitationRequest defines model for CreateInvitationRequest.
 type CreateInvitationRequest struct {
-	InviteeId string `json:"inviteeId"`
-	InviterId string `json:"inviterId"`
+	Invitee string `json:"invitee"`
 }
 
 // CreateKeystoreRequest defines model for CreateKeystoreRequest.
@@ -53,12 +52,9 @@ type Invitation struct {
 	DeletedAt            time.Time        `json:"deletedAt"`
 	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
 	Id                   string           `json:"id"`
-	InviteeId            string           `json:"inviteeId"`
-	InviteePublicKey     []byte           `json:"inviteePublicKey"`
-	InviterId            string           `json:"inviterId"`
-	InviterPublicKey     []byte           `json:"inviterPublicKey"`
-	KeystoreId           string           `json:"keystoreId"`
-	KeystoreName         string           `json:"keystoreName"`
+	Invitee              User             `json:"invitee"`
+	Inviter              User             `json:"inviter"`
+	Keystore             KeystoreName     `json:"keystore"`
 	Status               InvitationStatus `json:"status"`
 	UpdatedAt            time.Time        `json:"updatedAt"`
 }
@@ -77,6 +73,12 @@ type Keystore struct {
 	Version   int       `json:"version"`
 }
 
+// KeystoreName defines model for KeystoreName.
+type KeystoreName struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
 	Password  string `json:"password"`
@@ -93,8 +95,9 @@ type RegisterRequest struct {
 
 // User defines model for User.
 type User struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
+	Id        string `json:"id"`
+	PublicKey []byte `json:"publicKey"`
+	Username  string `json:"username"`
 }
 
 // LoginJSONBody defines parameters for Login.

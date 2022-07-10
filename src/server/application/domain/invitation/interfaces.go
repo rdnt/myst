@@ -14,8 +14,8 @@ type Repository interface {
 	UpdateInvitation(*Invitation) error
 	Invitations() ([]Invitation, error)
 	Delete(id string) error
-	//UserInvitations(userId string) ([]Invitation, error)
-	//UserInvitation(userId, invitationId string) (Invitation, error)
+	// UserInvitations(userId string) ([]Invitation, error)
+	// UserInvitation(userId, invitationId string) (Invitation, error)
 }
 
 type UserInvitationsOptions struct {
@@ -23,7 +23,7 @@ type UserInvitationsOptions struct {
 }
 
 type Service interface {
-	CreateInvitation(keystoreId, inviterId, inviteeId string) (Invitation, error)
+	CreateInvitation(keystoreId, inviterId, inviteeUsername string) (Invitation, error)
 	AcceptInvitation(userId string, invitationId string) (Invitation, error)
 	DeclineOrCancelInvitation(userId, invitationId string) (Invitation, error)
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (Invitation, error)

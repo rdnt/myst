@@ -68,12 +68,9 @@ type Invitation struct {
 	DeletedAt            time.Time        `json:"deletedAt"`
 	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
 	Id                   string           `json:"id"`
-	InviteeId            string           `json:"inviteeId"`
-	InviteePublicKey     []byte           `json:"inviteePublicKey"`
-	InviterId            string           `json:"inviterId"`
-	InviterPublicKey     []byte           `json:"inviterPublicKey"`
-	KeystoreId           string           `json:"keystoreId"`
-	KeystoreName         string           `json:"keystoreName"`
+	Invitee              User             `json:"invitee"`
+	Inviter              User             `json:"inviter"`
+	Keystore             Keystore         `json:"keystore"`
 	Status               InvitationStatus `json:"status"`
 	UpdatedAt            time.Time        `json:"updatedAt"`
 }
@@ -115,8 +112,9 @@ type UpdateEntryRequest struct {
 
 // User defines model for User.
 type User struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
+	Id        string `json:"id"`
+	PublicKey []byte `json:"publicKey"`
+	Username  string `json:"username"`
 }
 
 // LoginJSONBody defines parameters for Login.

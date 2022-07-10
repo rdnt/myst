@@ -7,24 +7,23 @@ import (
 	"time"
 
 	"myst/pkg/uuid"
+	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/user"
 )
 
 var (
-	//ErrAccepted    = errors.New("invitation already accepted")
-	//ErrNotAccepted = errors.New("invitation not accepted")
-	//ErrFinalized   = errors.New("invitation already finalized")
+	// ErrAccepted    = errors.New("invitation already accepted")
+	// ErrNotAccepted = errors.New("invitation not accepted")
+	// ErrFinalized   = errors.New("invitation already finalized")
 	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
 	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
 )
 
 type Invitation struct {
 	Id                   string
-	KeystoreId           string
-	KeystoreName         string
-	InviterId            string
-	InviteeId            string
-	InviterPublicKey     []byte
-	InviteePublicKey     []byte
+	Keystore             keystore.Keystore
+	Inviter              user.User
+	Invitee              user.User
 	EncryptedKeystoreKey []byte
 	Status               Status
 	CreatedAt            time.Time
@@ -64,10 +63,10 @@ func (i Invitation) Finalized() bool {
 func (i Invitation) String() string {
 	return fmt.Sprintln(
 		i.Id,
-		i.KeystoreId, i.InviterId, i.InviteeId,
+		i.Keystore, i.Inviter, i.Invitee,
 		i.Status,
-		base64.StdEncoding.EncodeToString(i.InviterPublicKey),
-		base64.StdEncoding.EncodeToString(i.InviteePublicKey),
 		base64.StdEncoding.EncodeToString(i.EncryptedKeystoreKey),
+		i.CreatedAt, i.UpdatedAt,
+		i.AcceptedAt, i.DeclinedAt, i.DeletedAt,
 	)
 }

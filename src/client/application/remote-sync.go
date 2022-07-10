@@ -22,7 +22,7 @@ func (app *application) sync() error {
 	}
 
 	for _, inv := range invs {
-		if inv.Accepted() && inv.InviterId == app.remote.CurrentUser().Id {
+		if inv.Accepted() && inv.Inviter.Id == app.remote.CurrentUser().Id {
 			log.Print("Finalizing invitation ", inv.Id, "...")
 
 			_, err = app.FinalizeInvitation(inv.Id)

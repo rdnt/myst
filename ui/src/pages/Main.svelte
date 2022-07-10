@@ -6,6 +6,7 @@
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
   import {Route, Router} from "svelte-navigator";
+  import {currentUser} from "@/stores/user";
 
   let showCreateKeystoreModal: boolean = false;
   let showAuthModal: boolean = false;
@@ -26,9 +27,11 @@
       <Keystores keystores={$keystores}/>
     </Route>
 
-    <Route path="/invitations">
-      <Invitations/>
-    </Route>
+    {#if $currentUser}
+      <Route path="/invitations">
+        <Invitations/>
+      </Route>
+    {/if}
   </main>
 </Router>
 

@@ -35,13 +35,21 @@ func (s *Server) ToJSONInvitation(i invitation.Invitation) (generated.Invitation
 	}
 
 	return generated.Invitation{
-		Id:                   i.Id,
-		KeystoreId:           k.Id,
-		KeystoreName:         k.Name,
-		InviterId:            inviter.Id,
-		InviterPublicKey:     inviter.PublicKey,
-		InviteeId:            invitee.Id,
-		InviteePublicKey:     invitee.PublicKey,
+		Id: i.Id,
+		Keystore: generated.KeystoreName{
+			Id:   k.Id,
+			Name: k.Name,
+		},
+		Inviter: generated.User{
+			Id:        inviter.Id,
+			Username:  inviter.Username,
+			PublicKey: inviter.PublicKey,
+		},
+		Invitee: generated.User{
+			Id:        invitee.Id,
+			Username:  invitee.Username,
+			PublicKey: invitee.PublicKey,
+		},
 		Status:               generated.InvitationStatus(i.Status.String()),
 		EncryptedKeystoreKey: i.EncryptedKeystoreKey,
 		CreatedAt:            i.CreatedAt,

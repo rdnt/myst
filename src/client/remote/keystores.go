@@ -144,8 +144,8 @@ func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, err
 	for _, restKeystore := range restKeystores {
 		var keystoreKey []byte
 		for _, inv := range invs {
-			if restKeystore.OwnerId != r.CurrentUser().Id && inv.KeystoreId == restKeystore.Id && inv.Finalized() {
-				symKey, err := curve25519.X25519(privateKey, inv.InviterPublicKey)
+			if restKeystore.OwnerId != r.CurrentUser().Id && inv.Keystore.RemoteId == restKeystore.Id && inv.Finalized() {
+				symKey, err := curve25519.X25519(privateKey, inv.Inviter.PublicKey)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to create asymmetric key")
 				}

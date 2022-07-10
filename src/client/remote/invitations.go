@@ -34,9 +34,8 @@ func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitat
 	}
 
 	res, err := r.client.CreateInvitationWithResponse(
-		context.Background(), inv.KeystoreId, generated.CreateInvitationJSONRequestBody{
-			InviterId: r.user.Id,
-			InviteeId: inv.InviteeId,
+		context.Background(), inv.Keystore.RemoteId, generated.CreateInvitationJSONRequestBody{
+			Invitee: inv.Invitee.Username,
 		},
 	)
 	if err != nil {
@@ -60,6 +59,10 @@ func (r *remote) Address() string {
 }
 
 func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
+	if !r.SignedIn() {
+		return nil, ErrSignedOut
+	}
+
 	res, err := r.client.InvitationsWithResponse(context.Background())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get invitations")
@@ -140,7 +143,7 @@ func (r *remote) FinalizeInvitation(invitationId string, keystoreKey, privateKey
 		return invitation.Invitation{}, errors.New("invitation has not been accepted")
 	}
 
-	asymKey, err := curve25519.X25519(privateKey, inv.InviteePublicKey)
+	asymKey, err := curve25519.X25519(privateKey, inv.Invitee.PublicKey)
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
 	}

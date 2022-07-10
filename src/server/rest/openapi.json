@@ -508,24 +508,25 @@
 					},
 					"username": {
 						"type": "string"
+					},
+					"publicKey": {
+						"type": "string",
+						"format": "byte"
 					}
 				},
 				"required": [
 					"id",
-					"username"
+					"username",
+					"publicKey"
 				]
 			},
 			"CreateInvitationRequest": {
 				"type": "object",
 				"required": [
-					"inviterId",
-					"inviteeId"
+					"invitee"
 				],
 				"properties": {
-					"inviterId": {
-						"type": "string"
-					},
-					"inviteeId": {
+					"invitee": {
 						"type": "string"
 					}
 				}
@@ -596,16 +597,28 @@
 					}
 				}
 			},
+			"KeystoreName": {
+				"type": "object",
+				"required": [
+					"id",
+					"name"
+				],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
 			"Invitation": {
 				"type": "object",
 				"required": [
 					"id",
-					"keystoreId",
-					"keystoreName",
-					"inviterId",
-					"inviteeId",
-					"inviterPublicKey",
-					"inviteePublicKey",
+					"keystore",
+					"inviter",
+					"invitee",
 					"encryptedKeystoreKey",
 					"status",
 					"createdAt",
@@ -618,25 +631,14 @@
 					"id": {
 						"type": "string"
 					},
-					"keystoreId": {
-						"type": "string"
+					"keystore": {
+						"$ref": "#/components/schemas/KeystoreName"
 					},
-					"inviterId": {
-						"type": "string"
+					"inviter": {
+						"$ref": "#/components/schemas/User"
 					},
-					"inviteeId": {
-						"type": "string"
-					},
-					"inviterPublicKey": {
-						"type": "string",
-						"format": "byte"
-					},
-					"inviteePublicKey": {
-						"type": "string",
-						"format": "byte"
-					},
-					"keystoreName": {
-						"type": "string"
+					"invitee": {
+						"$ref": "#/components/schemas/User"
 					},
 					"encryptedKeystoreKey": {
 						"type": "string",

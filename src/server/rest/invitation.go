@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Server) CreateInvitation(c *gin.Context) {
-	// userId := CurrentUser(c)
+	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
 	log.Println("SERVER Creating invitation", keystoreId)
@@ -24,8 +24,8 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 
 	inv, err := s.app.CreateInvitation(
 		keystoreId,
-		params.InviterId,
-		params.InviteeId,
+		userId,
+		params.Invitee,
 	)
 	if err != nil {
 		log.Error(err)

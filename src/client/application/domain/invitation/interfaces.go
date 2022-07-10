@@ -9,5 +9,9 @@ type Repository interface {
 }
 
 type Service interface {
-	CreateKeystoreInvitation(keystoreId, inviterId, inviteeId string, inviterKey []byte) (Invitation, error)
+	CreateInvitation(keystoreId string, inviteeUsername string) (Invitation, error)
+	AcceptInvitation(id string) (Invitation, error)
+	DeclineOrCancelInvitation(id string) (Invitation, error)
+	FinalizeInvitation(id string) (Invitation, error)
+	Invitations() (map[string]Invitation, error)
 }

@@ -6,22 +6,22 @@ import (
 	"myst/src/server/application/domain/invitation"
 )
 
-func (app *application) CreateInvitation(keystoreId, inviterId, inviteeId string) (invitation.Invitation, error) {
-	if inviterId == inviteeId {
-		return invitation.Invitation{}, errors.New("inviter cannot be the same as invitee")
-	}
-
-	k, err := app.keystores.Keystore(keystoreId)
-	if err != nil {
-		return invitation.Invitation{}, err
-	}
-
+func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error) {
 	inviter, err := app.users.User(inviterId)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
 
-	invitee, err := app.users.User(inviteeId)
+	invitee, err := app.users.UserByUsername(inviteeUsername)
+	if err != nil {
+		return invitation.Invitation{}, err
+	}
+
+	if inviter.Id == invitee.Id {
+		return invitation.Invitation{}, errors.New("inviter cannot be the same as invitee")
+	}
+
+	k, err := app.keystores.Keystore(keystoreId)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}

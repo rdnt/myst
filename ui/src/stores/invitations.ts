@@ -6,7 +6,7 @@ import {get, readable} from "svelte/store";
 let setFunc
 export const getInvitations = () => {
   if (!get(currentUser)) {
-    return Promise.reject("no user")
+    return []
   }
 
   return api.getInvitations().then((invs: Invitation[]) => {

@@ -849,25 +849,14 @@
           "id": {
             "type": "string"
           },
-          "keystoreId": {
-            "type": "string"
+          "keystore": {
+            "$ref": "#/components/schemas/Keystore"
           },
-          "keystoreName": {
-            "type": "string"
+          "inviter": {
+            "$ref": "#/components/schemas/User"
           },
-          "inviterId": {
-            "type": "string"
-          },
-          "inviteeId": {
-            "type": "string"
-          },
-          "inviterPublicKey": {
-            "type": "string",
-            "format": "byte"
-          },
-          "inviteePublicKey": {
-            "type": "string",
-            "format": "byte"
+          "invitee": {
+            "$ref": "#/components/schemas/User"
           },
           "encryptedKeystoreKey": {
             "type": "string",
@@ -906,12 +895,9 @@
         },
         "required": [
           "id",
-          "keystoreId",
-          "keystoreName",
-          "inviterId",
-          "inviteeId",
-          "inviterPublicKey",
-          "inviteePublicKey",
+          "keystore",
+          "inviter",
+          "invitee",
           "encryptedKeystoreKey",
           "status",
           "createdAt",
@@ -929,11 +915,16 @@
           },
           "username": {
             "type": "string"
+          },
+          "publicKey": {
+            "type": "string",
+            "format": "byte"
           }
         },
         "required": [
           "id",
-          "username"
+          "username",
+          "publicKey"
         ]
       },
       "RegisterRequest": {

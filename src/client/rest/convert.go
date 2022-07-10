@@ -8,13 +8,21 @@ import (
 
 func InvitationToRest(inv invitation.Invitation) generated.Invitation {
 	return generated.Invitation{
-		Id:                   inv.Id,
-		KeystoreId:           inv.KeystoreId,
-		KeystoreName:         inv.KeystoreName,
-		InviterId:            inv.InviterId,
-		InviteeId:            inv.InviteeId,
-		InviterPublicKey:     inv.InviterPublicKey,
-		InviteePublicKey:     inv.InviteePublicKey,
+		Id: inv.Id,
+		Keystore: generated.Keystore{
+			RemoteId: inv.Keystore.RemoteId,
+			Name:     inv.Keystore.Name,
+		},
+		Inviter: generated.User{
+			Id:        inv.Inviter.Id,
+			Username:  inv.Inviter.Username,
+			PublicKey: inv.Inviter.PublicKey,
+		},
+		Invitee: generated.User{
+			Id:        inv.Invitee.Id,
+			Username:  inv.Invitee.Username,
+			PublicKey: inv.Invitee.PublicKey,
+		},
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		Status:               generated.InvitationStatus(inv.Status.String()),
 		CreatedAt:            inv.CreatedAt,

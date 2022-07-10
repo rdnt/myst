@@ -24,14 +24,9 @@ func (app *application) CreateInvitation(keystoreId string, inviteeUsername stri
 		return invitation.Invitation{}, err
 	}
 
-	invitee, err := app.remote.UserByUsername(inviteeUsername)
-	if err != nil {
-		return invitation.Invitation{}, err
-	}
-
 	inv := invitation.New(
-		invitation.WithKeystoreId(k.RemoteId),
-		invitation.WithInviteeId(invitee.Id),
+		invitation.WithKeystore(k),
+		invitation.WithInviteeUsername(inviteeUsername),
 	)
 
 	inv, err = app.remote.CreateInvitation(inv)
@@ -72,7 +67,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, err
 	}
 
-	k, err := app.KeystoreByRemoteId(inv.KeystoreId)
+	k, err := app.KeystoreByRemoteId(inv.Keystore.RemoteId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}

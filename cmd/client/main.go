@@ -27,9 +27,8 @@ func parseFlags() Config {
 	cfg := Config{}
 
 	flag.StringVar(&cfg.RemoteAddress, "remote", "https://myst-abgx5.ondigitalocean.app/", "URL address of the remote server")
-	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
-
 	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
+	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
 
 	flag.Parse()
 

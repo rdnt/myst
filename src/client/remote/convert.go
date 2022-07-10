@@ -20,13 +20,21 @@ func InvitationFromJSON(gen generated.Invitation) (invitation.Invitation, error)
 	}
 
 	return invitation.Invitation{
-		Id:                   gen.Id,
-		InviterId:            gen.InviterId,
-		KeystoreId:           gen.KeystoreId,
-		KeystoreName:         gen.KeystoreName,
-		InviteeId:            gen.InviteeId,
-		InviterPublicKey:     gen.InviterPublicKey,
-		InviteePublicKey:     gen.InviteePublicKey,
+		Id: gen.Id,
+		Keystore: keystore.Keystore{
+			RemoteId: gen.Keystore.Id,
+			Name:     gen.Keystore.Name,
+		},
+		Inviter: user.User{
+			Id:        gen.Inviter.Id,
+			Username:  gen.Inviter.Username,
+			PublicKey: gen.Inviter.PublicKey,
+		},
+		Invitee: user.User{
+			Id:        gen.Invitee.Id,
+			Username:  gen.Invitee.Username,
+			PublicKey: gen.Invitee.PublicKey,
+		},
 		EncryptedKeystoreKey: gen.EncryptedKeystoreKey,
 		Status:               status,
 		CreatedAt:            gen.CreatedAt,

@@ -12,8 +12,10 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	user := s.client1
+
 	s.Run("Keystores are empty", func() {
-		res, err := s.client1.KeystoresWithResponse(ctx)
+		res, err := user.KeystoresWithResponse(ctx)
 		s.Require().Nil(err)
 		s.Require().NotNil(res.JSON200)
 		s.Require().Len(*res.JSON200, 0)
@@ -23,7 +25,7 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	var keystoreId string
 
 	s.Run("Keystore created", func() {
-		res, err := s.client1.CreateKeystoreWithResponse(ctx,
+		res, err := user.CreateKeystoreWithResponse(ctx,
 			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
 		)
 		s.Require().Nil(err)
@@ -34,14 +36,14 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	})
 
 	s.Run("Keystore can be queried", func() {
-		res, err := s.client1.KeystoreWithResponse(ctx, keystoreId)
+		res, err := user.KeystoreWithResponse(ctx, keystoreId)
 		s.Require().Nil(err)
 		s.Require().NotNil(res.JSON200)
 		s.Require().Equal(keystoreId, (*res.JSON200).Id)
 	})
 
 	s.Run("Keystores contain created keystore", func() {
-		res, err := s.client1.KeystoresWithResponse(ctx)
+		res, err := user.KeystoresWithResponse(ctx)
 		s.Require().Nil(err)
 		s.Require().NotNil(res.JSON200)
 		s.Require().Len(*res.JSON200, 1)
@@ -55,7 +57,7 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	var entryId string
 
 	s.Run("Entry created", func() {
-		res, err := s.client1.CreateEntryWithResponse(ctx, keystoreId,
+		res, err := user.CreateEntryWithResponse(ctx, keystoreId,
 			generated.CreateEntryJSONRequestBody{
 				Website:  website,
 				Username: username,
@@ -75,7 +77,7 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	})
 
 	s.Run("Entry can be queried", func() {
-		res, err := s.client1.KeystoreWithResponse(ctx, keystoreId)
+		res, err := user.KeystoreWithResponse(ctx, keystoreId)
 		s.Require().Nil(err)
 		s.Require().NotNil(res.JSON200)
 		s.Require().Len((*res.JSON200).Entries, 1)
@@ -86,7 +88,7 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	newNotes := s.rand()
 
 	s.Run("Entry can be updated", func() {
-		res, err := s.client1.UpdateEntryWithResponse(ctx, keystoreId, entryId,
+		res, err := user.UpdateEntryWithResponse(ctx, keystoreId, entryId,
 			generated.UpdateEntryJSONRequestBody{
 				Password: optional.Ref(newPassword),
 				Notes:    optional.Ref(newNotes),
@@ -97,7 +99,7 @@ func (s *IntegrationTestSuite) TestKeystores() {
 		s.Require().Equal((*res.JSON200).Password, newPassword)
 		s.Require().Equal((*res.JSON200).Notes, newNotes)
 
-		res2, err := s.client1.KeystoreWithResponse(ctx, keystoreId)
+		res2, err := user.KeystoreWithResponse(ctx, keystoreId)
 		s.Require().Nil(err)
 		s.Require().NotNil(res2.JSON200)
 		s.Require().Len((*res2.JSON200).Entries, 1)
@@ -116,10 +118,10 @@ func (s *IntegrationTestSuite) TestKeystores() {
 	})
 
 	s.Run("Keystore can be deleted", func() {
-		_, err := s.client1.DeleteKeystore(ctx, keystoreId)
+		_, err := user.DeleteKeystore(ctx, keystoreId)
 		s.Require().Nil(err)
 
-		res, err := s.client1.KeystoresWithResponse(ctx)
+		res, err := user.KeystoresWithResponse(ctx)
 		s.Require().Nil(err)
 		s.Require().NotNil(res.JSON200)
 		s.Require().Len(*res.JSON200, 0)

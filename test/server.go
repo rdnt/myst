@@ -3,46 +3,60 @@ package test
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
-
 	"myst/src/server/application"
 	"myst/src/server/repository"
 	"myst/src/server/rest"
+	"myst/src/server/rest/generated"
 )
 
 type Server struct {
-	app        application.Application
-	router     *gin.Engine
-	restServer *rest.Server
+	address string
+
+	app    application.Application
+	server *rest.Server
+	client *generated.ClientWithResponses
 }
 
 func (s *IntegrationTestSuite) setupServer(address string) *Server {
-	s.T().Logf("Server starting (%s)...", address)
-	defer s.T().Logf("Server started (%s).", address)
-
-	server := &Server{}
-
-	repo := repository.New()
-
-	var err error
-	server.app, err = application.New(
-		application.WithKeystoreRepository(repo),
-		application.WithUserRepository(repo),
-		application.WithInvitationRepository(repo),
-	)
-	s.Require().NoError(err)
-
-	server.restServer = rest.NewServer(server.app)
-
-	go func() {
-		fmt.Println(address)
-		err = server.restServer.Start(address)
-		s.Require().NoError(err)
-	}()
+	server, err := newServer(address)
+	s.Require().Nil(err)
 
 	return server
 }
 
-func (s *IntegrationTestSuite) teardownServer(server *Server) {
-	server.restServer.Stop()
+func newServer(address string) (*Server, error) {
+	repo := repository.New()
+
+	app, err := application.New(
+		application.WithKeystoreRepository(repo),
+		application.WithUserRepository(repo),
+		application.WithInvitationRepository(repo),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	server := rest.New(app)
+
+	clientAddr := fmt.Sprintf("http://%s/api", address)
+
+	client, err := generated.NewClientWithResponses(clientAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Server{
+		address: address,
+		app:     app,
+		server:  server,
+		client:  client,
+	}, nil
+}
+
+func (s *Server) Start() error {
+	return s.server.Start(s.address)
+}
+
+func (s *Server) Stop() error {
+	return s.server.Stop()
 }

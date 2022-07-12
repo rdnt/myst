@@ -3,19 +3,26 @@ package test
 import (
 	"os"
 
+	"github.com/gin-gonic/gin"
+
 	"myst/src/client/application"
 	"myst/src/client/remote"
 	"myst/src/client/repository"
 	"myst/src/client/rest"
+	"myst/src/client/rest/generated"
 )
 
 type Client struct {
+	address        string
 	dir            string
-	app            application.Application
-	restServer     *rest.Server
 	username       string
 	password       string
 	masterPassword string
+
+	app     application.Application
+	handler *gin.Engine
+	server  *rest.Server
+	client  *generated.ClientWithResponses
 }
 
 func (s *IntegrationTestSuite) setupClient(address string) *Client {

@@ -30,7 +30,7 @@ type Server struct {
 	server *server.Server
 }
 
-func NewServer(app application.Application) *Server {
+func New(app application.Application) *Server {
 	s := new(Server)
 
 	s.app = app
@@ -144,7 +144,18 @@ func (s *Server) Start(addr string) error {
 	return nil
 }
 
-func (s *Server) Stop() {
-	s.server.Stop()
-	s.app.Stop()
+func (s *Server) Stop() error {
+	var firstErr error
+
+	err := s.server.Stop()
+	if err != nil && firstErr == nil {
+		firstErr = err
+	}
+
+	err = s.app.Stop()
+	if err != nil && firstErr == nil {
+		firstErr = err
+	}
+
+	return firstErr
 }

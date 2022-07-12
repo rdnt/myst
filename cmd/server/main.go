@@ -24,7 +24,7 @@ func main() {
 		panic(err)
 	}
 
-	server := rest.NewServer(app)
+	server := rest.New(app)
 
 	err = server.Run(":8080")
 	if err != nil {

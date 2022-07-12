@@ -84,6 +84,10 @@ func (app *application) Invitations() (map[string]invitation.Invitation, error) 
 	return app.remote.Invitations()
 }
 
+func (app *application) Invitation(id string) (invitation.Invitation, error) {
+	return app.remote.Invitation(id)
+}
+
 // func (app *applicationrefactor) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {
 //	panic("implement me")
 //	//rinv, err := app.remote.CreateInvitation(k.RemoteId(), inviteeId)

@@ -3,14 +3,12 @@ package test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/suite"
 
-	clientgen "myst/src/client/rest/generated"
-
 	// servergen "myst/internal/server/api/rest/generated"
 	"myst/pkg/testing/capture"
+	"myst/src/client/rest/generated"
 )
 
 func TestIntegration(t *testing.T) {
@@ -20,75 +18,60 @@ func TestIntegration(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *IntegrationTestSuite) TestKeystoreCreation() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func (s *IntegrationTestSuite) createTestKeystore(ctx context.Context) (keystoreId string) {
+	keystoreName := s.rand()
 
-	k1name := s.rand()
+	s.Run("Create a keystore", func() {
+		res, err := s.client1.CreateKeystoreWithResponse(ctx,
+			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
+		)
+		s.Require().Nil(err)
+		s.Require().NotNil(res.JSON201)
+		s.Require().Equal(keystoreName, res.JSON201.Name)
 
-	createksres, err := s.client1.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
-		Name: k1name,
+		keystoreId = res.JSON201.Id
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(createksres.JSON201)
 
-	ks := *createksres.JSON201
-	s.Require().Equal(ks.Name, k1name)
+	website := s.rand()
+	username := s.rand()
+	password := s.rand()
+	notes := s.rand()
 
-	_, err = s.client1.CreateEntryWithResponse(ctx, ks.Id, clientgen.CreateEntryJSONRequestBody{
-		Website:  s.rand(),
-		Username: s.rand(),
-		Password: s.rand(),
-		Notes:    s.rand(),
+	s.Run("Add an entry to the keystore", func() {
+		res, err := s.client1.CreateEntryWithResponse(ctx, keystoreId,
+			generated.CreateEntryJSONRequestBody{
+				Website:  website,
+				Username: username,
+				Password: password,
+				Notes:    notes,
+			},
+		)
+		s.Require().Nil(err)
+		s.Require().NotNil(res.JSON201)
+
+		s.Require().Equal(res.JSON201.Website, website)
+		s.Require().Equal(res.JSON201.Username, username)
+		s.Require().Equal(res.JSON201.Password, password)
+		s.Require().Equal(res.JSON201.Notes, notes)
 	})
-	s.Require().NoError(err)
 
-	restKeystore, err := s.client1.KeystoreWithResponse(ctx, ks.Id)
-	s.Require().NoError(err)
-	s.Require().NotNil(restKeystore.JSON200)
+	return keystoreId
+}
 
-	k2name := s.rand()
+func (s *IntegrationTestSuite) createDebugInvitation(ctx context.Context,
+	keystoreId string, inviter, invitee string,
+) (invitationId string) {
+	s.Run("Invite someone to access the keystore", func() {
+		res, err := inviter.CreateInvitationWithResponse(ctx, keystoreId,
+			generated.CreateInvitationJSONRequestBody{
+				Invitee: invitee,
+			},
+		)
+		s.Require().Nil(err)
+		s.Require().NotNil(res.JSON201)
 
-	createksres2, err := s.client2.CreateKeystoreWithResponse(ctx, clientgen.CreateKeystoreJSONRequestBody{
-		Name: k2name,
+		invitationId = res.JSON201.Id
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(createksres2.JSON201)
 
-	ks2 := *createksres2.JSON201
-	s.Require().Equal(ks2.Name, k2name)
-
-	_, err = s.server.KeystoresWithResponse(context.Background())
-	s.Require().NoError(err)
-
-	createinvres, err := s.client1.CreateInvitationWithResponse(ctx, ks.Id, clientgen.CreateInvitationJSONRequestBody{
-		Invitee: s._client2.username,
-	})
-	s.Require().NoError(err)
-	s.Require().NotNil(createinvres.JSON201)
-
-	restInv := *createinvres.JSON201
-
-	invres, err := s.client1.GetInvitationsWithResponse(ctx)
-	s.Require().NoError(err)
-	s.Require().NotNil(invres.JSON200)
-	s.Require().Len(*invres.JSON200, 1)
-
-	invres, err = s.client2.GetInvitationsWithResponse(ctx)
-	s.Require().NoError(err)
-	s.Require().NotNil(invres.JSON200)
-	s.Require().Len(*invres.JSON200, 1)
-
-	acceptResponse, err := s.client2.AcceptInvitationWithResponse(ctx, restInv.Id)
-	s.Require().NoError(err)
-	s.Require().NotNil(acceptResponse.JSON200)
-
-	restInv = *acceptResponse.JSON200
-	s.Require().Equal(restInv.Status, clientgen.Accepted)
-	s.Require().NotNil(restInv.Invitee.PublicKey)
-
-	inv, err := s._client1.app.FinalizeInvitation(restInv.Id)
-	s.Require().NoError(err)
-	s.Require().NotNil(acceptResponse.JSON200)
-	s.Require().Equal(inv.Id, restInv.Id)
+	return invitationId
 }

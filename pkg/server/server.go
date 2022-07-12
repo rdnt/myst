@@ -50,11 +50,12 @@ func New(addr string, h http.Handler) (*Server, error) {
 	return s, nil
 }
 
-func (s *Server) Stop() {
+func (s *Server) Stop() error {
 	// TODO wait at most 1 minute for server to shutdown
 	err := s.server.Shutdown(context.Background())
 	if err != nil {
 		log.Error(err)
 	}
-	s.listener.Close()
+
+	return s.listener.Close()
 }

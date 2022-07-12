@@ -17,6 +17,7 @@ func (s *Server) initRoutes(r *gin.RouterGroup) {
 	r.PATCH("/keystore/:keystoreId/entry/:entryId", s.UpdateEntry)
 	r.DELETE("/keystore/:keystoreId/entry/:entryId", s.DeleteEntry)
 	r.GET("/invitations", s.GetInvitations)
+	r.GET("/invitation/:invitationId", s.GetInvitation)
 	r.POST("/keystore/:keystoreId/invitations", s.CreateInvitation)
 	r.PATCH("/invitation/:invitationId", s.AcceptInvitation)
 	r.DELETE("/invitation/:invitationId", s.DeclineOrCancelInvitation)

@@ -505,6 +505,19 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 	Success(c, InvitationToRest(inv))
 }
 
+func (s *Server) GetInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	inv, err := s.app.Invitation(invitationId)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, InvitationToRest(inv))
+}
+
 func (s *Server) FinalizeInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 

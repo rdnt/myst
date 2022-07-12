@@ -47,6 +47,7 @@ type Application interface {
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(id string) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
+	Invitation(id string) (invitation.Invitation, error)
 }
 
 type KeystoreRepository interface {

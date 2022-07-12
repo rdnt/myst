@@ -54,9 +54,14 @@ func (app *application) UserInvitations(userId string, opts *invitation.UserInvi
 
 	invitations := []invitation.Invitation{}
 	for _, inv := range invs {
+		if inv.InviterId != u.Id && inv.InviteeId != u.Id {
+			continue
+		}
+
 		if inv.Deleted() && inv.InviteeId == u.Id {
 			continue
 		}
+
 		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
 			continue
 		}
@@ -79,6 +84,10 @@ func (app *application) UserInvitation(userId, invitationId string) (invitation.
 	}
 
 	if i.InviterId != u.Id && i.InviteeId != u.Id {
+		return invitation.Invitation{}, invitation.ErrNotFound
+	}
+
+	if i.Deleted() && i.InviteeId == u.Id {
 		return invitation.Invitation{}, invitation.ErrNotFound
 	}
 

@@ -17,21 +17,26 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	capture        *capture.Capture
-	ports          []int
+	capture *capture.Capture
+
+	ports []int
+
 	serverAddress  string
 	client1address string
 	client2address string
+	client3address string
 
 	// mini *miniredis.Miniredis
 
 	_server  *Server
 	_client1 *Client
 	_client2 *Client
+	_client3 *Client
 
 	server  *generated.ClientWithResponses
 	client1 *clientGenerated.ClientWithResponses
 	client2 *clientGenerated.ClientWithResponses
+	client3 *clientGenerated.ClientWithResponses
 }
 
 func (s *IntegrationTestSuite) HandleStats(name string, stats *suite.SuiteInformation) {
@@ -69,16 +74,18 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	logger.EnableDebug = config.Debug
 
 	var err error
-	s.ports, err = freeport.GetFreePorts(3)
+	s.ports, err = freeport.GetFreePorts(4)
 	s.Require().NoError(err)
 
 	s.serverAddress = fmt.Sprintf("localhost:%d", s.ports[0])
 	s.client1address = fmt.Sprintf("localhost:%d", s.ports[1])
 	s.client2address = fmt.Sprintf("localhost:%d", s.ports[2])
+	s.client3address = fmt.Sprintf("localhost:%d", s.ports[3])
 
 	s.server, err = generated.NewClientWithResponses("http://" + s.serverAddress + "/api")
 	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s.client1address + "/api")
 	s.client2, err = clientGenerated.NewClientWithResponses("http://" + s.client2address + "/api")
+	s.client3, err = clientGenerated.NewClientWithResponses("http://" + s.client3address + "/api")
 
 	// s.mini, err = miniredis.Run()
 	// s.Require().NoError(err)
@@ -100,9 +107,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.capture.Start()
 
 	s._server = s.setupServer(s.serverAddress)
-
 	s._client1 = s.setupClient(s.client1address)
 	s._client2 = s.setupClient(s.client2address)
+	s._client3 = s.setupClient(s.client3address)
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
@@ -130,6 +137,6 @@ func (s *IntegrationTestSuite) TearDownTest() {
 
 	s.teardownClient(s._client1)
 	s.teardownClient(s._client2)
-
+	s.teardownClient(s._client3)
 	s.teardownServer(s._server)
 }

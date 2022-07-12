@@ -42,7 +42,7 @@ func main() {
 
 	cfg := parseFlags()
 
-	// rem, err := remote.NewServer("http://localhost:8080")
+	// rem, err := remote.New("http://localhost:8080")
 	// if err != nil {
 	//	panic(err)
 	// }

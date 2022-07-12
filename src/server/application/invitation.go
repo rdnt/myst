@@ -39,6 +39,10 @@ func (app *application) AcceptInvitation(userId string, invitationId string) (in
 		return invitation.Invitation{}, err
 	}
 
+	if userId != inv.InviteeId {
+		return invitation.Invitation{}, errors.New("cannot accept invitation")
+	}
+
 	err = inv.Accept()
 	if err != nil {
 		return invitation.Invitation{}, err

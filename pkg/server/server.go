@@ -5,113 +5,56 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
-	"os"
-	"strings"
 
-	"myst/pkg/logger"
-
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/gommon/log"
 )
 
 var (
-	httpSrv *http.Server
-	log     = logger.New("server", logger.DefaultColor)
+	// httpSrv *http.Server
+	// log     = logger.New("server", logger.DefaultColor)
 
-	ErrInvalidServerNetwork = fmt.Errorf("invalid server network")
+	ErrInvalidNetwork = fmt.Errorf("invalid server network")
 )
 
-func Start(r *gin.Engine) error {
-	network := os.Getenv("MYST_SERVER_NETWORK_TYPE")
-	if network == "" {
-		network = "tcp"
-	}
+type Server struct {
+	server   *http.Server
+	listener net.Listener
+}
 
-	var addr string
-	var httpUrl *url.URL
-
-	switch network {
-	case "tcp", "tcp4", "tcp6":
-		addr = os.Getenv("MYST_SERVER_ADDRESS")
-
-		var err error
-		httpUrl, err = ParseURL(addr)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		addr = fmt.Sprintf("%s:%s", httpUrl.Hostname(), httpUrl.Port())
-	case "unix", "unixpacket":
-		addr = os.Getenv("SERVER_SOCKET_PATH")
-	default:
-		log.Error(ErrInvalidServerNetwork)
-		return ErrInvalidServerNetwork
-	}
-
-	var httpLn net.Listener
-
-	var err error
-	httpLn, err = net.Listen(network, addr)
+func New(addr string, h http.Handler) (*Server, error) {
+	httpLn, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Error(err)
-		return err
+		return nil, err
 	}
 
-	httpSrv = &http.Server{Handler: r}
-	httpSrv.RegisterOnShutdown(
+	s := &Server{
+		server:   &http.Server{Handler: h},
+		listener: httpLn,
+	}
+
+	s.server.RegisterOnShutdown(
 		func() {
 			// cleanup upgraded/hijacked connections (e.g. websocket)
 		},
 	)
 
-	switch network {
-	case "tcp", "tcp4", "tcp6":
-		log.Debugf(
-			"Server started on port %s.\n",
-			httpUrl.Port(),
-		)
-	case "unix", "unixpacket":
-		log.Debugf("Server started.")
-	}
-
 	go func() {
-		err := httpSrv.Serve(httpLn)
+		err := s.server.Serve(httpLn)
 		if err != nil && err != http.ErrServerClosed {
 			log.Error(err)
-			Stop()
+			s.Stop()
 			return
 		}
 	}()
 
-	return nil
+	return s, nil
 }
 
-func ParseURL(address string) (*url.URL, error) {
-	scheme := "http://"
-	if !strings.HasPrefix(address, scheme) {
-		address = fmt.Sprintf("%s%s", scheme, address)
-	}
-	parsed, err := url.Parse(address)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-	if parsed.Port() == "" {
-		address = fmt.Sprintf("%s%s:%d", scheme, parsed.Hostname(), 8080)
-		parsed, err = url.Parse(address)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-	}
-	return parsed, nil
-}
-
-func Stop() {
+func (s *Server) Stop() {
 	// TODO wait at most 1 minute for server to shutdown
-	err := httpSrv.Shutdown(context.Background())
+	err := s.server.Shutdown(context.Background())
 	if err != nil {
 		log.Error(err)
 	}
+	s.listener.Close()
 }

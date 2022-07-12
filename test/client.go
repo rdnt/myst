@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"os"
 
 	"myst/src/client/application"
@@ -13,13 +12,13 @@ import (
 type Client struct {
 	dir            string
 	app            application.Application
-	address        string
+	restServer     *rest.Server
 	username       string
 	password       string
 	masterPassword string
 }
 
-func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Client {
+func (s *IntegrationTestSuite) setupClient(address string) *Client {
 	username, password, masterPassword := s.rand(), s.rand(), s.rand()
 
 	var err error
@@ -29,8 +28,8 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 	err = os.Chmod(dir, os.ModePerm)
 	s.Require().NoError(err)
 
-	s.T().Log("Client starting...", serverAddress, port, dir, username, password, masterPassword)
-	defer s.T().Log("Client started", serverAddress, port, dir, username, password, masterPassword)
+	s.T().Logf("Client starting (%s %s %s %s %s)...", address, dir, username, password, masterPassword)
+	defer s.T().Logf("Client started (%s %s %s %s %s).", address, dir, username, password, masterPassword)
 
 	client := &Client{
 		dir:            dir,
@@ -39,14 +38,11 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 		masterPassword: masterPassword,
 	}
 
-	// rem, err := remote.NewServer("http://localhost:8080")
-	// s.Require().NoError(err)
-
 	repo, err := repository.New(client.dir)
 	s.Require().NoError(err)
 
 	rem, err := remote.New(
-		remote.WithAddress(serverAddress),
+		remote.WithAddress("http://" + s.serverAddress),
 	)
 	s.Require().NoError(err)
 
@@ -59,15 +55,14 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 	err = client.app.CreateEnclave(masterPassword)
 	s.Require().NoError(err)
 
-	srv := rest.NewServer(client.app, nil)
-	client.address = fmt.Sprintf("localhost:%d", port)
+	client.restServer = rest.NewServer(client.app, nil)
 
 	u, err := client.app.Register(username, password)
 	s.Require().NoError(err)
 	s.Require().Equal(username, u.Username)
 
 	go func() {
-		err = srv.Run(client.address)
+		err = client.restServer.Start(address)
 		s.Require().NoError(err)
 	}()
 
@@ -75,6 +70,7 @@ func (s *IntegrationTestSuite) setupClient(serverAddress string, port int) *Clie
 }
 
 func (s *IntegrationTestSuite) teardownClient(client *Client) {
+	client.restServer.Stop()
 	s.Require().NoError(os.RemoveAll(client.dir))
 	// client.server.Close()
 }

@@ -9,6 +9,7 @@ require (
 	github.com/go-errors/errors v1.4.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.4.0
+	github.com/labstack/gommon v0.3.1
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.12
@@ -18,7 +19,6 @@ require (
 	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors/wrapper/gin v0.0.0-20220223021805-a4a5ce87d5a2
-	github.com/sanity-io/litter v1.5.5
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
@@ -40,6 +40,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/net v0.0.0-20220513224357-95641704303c // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect

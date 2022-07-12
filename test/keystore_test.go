@@ -8,7 +8,7 @@ import (
 	"myst/src/client/rest/generated"
 )
 
-func (s *IntegrationTestSuite) TestKeystore() {
+func (s *IntegrationTestSuite) TestKeystores() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 

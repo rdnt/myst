@@ -12,6 +12,7 @@ import (
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
+	"myst/pkg/server"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/entry"
@@ -34,7 +35,8 @@ var log = logger.New("router", logger.Cyan)
 
 type Server struct {
 	*gin.Engine
-	app application.Application
+	app    application.Application
+	server *server.Server
 }
 
 func NewServer(app application.Application, ui fs.FS) *Server {
@@ -474,7 +476,7 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	Success(c, InvitationToRest(inv))
+	c.JSON(http.StatusCreated, InvitationToRest(inv))
 }
 
 func (s *Server) AcceptInvitation(c *gin.Context) {
@@ -564,13 +566,24 @@ func (s *Server) HealthCheck(_ *gin.Context) {
 	s.app.HealthCheck()
 }
 
-func (s *Server) Run(addr string) error {
+func (s *Server) Start(addr string) error {
 	log.Println("starting app on", addr)
 
 	s.app.Start()
-
 	log.Println("app started")
-	return s.Engine.Run(addr)
+
+	httpServer, err := server.New(addr, s.Engine)
+	if err != nil {
+		return err
+	}
+
+	s.server = httpServer
+	return nil
+}
+
+func (s *Server) Stop() {
+	s.server.Stop()
+	s.app.Stop()
 }
 
 type embedFileSystem struct {

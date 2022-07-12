@@ -37,15 +37,15 @@ export class DefaultService {
 
     /**
      * Sets up the myst enclave with a master password
-     * @returns any OK
      * @returns Error Error
+     * @returns any Enclave created
      * @throws ApiError
      */
     public static createEnclave({
 requestBody,
 }: {
 requestBody: CreateEnclaveRequest,
-}): CancelablePromise<any | Error> {
+}): CancelablePromise<Error | any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/enclave',
@@ -291,8 +291,8 @@ entryId: string,
 
     /**
      * Create a keystore invitation
-     * @returns Invitation Invitation
      * @returns Error Error
+     * @returns Invitation Invitation
      * @throws ApiError
      */
     public static createInvitation({
@@ -301,7 +301,7 @@ keystoreId,
 }: {
 requestBody: CreateInvitationRequest,
 keystoreId?: string,
-}): CancelablePromise<Invitation | Error> {
+}): CancelablePromise<Error | Invitation> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/keystore/{keystoreId}/invitations',

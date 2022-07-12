@@ -11,14 +11,14 @@ import (
 )
 
 type Server struct {
-	app     application.Application
-	router  *gin.Engine
-	address string
+	app        application.Application
+	router     *gin.Engine
+	restServer *rest.Server
 }
 
-func (s *IntegrationTestSuite) setupServer(port int) *Server {
-	s.T().Log("Server starting...", port)
-	defer s.T().Log("Server started", port)
+func (s *IntegrationTestSuite) setupServer(address string) *Server {
+	s.T().Logf("Server starting (%s)...", address)
+	defer s.T().Logf("Server started (%s).", address)
 
 	server := &Server{}
 
@@ -32,11 +32,11 @@ func (s *IntegrationTestSuite) setupServer(port int) *Server {
 	)
 	s.Require().NoError(err)
 
-	srv := rest.NewServer(server.app)
-	server.address = fmt.Sprintf("localhost:%d", port)
+	server.restServer = rest.NewServer(server.app)
 
 	go func() {
-		err = srv.Run(server.address)
+		fmt.Println(address)
+		err = server.restServer.Start(address)
 		s.Require().NoError(err)
 	}()
 
@@ -44,5 +44,5 @@ func (s *IntegrationTestSuite) setupServer(port int) *Server {
 }
 
 func (s *IntegrationTestSuite) teardownServer(server *Server) {
-	// server.server.Close()
+	server.restServer.Stop()
 }

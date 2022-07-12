@@ -73,8 +73,7 @@ func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
 	if handlerName == "" {
 		return
 	}
-	// log.Printf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
-	log.Printf("%-7s %-50s\n", httpMethod, absolutePath)
+	log.Printf("%-7s %-50s --> %3s\n", httpMethod, absolutePath, handlerName)
 }
 
 func LoggerMiddleware(c *gin.Context) {

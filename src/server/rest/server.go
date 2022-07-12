@@ -14,6 +14,7 @@ import (
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
+	"myst/pkg/server"
 	"myst/src/server/application"
 )
 
@@ -25,7 +26,8 @@ var (
 
 type Server struct {
 	*gin.Engine
-	app application.Application
+	app    application.Application
+	server *server.Server
 }
 
 func NewServer(app application.Application) *Server {
@@ -127,11 +129,22 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 	sec.GET("/invitations", s.Invitations)
 }
 
-func (s *Server) Run(addr string) error {
+func (s *Server) Start(addr string) error {
 	log.Println("starting app on", addr)
 
 	s.app.Start()
-
 	log.Println("app started")
-	return s.Engine.Run(addr)
+
+	httpServer, err := server.New(addr, s.Engine)
+	if err != nil {
+		return err
+	}
+
+	s.server = httpServer
+	return nil
+}
+
+func (s *Server) Stop() {
+	s.server.Stop()
+	s.app.Stop()
 }

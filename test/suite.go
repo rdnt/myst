@@ -17,7 +17,11 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	capture *capture.Capture
+	capture        *capture.Capture
+	ports          []int
+	serverAddress  string
+	client1address string
+	client2address string
 
 	// mini *miniredis.Miniredis
 
@@ -64,16 +68,17 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	config.Debug = true
 	logger.EnableDebug = config.Debug
 
-	ports, err := freeport.GetFreePorts(3)
+	var err error
+	s.ports, err = freeport.GetFreePorts(3)
 	s.Require().NoError(err)
 
-	s._server = s.setupServer(ports[0])
-	s._client1 = s.setupClient("http://"+s._server.address, ports[1])
-	s._client2 = s.setupClient("http://"+s._server.address, ports[2])
+	s.serverAddress = fmt.Sprintf("localhost:%d", s.ports[0])
+	s.client1address = fmt.Sprintf("localhost:%d", s.ports[1])
+	s.client2address = fmt.Sprintf("localhost:%d", s.ports[2])
 
-	s.server, err = generated.NewClientWithResponses("http://" + s._server.address + "/api")
-	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s._client1.address + "/api")
-	s.client2, err = clientGenerated.NewClientWithResponses("http://" + s._client2.address + "/api")
+	s.server, err = generated.NewClientWithResponses("http://" + s.serverAddress + "/api")
+	s.client1, err = clientGenerated.NewClientWithResponses("http://" + s.client1address + "/api")
+	s.client2, err = clientGenerated.NewClientWithResponses("http://" + s.client2address + "/api")
 
 	// s.mini, err = miniredis.Run()
 	// s.Require().NoError(err)
@@ -81,10 +86,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	// s.mini.Close()
-
-	s.teardownClient(s._client1)
-	s.teardownClient(s._client2)
-	s.teardownServer(s._server)
 
 	// if verbose is enabled, print logger output
 	if testing.Verbose() {
@@ -96,14 +97,18 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	// s.capture.Start()
+	s.capture.Start()
 
+	s._server = s.setupServer(s.serverAddress)
+
+	s._client1 = s.setupClient(s.client1address)
+	s._client2 = s.setupClient(s.client2address)
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
 	// start next tests with a flushed database
 	// s.mini.FlushDB()
-	// output := s.capture.Stop()
+	output := s.capture.Stop()
 
 	if !testing.Verbose() {
 		// show progress
@@ -117,9 +122,14 @@ func (s *IntegrationTestSuite) TearDownTest() {
 	} else {
 		// if verbose is enabled, print logger output
 		if testing.Verbose() {
-			// fmt.Printf("%s", output)
+			fmt.Printf("%s", output)
 		} else {
 			fmt.Println()
 		}
 	}
+
+	s.teardownClient(s._client1)
+	s.teardownClient(s._client2)
+
+	s.teardownServer(s._server)
 }

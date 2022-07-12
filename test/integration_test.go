@@ -65,9 +65,9 @@ func (s *IntegrationTestSuite) TestKeystoreCreation() {
 		Invitee: s._client2.username,
 	})
 	s.Require().NoError(err)
-	s.Require().NotNil(createinvres.JSON200)
+	s.Require().NotNil(createinvres.JSON201)
 
-	restInv := *createinvres.JSON200
+	restInv := *createinvres.JSON201
 
 	invres, err := s.client1.GetInvitationsWithResponse(ctx)
 	s.Require().NoError(err)

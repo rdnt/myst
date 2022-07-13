@@ -30,7 +30,7 @@ type Server struct {
 	server *server.Server
 }
 
-func New(app application.Application) *Server {
+func NewServer(app application.Application) *Server {
 	s := new(Server)
 
 	s.app = app

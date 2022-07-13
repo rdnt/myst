@@ -41,7 +41,7 @@ func New(opts ...Option) (application.Remote, error) {
 
 	var err error
 	r.client, err = generated.NewClientWithResponses(
-		r.address+"/api",
+		r.address,
 		generated.WithRequestEditorFn(r.authenticate()),
 	)
 	if err != nil {

@@ -26,7 +26,7 @@ type Config struct {
 func parseFlags() Config {
 	cfg := Config{}
 
-	flag.StringVar(&cfg.RemoteAddress, "remote", "https://myst-abgx5.ondigitalocean.app/", "URL address of the remote server")
+	flag.StringVar(&cfg.RemoteAddress, "remote", "https://myst-abgx5.ondigitalocean.app/api", "URL address of the remote server API")
 	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
 
@@ -42,7 +42,7 @@ func main() {
 
 	cfg := parseFlags()
 
-	// rem, err := remote.New("http://localhost:8080")
+	// rem, err := remote.NewServer("http://localhost:8080")
 	// if err != nil {
 	//	panic(err)
 	// }

@@ -1,4 +1,4 @@
-package test
+package suite
 
 import (
 	"fmt"
@@ -15,13 +15,6 @@ type Server struct {
 	app    application.Application
 	server *rest.Server
 	client *generated.ClientWithResponses
-}
-
-func (s *IntegrationTestSuite) setupServer(address string) *Server {
-	server, err := newServer(address)
-	s.Require().Nil(err)
-
-	return server
 }
 
 func newServer(address string) (*Server, error) {
@@ -47,9 +40,10 @@ func newServer(address string) (*Server, error) {
 
 	return &Server{
 		address: address,
-		app:     app,
-		server:  server,
-		client:  client,
+
+		app:    app,
+		server: server,
+		client: client,
 	}, nil
 }
 

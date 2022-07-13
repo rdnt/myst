@@ -594,9 +594,22 @@ func (s *Server) Start(addr string) error {
 	return nil
 }
 
-func (s *Server) Stop() {
-	s.server.Stop()
-	s.app.Stop()
+func (s *Server) Stop() error {
+	// TODO: find way to return all errors, maybe (find) an errgroup-esque package
+	// that just runs all functions sequentially and returns all errors as one?
+	var firstErr error
+
+	err := s.server.Stop()
+	if err != nil && firstErr == nil {
+		firstErr = err
+	}
+
+	err = s.app.Stop()
+	if err != nil && firstErr == nil {
+		firstErr = err
+	}
+
+	return firstErr
 }
 
 type embedFileSystem struct {

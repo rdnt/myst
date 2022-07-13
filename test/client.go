@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) setupClient(address string) *Client {
 	s.Require().NoError(err)
 
 	rem, err := remote.New(
-		remote.WithAddress("http://" + s.serverAddress),
+		remote.WithAddress("http://" + s.serverAddress + "/api"),
 	)
 	s.Require().NoError(err)
 

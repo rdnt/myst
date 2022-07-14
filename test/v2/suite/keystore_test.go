@@ -21,10 +21,7 @@ func TestKeystores(t *testing.T) {
 		assert.Assert(t, len(*res.JSON200) == 0)
 	})
 
-	strs, err := randomStrings(1, 32)
-	assert.NilError(t, err)
-
-	keystoreName := strs[0]
+	keystoreName := random()
 	var keystoreId string
 
 	s.Run(t, "Keystore created", func(t *testing.T) {
@@ -53,13 +50,10 @@ func TestKeystores(t *testing.T) {
 		assert.Equal(t, (*res.JSON200)[0].Id, keystoreId)
 	})
 
-	strs, err = randomStrings(4, 32)
-	assert.NilError(t, err)
-
-	website := strs[0]
-	username := strs[1]
-	password := strs[2]
-	notes := strs[3]
+	website := random()
+	username := random()
+	password := random()
+	notes := random()
 	var entryId string
 
 	s.Run(t, "Entry created", func(t *testing.T) {
@@ -89,11 +83,8 @@ func TestKeystores(t *testing.T) {
 		assert.Equal(t, entryId, res.JSON200.Entries[0].Id)
 	})
 
-	strs, err = randomStrings(4, 32)
-	assert.NilError(t, err)
-
-	newPassword := strs[0]
-	newNotes := strs[1]
+	newPassword := random()
+	newNotes := random()
 
 	s.Run(t, "Entry can be updated", func(t *testing.T) {
 		res, err := user.client.UpdateEntryWithResponse(s.ctx, keystoreId, entryId,

@@ -24,12 +24,7 @@ type Client struct {
 }
 
 func newClient(serverAddress, address string) (*Client, error) {
-	strs, err := randomStrings(3, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	username, password, masterPassword := strs[0], strs[1], strs[2]
+	username, password, masterPassword := random(), random(), random()
 
 	dir, err := os.MkdirTemp("", "myst-client-data-*")
 	if err != nil {
@@ -84,7 +79,22 @@ func newClient(serverAddress, address string) (*Client, error) {
 }
 
 func (c *Client) Start() error {
-	return c.server.Start(c.address)
+	err := c.server.Start(c.address)
+	if err != nil {
+		return err
+	}
+
+	err = c.app.CreateEnclave(c.masterPassword)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.app.Register(c.username, c.password)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) Stop() error {

@@ -42,74 +42,43 @@ func setup(t *testing.T) Suite {
 	var server *Server
 	var client1, client2, client3 *Client
 
-	{
-		server, err = newServer(addrs[0])
-		assert.NilError(t, err)
-	}
+	server, err = newServer(addrs[0])
+	assert.NilError(t, err)
 
-	{
-		client1, err = newClient(addrs[0], addrs[1])
-		assert.NilError(t, err)
-	}
+	client1, err = newClient(addrs[0], addrs[1])
+	assert.NilError(t, err)
 
-	{
-		client2, err = newClient(addrs[0], addrs[2])
-		assert.NilError(t, err)
-	}
+	client2, err = newClient(addrs[0], addrs[2])
+	assert.NilError(t, err)
 
-	{
-		client3, err = newClient(addrs[0], addrs[3])
-		assert.NilError(t, err)
-	}
+	client3, err = newClient(addrs[0], addrs[3])
+	assert.NilError(t, err)
 
 	// setup := func(t *testing.T) {
 	err = server.Start()
 	assert.NilError(t, err)
 
-	{
-		err = client1.Start()
-		assert.NilError(t, err)
+	err = client1.Start()
+	assert.NilError(t, err)
 
-		err = client1.app.CreateEnclave(client1.masterPassword)
-		assert.NilError(t, err)
+	err = client2.Start()
+	assert.NilError(t, err)
 
-		_, err = client1.app.Register(client1.username, client1.password)
-		assert.NilError(t, err)
-	}
-
-	{
-		err = client2.Start()
-		assert.NilError(t, err)
-
-		err = client2.app.CreateEnclave(client2.masterPassword)
-		assert.NilError(t, err)
-
-		_, err = client2.app.Register(client2.username, client2.password)
-		assert.NilError(t, err)
-	}
-
-	{
-		err = client3.Start()
-		assert.NilError(t, err)
-
-		err = client3.app.CreateEnclave(client3.masterPassword)
-		assert.NilError(t, err)
-
-		_, err = client3.app.Register(client3.username, client3.password)
-		assert.NilError(t, err)
-	}
+	err = client3.Start()
+	assert.NilError(t, err)
 
 	t.Cleanup(func() {
+		now := time.Now()
+		cancel()
+
 		client1.Stop()
 		client2.Stop()
 		client3.Stop()
 		server.Stop()
-	})
 
-	t.Cleanup(func() {
-		cancel()
+		fmt.Println("@@@@")
+		fmt.Println(time.Since(now))
 	})
-	// }
 
 	return Suite{
 		Server:  server,
@@ -122,6 +91,11 @@ func setup(t *testing.T) Suite {
 
 	// Step(t, "Test keystores", TestKeystores)
 	// Step(t, "Test invitations", TestInvitations)
+}
+
+func startClient(t *testing.T, c *Client) {
+	err := c.Start()
+	assert.NilError(t, err)
 }
 
 func (s Suite) Run(t *testing.T, name string, fn func(*testing.T)) {

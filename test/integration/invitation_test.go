@@ -2,6 +2,7 @@ package suite
 
 import (
 	"testing"
+	"time"
 
 	"gotest.tools/v3/assert"
 
@@ -16,10 +17,10 @@ func TestInvitations(t *testing.T) {
 	invitee := s.Client2
 	other := s.Client3
 
-	keystoreId := CreateKeystore(s)
+	keystoreId := CreateKeystore(t, s)
 
 	var invitationId string
-	s.Run("Invite someone to access the keystore", func(ddt *testing.T) {
+	s.Run("Invitation is created", func(ddt *testing.T) {
 		res, err := inviter.Client.CreateInvitationWithResponse(s.Ctx,
 			keystoreId,
 			generated.CreateInvitationJSONRequestBody{
@@ -73,15 +74,77 @@ func TestInvitations(t *testing.T) {
 	})
 }
 
+func TestInvitationDelete(t *testing.T) {
+	s := suite.New(t)
+
+	inviter := s.Client1
+	invitee := s.Client2
+
+	keystoreId := CreateKeystore(t, s)
+	invitationId := CreateInvitation(s, keystoreId, inviter, invitee)
+
+	s.Run("The inviter deletes the invitation", func(t *testing.T) {
+		res, err := inviter.Client.DeclineOrCancelInvitationWithResponse(
+			s.Ctx, invitationId,
+		)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Equal(t, res.JSON200.Status, generated.Deleted)
+		assert.Assert(t, res.JSON200.DeletedAt != time.Time{})
+	})
+
+	s.Run("Only the inviter has access to the deleted invitation", func(t *testing.T) {
+		res, err := inviter.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Equal(t, res.JSON200.Status, generated.Deleted)
+		assert.Assert(t, res.JSON200.DeletedAt != time.Time{})
+
+		res, err = invitee.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 == nil)
+		assert.Assert(t, res.JSONDefault != nil)
+	})
+}
+
+func TestInvitationDecline(t *testing.T) {
+	s := suite.New(t)
+
+	inviter := s.Client1
+	invitee := s.Client2
+
+	keystoreId := CreateKeystore(t, s)
+	invitationId := CreateInvitation(s, keystoreId, inviter, invitee)
+
+	s.Run("The invitee declines the invitation", func(t *testing.T) {
+		res, err := invitee.Client.DeclineOrCancelInvitationWithResponse(
+			s.Ctx, invitationId,
+		)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Equal(t, res.JSON200.Status, generated.Declined)
+		assert.Assert(t, res.JSON200.DeclinedAt != time.Time{})
+	})
+
+	s.Run("Both users see invitation as declined", func(t *testing.T) {
+		res, err := inviter.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Equal(t, res.JSON200.Status, generated.Declined)
+
+		res, err = invitee.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Equal(t, res.JSON200.Status, generated.Declined)
+	})
+}
 func TestInvitationAccept(t *testing.T) {
 	s := suite.New(t)
 
 	inviter := s.Client1
 	invitee := s.Client2
-	other := s.Client3
 
-	keystoreId := CreateKeystore(s)
-
+	keystoreId := CreateKeystore(t, s)
 	invitationId := CreateInvitation(s, keystoreId, inviter, invitee)
 
 	s.Run("The inviter cannot accept the invitation", func(t *testing.T) {
@@ -114,7 +177,7 @@ func TestInvitationAccept(t *testing.T) {
 		assert.Equal(t, res2.JSON200.Status, generated.Accepted)
 	})
 
-	s.Run("Invitation cannot be accepted by either user", func(t *testing.T) {
+	s.Run("Invitation cannot now be accepted by either user", func(t *testing.T) {
 		res, err := inviter.Client.AcceptInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSONDefault != nil)
@@ -135,23 +198,49 @@ func TestInvitationAccept(t *testing.T) {
 		assert.Assert(t, res2.JSON200 != nil)
 		assert.Equal(t, res2.JSON200.Status, generated.Accepted)
 	})
+}
 
-	// s.Run("The inviter eventually finalizes the invitation", func() {
-	// 	// manually trigger finalization
-	// 	// TODO: maybe do eventually with retries
-	// 	_, err := s._client1.app.FinalizeInvitation(invitationId)
-	// 	s.Require().Nil(err)
-	// })
-	//
-	// s.Run("Invitation is finalized", func() {
-	// 	res, err := s.client1.GetInvitationWithResponse(ctx, invitationId)
-	// 	s.Require().Nil(err)
-	// 	s.Require().NotNil(res.JSON200)
-	// 	s.Require().Equal(res.JSON200.Status, generated.Finalized)
-	//
-	// 	res, err = s.client2.GetInvitationWithResponse(ctx, invitationId)
-	// 	s.Require().Nil(err)
-	// 	s.Require().NotNil(res.JSON200)
-	// 	s.Require().Equal(res.JSON200.Status, generated.Finalized)
-	// })
+func TestInvitationFinalize(t *testing.T) {
+	s := suite.New(t)
+
+	inviter := s.Client1
+	invitee := s.Client2
+
+	keystoreId := CreateKeystore(t, s)
+	invitationId := CreateInvitation(s, keystoreId, inviter, invitee)
+
+	s.Run("The invitee accepts the invitation", func(t *testing.T) {
+		res, err := invitee.Client.AcceptInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+
+		res2, err := inviter.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res2.JSON200 != nil)
+		assert.Equal(t, res2.JSON200.Status, generated.Accepted)
+
+		res2, err = invitee.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res2.JSON200 != nil)
+		assert.Equal(t, res2.JSON200.Status, generated.Accepted)
+	})
+
+	s.Run("The inviter eventually finalizes the invitation", func(t *testing.T) {
+		// manually trigger finalization
+		// TODO: maybe do eventually with retries
+		_, err := inviter.App.FinalizeInvitation(invitationId)
+		assert.NilError(t, err)
+	})
+
+	s.Run("Both users see invitation as finalized", func(t *testing.T) {
+		res, err := inviter.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Assert(t, res.JSON200.Status == generated.Finalized)
+
+		res, err = invitee.Client.GetInvitationWithResponse(s.Ctx, invitationId)
+		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
+		assert.Assert(t, res.JSON200.Status == generated.Finalized)
+	})
 }

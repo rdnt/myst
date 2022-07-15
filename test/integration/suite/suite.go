@@ -23,7 +23,7 @@ func random(t *testing.T) string {
 }
 
 type Suite struct {
-	T       *testing.T
+	t       *testing.T
 	Ctx     context.Context
 	Server  *Server
 	Client1 *Client
@@ -70,7 +70,7 @@ func New(t *testing.T) *Suite {
 	})
 
 	return &Suite{
-		T:       t,
+		t:       t,
 		Ctx:     ctx,
 		Server:  server,
 		Client1: client1,
@@ -80,8 +80,8 @@ func New(t *testing.T) *Suite {
 }
 
 func (s *Suite) Run(name string, fn func(*testing.T)) {
-	if !s.T.Run(name, fn) {
-		s.T.FailNow()
+	if !s.t.Run(name, fn) {
+		s.t.FailNow()
 	}
 }
 

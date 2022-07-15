@@ -186,7 +186,6 @@ func (r *remote) SignOut() error {
 }
 
 func (r *remote) Register(username, password string, publicKey []byte) (user.User, error) {
-	fmt.Println("Registering to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -219,8 +218,6 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 
 	r.user = &u
 	r.bearerToken = resp.Token
-
-	fmt.Println("Registered.")
 
 	return u, nil
 }

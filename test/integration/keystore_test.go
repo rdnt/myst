@@ -7,25 +7,26 @@ import (
 
 	"myst/pkg/optional"
 	"myst/src/client/rest/generated"
+	"myst/test/integration/suite"
 )
 
 func TestKeystores(t *testing.T) {
-	s := setup(t)
+	s := suite.New(t)
 
 	user := s.Client1
 
 	s.Run(t, "Keystores are empty", func(t *testing.T) {
-		res, err := user.client.KeystoresWithResponse(s.ctx)
+		res, err := user.Client.KeystoresWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 0)
 	})
 
-	keystoreName := random()
+	keystoreName := s.Random(t)
 	var keystoreId string
 
 	s.Run(t, "Keystore created", func(t *testing.T) {
-		res, err := user.client.CreateKeystoreWithResponse(s.ctx,
+		res, err := user.Client.CreateKeystoreWithResponse(s.Ctx,
 			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
 		)
 		assert.NilError(t, err)
@@ -36,28 +37,28 @@ func TestKeystores(t *testing.T) {
 	})
 
 	s.Run(t, "Keystore can be queried", func(t *testing.T) {
-		res, err := user.client.KeystoreWithResponse(s.ctx, keystoreId)
+		res, err := user.Client.KeystoreWithResponse(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Equal(t, res.JSON200.Id, keystoreId)
 	})
 
 	s.Run(t, "Keystores contain created keystore", func(t *testing.T) {
-		res, err := user.client.KeystoresWithResponse(s.ctx)
+		res, err := user.Client.KeystoresWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 1)
 		assert.Equal(t, (*res.JSON200)[0].Id, keystoreId)
 	})
 
-	website := random()
-	username := random()
-	password := random()
-	notes := random()
+	website := s.Random(t)
+	username := s.Random(t)
+	password := s.Random(t)
+	notes := s.Random(t)
 	var entryId string
 
 	s.Run(t, "Entry created", func(t *testing.T) {
-		res, err := user.client.CreateEntryWithResponse(s.ctx, keystoreId,
+		res, err := user.Client.CreateEntryWithResponse(s.Ctx, keystoreId,
 			generated.CreateEntryJSONRequestBody{
 				Website:  website,
 				Username: username,
@@ -76,18 +77,18 @@ func TestKeystores(t *testing.T) {
 	})
 
 	s.Run(t, "Entry can be queried", func(t *testing.T) {
-		res, err := user.client.KeystoreWithResponse(s.ctx, keystoreId)
+		res, err := user.Client.KeystoreWithResponse(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(res.JSON200.Entries) == 1)
 		assert.Equal(t, entryId, res.JSON200.Entries[0].Id)
 	})
 
-	newPassword := random()
-	newNotes := random()
+	newPassword := s.Random(t)
+	newNotes := s.Random(t)
 
 	s.Run(t, "Entry can be updated", func(t *testing.T) {
-		res, err := user.client.UpdateEntryWithResponse(s.ctx, keystoreId, entryId,
+		res, err := user.Client.UpdateEntryWithResponse(s.Ctx, keystoreId, entryId,
 			generated.UpdateEntryJSONRequestBody{
 				Password: optional.Ref(newPassword),
 				Notes:    optional.Ref(newNotes),
@@ -98,7 +99,7 @@ func TestKeystores(t *testing.T) {
 		assert.Equal(t, newPassword, res.JSON200.Password)
 		assert.Equal(t, newNotes, res.JSON200.Notes)
 
-		res2, err := user.client.KeystoreWithResponse(s.ctx, keystoreId)
+		res2, err := user.Client.KeystoreWithResponse(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 		assert.Assert(t, res2.JSON200 != nil)
 		assert.Assert(t, len(res2.JSON200.Entries) == 1)
@@ -107,20 +108,20 @@ func TestKeystores(t *testing.T) {
 	})
 
 	s.Run(t, "Entry can be deleted", func(t *testing.T) {
-		_, err := user.client.DeleteEntryWithResponse(s.ctx, keystoreId, entryId)
+		_, err := user.Client.DeleteEntryWithResponse(s.Ctx, keystoreId, entryId)
 		assert.NilError(t, err)
 
-		res, err := user.client.KeystoreWithResponse(s.ctx, keystoreId)
+		res, err := user.Client.KeystoreWithResponse(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(res.JSON200.Entries) == 0)
 	})
 
 	s.Run(t, "Keystore can be deleted", func(t *testing.T) {
-		_, err := user.client.DeleteKeystore(s.ctx, keystoreId)
+		_, err := user.Client.DeleteKeystore(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 
-		res, err := user.client.KeystoresWithResponse(s.ctx)
+		res, err := user.Client.KeystoresWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 0)

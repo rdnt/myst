@@ -65,6 +65,7 @@ func HashPassword(password string) (string, error) {
 // cryptographically secure random bytes.
 func GenerateRandomBytes(n uint) ([]byte, error) {
 	b := make([]byte, n)
+
 	_, err := rand.Read(b)
 	if err != nil {
 		return nil, err

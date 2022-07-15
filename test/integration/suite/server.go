@@ -2,6 +2,9 @@ package suite
 
 import (
 	"fmt"
+	"testing"
+
+	"gotest.tools/v3/assert"
 
 	"myst/src/server/application"
 	"myst/src/server/repository"
@@ -17,7 +20,7 @@ type Server struct {
 	client *generated.ClientWithResponses
 }
 
-func newServer(address string) (*Server, error) {
+func newServer(t *testing.T, address string) *Server {
 	repo := repository.New()
 
 	app, err := application.New(
@@ -25,18 +28,14 @@ func newServer(address string) (*Server, error) {
 		application.WithUserRepository(repo),
 		application.WithInvitationRepository(repo),
 	)
-	if err != nil {
-		return nil, err
-	}
+	assert.NilError(t, err)
 
 	server := rest.NewServer(app)
 
 	clientAddr := fmt.Sprintf("http://%s/api", address)
 
 	client, err := generated.NewClientWithResponses(clientAddr)
-	if err != nil {
-		return nil, err
-	}
+	assert.NilError(t, err)
 
 	return &Server{
 		address: address,
@@ -44,13 +43,14 @@ func newServer(address string) (*Server, error) {
 		app:    app,
 		server: server,
 		client: client,
-	}, nil
+	}
 }
 
-func (s *Server) Start() error {
-	return s.server.Start(s.address)
+func (s *Server) start(t *testing.T) {
+	err := s.server.Start(s.address)
+	assert.NilError(t, err)
 }
 
-func (s *Server) Stop() error {
-	return s.server.Stop()
+func (s *Server) stop(t *testing.T) {
+	_ = s.server.Stop()
 }

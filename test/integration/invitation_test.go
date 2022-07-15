@@ -6,10 +6,11 @@ import (
 	"gotest.tools/v3/assert"
 
 	"myst/src/client/rest/generated"
+	"myst/test/integration/suite"
 )
 
 func TestInvitations(t *testing.T) {
-	s := setup(t)
+	s := suite.New(t)
 
 	inviter := s.Client1
 	invitee := s.Client2
@@ -19,10 +20,10 @@ func TestInvitations(t *testing.T) {
 
 	var invitationId string
 	s.Run(t, "Invite someone to access the keystore", func(ddt *testing.T) {
-		res, err := inviter.client.CreateInvitationWithResponse(s.ctx,
+		res, err := inviter.Client.CreateInvitationWithResponse(s.Ctx,
 			keystoreId,
 			generated.CreateInvitationJSONRequestBody{
-				Invitee: s.Client2.username,
+				Invitee: s.Client2.Username,
 			},
 		)
 		assert.NilError(t, err)
@@ -31,49 +32,41 @@ func TestInvitations(t *testing.T) {
 		invitationId = res.JSON201.Id
 	})
 
-	var inviterInvitation *generated.Invitation
-
 	s.Run(t, "The inviter has access to the invitation", func(t *testing.T) {
-		res, err := inviter.client.GetInvitationsWithResponse(s.ctx)
+		res, err := inviter.Client.GetInvitationsWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 1)
 		assert.Equal(t, (*res.JSON200)[0].Id, invitationId)
 
-		res2, err := inviter.client.GetInvitationWithResponse(s.ctx, invitationId)
+		res2, err := inviter.Client.GetInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
 		assert.Assert(t, res2.JSON200 != nil)
 		assert.Equal(t, res2.JSON200.Id, invitationId)
 		assert.Equal(t, res2.JSON200.Status, generated.Pending)
-
-		inviterInvitation = res2.JSON200
 	})
 
 	s.Run(t, "The invitee has access to the invitation", func(t *testing.T) {
-		res, err := invitee.client.GetInvitationsWithResponse(s.ctx)
+		res, err := invitee.Client.GetInvitationsWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 1)
 		assert.Equal(t, (*res.JSON200)[0].Id, invitationId)
 
-		res2, err := invitee.client.GetInvitationWithResponse(s.ctx, invitationId)
+		res2, err := invitee.Client.GetInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
 		assert.Assert(t, res2.JSON200 != nil)
 		assert.Equal(t, res2.JSON200.Id, invitationId)
 		assert.Equal(t, res2.JSON200.Status, generated.Pending)
-
-		inviterInvitation.Id = keystoreId
-
-		assert.DeepEqual(t, res2.JSON200, inviterInvitation)
 	})
 
 	s.Run(t, "Another user doesn't have access to the invitation", func(t *testing.T) {
-		res, err := other.client.GetInvitationsWithResponse(s.ctx)
+		res, err := other.Client.GetInvitationsWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Assert(t, len(*res.JSON200) == 0)
 
-		res2, err := other.client.GetInvitationWithResponse(s.ctx, invitationId)
+		res2, err := other.Client.GetInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
 		assert.Assert(t, res2.JSON200 == nil)
 		assert.Assert(t, res2.JSONDefault != nil)

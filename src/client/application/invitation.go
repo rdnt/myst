@@ -34,7 +34,6 @@ func (app *application) CreateInvitation(keystoreId string, inviteeUsername stri
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to create invitation")
 	}
 
-	log.Debug("invitation created", "invitation", inv)
 	return inv, nil
 }
 

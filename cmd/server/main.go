@@ -1,13 +1,11 @@
 package main
 
 import (
-	application "myst/internal/server"
-	"myst/internal/server/api/http"
-	invitationrepo "myst/internal/server/core/invitationrepo/memory"
-	keystorerepo "myst/internal/server/core/keystorerepo/memory"
-	userrepo "myst/internal/server/core/userrepo/memory"
 	"myst/pkg/config"
 	"myst/pkg/logger"
+	"myst/src/server/application"
+	"myst/src/server/repository"
+	"myst/src/server/rest"
 )
 
 var log = logger.New("app", logger.Red)
@@ -15,22 +13,20 @@ var log = logger.New("app", logger.Red)
 func main() {
 	logger.EnableDebug = config.Debug
 
-	keystoreRepo := keystorerepo.New()
-	userRepo := userrepo.New()
-	invitationRepo := invitationrepo.New()
+	repo := repository.New()
 
 	app, err := application.New(
-		application.WithKeystoreRepository(keystoreRepo),
-		application.WithUserRepository(userRepo),
-		application.WithInvitationRepository(invitationRepo),
+		application.WithKeystoreRepository(repo),
+		application.WithUserRepository(repo),
+		application.WithInvitationRepository(repo),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	api := http.New(app)
+	server := rest.NewServer(app)
 
-	err = api.Run(":8080")
+	err = server.Run(":8080")
 	if err != nil {
 		panic(err)
 	}

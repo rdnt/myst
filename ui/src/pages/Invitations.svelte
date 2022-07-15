@@ -8,11 +8,12 @@
   import {getInvitations, invitations} from "@/stores/invitations";
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
+  import {onMount} from "svelte";
 
   const registerFocus = useFocus();
 
-  $: incomingInvitations = $invitations.filter((inv) => inv.inviteeId === $currentUser.id && inv.status === 'pending');
-  $: outgoingInvitations = $invitations.filter((inv) => inv.inviterId === $currentUser.id && (inv.status === 'pending'));
+  $: incomingInvitations = $invitations.filter((inv) => inv.invitee.id === $currentUser.id && inv.status === 'pending');
+  $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending'));
   $: pastInvitations = $invitations.filter((inv) => inv.status !== 'pending')
 
   let invitation: Invitation;
@@ -46,6 +47,10 @@
     invitation = inv;
     showDeclineInvitationModal = true;
   }
+
+  onMount(() => {
+    getInvitations()
+  })
 </script>
 
 <div class="invitations-list" use:registerFocus>
@@ -55,16 +60,16 @@
       {#each incomingInvitations as inv}
         <div class="invitation">
           <span class="icon">
-            <span style="background-color: {hash(inv.inviterId)}">
-              {inv.inviterId.slice(0, 2).toUpperCase()}
+            <span style="background-color: {hash(inv.inviter.username)}">
+              {inv.inviter.username.slice(0, 2).toUpperCase()}
             </span>
           </span>
           <div class="info">
             <span class="name">
-              {inv.keystoreName}
+              {inv.keystore.name}
             </span>
             <span class="user">
-              Invited by <strong>{inv.inviterId}</strong>
+              Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
             </span>
           </div>
           <div class="actions">
@@ -83,16 +88,16 @@
       {#each outgoingInvitations as inv}
         <div class="invitation">
           <span class="icon">
-            <span style="background-color: {hash(inv.inviteeId)}">
-              {inv.inviteeId.slice(0, 2).toUpperCase()}
+            <span style="background-color: {hash(inv.invitee.username)}">
+              {inv.invitee.username.slice(0, 2).toUpperCase()}
             </span>
           </span>
           <div class="info">
             <span class="name">
-              {inv.keystoreName}
+              {inv.keystore.name}
             </span>
             <span class="user">
-              Invited <strong>{inv.inviteeId}</strong>
+              Invited <strong>{inv.invitee.username}</strong> {format(inv.createdAt)}
             </span>
           </div>
           <div class="actions">
@@ -109,50 +114,52 @@
       {#each pastInvitations as inv}
         <div class="invitation">
         <span class="icon">
-          <span style="background-color: {hash(inv.inviterId === $currentUser.id ? inv.inviteeId : inv.inviterId)}">
-            {#if inv.inviterId === $currentUser.id}
-              {inv.inviteeId.slice(0, 2).toUpperCase()}
+          <span style="background-color: {hash(inv.inviter.id === $currentUser.id ? inv.invitee.username : inv.inviter.username)}">
+            {#if inv.inviter.id === $currentUser.id}
+              {inv.invitee.username.slice(0, 2).toUpperCase()}
             {:else}
-              {inv.inviterId.slice(0, 2).toUpperCase()}
+              {inv.inviter.username.slice(0, 2).toUpperCase()}
             {/if}
           </span>
         </span>
           <div class="info">
           <span class="name">
-            {inv.keystoreName}
+            {inv.keystore.name}
           </span>
             <span class="user">
             {#if inv.status === 'accepted'}
-              {#if inv.inviterId === $currentUser.id}
-                Shared with <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> since {format(inv.acceptedAt)}
+              {#if inv.inviter.id === $currentUser.id}
+                Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}
               {:else}
                 Invitation accepted {format(inv.acceptedAt)}.
-                Waiting for <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> to come online.
+                Waiting for <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> to come online.
               {/if}
             {:else if inv.status === 'finalized'}
-              {#if inv.inviterId === $currentUser.id}
-                Shared with <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> since {format(inv.acceptedAt)}
+              {#if inv.inviter.id === $currentUser.id}
+                Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}
               {:else}
-                Being shared by <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> since {format(inv.acceptedAt)}
+                Being shared by <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> since {format(inv.acceptedAt)}
               {/if}
             {:else if inv.status === 'deleted'}
-              {#if inv.inviterId === $currentUser.id}
-                Invitation to <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> deleted {format(inv.deletedAt)}
+              {#if inv.inviter.id === $currentUser.id}
+                Invitation to <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> deleted {format(inv.deletedAt)}
               {/if}
             {:else if inv.status === 'declined'}
-              {#if inv.inviterId === $currentUser.id}
-                Invitation declined by <strong style="color: {hash(inv.inviteeId)}">{inv.inviteeId}</strong> {format(inv.declinedAt)}
+              {#if inv.inviter.id === $currentUser.id}
+                Invitation declined by <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> {format(inv.declinedAt)}
               {:else}
-                Declined invitation from <strong style="color: {hash(inv.inviterId)}">{inv.inviterId}</strong> {format(inv.declinedAt)}
+                Declined invitation from <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> {format(inv.declinedAt)}
               {/if}
             {/if}
           </span>
           </div>
           <div class="actions">
-            {#if inv.inviterId === $currentUser.id}
-              <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
-            {:else}
-              <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
+            {#if inv.status === 'finalized' || inv.status === 'accepted'}
+              {#if inv.inviter.id === $currentUser.id}
+                <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
+              {:else}
+                <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
+              {/if}
             {/if}
           </div>
         </div>

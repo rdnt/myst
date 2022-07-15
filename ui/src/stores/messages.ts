@@ -11,12 +11,12 @@ export interface Message {
   message: any;
 }
 
-let setMessagesFunc;
+let setFunc;
 export const messages = readable<Message[]>([], (set) => {
-  setMessagesFunc = set
+  setFunc = set
 
   return () => {
-    // setMessagesFunc([]);
+    setFunc = undefined
   }
 });
 
@@ -31,11 +31,16 @@ export const showError = (title: string, message?: any) => {
 const showMsg = (msg: Message) => {
   const msgs = get(messages);
   msgs.push(msg);
-  setMessagesFunc(msgs);
+  if (setFunc) {
+    setFunc(msgs);
+  }
 
   window.setTimeout(() => {
     const msgs = get(messages);
     msgs.shift();
-    setMessagesFunc(msgs)
+
+    if (setFunc) {
+      setFunc(msgs)
+    }
   }, 5000);
 }

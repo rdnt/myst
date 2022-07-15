@@ -7,6 +7,8 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AuthenticateRequest } from './models/AuthenticateRequest';
+export type { AuthorizationResponse } from './models/AuthorizationResponse';
+export type { CreateEnclaveRequest } from './models/CreateEnclaveRequest';
 export type { CreateEntryRequest } from './models/CreateEntryRequest';
 export type { CreateInvitationRequest } from './models/CreateInvitationRequest';
 export type { CreateKeystoreRequest } from './models/CreateKeystoreRequest';
@@ -16,6 +18,8 @@ export type { Invitation } from './models/Invitation';
 export type { Invitations } from './models/Invitations';
 export type { Keystore } from './models/Keystore';
 export type { Keystores } from './models/Keystores';
+export type { LoginRequest } from './models/LoginRequest';
+export type { RegisterRequest } from './models/RegisterRequest';
 export type { UnlockKeystoreRequest } from './models/UnlockKeystoreRequest';
 export type { UpdateEntryRequest } from './models/UpdateEntryRequest';
 export type { User } from './models/User';

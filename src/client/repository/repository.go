@@ -3,6 +3,7 @@ package repository
 import (
 	"crypto/sha256"
 	"fmt"
+	"io/fs"
 	"os"
 	"sync"
 	"time"
@@ -20,20 +21,15 @@ var log = logger.New("repository", logger.Green)
 
 type Repository struct {
 	mux             sync.Mutex
-	path            string
 	key             []byte
 	lastHealthCheck time.Time
+	fs              fs.FS
 	// remote          remote.Remote
 }
 
-func New(path string) (*Repository, error) {
-	err := os.MkdirAll(path, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
-
+func New(fs fs.FS) (*Repository, error) {
 	r := &Repository{
-		path: path,
+		fs: fs,
 	}
 
 	go r.startHealthCheck()
@@ -118,7 +114,7 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, err := os.ReadFile(r.enclavePath())
+	_, err := r.fs.Open(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, application.ErrInitializationRequired
 	} else if err != nil {
@@ -375,7 +371,12 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 	// prepend salt and mac to the ciphertext
 	b = append(e.Salt(), append(mac, b...)...)
 
-	return os.WriteFile(r.enclavePath(), b, 0600)
+	f, err := r.fs.Open(r.enclavePath())
+	if err != nil {
+		return err
+	}
+
+	return r.fs.WriteFile(r.enclavePath(), b, 0600)
 }
 
 // func (r *Repository) Keypair() (publicKey, privateKey []byte, err error) {

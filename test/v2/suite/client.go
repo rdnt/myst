@@ -2,18 +2,18 @@ package suite
 
 import (
 	"fmt"
-	"os"
 
 	"myst/src/client/application"
 	"myst/src/client/remote"
 	"myst/src/client/repository"
 	"myst/src/client/rest"
 	"myst/src/client/rest/generated"
+
+	"github.com/liamg/memoryfs"
 )
 
 type Client struct {
 	address        string
-	dir            string
 	username       string
 	password       string
 	masterPassword string
@@ -26,17 +26,9 @@ type Client struct {
 func newClient(serverAddress, address string) (*Client, error) {
 	username, password, masterPassword := random(), random(), random()
 
-	dir, err := os.MkdirTemp("", "myst-client-data-*")
-	if err != nil {
-		return nil, err
-	}
+	fs := memoryfs.New()
 
-	err = os.Chmod(dir, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
-
-	repo, err := repository.New(dir)
+	repo, err := repository.New(fs)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +59,6 @@ func newClient(serverAddress, address string) (*Client, error) {
 
 	return &Client{
 		address:        address,
-		dir:            dir,
 		username:       username,
 		password:       password,
 		masterPassword: masterPassword,

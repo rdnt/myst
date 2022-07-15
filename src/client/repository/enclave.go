@@ -4,8 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path"
+	"io"
 
 	"github.com/pkg/errors"
 
@@ -15,11 +14,16 @@ import (
 )
 
 func (r *Repository) enclavePath() string {
-	return path.Join(r.path, "data.myst")
+	return "data.myst"
 }
 
 func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
-	b, err := os.ReadFile(r.enclavePath())
+	f, err := r.fs.Open(r.enclavePath())
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}

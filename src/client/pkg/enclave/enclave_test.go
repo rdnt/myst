@@ -23,5 +23,5 @@ func TestEnclaveEncryptDecryptLossless(t *testing.T) {
 
 	b2, err := enclave.Unlock(enc, key)
 	assert.NilError(t, err)
-	assert.Equal(t, b, b2)
+	assert.DeepEqual(t, b, b2)
 }

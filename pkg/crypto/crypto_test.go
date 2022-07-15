@@ -22,7 +22,7 @@ func TestPKCS7PadUnpad(t *testing.T) {
 		b3, err := crypto.PKCS7Unpad(b2, aes.BlockSize)
 		assert.NilError(t, err)
 
-		assert.Equal(t, b, b3)
+		assert.DeepEqual(t, b, b3)
 	}
 
 	// b := []byte("padyloadssssdsww")

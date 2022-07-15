@@ -3,7 +3,6 @@ package repository
 import (
 	"crypto/sha256"
 	"fmt"
-	"io/fs"
 	"os"
 	"sync"
 	"time"
@@ -23,13 +22,13 @@ type Repository struct {
 	mux             sync.Mutex
 	key             []byte
 	lastHealthCheck time.Time
-	fs              fs.FS
+	path            string
 	// remote          remote.Remote
 }
 
-func New(fs fs.FS) (*Repository, error) {
+func New(path string) (*Repository, error) {
 	r := &Repository{
-		fs: fs,
+		path: path,
 	}
 
 	go r.startHealthCheck()
@@ -114,7 +113,7 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, err := r.fs.Open(r.enclavePath())
+	_, err := os.Open(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, application.ErrInitializationRequired
 	} else if err != nil {
@@ -371,12 +370,7 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 	// prepend salt and mac to the ciphertext
 	b = append(e.Salt(), append(mac, b...)...)
 
-	f, err := r.fs.Open(r.enclavePath())
-	if err != nil {
-		return err
-	}
-
-	return r.fs.WriteFile(r.enclavePath(), b, 0600)
+	return os.WriteFile(r.enclavePath(), b, 0600)
 }
 
 // func (r *Repository) Keypair() (publicKey, privateKey []byte, err error) {

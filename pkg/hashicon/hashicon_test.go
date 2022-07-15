@@ -3,21 +3,21 @@ package hashicon
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestNew(t *testing.T) {
 	b := make([]byte, 16)
 	_, err := New(b)
-	assert.NotEqual(t, err, nil)
+	assert.Assert(t, err != nil)
 
 	b = make([]byte, 48)
 	_, err = New(b)
-	assert.NotEqual(t, err, nil)
+	assert.Assert(t, err != nil)
 
 	b = make([]byte, 16384)
 	_, err = New(b)
-	assert.NotEqual(t, err, nil)
+	assert.Assert(t, err != nil)
 
 	b = make([]byte, 8192)
 	_, err = New(b)

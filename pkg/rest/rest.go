@@ -23,7 +23,7 @@ type Pagination struct {
 	PerPage int `json:"per-page"`
 }
 
-// ErrorResponse is an error response. Adds a default http status message if
+// ErrorResponse is an error response. Adds a default rest status message if
 // none was supplied
 type ErrorResponse struct {
 	Status  string      `json:"status"`

@@ -10,6 +10,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"math/big"
 	"reflect"
 	"strings"
 
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	debug                 = false
+	debug                 = true
 	DefaultArgon2IdParams = Argon2IdParams{
 		Memory:      64 * 1024,
 		Time:        1,
@@ -64,11 +65,28 @@ func HashPassword(password string) (string, error) {
 // cryptographically secure random bytes.
 func GenerateRandomBytes(n uint) ([]byte, error) {
 	b := make([]byte, n)
+
 	_, err := rand.Read(b)
 	if err != nil {
 		return nil, err
 	}
 	return b, nil
+}
+
+// GenerateRandomString returns a string with size n that is cryptographically
+// random
+func GenerateRandomString(n int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return "", err
+		}
+		ret[i] = letters[num.Int64()]
+	}
+
+	return string(ret), nil
 }
 
 // HMAC_SHA256 generates a hash-based message authentication code for
@@ -104,7 +122,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if len(key) != 32 {
 		return nil, fmt.Errorf("invalid key length")
 	}
-	// Initialize the AES cipher
+	// CreateEnclave the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -120,7 +138,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Create a CBC Encrypter
+	// CreateInvitation a CBC Encrypter
 	mode := cipher.NewCBCEncrypter(block, iv)
 	// Encrypt the plaintext
 	ciphertext := make([]byte, len(plaintext))
@@ -147,7 +165,7 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) < aes.BlockSize*2 {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
-	// Initialize the AES cipher
+	// CreateEnclave the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -159,7 +177,7 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext)%aes.BlockSize != 0 {
 		return nil, fmt.Errorf("ciphertext not multiple of blocksize")
 	}
-	// Create a CBC Decrypter
+	// CreateInvitation a CBC Decrypter
 	mode := cipher.NewCBCDecrypter(block, iv)
 	// Decrypt the ciphertext
 	plaintext := make([]byte, len(ciphertext))
@@ -262,7 +280,6 @@ func VerifyPassword(password, encodedHash string) (bool, error) {
 	}
 
 	if !reflect.DeepEqual(p, &DefaultArgon2IdParams) {
-		fmt.Println("reflect does not equal")
 		return false, err
 	}
 	// Calculate a new hash with the given password and the parameters and salt

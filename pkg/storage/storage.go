@@ -17,7 +17,7 @@ func Init() error {
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll("data/keystorerepo", os.ModePerm)
+	err = os.MkdirAll("data/repository", os.ModePerm)
 	if err != nil {
 		return err
 	}

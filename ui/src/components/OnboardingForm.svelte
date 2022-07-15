@@ -7,20 +7,21 @@
 
   let warnings: boolean = false;
 
-  let step: number = 1;
+  let step: number = 2;
 
   let name: string = '';
   $: nameValid = name.length > 0;
 
-  let password: string = '';
+  let password: string = '12345678';
   $: passwordValid = password.length >= 8;
 
-  $: valid = (step === 1 && nameValid) || (step === 2 && passwordValid)
+  // $: valid = (step === 1 && nameValid) || (step === 2 && passwordValid)
+  $: valid = (step === 2 && passwordValid)
 
   let nameInput: HTMLInputElement;
   let passwordInput: HTMLInputElement;
 
-  onMount(() => nameInput.focus())
+  onMount(() => passwordInput.focus())
 
   const submit = () => {
     if (!valid) {
@@ -32,13 +33,12 @@
       warnings = false
       setTimeout(() => passwordInput.focus(), 0)
     } else if (step === 2) {
-      api.createKeystore({
+      api.createEnclave({
         requestBody: {
-          name,
           password,
         }
-      }).then((keystore) => {
-        dispatch('created', keystore)
+      }).then(() => {
+        dispatch('initialized')
       }).catch((err) => {
         console.error(err)
       })
@@ -66,8 +66,8 @@
           bind:ref={nameInput}
         />
       {:else}
-        <h6>Selected keystore name</h6>
-        <span class="selected-name">{name}</span>
+<!--        <h6>Selected keystore name</h6>-->
+<!--        <span class="selected-name">{name}</span>-->
       {/if}
     </div>
 
@@ -78,7 +78,7 @@
           class="password-input"
           error={!passwordValid && warnings ? 'Password too weak' : ''}
           readonly={step !== 1}
-          label="Your keystores will be encrypted using a master password. The security of your secrets will
+          label="Your data will be encrypted with a master password. The security of your secrets will
           depend on its complexity. Choose one wisely and make sure you remember it."
           placeholder="Master password"
           on:input={() => warnings = true}
@@ -88,7 +88,7 @@
     {/if}
 
     <div class="footer">
-      <span class="step-label">Step {step} of 2</span>
+<!--      <span class="step-label">Step {step} of 2</span>-->
       {#if step === 1}
         <button class:disabled={!valid} class="button" type="submit">Next</button>
       {:else}

@@ -1,23 +1,18 @@
 <script lang="ts">
   import api from "@/api";
-  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import LoginForm from "@/components/LoginForm.svelte";
   import Messages from "@/components/Messages.svelte";
   import OnboardingForm from "@/components/OnboardingForm.svelte";
-  import Sidebar from "@/components/Sidebar.svelte";
-  import Invitations from "@/pages/Invitations.svelte";
-  import Keystores from "@/pages/Keystores.svelte";
-  import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {currentUser} from "@/stores/user";
+  import Main from "@/pages/Main.svelte";
+  import {getKeystores} from "@/stores/keystores.ts";
   import {onMount} from 'svelte';
-  import {Route, Router} from "svelte-navigator";
+  import {Router} from "svelte-navigator";
 
   let onboarding = false;
   let ready = false;
   let login = false;
 
   let keystore = null;
-  let showCreateKeystoreModal: boolean = false;
 
   const healthCheck = () => {
     api.healthCheck().then(() => {
@@ -34,27 +29,41 @@
   const initialize = () => {
     // return $keystores;
 
-    getKeystores().then((response) => {
-
-      onboarding = response.length == 0;
+    api.enclave().then((response) => {
+      onboarding = false
       login = false
 
-      if (response.length > 0) {
-        //
-        // keystores = response.sort((a, b) => {
-        //   return a.id < b.id ? 1 : -1;
-        // });
+      // checkIfInitialized()
 
-        keystore = response[0];
-      }
+      getKeystores().then(keystores => {
+        if (keystores.length > 0) {
+          keystore = keystores[0];
+        }
+      })
+      // console.log(response)
+
+      // onboarding = response.length == 0;
+      // login = false
+      //
+      // if (response.length > 0) {
+      //   //
+      //   // keystores = response.sort((a, b) => {
+      //   //   return a.id < b.id ? 1 : -1;
+      //   // });
+      //
+      //   keystore = response[0];
+      // }
 
     }).catch((error: Response) => {
-      if (error.status == 401) {
+      if (error.status == 404) {
+        onboarding = true;
+        return
+      } else if (error.status == 401) {
         login = true;
         return
+      } else {
+        console.error(error);
       }
-
-      console.log(error)
     }).finally(() => {
       ready = true;
     });
@@ -71,35 +80,17 @@
     <span>Loading...</span>
   {:else}
     {#if onboarding}
-      <OnboardingForm on:created={initialize}/>
+      <OnboardingForm on:initialized={initialize}/>
     {:else if login}
       <LoginForm on:login={initialize}/>
-    {:else if $currentUser}
-      <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
-      <main>
-        <Route>
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/keystore/:keystoreId">
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/keystore/:keystoreId/entry/:entryId">
-          <Keystores keystores={$keystores}/>
-        </Route>
-
-        <Route path="/invitations">
-          <Invitations/>
-        </Route>
-      </main>
+    {:else}
+      <Main/>
     {/if}
   {/if}
 </Router>
 
 <Messages/>
 
-<CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
 <style lang="scss">
   $bg: #0a0e11;

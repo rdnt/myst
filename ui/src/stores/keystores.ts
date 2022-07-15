@@ -1,22 +1,8 @@
-import api from "@/api";
+import api, {ApiError} from "@/api";
 import type {Keystore} from "@/api";
 import {readable} from "svelte/store";
 
-let setKeystores;
-export const keystores = readable<Keystore[]>([], (set) => {
-  setKeystores = set
-
-  // getKeystores().then((keystores) => {
-  //   set(keystores);
-  // }).catch(() => {
-  //   set([]);
-  // });
-
-  return () => {
-    // set([]);
-  }
-});
-
+let setFunc
 export const getKeystores = () => {
   return api.keystores().then((keystores: Keystore[]) => {
     keystores = keystores.sort((a, b) => {
@@ -29,16 +15,31 @@ export const getKeystores = () => {
       })
     })
 
-    if (setKeystores) {
-      setKeystores(keystores);
+    if (setFunc) {
+      setFunc(keystores)
     }
 
     return Promise.resolve(keystores)
-  }).catch((error: Response) => {
-    if (setKeystores) {
-      setKeystores([]);
+  }).catch((e: ApiError) => {
+    console.error(e)
+
+    if (setFunc) {
+      setFunc([])
     }
 
-    return Promise.reject(error)
-  });
+    return Promise.reject(e)
+  })
 }
+
+export const keystores = readable<Keystore[]>([], (set) => {
+  setFunc = set
+  getKeystores()
+
+  let interval = window.setInterval(getKeystores, 60000)
+
+  return () => {
+    window.clearInterval(interval)
+    setFunc([]);
+    setFunc = undefined
+  }
+});

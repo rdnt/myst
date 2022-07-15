@@ -5,7 +5,7 @@ import * as path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    outDir: '../build'
+    outDir: '../cmd/client/static'
   },
   server: {
     port: 8082,

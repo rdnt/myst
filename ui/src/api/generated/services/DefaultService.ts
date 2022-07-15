@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AuthenticateRequest } from '../models/AuthenticateRequest';
+import type { CreateEnclaveRequest } from '../models/CreateEnclaveRequest';
 import type { CreateEntryRequest } from '../models/CreateEntryRequest';
 import type { CreateInvitationRequest } from '../models/CreateInvitationRequest';
 import type { CreateKeystoreRequest } from '../models/CreateKeystoreRequest';
@@ -11,6 +12,8 @@ import type { Invitation } from '../models/Invitation';
 import type { Invitations } from '../models/Invitations';
 import type { Keystore } from '../models/Keystore';
 import type { Keystores } from '../models/Keystores';
+import type { LoginRequest } from '../models/LoginRequest';
+import type { RegisterRequest } from '../models/RegisterRequest';
 import type { UpdateEntryRequest } from '../models/UpdateEntryRequest';
 import type { User } from '../models/User';
 
@@ -33,6 +36,38 @@ export class DefaultService {
     }
 
     /**
+     * Sets up the myst enclave with a master password
+     * @returns Error Error
+     * @returns any Enclave created
+     * @throws ApiError
+     */
+    public static createEnclave({
+requestBody,
+}: {
+requestBody: CreateEnclaveRequest,
+}): CancelablePromise<Error | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/enclave',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Check if the Myst enclave is set up
+     * @returns any OK
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static enclave(): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/enclave',
+        });
+    }
+
+    /**
      * Attempts to authenticate the user
      * @returns any OK
      * @returns Error Error
@@ -46,6 +81,44 @@ requestBody: AuthenticateRequest,
         return __request(OpenAPI, {
             method: 'POST',
             url: '/authenticate',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Registers a new account
+     * @returns Error Error
+     * @returns User Successfully registered
+     * @throws ApiError
+     */
+    public static register({
+requestBody,
+}: {
+requestBody: RegisterRequest,
+}): CancelablePromise<Error | User> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/register',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Logs in to the remote
+     * @returns any Successfully logged in
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static login({
+requestBody,
+}: {
+requestBody: LoginRequest,
+}): CancelablePromise<any | Error> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/login',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -143,8 +216,8 @@ keystoreId: string,
 
     /**
      * Creates a new entry and adds it to the keystore
-     * @returns Entry Entry
      * @returns Error Error
+     * @returns Entry Entry
      * @throws ApiError
      */
     public static createEntry({
@@ -154,7 +227,7 @@ requestBody,
 /** unique identifier for a keystore **/
 keystoreId: string,
 requestBody: CreateEntryRequest,
-}): CancelablePromise<Entry | Error> {
+}): CancelablePromise<Error | Entry> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/keystore/{keystoreId}/entries',
@@ -163,27 +236,6 @@ requestBody: CreateEntryRequest,
             },
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-
-    /**
-     * Get the entries of a keystore
-     * @returns Entry Entries
-     * @returns Error Error
-     * @throws ApiError
-     */
-    public static keystoreEntries({
-keystoreId,
-}: {
-/** unique identifier for a keystore **/
-keystoreId: string,
-}): CancelablePromise<Array<Entry> | Error> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/keystore/{keystoreId}/entries',
-            path: {
-                'keystoreId': keystoreId,
-            },
         });
     }
 
@@ -239,8 +291,8 @@ entryId: string,
 
     /**
      * Create a keystore invitation
-     * @returns Invitation Invitation
      * @returns Error Error
+     * @returns Invitation Invitation
      * @throws ApiError
      */
     public static createInvitation({
@@ -249,7 +301,7 @@ keystoreId,
 }: {
 requestBody: CreateInvitationRequest,
 keystoreId?: string,
-}): CancelablePromise<Invitation | Error> {
+}): CancelablePromise<Error | Invitation> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/keystore/{keystoreId}/invitations',

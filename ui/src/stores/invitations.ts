@@ -1,12 +1,17 @@
 import type {Invitation} from "@/api";
 import api, {ApiError} from "@/api";
-import {readable} from "svelte/store";
+import {currentUser} from "@/stores/user";
+import {get, readable} from "svelte/store";
 
 let setFunc
 export const getInvitations = () => {
-  api.getInvitations().then((invs: Invitation[]) => {
+  if (!get(currentUser)) {
+    return []
+  }
+
+  return api.getInvitations().then((invs: Invitation[]) => {
     invs = invs.sort((a, b) => {
-      return a.id < b.id ? 1 : -1;
+      return a.updatedAt < b.updatedAt ? 1 : -1;
     })
 
     if (setFunc) {
@@ -27,9 +32,10 @@ export const getInvitations = () => {
 
 export const invitations = readable<Invitation[]>([], (set) => {
   setFunc = set
+
   getInvitations()
 
-  let interval = window.setInterval(getInvitations, 1000)
+  let interval = window.setInterval(getInvitations, 10000)
 
   return () => {
     window.clearInterval(interval)

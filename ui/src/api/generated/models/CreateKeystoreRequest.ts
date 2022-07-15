@@ -4,5 +4,4 @@
 
 export type CreateKeystoreRequest = {
     name: string;
-    password?: string;
 };

@@ -138,7 +138,7 @@ func (h *Hashicon) ToSVG() string {
 	mult := 256 / h.Stride
 
 	svg := fmt.Sprintf(
-		`<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult,
+		`<svg width="%d" height="%d" version="1.1" xmlns="rest://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult,
 	)
 	svg += `<rect width="100%" height="100%" fill="#181b21"/>`
 	for i, p := range h.Pix {

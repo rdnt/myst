@@ -3,7 +3,7 @@ package repository_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/repository"
@@ -11,17 +11,17 @@ import (
 
 func TestRepository(t *testing.T) {
 	repo, err := repository.New(t.TempDir())
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 
 	err = repo.CreateEnclave("12345678")
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 
 	err = repo.Authenticate("12345678")
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 
 	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test")))
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 
 	_, err = repo.Keystore(k.Id)
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 }

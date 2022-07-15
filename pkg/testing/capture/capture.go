@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 type Capture struct {
@@ -27,7 +27,7 @@ func (c *Capture) Start() {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	require.Equal(c.t, c.capturing, false)
+	assert.Equal(c.t, c.capturing, false)
 	c.capturing = true
 
 	c.stdout = os.Stdout
@@ -35,7 +35,7 @@ func (c *Capture) Start() {
 
 	var err error
 	c.pr, c.pw, err = os.Pipe()
-	require.NoError(c.t, err)
+	assert.NilError(c.t, err)
 
 	os.Stdout = c.pw
 	os.Stderr = c.pw
@@ -45,16 +45,16 @@ func (c *Capture) Stop() string {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	require.Equal(c.t, c.capturing, true)
+	assert.Equal(c.t, c.capturing, true)
 
 	err := c.pw.Close()
-	require.NoError(c.t, err)
+	assert.NilError(c.t, err)
 
 	b, err := io.ReadAll(c.pr)
-	require.NoError(c.t, err)
+	assert.NilError(c.t, err)
 
 	err = c.pr.Close()
-	require.NoError(c.t, err)
+	assert.NilError(c.t, err)
 
 	os.Stdout = c.stdout
 	os.Stderr = c.stderr

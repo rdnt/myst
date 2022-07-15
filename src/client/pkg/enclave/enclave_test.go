@@ -3,7 +3,7 @@ package enclave_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 
 	"myst/pkg/crypto"
 	"myst/src/client/pkg/enclave"
@@ -14,14 +14,14 @@ func TestEnclaveEncryptDecryptLossless(t *testing.T) {
 	password := []byte("my-password")
 
 	salt, err := crypto.GenerateRandomBytes(uint(crypto.DefaultArgon2IdParams.SaltLength))
-	assert.Nil(t, err)
+	assert.NilError(t, err)
 
 	key := crypto.Argon2Id(password, salt)
 
 	enc, err := enclave.Create(b, key, salt)
-	assert.Nil(t, err)
+	assert.NilError(t, err)
 
 	b2, err := enclave.Unlock(enc, key)
-	assert.Nil(t, err)
+	assert.NilError(t, err)
 	assert.Equal(t, b, b2)
 }

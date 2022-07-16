@@ -24,7 +24,7 @@ type Remote interface {
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	SignIn(username, password string) (user.User, error)
+	SignIn(username, password string, publicKey []byte) (user.User, error)
 	Register(username, password string, publicKey []byte) (user.User, error)
 	SignOut() error
 	SignedIn() bool

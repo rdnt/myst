@@ -116,7 +116,7 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 }
 
 func (r *remote) UpdateKeystore(k keystore.Keystore) error {
-	return r.UpdateKeystore(k)
+	panic("implement me")
 }
 
 func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {

@@ -58,11 +58,11 @@ func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error
 }
 
 func (app *application) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
-	panic("implement me")
-	// k, err := app.keystores.UserKeystore(userId, keystoreId)
-	// if err != nil {
-	// 	return keystore.Keystore{}, errors.WithMessage(err, "failed to get user keystore")
-	// }
-	//
-	// return k, nil
+	// TODO: implement
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get user keystore")
+	}
+
+	return k, nil
 }

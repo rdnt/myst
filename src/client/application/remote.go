@@ -24,7 +24,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 			return user.User{}, fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(username, password)
+		_, err = app.remote.SignIn(username, password, rem.PublicKey)
 		if err != nil {
 			return user.User{}, err
 		}
@@ -65,7 +65,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 			return user.User{}, fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(username, password)
+		_, err = app.remote.SignIn(username, password, rem.PublicKey)
 		if err != nil {
 			return user.User{}, err
 		}
@@ -76,7 +76,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 		return user.User{}, err
 	}
 
-	u, err := app.remote.SignIn(username, password)
+	u, err := app.remote.SignIn(username, password, rem.PublicKey)
 	if err != nil {
 		return user.User{}, err
 	}
@@ -122,7 +122,7 @@ func (app *application) Authenticate(password string) error {
 			return fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(rem.Username, rem.Password)
+		_, err = app.remote.SignIn(rem.Username, rem.Password, rem.PublicKey)
 		if err != nil {
 			return err
 		}

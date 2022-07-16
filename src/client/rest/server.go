@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -51,7 +51,8 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	gin.DefaultWriter = ioutil.Discard
+	gin.DefaultWriter = io.Discard
+	gin.DefaultErrorWriter = io.Discard
 
 	r := gin.New()
 	s.Engine = r

@@ -24,6 +24,6 @@ func String(length int) (string, error) {
 			result[i] &= 0x7F
 		}
 	}
-	
+
 	return string(result), nil
 }

@@ -98,6 +98,7 @@ func (e *Enclave) Salt() []byte {
 }
 
 func (e *Enclave) UpdateKeystore(k keystore.Keystore) error {
+	k.Version++
 	e.keystores[k.Id] = k
 
 	return nil

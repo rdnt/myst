@@ -7,8 +7,6 @@ import (
 )
 
 func (app *application) sync() error {
-	return nil // TODO: perform sync
-
 	log.Println("Sync started.")
 	defer log.Print("Sync finished.")
 

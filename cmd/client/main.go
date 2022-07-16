@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 	"fmt"
+	"os"
+	"os/signal"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -69,8 +71,15 @@ func main() {
 
 	server := rest.NewServer(app, static)
 
-	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
+	err = server.Start(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	<-c
+
+	_ = server.Stop()
 }

@@ -113,7 +113,7 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, err := os.Open(r.enclavePath())
+	_, err := os.ReadFile(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, application.ErrInitializationRequired
 	} else if err != nil {

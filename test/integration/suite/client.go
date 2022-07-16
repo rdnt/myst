@@ -15,6 +15,8 @@ import (
 )
 
 type Client struct {
+	dir string
+
 	Address        string
 	Username       string
 	Password       string
@@ -56,6 +58,8 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	assert.NilError(t, err)
 
 	return &Client{
+		dir: dir,
+
 		Address:        address,
 		Username:       username,
 		Password:       password,
@@ -80,5 +84,7 @@ func (c *Client) start(t *testing.T) {
 
 func (c *Client) stop(t *testing.T) {
 	_ = c.Server.Stop()
-	// assert.NilError(t, err)
+
+	err := os.RemoveAll(c.dir)
+	assert.NilError(t, err)
 }

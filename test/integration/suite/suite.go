@@ -79,9 +79,9 @@ func New(t *testing.T) *Suite {
 	}
 }
 
-func (s *Suite) Run(name string, fn func(*testing.T)) {
-	if !s.t.Run(name, fn) {
-		s.t.FailNow()
+func (s *Suite) Run(t *testing.T, name string, fn func(*testing.T)) {
+	if !t.Run(name, fn) {
+		t.FailNow()
 	}
 }
 

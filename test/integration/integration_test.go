@@ -1,4 +1,4 @@
-package suite
+package integration_test
 
 import (
 	"testing"
@@ -9,13 +9,19 @@ import (
 	"myst/test/integration/suite"
 )
 
-func CreateKeystore(t *testing.T, s *suite.Suite) (keystoreId string) {
+type Suite struct {
+	*suite.Suite
+}
+
+func setup(t *testing.T) *Suite {
+	return &Suite{suite.New(t)}
+}
+
+func (s *Suite) createKeystore(t *testing.T) (keystoreId string) {
 	keystoreName := s.Random(t)
 
-	user := s.Client1
-
-	s.Run("Create a keystore", func(t *testing.T) {
-		res, err := user.Client.CreateKeystoreWithResponse(s.Ctx,
+	s.Run(t, "Create a keystore", func(t *testing.T) {
+		res, err := s.Client1.Client.CreateKeystoreWithResponse(s.Ctx,
 			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
 		)
 		assert.NilError(t, err)
@@ -28,8 +34,8 @@ func CreateKeystore(t *testing.T, s *suite.Suite) (keystoreId string) {
 	website, username, password, notes :=
 		s.Random(t), s.Random(t), s.Random(t), s.Random(t)
 
-	s.Run("Add an entry to the keystore", func(t *testing.T) {
-		res, err := user.Client.CreateEntryWithResponse(s.Ctx, keystoreId,
+	s.Run(t, "Add an entry to the keystore", func(t *testing.T) {
+		res, err := s.Client1.Client.CreateEntryWithResponse(s.Ctx, keystoreId,
 			generated.CreateEntryJSONRequestBody{
 				Website:  website,
 				Username: username,
@@ -49,13 +55,11 @@ func CreateKeystore(t *testing.T, s *suite.Suite) (keystoreId string) {
 	return keystoreId
 }
 
-func CreateInvitation(s *suite.Suite,
-	keystoreId string, inviter *suite.Client, invitee *suite.Client,
-) (invitationId string) {
-	s.Run("Invite someone to access the keystore", func(t *testing.T) {
-		res, err := inviter.Client.CreateInvitationWithResponse(s.Ctx, keystoreId,
+func (s *Suite) createInvitation(t *testing.T, keystoreId string) (invitationId string) {
+	s.Run(t, "Invite someone to access the keystore", func(t *testing.T) {
+		res, err := s.Client1.Client.CreateInvitationWithResponse(s.Ctx, keystoreId,
 			generated.CreateInvitationJSONRequestBody{
-				Invitee: invitee.Username,
+				Invitee: s.Client2.Username,
 			},
 		)
 		assert.NilError(t, err)

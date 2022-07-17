@@ -125,7 +125,7 @@ type RegisterJSONBody = RegisterRequest
 // AuthenticateJSONBody defines parameters for Authenticate.
 type AuthenticateJSONBody = AuthenticateRequest
 
-// CreateEnclaveJSONBody defines parameters for CreateEnclave.
+// CreateEnclaveJSONBody defines parameters for Initialize.
 type CreateEnclaveJSONBody = CreateEnclaveRequest
 
 // CreateEntryJSONBody defines parameters for CreateEntry.
@@ -149,7 +149,7 @@ type RegisterJSONRequestBody = RegisterJSONBody
 // AuthenticateJSONRequestBody defines body for Authenticate for application/json ContentType.
 type AuthenticateJSONRequestBody = AuthenticateJSONBody
 
-// CreateEnclaveJSONRequestBody defines body for CreateEnclave for application/json ContentType.
+// CreateEnclaveJSONRequestBody defines body for Initialize for application/json ContentType.
 type CreateEnclaveJSONRequestBody = CreateEnclaveJSONBody
 
 // CreateEntryJSONRequestBody defines body for CreateEntry for application/json ContentType.

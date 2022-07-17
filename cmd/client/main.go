@@ -63,6 +63,8 @@ func main() {
 
 	app, err := application.New(
 		application.WithKeystoreRepository(repo),
+		application.WithInvitationRepository(rem),
+		application.WithRepository(repo),
 		application.WithRemote(rem),
 	)
 	if err != nil {

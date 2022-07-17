@@ -14,4 +14,5 @@ type Service interface {
 	DeclineOrCancelInvitation(id string) (Invitation, error)
 	FinalizeInvitation(id string) (Invitation, error)
 	Invitations() (map[string]Invitation, error)
+	Invitation(id string) (Invitation, error)
 }

@@ -38,7 +38,7 @@ func (app *application) sync() error {
 		return errors.WithMessage(err, "failed to get keystores")
 	}
 
-	rem, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if err != nil {
 		return errors.WithMessage(err, "failed to get remote config")
 	}

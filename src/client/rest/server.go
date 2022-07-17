@@ -15,8 +15,8 @@ import (
 	"myst/pkg/server"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/enclave"
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/rest/generated"
 
 	"github.com/gin-gonic/gin"
@@ -199,7 +199,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 		return
 	}
 
-	err = s.app.CreateEnclave(req.Password)
+	err = s.app.Initialize(req.Password)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -210,7 +210,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 }
 
 func (s *Server) Enclave(c *gin.Context) {
-	err := s.app.Enclave()
+	err := s.app.IsInitialized()
 	if errors.Is(err, application.ErrInitializationRequired) {
 		Error(c, http.StatusNotFound, err)
 		return

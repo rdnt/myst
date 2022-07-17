@@ -30,21 +30,13 @@ type Remote interface {
 	SignedIn() bool
 	CurrentUser() *user.User
 	UserByUsername(username string) (user.User, error)
+}
 
-	// keystores
-	// UploadKeystore(id string) (*generated.Keystore, error)
-	// Keystores() ([]keystore.Keystore, error)
-	//
-	// // invitations
-	// CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error)
-	// AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error)
-	//
-	// Invitation(id string) (invitation.Invitation, error)
-	// UpdateInvitation(k invitation.Invitation) error
-	// DeleteInvitation(id string) error
-	//
-	// Invitations() ([]invitation.Invitation, error)
-	//
-	// // TODO: refine to dynamically find local keystoreId
-	// FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
+type Repository interface {
+	HealthCheck()
+
+	Initialize(password string) error
+	IsInitialized() error
+
+	Authenticate(password string) error
 }

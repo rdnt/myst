@@ -4,70 +4,39 @@ import (
 	"time"
 
 	"myst/pkg/logger"
-	"myst/src/client/application/domain/enclave"
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/remote"
 	"myst/src/client/application/domain/user"
 )
 
 var log = logger.New("app", logger.Blue)
 
 type Application interface {
+	invitation.Service
+	keystore.Service
+	user.Service
+	Repository
+
+	// Authenticate(password string) error
+	// HealthCheck()
+	// Initialize(password string) error
+	// IsInitialized() error
+
 	Start() error
 	Stop() error
-
-	// remote
-	SignIn(username, password string) (user.User, error)
-	SignOut() error
-	CurrentUser() (*user.User, error)
-	Register(username, password string) (user.User, error)
-	// CreateKeystore(name string, keystoreKey []byte, keystore *keystore.Keystore) (*generated.Keystore, error)
-	// Keystore(id string) (*generated.Keystore, error)
-	// Keystores() ([]*generated.Keystore, error)
-	// CreateInvitation(keystoreId, inviteeId string) (*generated.Invitation, error)
-	// AcceptInvitation(keystoreId, invitationId string) (*generated.Invitation, error)
-	// FinalizeInvitation(keystoreId, invitationId string, keystoreKey []byte) (*generated.Invitation, error)
-
-	// keystores
-	Authenticate(password string) error
-	CreateEnclave(password string) error
-	Enclave() error
-	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
-	DeleteKeystore(id string) error
-	Keystore(id string) (keystore.Keystore, error)
-	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
-	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
-	DeleteKeystoreEntry(keystoreId, entryId string) error
-	Keystores() (map[string]keystore.Keystore, error)
-	HealthCheck()
-
-	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
-	AcceptInvitation(id string) (invitation.Invitation, error)
-	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(id string) (invitation.Invitation, error)
-	Invitations() (map[string]invitation.Invitation, error)
-	Invitation(id string) (invitation.Invitation, error)
-}
-
-type KeystoreRepository interface {
-	keystore.Repository
-	Authenticate(password string) error
-	HealthCheck()
-	CreateEnclave(password string) error
-	Enclave() error
-	SetRemote(address, username, password string, publicKey, privateKey []byte) error
-	Remote() (enclave.Remote, error)
 }
 
 type application struct {
-	keystores   KeystoreRepository
+	keystores   keystore.Repository
 	invitations invitation.Repository
+	credentials remote.Repository
+	repo        Repository
 
 	remote Remote
 }
 
-func New(opts ...Option) (*application, error) {
+func New(opts ...Option) (Application, error) {
 	app := &application{}
 
 	for _, opt := range opts {

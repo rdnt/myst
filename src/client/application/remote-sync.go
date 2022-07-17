@@ -81,7 +81,7 @@ func (app *application) sync() error {
 			}
 			fmt.Println("local updated", k.Id, k.RemoteId)
 		} else if rk.Version < k.Version {
-			err = app.remote.UpdateKeystore(k)
+			_, err = app.remote.UpdateKeystore(k)
 			if err != nil {
 				fmt.Println("remote update failed")
 				return err

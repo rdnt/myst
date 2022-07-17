@@ -33,6 +33,39 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 	return app.keystores.Keystores()
 }
 
+func (app *application) UpdateKeystore(userId, keystoreId string, params keystore.UpdateParams) (keystore.
+	Keystore,
+	error) {
+	u, err := app.users.User(userId)
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
+
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
+
+	if k.OwnerId != u.Id {
+		return keystore.Keystore{}, errors.New("not allowed")
+	}
+
+	if params.Name != nil {
+		k.Name = *params.Name
+	}
+
+	if params.Payload != nil {
+		k.Payload = *params.Payload
+	}
+
+	err = app.keystores.UpdateKeystore(&k)
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
+
+	return k, nil
+}
+
 func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error) {
 	u, err := app.users.User(userId)
 	if err != nil {

@@ -20,7 +20,7 @@ type Remote interface {
 
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystore(id string, privateKey []byte) (keystore.Keystore, error)
-	UpdateKeystore(k keystore.Keystore) error
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 

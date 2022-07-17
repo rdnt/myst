@@ -93,6 +93,12 @@ type RegisterRequest struct {
 	Username  string `json:"username"`
 }
 
+// UpdateKeystoreRequest defines model for UpdateKeystoreRequest.
+type UpdateKeystoreRequest struct {
+	Name    *string `json:"name,omitempty"`
+	Payload *[]byte `json:"payload,omitempty"`
+}
+
 // User defines model for User.
 type User struct {
 	Id        string `json:"id"`
@@ -108,6 +114,9 @@ type RegisterJSONBody = RegisterRequest
 
 // FinalizeInvitationJSONBody defines parameters for FinalizeInvitation.
 type FinalizeInvitationJSONBody = FinalizeInvitationRequest
+
+// UpdateKeystoreJSONBody defines parameters for UpdateKeystore.
+type UpdateKeystoreJSONBody = UpdateKeystoreRequest
 
 // CreateInvitationJSONBody defines parameters for CreateInvitation.
 type CreateInvitationJSONBody = CreateInvitationRequest
@@ -128,6 +137,9 @@ type RegisterJSONRequestBody = RegisterJSONBody
 
 // FinalizeInvitationJSONRequestBody defines body for FinalizeInvitation for application/json ContentType.
 type FinalizeInvitationJSONRequestBody = FinalizeInvitationJSONBody
+
+// UpdateKeystoreJSONRequestBody defines body for UpdateKeystore for application/json ContentType.
+type UpdateKeystoreJSONRequestBody = UpdateKeystoreJSONBody
 
 // CreateInvitationJSONRequestBody defines body for CreateInvitation for application/json ContentType.
 type CreateInvitationJSONRequestBody = CreateInvitationJSONBody

@@ -119,6 +119,7 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 	// keystore
 	sec.POST("/keystores", s.CreateKeystore)
 	sec.GET("/keystore/:keystoreId", s.Keystore)
+	sec.PATCH("/keystore/:keystoreId", s.UpdateKeystore)
 	sec.GET("/keystores", s.Keystores)
 
 	// invitation

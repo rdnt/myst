@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"myst/src/server/application/domain/keystore"
 	"myst/src/server/rest/generated"
 )
 
@@ -30,6 +31,27 @@ func (s *Server) Keystore(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 
 	k, err := s.app.UserKeystore(userId, keystoreId)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(http.StatusOK, ToJSONKeystore(k))
+}
+
+func (s *Server) UpdateKeystore(c *gin.Context) {
+	userId := CurrentUser(c)
+	keystoreId := c.Param("keystoreId")
+
+	var req generated.UpdateKeystoreRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		panic(err)
+	}
+
+	k, err := s.app.UpdateKeystore(userId, keystoreId, keystore.UpdateParams{
+		Name:    req.Name,
+		Payload: req.Payload,
+	})
 	if err != nil {
 		panic(err)
 	}

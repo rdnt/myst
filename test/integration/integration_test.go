@@ -17,7 +17,7 @@ func setup(t *testing.T) *Suite {
 	return &Suite{suite.New(t)}
 }
 
-func (s *Suite) createKeystore(t *testing.T) (keystoreId string) {
+func (s *Suite) createKeystore(t *testing.T) (keystore generated.Keystore) {
 	keystoreName := s.Random(t)
 
 	s.Run(t, "Create a keystore", func(t *testing.T) {
@@ -28,14 +28,14 @@ func (s *Suite) createKeystore(t *testing.T) (keystoreId string) {
 		assert.Assert(t, res.JSON201 != nil)
 		assert.Equal(t, res.JSON201.Name, keystoreName)
 
-		keystoreId = res.JSON201.Id
+		keystore = *res.JSON201
 	})
 
 	website, username, password, notes :=
 		s.Random(t), s.Random(t), s.Random(t), s.Random(t)
 
 	s.Run(t, "Add an entry to the keystore", func(t *testing.T) {
-		res, err := s.Client1.Client.CreateEntryWithResponse(s.Ctx, keystoreId,
+		res, err := s.Client1.Client.CreateEntryWithResponse(s.Ctx, keystore.Id,
 			generated.CreateEntryJSONRequestBody{
 				Website:  website,
 				Username: username,
@@ -52,7 +52,7 @@ func (s *Suite) createKeystore(t *testing.T) (keystoreId string) {
 		assert.Equal(t, res.JSON201.Notes, notes)
 	})
 
-	return keystoreId
+	return keystore
 }
 
 func (s *Suite) createInvitation(t *testing.T, keystoreId string) (invitationId string) {

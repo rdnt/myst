@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (app *application) sync() error {
+func (app *application) Sync() error {
 	log.Println("Sync started.")
 	defer log.Print("Sync finished.")
 
@@ -94,7 +94,7 @@ func (app *application) sync() error {
 		fmt.Println(k.Version)
 
 		// if _, ok := remoteKeystores[k.Id]; !ok {
-		//	// sync from local to remote
+		//	// Sync from local to remote
 		//
 		//
 		// }
@@ -103,7 +103,7 @@ func (app *application) sync() error {
 	for _, rk := range remoteKeystores {
 		fmt.Println("REMOTE KEYSTORE", rk)
 		if k, ok := keystores[rk.Id]; !ok {
-			// sync from remote to local
+			// Sync from remote to local
 
 			_, err = app.keystores.CreateKeystore(rk)
 			if err != nil {

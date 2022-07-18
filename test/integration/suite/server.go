@@ -13,11 +13,11 @@ import (
 )
 
 type Server struct {
-	address string
+	Address string
 
-	app    application.Application
-	server *rest.Server
-	client *generated.ClientWithResponses
+	App    application.Application
+	Server *rest.Server
+	Client *generated.ClientWithResponses
 }
 
 func newServer(t *testing.T, address string) *Server {
@@ -38,19 +38,19 @@ func newServer(t *testing.T, address string) *Server {
 	assert.NilError(t, err)
 
 	return &Server{
-		address: address,
+		Address: address,
 
-		app:    app,
-		server: server,
-		client: client,
+		App:    app,
+		Server: server,
+		Client: client,
 	}
 }
 
 func (s *Server) start(t *testing.T) {
-	err := s.server.Start(s.address)
+	err := s.Server.Start(s.Address)
 	assert.NilError(t, err)
 }
 
 func (s *Server) stop(t *testing.T) {
-	_ = s.server.Stop()
+	_ = s.Server.Stop()
 }

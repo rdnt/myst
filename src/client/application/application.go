@@ -23,6 +23,7 @@ type Application interface {
 	// Initialize(password string) error
 	// IsInitialized() error
 
+	Sync() error
 	Start() error
 	Stop() error
 	Debug() (map[string]any, error)
@@ -57,7 +58,7 @@ func (app *application) Start() error {
 	go func() {
 		for {
 			if app.remote.SignedIn() {
-				err := app.sync()
+				err := app.Sync()
 				if err != nil {
 					log.Error(err)
 				}
@@ -67,7 +68,7 @@ func (app *application) Start() error {
 				// }
 				//
 				// if app.remote.SignedIn() {
-				//	err := app.sync()
+				//	err := app.Sync()
 				//	if err != nil {
 				//		log.Error(err)
 				//	}

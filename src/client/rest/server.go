@@ -65,7 +65,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	gin.DebugPrintRouteFunc = PrintRoutes
 
 	// always use recovery middleware
-	r.Use(gin.CustomRecovery(recoveryHandler))
+	// r.Use(gin.CustomRecovery(recoveryHandler))
 
 	// custom logging middleware
 	r.Use(LoggerMiddleware)

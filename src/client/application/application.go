@@ -25,6 +25,7 @@ type Application interface {
 
 	Start() error
 	Stop() error
+	Debug() (map[string]any, error)
 }
 
 type application struct {
@@ -73,7 +74,7 @@ func (app *application) Start() error {
 				// }
 			}
 
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
@@ -84,6 +85,27 @@ func (app *application) Stop() error {
 	log.Print("App stopped")
 
 	return nil
+}
+
+func (app *application) Debug() (data map[string]any, err error) {
+	data = map[string]any{}
+
+	data["keystores"], err = app.keystores.Keystores()
+	if err != nil {
+		return nil, err
+	}
+
+	data["credentials"], err = app.credentials.Remote()
+	if err != nil {
+		return nil, err
+	}
+
+	data["invitations"], err = app.invitations.Invitations()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // func (app *application) setup() {

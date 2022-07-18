@@ -15,10 +15,10 @@
 
 <form on:submit|preventDefault={submit}>
   <Modal bind:show={show}>
-    <div class="delete-title" slot="header">Are you sure you want to {$currentUser.id === invitation.inviterId ? 'delete' : 'decline'} this invitation?</div>
+    <div class="delete-title" slot="header">Are you sure you want to {$currentUser.id === invitation.inviter.id ? 'delete' : 'decline'} this invitation?</div>
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class="button red" type="submit">{$currentUser.id === invitation.inviterId ? 'Delete' : 'Decline'}</button>
+      <button class="button red" type="submit">{$currentUser.id === invitation.inviter.id ? 'Delete' : 'Decline'}</button>
     </div>
   </Modal>
 </form>

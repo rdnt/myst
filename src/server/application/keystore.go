@@ -36,7 +36,7 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 func (app *application) UpdateKeystore(userId, keystoreId string, params keystore.UpdateParams) (keystore.
 	Keystore,
 	error) {
-	u, err := app.users.User(userId)
+	_, err := app.users.User(userId)
 	if err != nil {
 		return keystore.Keystore{}, err
 	}
@@ -46,9 +46,9 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params keystor
 		return keystore.Keystore{}, err
 	}
 
-	if k.OwnerId != u.Id {
-		return keystore.Keystore{}, errors.New("not allowed")
-	}
+	// if k.OwnerId != u.Id {
+	// 	return keystore.Keystore{}, errors.New("not allowed")
+	// }
 
 	if params.Name != nil {
 		k.Name = *params.Name

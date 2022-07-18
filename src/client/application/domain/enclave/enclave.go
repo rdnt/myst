@@ -2,6 +2,7 @@ package enclave
 
 import (
 	"fmt"
+	"time"
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/keystore"
@@ -44,6 +45,8 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 		return err
 	}
 
+	k.CreatedAt = time.Now()
+	k.UpdatedAt = time.Now()
 	e.keystores[k.Id] = k
 	e.keys[k.Id] = key
 
@@ -91,6 +94,7 @@ func (e *Enclave) Salt() []byte {
 }
 
 func (e *Enclave) UpdateKeystore(k keystore.Keystore) error {
+	k.UpdatedAt = time.Now()
 	k.Version++
 	e.keystores[k.Id] = k
 

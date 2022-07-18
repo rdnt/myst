@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -23,6 +24,7 @@ type Config struct {
 	RemoteAddress string
 	Port          int
 	DataDir       string
+	Slow          bool
 }
 
 func parseFlags() Config {
@@ -31,6 +33,7 @@ func parseFlags() Config {
 	flag.StringVar(&cfg.RemoteAddress, "remote", "https://myst-abgx5.ondigitalocean.app/api", "URL address of the remote server API")
 	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
+	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 1 second before starting up")
 
 	flag.Parse()
 
@@ -40,9 +43,13 @@ func parseFlags() Config {
 var log = logger.New("client", logger.Red)
 
 func main() {
-	logger.EnableDebug = config.Debug
-
 	cfg := parseFlags()
+
+	if cfg.Slow {
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	logger.EnableDebug = config.Debug
 
 	// rem, err := remote.NewServer("http://localhost:8080")
 	// if err != nil {
@@ -66,6 +73,7 @@ func main() {
 		application.WithInvitationRepository(rem),
 		application.WithRepository(repo),
 		application.WithRemote(rem),
+		application.WithCredentials(repo),
 	)
 	if err != nil {
 		panic(err)

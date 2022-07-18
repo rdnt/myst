@@ -35,7 +35,7 @@ export const keystores = readable<Keystore[]>([], (set) => {
   setFunc = set
   getKeystores()
 
-  let interval = window.setInterval(getKeystores, 10000)
+  let interval = window.setInterval(getKeystores, 5000)
 
   return () => {
     window.clearInterval(interval)

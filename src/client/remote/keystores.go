@@ -19,8 +19,6 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	// id := k.Id
-
 	jk := repository.KeystoreToJSON(k)
 
 	b, err := json.Marshal(jk)

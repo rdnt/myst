@@ -19,7 +19,6 @@ type Service interface {
 	DeleteKeystore(id string) error
 	Keystore(id string) (Keystore, error)
 	KeystoreByRemoteId(id string) (Keystore, error)
-	KeystoreEntries(id string) (map[string]entry.Entry, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
 	DeleteKeystoreEntry(keystoreId, entryId string) error

@@ -566,6 +566,7 @@ func (s *Server) Keystores(c *gin.Context) {
 				RemoteId: k.RemoteId,
 				Name:     k.Name,
 				Entries:  entries,
+				Access:   generated.KeystoreAccess(k.Access),
 			},
 		)
 	}

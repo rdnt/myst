@@ -761,6 +761,7 @@
           "id",
           "remoteId",
           "name",
+          "access",
           "entries"
         ],
         "properties": {
@@ -772,6 +773,13 @@
           },
           "name": {
             "type": "string"
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "read",
+              "read/write"
+            ]
           },
           "entries": {
             "type": "array",

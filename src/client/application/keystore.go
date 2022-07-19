@@ -23,15 +23,6 @@ func (app *application) HealthCheck() {
 	app.repo.HealthCheck()
 }
 
-func (app *application) KeystoreEntries(id string) (map[string]entry.Entry, error) {
-	k, err := app.keystores.Keystore(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return k.Entries, nil
-}
-
 func (app *application) UpdateKeystoreEntry(keystoreId, entryId string, password, notes *string) (entry.Entry, error) {
 	// do not allow empty password
 	if password != nil && strings.TrimSpace(*password) == "" {
@@ -144,6 +135,11 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 		return nil, errors.WithMessage(err, "failed to get keystores")
 	}
 
+	for id, k := range ks {
+		k.Access = "read/write"
+		ks[id] = k
+	}
+
 	if app.remote.SignedIn() {
 		rem, err := app.credentials.Remote()
 		if err != nil {
@@ -157,6 +153,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 
 		for _, rk := range rks {
 			if _, ok := ks[rk.Id]; !ok {
+				rk.Access = "read"
 				ks[rk.Id] = rk
 			}
 		}

@@ -20,6 +20,7 @@ type Keystore struct {
 	Name     string
 	Version  int
 	Entries  map[string]entry.Entry
+	Access   string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -36,14 +37,12 @@ func New(opts ...Option) Keystore {
 		Id:      uuid.New().String(),
 		Version: 1,
 		Entries: map[string]entry.Entry{},
+		Access:  "read/write",
 	}
 
 	for _, opt := range opts {
 		opt(&k)
 	}
-
-	// TODO: remove this
-	// k.id = "0000000000000000000000"
 
 	return k
 }

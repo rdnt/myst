@@ -14,12 +14,12 @@ func (app *application) Sync() error {
 		return errors.New("signed out")
 	}
 
-	//invs, err := app.remote.Invitations()
-	//if err != nil {
+	// invs, err := app.remote.Invitations()
+	// if err != nil {
 	//	return errors.WithMessage(err, "failed to get invitations from remote")
-	//}
+	// }
 	//
-	//for _, inv := range invs {
+	// for _, inv := range invs {
 	//	if inv.Accepted() && inv.Inviter.Id == app.remote.CurrentUser().Id {
 	//		log.Print("Finalizing invitation ", inv.Id, "...")
 	//
@@ -31,7 +31,7 @@ func (app *application) Sync() error {
 	//
 	//		log.Print("Invitation ", inv.Id, " finalized.")
 	//	}
-	//}
+	// }
 
 	keystores, err := app.keystores.Keystores()
 	if err != nil {
@@ -102,7 +102,7 @@ func (app *application) Sync() error {
 
 	for _, rk := range remoteKeystores {
 		fmt.Println("REMOTE KEYSTORE", rk)
-		if k, ok := keystores[rk.Id]; !ok {
+		if _, ok := keystores[rk.Id]; !ok {
 			// Sync from remote to local
 
 			_, err = app.keystores.CreateKeystore(rk)
@@ -112,23 +112,23 @@ func (app *application) Sync() error {
 			}
 			fmt.Println("local updated", rk.Id, rk.RemoteId)
 		} else {
-			if rk.Version > k.Version {
-				err = app.keystores.UpdateKeystore(rk)
-				if err != nil {
-					fmt.Println("local update failed")
-					return err
-				}
-				fmt.Println("local updated", k.Id, k.RemoteId)
-			} else if rk.Version < k.Version {
-				_, err = app.remote.UpdateKeystore(k)
-				if err != nil {
-					fmt.Println("remote update failed")
-					return err
-				}
-				fmt.Println("remote updated", k.Id, k.RemoteId)
-			} else {
-				fmt.Println("no change", k.Id, k.RemoteId)
-			}
+			// if rk.Version > k.Version {
+			// 	err = app.keystores.UpdateKeystore(rk)
+			// 	if err != nil {
+			// 		fmt.Println("local update failed")
+			// 		return err
+			// 	}
+			// 	fmt.Println("local updated", k.Id, k.RemoteId)
+			// } else if rk.Version < k.Version {
+			// 	_, err = app.remote.UpdateKeystore(k)
+			// 	if err != nil {
+			// 		fmt.Println("remote update failed")
+			// 		return err
+			// 	}
+			// 	fmt.Println("remote updated", k.Id, k.RemoteId)
+			// } else {
+			// 	fmt.Println("no change", k.Id, k.RemoteId)
+			// }
 		}
 	}
 

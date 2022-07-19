@@ -149,11 +149,4 @@
   :root {
     color-scheme: dark;
   }
-
-  main {
-    display: flex;
-    align-items: stretch;
-    background-color: $bg;
-    width: 100%;
-  }
 </style>

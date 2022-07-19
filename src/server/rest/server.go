@@ -4,7 +4,7 @@ package rest
 //go:generate oapi-codegen --config oapi-codegen-client.yaml openapi.json
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -42,7 +42,8 @@ func NewServer(app application.Application) *Server {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	gin.DefaultWriter = ioutil.Discard
+	gin.DefaultWriter = io.Discard
+	gin.DefaultErrorWriter = io.Discard
 
 	r := gin.New()
 	s.Engine = r
@@ -118,6 +119,7 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 	// keystore
 	sec.POST("/keystores", s.CreateKeystore)
 	sec.GET("/keystore/:keystoreId", s.Keystore)
+	sec.PATCH("/keystore/:keystoreId", s.UpdateKeystore)
 	sec.GET("/keystores", s.Keystores)
 
 	// invitation

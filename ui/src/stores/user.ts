@@ -33,7 +33,7 @@ export const currentUser = readable<User>(undefined, (set) => {
     getInvitations()
   })
 
-  let interval = window.setInterval(getCurrentUser, 10000)
+  let interval = window.setInterval(getCurrentUser, 5000)
 
   return () => {
     window.clearInterval(interval)

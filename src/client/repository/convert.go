@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/keystore/entry"
 )
 
 type Enclave struct {

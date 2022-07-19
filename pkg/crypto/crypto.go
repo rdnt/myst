@@ -122,7 +122,7 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	if len(key) != 32 {
 		return nil, fmt.Errorf("invalid key length")
 	}
-	// CreateEnclave the AES cipher
+	// Initialize the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) < aes.BlockSize*2 {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
-	// CreateEnclave the AES cipher
+	// Initialize the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

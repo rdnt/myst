@@ -104,15 +104,16 @@ func New(opts ...Option) (application.Remote, error) {
 //	return k, nil
 // }
 
-func (r *remote) SignIn(username, password string) (user.User, error) {
+func (r *remote) SignIn(username, password string, publicKey []byte) (user.User, error) {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
 		ctx, generated.LoginJSONRequestBody{
-			Username: username,
-			Password: password,
+			Username:  username,
+			Password:  password,
+			PublicKey: publicKey,
 		},
 	)
 	if err != nil {
@@ -130,8 +131,9 @@ func (r *remote) SignIn(username, password string) (user.User, error) {
 	}
 
 	u := user.User{
-		Id:       resp.User.Id,
-		Username: resp.User.Username,
+		Id:        resp.User.Id,
+		Username:  resp.User.Username,
+		PublicKey: resp.User.PublicKey,
 	}
 
 	r.user = &u
@@ -212,8 +214,9 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 	}
 
 	u := user.User{
-		Id:       resp.User.Id,
-		Username: resp.User.Username,
+		Id:        resp.User.Id,
+		Username:  resp.User.Username,
+		PublicKey: publicKey,
 	}
 
 	r.user = &u

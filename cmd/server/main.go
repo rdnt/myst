@@ -1,6 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"os/signal"
+	"time"
+
+	"github.com/namsral/flag"
+
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/server/application"
@@ -8,9 +15,31 @@ import (
 	"myst/src/server/rest"
 )
 
+type Config struct {
+	Port int
+	Slow bool
+}
+
+func parseFlags() Config {
+	cfg := Config{}
+
+	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
+	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 100ms before starting up")
+
+	flag.Parse()
+
+	return cfg
+}
+
 var log = logger.New("app", logger.Red)
 
 func main() {
+	cfg := parseFlags()
+
+	if cfg.Slow {
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	logger.EnableDebug = config.Debug
 
 	repo := repository.New()
@@ -26,8 +55,20 @@ func main() {
 
 	server := rest.NewServer(app)
 
-	err = server.Run(":8080")
+	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
+
+	err = server.Start(":8080")
+	if err != nil {
+		log.Error(err)
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	<-c
+
+	_ = server.Stop()
 }

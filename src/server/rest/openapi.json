@@ -268,6 +268,51 @@
             }
           }
         }
+      },
+      "patch": {
+        "description": "Updates a keystore",
+        "operationId": "UpdateKeystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeystoreRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Keystore",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Keystore"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/keystore/{keystoreId}/invitations": {
@@ -549,6 +594,18 @@
           "name",
           "payload"
         ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      },
+      "UpdateKeystoreRequest": {
+        "type": "object",
         "properties": {
           "name": {
             "type": "string"

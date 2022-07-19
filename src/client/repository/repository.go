@@ -7,13 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"myst/pkg/crypto"
 	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
-
-	"github.com/pkg/errors"
+	"myst/src/client/application/domain/remote"
 )
 
 var log = logger.New("repository", logger.Green)
@@ -132,7 +133,7 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	return e.Keystores()
 }
 
-func (r *Repository) Enclave() error {
+func (r *Repository) IsInitialized() error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -207,7 +208,7 @@ func (r *Repository) createKeystore(k keystore.Keystore) (keystore.Keystore, err
 }
 
 // CreateEnclave initializes the enclave with the given password
-func (r *Repository) CreateEnclave(password string) error {
+func (r *Repository) Initialize(password string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -468,7 +469,7 @@ func (r *Repository) SetRemote(address, username, password string, publicKey, pr
 		return err
 	}
 
-	e.SetRemote(enclave.Remote{
+	e.SetRemote(remote.Remote{
 		Address:    address,
 		Username:   username,
 		Password:   password,
@@ -479,22 +480,22 @@ func (r *Repository) SetRemote(address, username, password string, publicKey, pr
 	return r.sealAndWrite(e)
 }
 
-func (r *Repository) Remote() (enclave.Remote, error) {
+func (r *Repository) Remote() (remote.Remote, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return enclave.Remote{}, fmt.Errorf("authentication required")
+		return remote.Remote{}, fmt.Errorf("authentication required")
 	}
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return enclave.Remote{}, err
+		return remote.Remote{}, err
 	}
 
 	rem := e.Remote()
 	if rem == nil {
-		return enclave.Remote{}, enclave.ErrRemoteNotSet
+		return remote.Remote{}, enclave.ErrRemoteNotSet
 	}
 
 	return *rem, nil

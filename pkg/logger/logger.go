@@ -2,14 +2,13 @@ package logger
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strings"
-	"sync"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
@@ -17,7 +16,6 @@ import (
 )
 
 var EnableDebug bool = true
-var mux sync.Mutex
 
 const (
 	DefaultColor = Color(0)
@@ -65,8 +63,8 @@ func init() {
 	StdoutWriter = NewWriter(colorable.NewColorable(os.Stdout))
 	StderrWriter = NewWriter(colorable.NewColorable(os.Stderr))
 	// initialize default log writers/loggers
-	DebugLogWriter = NewWriter(ioutil.Discard)
-	ErrorLogWriter = NewWriter(ioutil.Discard)
+	DebugLogWriter = NewWriter(io.Discard)
+	ErrorLogWriter = NewWriter(io.Discard)
 	// create default logger
 	defaultLogger = New("server", DefaultColor)
 }
@@ -90,7 +88,7 @@ func New(name string, color Color) *Logger {
 	}
 }
 
-//func WithDebugLog(path string) func(*Logger) error {
+// func WithDebugLog(path string) func(*Logger) error {
 //	return func(l *Logger) error {
 //
 //		f, err := os.OpenFile(
@@ -105,7 +103,7 @@ func New(name string, color Color) *Logger {
 //
 //		return nil
 //	}
-//}
+// }
 
 var cwd string
 
@@ -137,44 +135,36 @@ func (l *Logger) prefix(caller bool) string {
 func (l *Logger) print(s string) {
 	s = strings.TrimRight(s, "\n")
 
-	mux.Lock()
 	_ = l.stdout.Output(3, fmt.Sprint(l.prefix(false), s))
-	mux.Unlock()
 }
 
 func (l *Logger) debugPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 
-	mux.Lock()
 	_ = l.debugLog.Output(3, l.prefix(false)+s)
 	if EnableDebug {
 		_ = l.stdout.Output(3, l.prefix(false)+s)
 	}
-	defer mux.Unlock()
 }
 
 func (l *Logger) errorPrint(s string) {
 	s = strings.TrimRight(s, "\n")
 	s = Colorize(s, Red)
 
-	mux.Lock()
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if EnableDebug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
-	mux.Unlock()
 }
 
 func (l *Logger) tracePrint() {
 	stack := debug.Stack()
 	s := Colorize(string(stack), Red)
 
-	mux.Lock()
 	_ = l.errorLog.Output(3, l.prefix(true)+s)
 	if EnableDebug {
 		_ = l.stderr.Output(3, l.prefix(true)+s)
 	}
-	mux.Unlock()
 }
 
 func Init() error {

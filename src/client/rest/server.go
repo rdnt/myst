@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -15,8 +15,8 @@ import (
 	"myst/pkg/server"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/enclave"
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/rest/generated"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +51,8 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	gin.DefaultWriter = ioutil.Discard
+	gin.DefaultWriter = io.Discard
+	gin.DefaultErrorWriter = io.Discard
 
 	r := gin.New()
 	s.Engine = r
@@ -64,7 +65,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	gin.DebugPrintRouteFunc = PrintRoutes
 
 	// always use recovery middleware
-	r.Use(gin.CustomRecovery(recoveryHandler))
+	// r.Use(gin.CustomRecovery(recoveryHandler))
 
 	// custom logging middleware
 	r.Use(LoggerMiddleware)
@@ -130,10 +131,7 @@ func (s *Server) CurrentUser(c *gin.Context) {
 	}
 
 	c.JSON(
-		http.StatusOK, generated.User{
-			Id:       u.Id,
-			Username: u.Username,
-		},
+		http.StatusOK, UserToRest(*u),
 	)
 }
 
@@ -198,7 +196,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 		return
 	}
 
-	err = s.app.CreateEnclave(req.Password)
+	err = s.app.Initialize(req.Password)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -209,7 +207,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 }
 
 func (s *Server) Enclave(c *gin.Context) {
-	err := s.app.Enclave()
+	err := s.app.IsInitialized()
 	if errors.Is(err, application.ErrInitializationRequired) {
 		Error(c, http.StatusNotFound, err)
 		return

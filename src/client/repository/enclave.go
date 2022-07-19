@@ -12,6 +12,7 @@ import (
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/remote"
 )
 
 func (r *Repository) enclavePath() string {
@@ -97,11 +98,11 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 		ks[k.Id] = k
 	}
 
-	var rem *enclave.Remote
+	var rem *remote.Remote
 	jrem := e.Remote
 
 	if jrem != nil {
-		rem = &enclave.Remote{
+		rem = &remote.Remote{
 			Address:    jrem.Address,
 			Username:   jrem.Username,
 			Password:   jrem.Password,

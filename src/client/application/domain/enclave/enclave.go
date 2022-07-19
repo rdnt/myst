@@ -2,9 +2,11 @@ package enclave
 
 import (
 	"fmt"
+	"time"
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/remote"
 )
 
 var (
@@ -16,15 +18,7 @@ type Enclave struct {
 	keystores map[string]keystore.Keystore
 	keys      map[string][]byte
 
-	remote *Remote
-}
-
-type Remote struct {
-	Address    string
-	Username   string
-	Password   string
-	PublicKey  []byte
-	PrivateKey []byte
+	remote *remote.Remote
 }
 
 func New(opts ...Option) (*Enclave, error) {
@@ -51,6 +45,8 @@ func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 		return err
 	}
 
+	k.CreatedAt = time.Now()
+	k.UpdatedAt = time.Now()
 	e.keystores[k.Id] = k
 	e.keys[k.Id] = key
 
@@ -98,6 +94,8 @@ func (e *Enclave) Salt() []byte {
 }
 
 func (e *Enclave) UpdateKeystore(k keystore.Keystore) error {
+	k.UpdatedAt = time.Now()
+	k.Version++
 	e.keystores[k.Id] = k
 
 	return nil
@@ -110,10 +108,10 @@ func (e *Enclave) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (e *Enclave) SetRemote(r Remote) {
+func (e *Enclave) SetRemote(r remote.Remote) {
 	e.remote = &r
 }
 
-func (e *Enclave) Remote() *Remote {
+func (e *Enclave) Remote() *remote.Remote {
 	return e.remote
 }

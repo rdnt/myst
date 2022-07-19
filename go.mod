@@ -3,6 +3,7 @@ module myst
 go 1.18
 
 require (
+	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/deepmap/oapi-codegen v1.11.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.8.1

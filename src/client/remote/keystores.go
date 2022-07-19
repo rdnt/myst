@@ -19,8 +19,6 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	// id := k.Id
-
 	jk := repository.KeystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
@@ -115,8 +113,43 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 	return k, nil
 }
 
-func (r *remote) UpdateKeystore(k keystore.Keystore) error {
-	return r.UpdateKeystore(k)
+func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
+	if !r.SignedIn() {
+		return keystore.Keystore{}, ErrSignedOut
+	}
+
+	jk := repository.KeystoreToJSON(k)
+
+	b, err := json.Marshal(jk)
+	if err != nil {
+		return keystore.Keystore{}, errors.Wrap(err, "failed to marshal keystore to json")
+	}
+
+	b, err = crypto.AES256CBC_Encrypt(k.Key, b)
+	if err != nil {
+		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc encrypt failed")
+	}
+
+	res, err := r.client.UpdateKeystoreWithResponse(context.Background(), k.RemoteId, generated.UpdateKeystoreRequest{
+		Name:    &k.Name,
+		Payload: &b,
+	})
+	if err != nil {
+		return keystore.Keystore{}, errors.Wrap(err, "failed to get keystores")
+	}
+
+	if res.JSON200 == nil {
+		return keystore.Keystore{}, fmt.Errorf("invalid response")
+	}
+
+	k2, err := KeystoreFromJSON(*res.JSON200, k.Key)
+	if err != nil {
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
+	}
+
+	k2.Key = k.Key
+
+	return k2, nil
 }
 
 func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {

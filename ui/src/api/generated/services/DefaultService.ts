@@ -334,6 +334,26 @@ invitationId?: string,
     }
 
     /**
+     * Finalizes an invitation
+     * @returns Invitation Invitation
+     * @returns Error Error
+     * @throws ApiError
+     */
+    public static finalizeInvitation({
+invitationId,
+}: {
+invitationId?: string,
+}): CancelablePromise<Invitation | Error> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/invitation/{invitationId}',
+            path: {
+                'invitationId': invitationId,
+            },
+        });
+    }
+
+    /**
      * Declines/cancels an invitation
      * @returns Invitation Invitation
      * @returns Error Error

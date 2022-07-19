@@ -72,6 +72,7 @@
               Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
             </span>
           </div>
+          <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
           <div class="actions">
             <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
             <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>

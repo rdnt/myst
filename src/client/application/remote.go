@@ -90,13 +90,16 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 }
 
 func (app *application) CurrentUser() (*user.User, error) {
-	_, err := app.credentials.Remote()
+	rem, err := app.credentials.Remote()
 	if err != nil {
 		return nil, err
 
 	}
 
-	return app.remote.CurrentUser(), nil
+	u := app.remote.CurrentUser()
+	u.PublicKey = rem.PublicKey
+
+	return u, nil
 }
 
 func (app *application) SignOut() error {

@@ -875,12 +875,16 @@
           "publicKey": {
             "type": "string",
             "format": "byte"
+          },
+          "icon": {
+            "type": "string"
           }
         },
         "required": [
           "id",
           "username",
-          "publicKey"
+          "publicKey",
+          "icon"
         ]
       },
       "RegisterRequest": {

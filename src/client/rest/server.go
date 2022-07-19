@@ -131,10 +131,7 @@ func (s *Server) CurrentUser(c *gin.Context) {
 	}
 
 	c.JSON(
-		http.StatusOK, generated.User{
-			Id:       u.Id,
-			Username: u.Username,
-		},
+		http.StatusOK, UserToRest(*u),
 	)
 }
 

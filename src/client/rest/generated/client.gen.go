@@ -608,7 +608,7 @@ func NewAuthenticateRequestWithBody(server string, contentType string, body io.R
 	return req, nil
 }
 
-// NewEnclaveRequest generates requests for IsInitialized
+// NewEnclaveRequest generates requests for Enclave
 func NewEnclaveRequest(server string) (*http.Request, error) {
 	var err error
 
@@ -635,7 +635,7 @@ func NewEnclaveRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateEnclaveRequest calls the generic Initialize builder with application/json body
+// NewCreateEnclaveRequest calls the generic CreateEnclave builder with application/json body
 func NewCreateEnclaveRequest(server string, body CreateEnclaveJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
@@ -646,7 +646,7 @@ func NewCreateEnclaveRequest(server string, body CreateEnclaveJSONRequestBody) (
 	return NewCreateEnclaveRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateEnclaveRequestWithBody generates requests for Initialize with any type of body
+// NewCreateEnclaveRequestWithBody generates requests for CreateEnclave with any type of body
 func NewCreateEnclaveRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
@@ -1240,10 +1240,10 @@ type ClientWithResponsesInterface interface {
 
 	AuthenticateWithResponse(ctx context.Context, body AuthenticateJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthenticateResponse, error)
 
-	// IsInitialized request
+	// Enclave request
 	EnclaveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*EnclaveResponse, error)
 
-	// Initialize request with any body
+	// CreateEnclave request with any body
 	CreateEnclaveWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEnclaveResponse, error)
 
 	CreateEnclaveWithResponse(ctx context.Context, body CreateEnclaveJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEnclaveResponse, error)

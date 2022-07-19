@@ -131,8 +131,9 @@ func (r *remote) SignIn(username, password string, publicKey []byte) (user.User,
 	}
 
 	u := user.User{
-		Id:       resp.User.Id,
-		Username: resp.User.Username,
+		Id:        resp.User.Id,
+		Username:  resp.User.Username,
+		PublicKey: resp.User.PublicKey,
 	}
 
 	r.user = &u
@@ -213,8 +214,9 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 	}
 
 	u := user.User{
-		Id:       resp.User.Id,
-		Username: resp.User.Username,
+		Id:        resp.User.Id,
+		Username:  resp.User.Username,
+		PublicKey: publicKey,
 	}
 
 	r.user = &u

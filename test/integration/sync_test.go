@@ -51,6 +51,5 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.NilError(t, err)
 		assert.Assert(t, len(ks) == 1)
 		assert.Equal(t, ks[keystore.Id].Version, 3)
-
 	})
 }

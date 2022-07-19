@@ -24,7 +24,7 @@ func parseFlags() Config {
 	cfg := Config{}
 
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
-	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 1 second before starting up")
+	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 100ms before starting up")
 
 	flag.Parse()
 

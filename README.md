@@ -3,14 +3,14 @@
 
 # myst 
 
-#### Zero-knowledge, end-to-end encrypted password manager
+### Zero-knowledge, end-to-end encrypted password manager
 
 
 ### Development requirements
 - Go v1.18
 - Node 16+
 
-# Bootstrap
+#### Bootstrap
 
 ```bash
 npm install -g openapi-typescript-codegen

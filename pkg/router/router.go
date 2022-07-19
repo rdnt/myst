@@ -2,7 +2,7 @@ package router
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -23,7 +23,7 @@ var (
 
 func init() {
 	// Discard gin's startup messages
-	gin.DefaultWriter = ioutil.Discard
+	gin.DefaultWriter = io.Discard
 	// Custom PrintRouteFunc
 	gin.DebugPrintRouteFunc = PrintRoutes
 }

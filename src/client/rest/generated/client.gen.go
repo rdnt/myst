@@ -125,6 +125,9 @@ type ClientInterface interface {
 	// AcceptInvitation request
 	AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// FinalizeInvitation request
+	FinalizeInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetInvitations request
 	GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -310,6 +313,18 @@ func (c *Client) GetInvitation(ctx context.Context, invitationId string, reqEdit
 
 func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAcceptInvitationRequest(c.Server, invitationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FinalizeInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFinalizeInvitationRequest(c.Server, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -804,6 +819,40 @@ func NewAcceptInvitationRequest(server string, invitationId string) (*http.Reque
 	return req, nil
 }
 
+// NewFinalizeInvitationRequest generates requests for FinalizeInvitation
+func NewFinalizeInvitationRequest(server string, invitationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/invitation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetInvitationsRequest generates requests for GetInvitations
 func NewGetInvitationsRequest(server string) (*http.Request, error) {
 	var err error
@@ -1260,6 +1309,9 @@ type ClientWithResponsesInterface interface {
 	// AcceptInvitation request
 	AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
 
+	// FinalizeInvitation request
+	FinalizeInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error)
+
 	// GetInvitations request
 	GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error)
 
@@ -1494,6 +1546,29 @@ func (r AcceptInvitationResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r AcceptInvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type FinalizeInvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Invitation
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r FinalizeInvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r FinalizeInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1839,6 +1914,15 @@ func (c *ClientWithResponses) AcceptInvitationWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParseAcceptInvitationResponse(rsp)
+}
+
+// FinalizeInvitationWithResponse request returning *FinalizeInvitationResponse
+func (c *ClientWithResponses) FinalizeInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error) {
+	rsp, err := c.FinalizeInvitation(ctx, invitationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFinalizeInvitationResponse(rsp)
 }
 
 // GetInvitationsWithResponse request returning *GetInvitationsResponse
@@ -2191,6 +2275,39 @@ func ParseAcceptInvitationResponse(rsp *http.Response) (*AcceptInvitationRespons
 	}
 
 	response := &AcceptInvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Invitation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseFinalizeInvitationResponse parses an HTTP response from a FinalizeInvitationWithResponse call
+func ParseFinalizeInvitationResponse(rsp *http.Response) (*FinalizeInvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &FinalizeInvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

@@ -2,6 +2,7 @@
   import api from "@/api";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import DeclineInvitationModal from "@/components/DeclineInvitationModal.svelte";
+  import FinalizeInvitationModal from "@/components/FinalizeInvitationModal.svelte";
   import Invitation from "@/components/Invitation.svelte";
   import {hash} from "@/lib/color-hash";
   import {format} from "@/lib/date";
@@ -12,13 +13,14 @@
 
   const registerFocus = useFocus();
 
-  $: incomingInvitations = $invitations.filter((inv) => inv.invitee.id === $currentUser.id && inv.status === 'pending');
-  $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending'));
-  $: pastInvitations = $invitations.filter((inv) => inv.status !== 'pending')
+  $: incomingInvitations = $invitations.filter((inv) => inv.invitee.id === $currentUser.id && (inv.status === 'pending' || inv.status === 'accepted'));
+  $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending' || inv.status === 'accepted'));
+  $: pastInvitations = $invitations.filter((inv) => (inv.status !== 'pending' && inv.status !== 'accepted'))
 
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
   let showDeclineInvitationModal: boolean = false;
+  let showFinalizeInvitationModal: boolean = false;
 
   function acceptInvitation() {
     api.acceptInvitation({
@@ -38,6 +40,15 @@
     });
   }
 
+  function finalizeInvitation() {
+    api.finalizeInvitation({
+      invitationId: invitation.id
+    }).then(() => {
+      showFinalizeInvitationModal = false;
+      getInvitations();
+    });
+  }
+
   function showAcceptInvitationModalFunc(inv: Invitation) {
     invitation = inv;
     showAcceptInvitationModal = true;
@@ -46,6 +57,11 @@
   function showDeclineInvitationModalFunc(inv: Invitation) {
     invitation = inv;
     showDeclineInvitationModal = true;
+  }
+
+  function showFinalizeInvitationModalFunc(inv: Invitation) {
+    invitation = inv;
+    showFinalizeInvitationModal = true;
   }
 
   onMount(() => {
@@ -72,6 +88,7 @@
               Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
             </span>
           </div>
+          <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
           <div class="actions">
             <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
             <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
@@ -101,6 +118,9 @@
             </span>
           </div>
           <div class="actions">
+            {#if inv.status === 'accepted'}
+              <button class="button green" on:click={() => {showFinalizeInvitationModalFunc(inv)}}>Finalize Invitation</button>
+            {/if}
             <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete Invitation</button>
           </div>
         </div>
@@ -171,6 +191,7 @@
 {#if invitation}
   <AcceptInvitationModal bind:show={showAcceptInvitationModal} {invitation} on:submit={() => {acceptInvitation()}}/>
   <DeclineInvitationModal bind:show={showDeclineInvitationModal} {invitation} on:submit={() => {declineInvitation()}}/>
+  <FinalizeInvitationModal bind:show={showFinalizeInvitationModal} {invitation} on:submit={() => {finalizeInvitation()}}/>
 {/if}
 
 {#if invitation}

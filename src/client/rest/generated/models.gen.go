@@ -111,6 +111,7 @@ type UpdateEntryRequest struct {
 
 // User defines model for User.
 type User struct {
+	Icon      string `json:"icon"`
 	Id        string `json:"id"`
 	PublicKey []byte `json:"publicKey"`
 	Username  string `json:"username"`

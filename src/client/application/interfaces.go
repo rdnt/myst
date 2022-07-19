@@ -20,31 +20,23 @@ type Remote interface {
 
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystore(id string, privateKey []byte) (keystore.Keystore, error)
-	UpdateKeystore(k keystore.Keystore) error
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	SignIn(username, password string) (user.User, error)
+	SignIn(username, password string, publicKey []byte) (user.User, error)
 	Register(username, password string, publicKey []byte) (user.User, error)
 	SignOut() error
 	SignedIn() bool
 	CurrentUser() *user.User
 	UserByUsername(username string) (user.User, error)
+}
 
-	// keystores
-	// UploadKeystore(id string) (*generated.Keystore, error)
-	// Keystores() ([]keystore.Keystore, error)
-	//
-	// // invitations
-	// CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error)
-	// AcceptInvitation(keystoreId, invitationId string) (invitation.Invitation, error)
-	//
-	// Invitation(id string) (invitation.Invitation, error)
-	// UpdateInvitation(k invitation.Invitation) error
-	// DeleteInvitation(id string) error
-	//
-	// Invitations() ([]invitation.Invitation, error)
-	//
-	// // TODO: refine to dynamically find local keystoreId
-	// FinalizeInvitation(localKeystoreId, keystoreId, invitationId string) (*generated.Invitation, error)
+type Repository interface {
+	HealthCheck()
+
+	Initialize(password string) error
+	IsInitialized() error
+
+	Authenticate(password string) error
 }

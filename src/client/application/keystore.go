@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"myst/src/client/application/domain/enclave"
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/application/domain/keystore/entry"
+	"myst/src/client/application/domain/remote"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 )
 
 func (app *application) HealthCheck() {
-	app.keystores.HealthCheck()
+	app.repo.HealthCheck()
 }
 
 func (app *application) KeystoreEntries(id string) (map[string]entry.Entry, error) {
@@ -106,26 +106,12 @@ func (app *application) CreateKeystoreEntry(keystoreId string, opts ...entry.Opt
 	return e, app.keystores.UpdateKeystore(k)
 }
 
-func (app *application) CreateFirstKeystore(k keystore.Keystore, password string) (keystore.Keystore, error) {
-	err := app.keystores.CreateEnclave(password)
-	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to initialize enclave")
-	}
-
-	k, err = app.keystores.CreateKeystore(k)
-	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to create keystore")
-	}
-
-	return k, nil
+func (app *application) Initialize(password string) error {
+	return app.repo.Initialize(password)
 }
 
-func (app *application) CreateEnclave(password string) error {
-	return app.keystores.CreateEnclave(password)
-}
-
-func (app *application) Enclave() error {
-	return app.keystores.Enclave()
+func (app *application) IsInitialized() error {
+	return app.repo.IsInitialized()
 }
 
 func (app *application) Keystore(id string) (keystore.Keystore, error) {
@@ -159,7 +145,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	}
 
 	if app.remote.SignedIn() {
-		rem, err := app.keystores.Remote()
+		rem, err := app.credentials.Remote()
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get remote")
 		}
@@ -189,9 +175,9 @@ func (app *application) UpdateKeystore(k keystore.Keystore) error {
 }
 
 func (app *application) SetRemote(address, username, password string, publicKey, privateKey []byte) error {
-	return app.keystores.SetRemote(address, username, password, publicKey, privateKey)
+	return app.credentials.SetRemote(address, username, password, publicKey, privateKey)
 }
 
-func (app *application) Remote() (enclave.Remote, error) {
-	return app.keystores.Remote()
+func (app *application) Remote() (remote.Remote, error) {
+	return app.credentials.Remote()
 }

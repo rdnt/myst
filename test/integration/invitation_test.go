@@ -12,12 +12,12 @@ import (
 func TestInvitations(t *testing.T) {
 	s := setup(t)
 
-	keystoreId := s.createKeystore(t)
+	keystore := s.createKeystore(t)
 
 	var invitationId string
 	s.Run(t, "Invitation is created", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateInvitationWithResponse(s.Ctx,
-			keystoreId,
+			keystore.Id,
 			generated.CreateInvitationJSONRequestBody{
 				Invitee: s.Client2.Username,
 			},
@@ -72,8 +72,8 @@ func TestInvitations(t *testing.T) {
 func TestInvitationDelete(t *testing.T) {
 	s := setup(t)
 
-	keystoreId := s.createKeystore(t)
-	invitationId := s.createInvitation(t, keystoreId)
+	keystore := s.createKeystore(t)
+	invitationId := s.createInvitation(t, keystore.Id)
 
 	s.Run(t, "The inviter deletes the invitation", func(t *testing.T) {
 		res, err := s.Client1.Client.DeclineOrCancelInvitationWithResponse(
@@ -102,8 +102,8 @@ func TestInvitationDelete(t *testing.T) {
 func TestInvitationDecline(t *testing.T) {
 	s := setup(t)
 
-	keystoreId := s.createKeystore(t)
-	invitationId := s.createInvitation(t, keystoreId)
+	keystore := s.createKeystore(t)
+	invitationId := s.createInvitation(t, keystore.Id)
 
 	s.Run(t, "The invitee declines the invitation", func(t *testing.T) {
 		res, err := s.Client2.Client.DeclineOrCancelInvitationWithResponse(
@@ -130,8 +130,8 @@ func TestInvitationDecline(t *testing.T) {
 func TestInvitationAccept(t *testing.T) {
 	s := setup(t)
 
-	keystoreId := s.createKeystore(t)
-	invitationId := s.createInvitation(t, keystoreId)
+	keystore := s.createKeystore(t)
+	invitationId := s.createInvitation(t, keystore.Id)
 
 	s.Run(t, "The inviter cannot accept the invitation", func(t *testing.T) {
 		res, err := s.Client1.Client.AcceptInvitationWithResponse(
@@ -189,8 +189,8 @@ func TestInvitationAccept(t *testing.T) {
 func TestInvitationFinalize(t *testing.T) {
 	s := setup(t)
 
-	keystoreId := s.createKeystore(t)
-	invitationId := s.createInvitation(t, keystoreId)
+	keystore := s.createKeystore(t)
+	invitationId := s.createInvitation(t, keystore.Id)
 
 	s.Run(t, "The invitee accepts the invitation", func(t *testing.T) {
 		res, err := s.Client2.Client.AcceptInvitationWithResponse(s.Ctx, invitationId)
@@ -209,10 +209,9 @@ func TestInvitationFinalize(t *testing.T) {
 	})
 
 	s.Run(t, "The inviter eventually finalizes the invitation", func(t *testing.T) {
-		// manually trigger finalization
-		// TODO: maybe do eventually with retries
-		_, err := s.Client1.App.FinalizeInvitation(invitationId)
+		res, err := s.Client1.Client.FinalizeInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
 	})
 
 	s.Run(t, "Both users see invitation as finalized", func(t *testing.T) {

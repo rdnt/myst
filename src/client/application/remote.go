@@ -12,7 +12,7 @@ import (
 func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
 
-	rem, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
@@ -24,7 +24,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 			return user.User{}, fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(username, password)
+		_, err = app.remote.SignIn(username, password, rem.PublicKey)
 		if err != nil {
 			return user.User{}, err
 		}
@@ -40,7 +40,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 		return user.User{}, err
 	}
 
-	err = app.keystores.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	err = app.credentials.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
 		return user.User{}, err
 	}
@@ -53,7 +53,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 
 	var mustInit bool
 
-	rem, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
@@ -65,7 +65,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 			return user.User{}, fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(username, password)
+		_, err = app.remote.SignIn(username, password, rem.PublicKey)
 		if err != nil {
 			return user.User{}, err
 		}
@@ -76,12 +76,12 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 		return user.User{}, err
 	}
 
-	u, err := app.remote.SignIn(username, password)
+	u, err := app.remote.SignIn(username, password, rem.PublicKey)
 	if err != nil {
 		return user.User{}, err
 	}
 
-	err = app.keystores.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	err = app.credentials.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
 		return user.User{}, err
 	}
@@ -90,13 +90,16 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 }
 
 func (app *application) CurrentUser() (*user.User, error) {
-	_, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if err != nil {
 		return nil, err
 
 	}
 
-	return app.remote.CurrentUser(), nil
+	u := app.remote.CurrentUser()
+	u.PublicKey = rem.PublicKey
+
+	return u, nil
 }
 
 func (app *application) SignOut() error {
@@ -104,13 +107,13 @@ func (app *application) SignOut() error {
 }
 
 func (app *application) Authenticate(password string) error {
-	err := app.keystores.Authenticate(password)
+	err := app.repo.Authenticate(password)
 	if err != nil {
 		return err
 	}
 
 	var trySignIn bool
-	rem, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if err == nil {
 		trySignIn = true
 	} else if !errors.Is(err, enclave.ErrRemoteNotSet) {
@@ -122,7 +125,7 @@ func (app *application) Authenticate(password string) error {
 			return fmt.Errorf("remote address mismatch")
 		}
 
-		_, err = app.remote.SignIn(rem.Username, rem.Password)
+		_, err = app.remote.SignIn(rem.Username, rem.Password, rem.PublicKey)
 		if err != nil {
 			return err
 		}

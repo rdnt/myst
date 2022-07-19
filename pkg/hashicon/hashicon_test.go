@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
+
+	"myst/pkg/rand"
 )
 
 func TestNew(t *testing.T) {
@@ -28,4 +30,12 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, h.Stride, 8)
 	assert.Equal(t, len(h.Pix), 64)
+
+	b, err = rand.Bytes(256)
+	assert.Equal(t, err, nil)
+
+	h, err = New(b)
+	assert.Equal(t, err, nil)
+
+	t.Log(h.ToSVG())
 }

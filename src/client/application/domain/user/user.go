@@ -2,12 +2,7 @@ package user
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
-)
-
-var (
-	ErrInvalidUsername = errors.New("invalid username")
 )
 
 type User struct {

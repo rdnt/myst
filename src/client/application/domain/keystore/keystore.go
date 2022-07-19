@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"myst/pkg/uuid"
-	"myst/src/client/application/domain/entry"
+	"myst/src/client/application/domain/keystore/entry"
 )
 
 var (

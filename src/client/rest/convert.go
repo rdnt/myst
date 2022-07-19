@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"myst/pkg/hashicon"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/user"
 	"myst/src/client/rest/generated"
@@ -13,16 +14,8 @@ func InvitationToRest(inv invitation.Invitation) generated.Invitation {
 			RemoteId: inv.Keystore.RemoteId,
 			Name:     inv.Keystore.Name,
 		},
-		Inviter: generated.User{
-			Id:        inv.Inviter.Id,
-			Username:  inv.Inviter.Username,
-			PublicKey: inv.Inviter.PublicKey,
-		},
-		Invitee: generated.User{
-			Id:        inv.Invitee.Id,
-			Username:  inv.Invitee.Username,
-			PublicKey: inv.Invitee.PublicKey,
-		},
+		Inviter:              UserToRest(inv.Inviter),
+		Invitee:              UserToRest(inv.Invitee),
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		Status:               generated.InvitationStatus(inv.Status.String()),
 		CreatedAt:            inv.CreatedAt,
@@ -34,8 +27,15 @@ func InvitationToRest(inv invitation.Invitation) generated.Invitation {
 }
 
 func UserToRest(u user.User) generated.User {
+	h, err := hashicon.New(u.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+
 	return generated.User{
-		Id:       u.Id,
-		Username: u.Username,
+		Id:        u.Id,
+		Username:  u.Username,
+		PublicKey: u.PublicKey,
+		Icon:      h.ToSVG(),
 	}
 }

@@ -47,6 +47,9 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	app, err := application.New(
 		application.WithKeystoreRepository(repo),
 		application.WithRemote(rem),
+		application.WithInvitationRepository(rem),
+		application.WithRepository(repo),
+		application.WithCredentials(repo),
 	)
 	assert.NilError(t, err)
 
@@ -75,7 +78,7 @@ func (c *Client) start(t *testing.T) {
 	err := c.Server.Start(c.Address)
 	assert.NilError(t, err)
 
-	err = c.App.CreateEnclave(c.MasterPassword)
+	err = c.App.Initialize(c.MasterPassword)
 	assert.NilError(t, err)
 
 	_, err = c.App.Register(c.Username, c.Password)

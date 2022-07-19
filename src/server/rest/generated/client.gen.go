@@ -120,6 +120,11 @@ type ClientInterface interface {
 	// Keystore request
 	Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UpdateKeystore request with any body
+	UpdateKeystoreWithBody(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateKeystore(ctx context.Context, keystoreId string, body UpdateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateInvitation request with any body
 	CreateInvitationWithBody(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -259,6 +264,30 @@ func (c *Client) Invitations(ctx context.Context, reqEditors ...RequestEditorFn)
 
 func (c *Client) Keystore(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewKeystoreRequest(c.Server, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateKeystoreWithBody(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateKeystoreRequestWithBody(c.Server, keystoreId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateKeystore(ctx context.Context, keystoreId string, body UpdateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateKeystoreRequest(c.Server, keystoreId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -631,6 +660,53 @@ func NewKeystoreRequest(server string, keystoreId string) (*http.Request, error)
 	return req, nil
 }
 
+// NewUpdateKeystoreRequest calls the generic UpdateKeystore builder with application/json body
+func NewUpdateKeystoreRequest(server string, keystoreId string, body UpdateKeystoreJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateKeystoreRequestWithBody(server, keystoreId, "application/json", bodyReader)
+}
+
+// NewUpdateKeystoreRequestWithBody generates requests for UpdateKeystore with any type of body
+func NewUpdateKeystoreRequestWithBody(server string, keystoreId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "keystoreId", runtime.ParamLocationPath, keystoreId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/keystore/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
 func NewCreateInvitationRequest(server string, keystoreId string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -865,6 +941,11 @@ type ClientWithResponsesInterface interface {
 	// Keystore request
 	KeystoreWithResponse(ctx context.Context, keystoreId string, reqEditors ...RequestEditorFn) (*KeystoreResponse, error)
 
+	// UpdateKeystore request with any body
+	UpdateKeystoreWithBodyWithResponse(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateKeystoreResponse, error)
+
+	UpdateKeystoreWithResponse(ctx context.Context, keystoreId string, body UpdateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateKeystoreResponse, error)
+
 	// CreateInvitation request with any body
 	CreateInvitationWithBodyWithResponse(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateInvitationResponse, error)
 
@@ -1066,6 +1147,29 @@ func (r KeystoreResponse) StatusCode() int {
 	return 0
 }
 
+type UpdateKeystoreResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Keystore
+	JSONDefault  *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateKeystoreResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateKeystoreResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1252,6 +1356,23 @@ func (c *ClientWithResponses) KeystoreWithResponse(ctx context.Context, keystore
 		return nil, err
 	}
 	return ParseKeystoreResponse(rsp)
+}
+
+// UpdateKeystoreWithBodyWithResponse request with arbitrary body returning *UpdateKeystoreResponse
+func (c *ClientWithResponses) UpdateKeystoreWithBodyWithResponse(ctx context.Context, keystoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateKeystoreResponse, error) {
+	rsp, err := c.UpdateKeystoreWithBody(ctx, keystoreId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateKeystoreResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateKeystoreWithResponse(ctx context.Context, keystoreId string, body UpdateKeystoreJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateKeystoreResponse, error) {
+	rsp, err := c.UpdateKeystore(ctx, keystoreId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateKeystoreResponse(rsp)
 }
 
 // CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
@@ -1546,6 +1667,39 @@ func ParseKeystoreResponse(rsp *http.Response) (*KeystoreResponse, error) {
 	}
 
 	response := &KeystoreResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Keystore
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateKeystoreResponse parses an HTTP response from a UpdateKeystoreWithResponse call
+func ParseUpdateKeystoreResponse(rsp *http.Response) (*UpdateKeystoreResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateKeystoreResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

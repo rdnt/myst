@@ -1,10 +1,13 @@
 package hashicon
 
 import (
+	"bytes"
 	"fmt"
 	"image/color"
 	"math"
 	"os"
+
+	"github.com/ajstarks/svgo"
 )
 
 var (
@@ -20,7 +23,7 @@ type Hashicon struct {
 	Pix    []float64
 }
 
-// New creates a new _hashicon and stores its pix array and stride.
+// New creates a new hashicon and stores its pix array and stride.
 // The length of the pix slice always equals stride^2.
 func New(b []byte) (*Hashicon, error) {
 	if len(b) < 32 || len(b) > 8192 || !((len(b) & (len(b) - 1)) == 0) {
@@ -112,17 +115,17 @@ func New(b []byte) (*Hashicon, error) {
 
 // WeightToColor converts a normalized weight (in the range 0..1) to a color.
 // Can be overwritten to allow for custom visualizations.
-func WeightToColor(w float64) color.RGBA {
+func WeightToColor(w float64) color.NRGBA {
 	switch {
 	case w > .5:
-		return color.RGBA{
+		return color.NRGBA{
 			R: 32,
 			G: 233,
 			B: 183,
 			A: uint8(w * 255),
 		}
 	default:
-		return color.RGBA{
+		return color.NRGBA{
 			R: 58,
 			G: 141,
 			B: 153,
@@ -131,38 +134,36 @@ func WeightToColor(w float64) color.RGBA {
 	}
 }
 
-// ToSVG returns an SVG based on the _hashicon pixel data.
-// TODO: use a string builder?
+// ToSVG returns an SVG based on the hashicon's pixel data.
 func (h *Hashicon) ToSVG() string {
 	// try to be the same size in the resulting SVG regardless of stride
-	mult := 256 / h.Stride
+	size := 256 / h.Stride
 
-	svg := fmt.Sprintf(
-		`<svg width="%d" height="%d" version="1.1" xmlns="rest://www.w3.org/2000/svg">`, h.Stride*mult, h.Stride*mult,
-	)
-	svg += `<rect width="100%" height="100%" fill="#181b21"/>`
+	buf := new(bytes.Buffer)
+
+	canvas := svg.New(buf)
+	canvas.Start(h.Stride*size, h.Stride*size)
+
+	canvas.Polygon([]int{0, h.Stride * size, h.Stride * size, 0}, []int{0, 0, h.Stride * size, h.Stride * size}, "fill: #181b21")
+
 	for i, p := range h.Pix {
-		x := i % h.Stride
-		y := i / h.Stride
+		x := (i % h.Stride) * size
+		y := (i / h.Stride) * size
 
 		clr := WeightToColor(p)
 
-		svg += fmt.Sprintf(
-			`<rect x="%d" y="%d" width="%d" height="%d" fill="%s" opacity="%f" />`,
-			x*mult,
-			y*mult,
-			mult,
-			mult,
-			fmt.Sprintf("#%X%X%X", clr.R, clr.G, clr.B),
-			float64(clr.A)/255,
-		)
-	}
-	svg += `</svg>`
+		xs := []int{x, x + size, x + size, x}
+		ys := []int{y, y, y + size, y + size}
 
-	return svg
+		canvas.Polygon(xs, ys, fmt.Sprintf("fill:#%02X%02X%02X; opacity:%f", clr.R, clr.G, clr.B, float64(clr.A)/255.0))
+	}
+
+	canvas.End()
+
+	return buf.String()
 }
 
-// Export converts the _hashicon to SVG and saves it in the specified path.
+// Export converts the hashicon to SVG and saves it in the specified path.
 func (h *Hashicon) Export(path string) error {
 	f, err := os.Create(path)
 	if err != nil {

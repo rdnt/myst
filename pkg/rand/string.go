@@ -24,6 +24,19 @@ func String(length int) (string, error) {
 			result[i] &= 0x7F
 		}
 	}
-	
+
 	return string(result), nil
+}
+
+// Bytes returns a bytes slice with size n that contains
+// cryptographically secure random bytes.
+func Bytes(n uint) ([]byte, error) {
+	b := make([]byte, n)
+
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }

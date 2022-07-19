@@ -35,8 +35,9 @@ func (s *Server) Register(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, generated.AuthorizationResponse{
 		User: generated.User{
-			Id:       u.Id,
-			Username: u.Username,
+			Id:        u.Id,
+			Username:  u.Username,
+			PublicKey: u.PublicKey,
 		},
 		Token: token,
 	})

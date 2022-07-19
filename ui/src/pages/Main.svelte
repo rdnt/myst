@@ -38,3 +38,14 @@
 <CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
 <AuthModal bind:show={showAuthModal}/>
+
+<style lang="scss">
+  $bg: #0a0e11;
+
+  main {
+    display: flex;
+    align-items: stretch;
+    background-color: $bg;
+    width: 100%;
+  }
+</style>

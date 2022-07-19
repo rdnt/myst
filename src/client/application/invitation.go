@@ -61,7 +61,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
 	}
 
-	rem, err := app.keystores.Remote()
+	rem, err := app.credentials.Remote()
 	if err != nil {
 		return invitation.Invitation{}, err
 	}

@@ -14,24 +14,24 @@ func (app *application) Sync() error {
 		return errors.New("signed out")
 	}
 
-	invs, err := app.remote.Invitations()
-	if err != nil {
-		return errors.WithMessage(err, "failed to get invitations from remote")
-	}
-
-	for _, inv := range invs {
-		if inv.Accepted() && inv.Inviter.Id == app.remote.CurrentUser().Id {
-			log.Print("Finalizing invitation ", inv.Id, "...")
-
-			_, err = app.FinalizeInvitation(inv.Id)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			log.Print("Invitation ", inv.Id, " finalized.")
-		}
-	}
+	//invs, err := app.remote.Invitations()
+	//if err != nil {
+	//	return errors.WithMessage(err, "failed to get invitations from remote")
+	//}
+	//
+	//for _, inv := range invs {
+	//	if inv.Accepted() && inv.Inviter.Id == app.remote.CurrentUser().Id {
+	//		log.Print("Finalizing invitation ", inv.Id, "...")
+	//
+	//		_, err = app.FinalizeInvitation(inv.Id)
+	//		if err != nil {
+	//			log.Error(err)
+	//			continue
+	//		}
+	//
+	//		log.Print("Invitation ", inv.Id, " finalized.")
+	//	}
+	//}
 
 	keystores, err := app.keystores.Keystores()
 	if err != nil {

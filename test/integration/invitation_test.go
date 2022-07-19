@@ -209,10 +209,9 @@ func TestInvitationFinalize(t *testing.T) {
 	})
 
 	s.Run(t, "The inviter eventually finalizes the invitation", func(t *testing.T) {
-		// manually trigger finalization
-		// TODO: maybe do eventually with retries
-		_, err := s.Client1.App.FinalizeInvitation(invitationId)
+		res, err := s.Client1.Client.FinalizeInvitationWithResponse(s.Ctx, invitationId)
 		assert.NilError(t, err)
+		assert.Assert(t, res.JSON200 != nil)
 	})
 
 	s.Run(t, "Both users see invitation as finalized", func(t *testing.T) {

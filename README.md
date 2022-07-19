@@ -5,10 +5,13 @@
 
 ### Zero-knowledge, end-to-end encrypted password manager
 
+---
 
-### Development requirements
+#### Development requirements
 - Go v1.18
 - Node 16+
+
+---
 
 #### Bootstrap
 

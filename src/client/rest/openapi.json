@@ -760,6 +760,7 @@
         "required": [
           "id",
           "remoteId",
+          "readOnly",
           "name",
           "entries"
         ],
@@ -769,6 +770,9 @@
           },
           "remoteId": {
             "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean"
           },
           "name": {
             "type": "string"

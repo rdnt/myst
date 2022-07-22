@@ -55,19 +55,13 @@ func KeystoreToJSON(k keystore.Keystore) generated.Keystore {
 
 func UserFromJSON(u generated.User) user.User {
 	return user.User{
-		Id:       u.Id,
-		Username: u.Username,
+		Id:        u.Id,
+		Username:  u.Username,
+		PublicKey: u.PublicKey,
 	}
 }
 
 func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keystore, error) {
-	// CreatedAt
-	// Id
-	// Name
-	// OwnerId
-	// Payload
-	// UpdatedAt
-
 	decryptedKeystorePayload, err := crypto.AES256CBC_Decrypt(keystoreKey, gen.Payload)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc decrypt failed when parsing keystore")
@@ -80,9 +74,12 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 		return keystore.Keystore{}, errors.Wrap(err, "failed to unmarshal keystore")
 	}
 
-	return repository.KeystoreFromJSON(jk)
+	k, err := repository.KeystoreFromJSON(jk)
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
 
-	// FIXME: this should decode the keystore from the generated one. generated keystore should also return the encrypted
-	// payload so that the client can decrypt and parse it into a keystore.Keystore
+	k.ReadOnly = true
 
+	return k, nil
 }

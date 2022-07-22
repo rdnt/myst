@@ -47,11 +47,13 @@
 
 <div class="entries-list">
   <div class="entries" use:registerFocus>
-    <div class="entries-list-header">
-      <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
-      <button on:click={() => showCreateEntryModal = true} class="button"><span class="icon"></span>Create Entry</button>
-      <button on:click={() => showDeleteKeystoreModal = true} class="button"><span class="icon"></span>Delete Keystore</button>
-    </div>
+    {#if !keystore.readOnly}
+      <div class="entries-list-header">
+        <button on:click={() => showCreateInvitationModal = true} class="button"><span class="icon"></span>Share</button>
+        <button on:click={() => showCreateEntryModal = true} class="button"><span class="icon"></span>Create Entry</button>
+        <button on:click={() => showDeleteKeystoreModal = true} class="button"><span class="icon"></span>Delete Keystore</button>
+      </div>
+    {/if}
     {#each keystore.entries as entry}
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
         <div class="entry">

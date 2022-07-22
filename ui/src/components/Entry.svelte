@@ -61,10 +61,12 @@
         <h5>{entry.website}</h5>
         <a>{entry.username}</a>
       </div>
-      <div class="actions">
-        <button on:click={() => showEditModal = true} class="button"><span class="icon"></span> Edit</button>
-        <button on:click={() => showDeleteModal = true} class="button red"><span class="icon"></span> Delete</button>
-      </div>
+      {#if !keystore.readOnly}
+        <div class="actions">
+          <button on:click={() => showEditModal = true} class="button"><span class="icon"></span> Edit</button>
+          <button on:click={() => showDeleteModal = true} class="button red"><span class="icon"></span> Delete</button>
+        </div>
+      {/if}
     </div>
     <div class="fields">
       <Field label="Website" value={entry.website}/>

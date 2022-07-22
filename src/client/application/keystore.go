@@ -136,7 +136,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	}
 
 	for id, k := range ks {
-		k.Access = "read/write"
+		k.OwnerId = ""
 		ks[id] = k
 	}
 
@@ -153,7 +153,6 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 
 		for _, rk := range rks {
 			if _, ok := ks[rk.Id]; !ok {
-				rk.Access = "read"
 				ks[rk.Id] = rk
 			}
 		}

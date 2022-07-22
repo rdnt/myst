@@ -17,10 +17,10 @@ var (
 type Keystore struct {
 	Id       string
 	RemoteId string
+	OwnerId  string
 	Name     string
 	Version  int
 	Entries  map[string]entry.Entry
-	Access   string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -28,16 +28,11 @@ type Keystore struct {
 	Key []byte
 }
 
-func (k *Keystore) IncrementVersion() {
-	k.Version++
-}
-
 func New(opts ...Option) Keystore {
 	k := Keystore{
 		Id:      uuid.New().String(),
 		Version: 1,
 		Entries: map[string]entry.Entry{},
-		Access:  "read/write",
 	}
 
 	for _, opt := range opts {

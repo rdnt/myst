@@ -16,12 +16,6 @@ const (
 	Pending   InvitationStatus = "pending"
 )
 
-// Defines values for KeystoreAccess.
-const (
-	Read      KeystoreAccess = "read"
-	Readwrite KeystoreAccess = "read/write"
-)
-
 // AuthenticateRequest defines model for AuthenticateRequest.
 type AuthenticateRequest struct {
 	Password string `json:"password"`
@@ -88,15 +82,12 @@ type Invitations = []Invitation
 
 // Keystore defines model for Keystore.
 type Keystore struct {
-	Access   KeystoreAccess `json:"access"`
-	Entries  []Entry        `json:"entries"`
-	Id       string         `json:"id"`
-	Name     string         `json:"name"`
-	RemoteId string         `json:"remoteId"`
+	Entries  []Entry `json:"entries"`
+	Id       string  `json:"id"`
+	Name     string  `json:"name"`
+	OwnerId  string  `json:"ownerId"`
+	RemoteId string  `json:"remoteId"`
 }
-
-// KeystoreAccess defines model for Keystore.Access.
-type KeystoreAccess string
 
 // Keystores defines model for Keystores.
 type Keystores = []Keystore

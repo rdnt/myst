@@ -760,8 +760,8 @@
         "required": [
           "id",
           "remoteId",
+          "ownerId",
           "name",
-          "access",
           "entries"
         ],
         "properties": {
@@ -771,15 +771,11 @@
           "remoteId": {
             "type": "string"
           },
-          "name": {
+          "ownerId": {
             "type": "string"
           },
-          "access": {
-            "type": "string",
-            "enum": [
-              "read",
-              "read/write"
-            ]
+          "name": {
+            "type": "string"
           },
           "entries": {
             "type": "array",

@@ -85,7 +85,7 @@ type Keystore struct {
 	Entries  []Entry `json:"entries"`
 	Id       string  `json:"id"`
 	Name     string  `json:"name"`
-	OwnerId  string  `json:"ownerId"`
+	ReadOnly bool    `json:"readOnly"`
 	RemoteId string  `json:"remoteId"`
 }
 

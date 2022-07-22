@@ -760,7 +760,7 @@
         "required": [
           "id",
           "remoteId",
-          "ownerId",
+          "readOnly",
           "name",
           "entries"
         ],
@@ -771,8 +771,8 @@
           "remoteId": {
             "type": "string"
           },
-          "ownerId": {
-            "type": "string"
+          "readOnly": {
+            "type": "boolean"
           },
           "name": {
             "type": "string"

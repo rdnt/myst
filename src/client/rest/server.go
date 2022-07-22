@@ -153,26 +153,7 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	entries := []generated.Entry{}
-
-	for _, e := range k.Entries {
-		entries = append(entries, generated.Entry{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
-		})
-	}
-
-	c.JSON(
-		http.StatusCreated, generated.Keystore{
-			Id:       k.Id,
-			RemoteId: k.RemoteId,
-			Name:     k.Name,
-			Entries:  entries,
-		},
-	)
+	c.JSON(http.StatusCreated, KeystoreToRest(k))
 }
 
 func (s *Server) DeleteKeystore(c *gin.Context) {
@@ -373,26 +354,7 @@ func (s *Server) Keystore(c *gin.Context) {
 		return
 	}
 
-	entries := []generated.Entry{}
-
-	for _, e := range k.Entries {
-		entries = append(entries, generated.Entry{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
-		})
-	}
-
-	Success(
-		c, generated.Keystore{
-			Id:       k.Id,
-			RemoteId: k.RemoteId,
-			Name:     k.Name,
-			Entries:  entries,
-		},
-	)
+	c.JSON(http.StatusOK, KeystoreToRest(k))
 }
 
 func (s *Server) UpdateEntry(c *gin.Context) {
@@ -543,31 +505,11 @@ func (s *Server) Keystores(c *gin.Context) {
 		return
 	}
 
-	keystores := []generated.Keystore{}
+	keystores := generated.Keystores{}
 
 	for _, k := range ks {
-		entries := []generated.Entry{}
-
-		for _, e := range k.Entries {
-			entries = append(
-				entries, generated.Entry{
-					Id:       e.Id,
-					Website:  e.Website,
-					Username: e.Username,
-					Password: e.Password,
-					Notes:    e.Notes,
-				},
-			)
-		}
-
 		keystores = append(
-			keystores, generated.Keystore{
-				Id:       k.Id,
-				RemoteId: k.RemoteId,
-				OwnerId:  k.OwnerId,
-				Name:     k.Name,
-				Entries:  entries,
-			},
+			keystores, KeystoreToRest(k),
 		)
 	}
 

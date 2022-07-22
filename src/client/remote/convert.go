@@ -79,7 +79,7 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 		return keystore.Keystore{}, err
 	}
 
-	k.OwnerId = gen.OwnerId
+	k.ReadOnly = true
 
 	return k, nil
 }

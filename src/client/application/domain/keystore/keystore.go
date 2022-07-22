@@ -17,7 +17,7 @@ var (
 type Keystore struct {
 	Id       string
 	RemoteId string
-	OwnerId  string
+	ReadOnly bool
 	Name     string
 	Version  int
 	Entries  map[string]entry.Entry

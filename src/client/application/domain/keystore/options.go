@@ -18,6 +18,12 @@ func WithRemoteId(remoteId string) Option {
 	}
 }
 
+func WithReadOnly(readOnly bool) Option {
+	return func(k *Keystore) {
+		k.ReadOnly = readOnly
+	}
+}
+
 func WithName(name string) Option {
 	return func(k *Keystore) {
 		k.Name = name

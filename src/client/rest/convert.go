@@ -3,6 +3,7 @@ package rest
 import (
 	"myst/pkg/hashicon"
 	"myst/src/client/application/domain/invitation"
+	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/user"
 	"myst/src/client/rest/generated"
 )
@@ -37,5 +38,29 @@ func UserToRest(u user.User) generated.User {
 		Username:  u.Username,
 		PublicKey: u.PublicKey,
 		Icon:      h.ToSVG(),
+	}
+}
+
+func KeystoreToRest(k keystore.Keystore) generated.Keystore {
+	entries := []generated.Entry{}
+
+	for _, e := range k.Entries {
+		entries = append(
+			entries, generated.Entry{
+				Id:       e.Id,
+				Website:  e.Website,
+				Username: e.Username,
+				Password: e.Password,
+				Notes:    e.Notes,
+			},
+		)
+	}
+
+	return generated.Keystore{
+		Id:       k.Id,
+		RemoteId: k.RemoteId,
+		ReadOnly: k.ReadOnly,
+		Name:     k.Name,
+		Entries:  entries,
 	}
 }

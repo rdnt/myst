@@ -22,6 +22,7 @@ type Remote struct {
 type Keystore struct {
 	Id       string      `json:"id"`
 	RemoteId string      `json:"remoteId"`
+	ReadOnly bool        `json:"readOnly"`
 	Name     string      `json:"name"`
 	Version  int         `json:"version"`
 	Entries  []JSONEntry `json:"entries"`
@@ -51,6 +52,7 @@ func KeystoreToJSON(k keystore.Keystore) Keystore {
 	return Keystore{
 		Id:       k.Id,
 		RemoteId: k.RemoteId,
+		ReadOnly: k.ReadOnly,
 		Name:     k.Name,
 		Version:  k.Version,
 		Entries:  entries,
@@ -75,6 +77,7 @@ func KeystoreFromJSON(k Keystore) (keystore.Keystore, error) {
 	return keystore.New(
 		keystore.WithId(k.Id),
 		keystore.WithRemoteId(k.RemoteId),
+		keystore.WithReadOnly(k.ReadOnly),
 		keystore.WithName(k.Name),
 		keystore.WithVersion(k.Version),
 		keystore.WithEntries(entries),

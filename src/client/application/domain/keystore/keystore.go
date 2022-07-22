@@ -17,6 +17,7 @@ var (
 type Keystore struct {
 	Id       string
 	RemoteId string
+	ReadOnly bool
 	Name     string
 	Version  int
 	Entries  map[string]entry.Entry
@@ -25,10 +26,6 @@ type Keystore struct {
 	UpdatedAt time.Time
 
 	Key []byte
-}
-
-func (k *Keystore) IncrementVersion() {
-	k.Version++
 }
 
 func New(opts ...Option) Keystore {
@@ -41,9 +38,6 @@ func New(opts ...Option) Keystore {
 	for _, opt := range opts {
 		opt(&k)
 	}
-
-	// TODO: remove this
-	// k.id = "0000000000000000000000"
 
 	return k
 }

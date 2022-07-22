@@ -24,7 +24,7 @@ func parseFlags() Config {
 	cfg := Config{}
 
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
-	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 100ms before starting up")
+	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 500ms before starting up")
 
 	flag.Parse()
 
@@ -37,7 +37,7 @@ func main() {
 	cfg := parseFlags()
 
 	if cfg.Slow {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	logger.EnableDebug = config.Debug

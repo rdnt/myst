@@ -13,6 +13,7 @@ import (
 	"myst/src/client/remote"
 	"myst/src/client/repository"
 	"myst/src/client/rest"
+	"myst/src/client/scheduler"
 
 	"github.com/namsral/flag"
 )
@@ -81,6 +82,16 @@ func main() {
 
 	server := rest.NewServer(app, static)
 
+	sched, err := scheduler.New(app)
+	if err != nil {
+		panic(err)
+	}
+
+	err = sched.Start()
+	if err != nil {
+		panic(err)
+	}
+
 	err = server.Start(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
 		log.Error(err)
@@ -92,4 +103,5 @@ func main() {
 	<-c
 
 	_ = server.Stop()
+	_ = sched.Stop()
 }

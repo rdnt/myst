@@ -1,8 +1,6 @@
 package application
 
 import (
-	"time"
-
 	"myst/pkg/logger"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
@@ -54,30 +52,6 @@ func New(opts ...Option) (Application, error) {
 
 func (app *application) Start() error {
 	defer log.Print("App started")
-
-	go func() {
-		for {
-			if app.remote.SignedIn() {
-				err := app.Sync()
-				if err != nil {
-					log.Error(err)
-				}
-				// err := app.remote.SignIn()
-				// if err != nil {
-				//	log.Error(err)
-				// }
-				//
-				// if app.remote.SignedIn() {
-				//	err := app.Sync()
-				//	if err != nil {
-				//		log.Error(err)
-				//	}
-				// }
-			}
-
-			time.Sleep(5 * time.Second)
-		}
-	}()
 
 	return nil
 }

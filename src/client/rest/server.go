@@ -31,6 +31,8 @@ import (
 // //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
 //go:generate openapi --input openapi.json --output ../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
 
+//go:generate oapi-codegen --config oapi-codegen-models.yaml openapi.json
+
 var log = logger.New("router", logger.Cyan)
 
 type Server struct {

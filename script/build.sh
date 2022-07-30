@@ -1,33 +1,45 @@
 #!/bin/bash
-echo "Building for production..."
-sleep 1
-echo "Cleaning up old files..."
+echo "=== Building Myst for production..."
+
+
+
+echo "=== Building client..."
+
+
+
+
+echo "=== Cleaning up old files..."
 rm -r "build" > /dev/null 2>&1
-echo "Formatting server packages..."
-go fmt ./go/...
-echo "Compiling server binary..."
+
+
+echo "--- Detecting platform..."
+
 if [[ -z "${GOOS}" ]]; then
-    export GOOS=linux
+    export GOOS=lpoinux
 fi
 if [[ -z "${GOARCH}" ]]; then
     export GOARCH=amd64
 fi
-echo "  detected platform: $GOOS, architecture: $GOARCH"
+
+echo "    --- platform:  $GOOS, architecture: $GOARCH"
+
+echo "=== Building server..."
+
 if [ $GOOS = windows ]; then
-    go build -o build/server-${GOOS}-${GOARCH}.exe go/main.go
+    go build -o build/server/server-${GOOS}-${GOARCH}.exe cmd/server/main.go
 else
-    go build -o build/server-${GOOS}-${GOARCH} go/main.go
+    go build -o build/server/server-${GOOS}-${GOARCH} cmd/server/main.go
 fi
-echo "Server binary compiled."
-echo "Compiling frontend bundle..."
-cd vue > /dev/null 2>&1
-npm install > /dev/null 2>&1
-npm run build > /dev/null 2>&1
-cd .. > /dev/null 2>&1
-echo "Frontend bundle compiled."
-echo "Copying assets..."
-cp -r "static" "build/static"  > /dev/null 2>&1
-cp -r ".env."* "build" > /dev/null 2>&1
-cp -r "assets" "build/assets" > /dev/null 2>&1
-echo "Build Successful."
-sleep 3
+
+#echo "Compiling frontend bundle..."
+#cd vue > /dev/null 2>&1
+#npm install > /dev/null 2>&1
+#npm run build > /dev/null 2>&1
+#cd .. > /dev/null 2>&1
+#echo "Frontend bundle compiled."
+#echo "Copying assets..."
+#cp -r "static" "build/static"  > /dev/null 2>&1
+#cp -r ".env."* "build" > /dev/null 2>&1
+#cp -r "assets" "build/assets" > /dev/null 2>&1
+#echo "Build Successful."
+#sleep 3

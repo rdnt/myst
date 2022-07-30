@@ -1,8 +1,0 @@
-#!/bin/bash
-echo "Bootstrapping..."
-echo "Downloading node modules..."
-npm --prefix ui install ui
-echo "Downloading go modules..."
-go mod download
-echo "Bootstrapping complete."
-sleep 3

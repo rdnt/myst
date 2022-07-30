@@ -1,27 +1,18 @@
 #!/bin/bash
 echo "=== Building Myst for production..."
 
-
-
-echo "=== Building client..."
-
-
-
-
 echo "=== Cleaning up old files..."
 rm -r "build" > /dev/null 2>&1
 
-
-echo "--- Detecting platform..."
-
 if [[ -z "${GOOS}" ]]; then
-    export GOOS=lpoinux
+    export GOOS=linux
 fi
 if [[ -z "${GOARCH}" ]]; then
     export GOARCH=amd64
 fi
 
-echo "    --- platform:  $GOOS, architecture: $GOARCH"
+echo "--- Platform: $GOOS"
+echo "--- Architecture: $GOARCH"
 
 echo "=== Building server..."
 
@@ -29,6 +20,20 @@ if [ $GOOS = windows ]; then
     go build -o build/server/server-${GOOS}-${GOARCH}.exe cmd/server/main.go
 else
     go build -o build/server/server-${GOOS}-${GOARCH} cmd/server/main.go
+fi
+
+echo "=== Building client-ui..."
+
+cd ui
+npm run build
+cd ..
+
+cp -r static cmd/client/static
+
+if [ $GOOS = windows ]; then
+    go build -o build/client/client-${GOOS}-${GOARCH}.exe cmd/client/main.go
+else
+    go build -o build/client/client-${GOOS}-${GOARCH} cmd/client/main.go
 fi
 
 #echo "Compiling frontend bundle..."

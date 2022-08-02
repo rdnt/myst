@@ -22,13 +22,16 @@ else
     go build -o build/server/server-${GOOS}-${GOARCH} cmd/server/main.go
 fi
 
-echo "=== Building client-ui..."
+echo "=== Building UI..."
+
+rm -rf ./static
 
 cd ui
 npm run build
 cd ..
 
-cp -r static cmd/client/static
+rm -rf ./cmd/client/static
+cp -r static ./cmd/client/static
 
 if [ $GOOS = windows ]; then
     go build -o build/client/client-${GOOS}-${GOARCH}.exe cmd/client/main.go

@@ -3,9 +3,8 @@ package main
 import (
 	"runtime"
 
-	. "github.com/rdnt/builder/assert"
-	. "github.com/rdnt/builder/runtime"
-	. "github.com/rdnt/builder/util"
+	. "myst/pkg/builder/runtime"
+	. "myst/pkg/builder/util"
 )
 
 func Install() {

@@ -18,6 +18,8 @@
 *.myst
 myst.exe
 mystd
+builder.exe
+builder
 cmd/client/static/*
 !cmd/client/static/.gitkeep
 

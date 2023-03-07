@@ -181,7 +181,9 @@ requestBody: CreateKeystoreRequest,
     public static keystore({
 keystoreId,
 }: {
-/** unique identifier for a keystore **/
+/**
+ * unique identifier for a keystore
+ */
 keystoreId: string,
 }): CancelablePromise<Keystore | Error> {
         return __request(OpenAPI, {
@@ -202,7 +204,9 @@ keystoreId: string,
     public static deleteKeystore({
 keystoreId,
 }: {
-/** unique identifier for a keystore **/
+/**
+ * unique identifier for a keystore
+ */
 keystoreId: string,
 }): CancelablePromise<any | Error> {
         return __request(OpenAPI, {
@@ -224,7 +228,9 @@ keystoreId: string,
 keystoreId,
 requestBody,
 }: {
-/** unique identifier for a keystore **/
+/**
+ * unique identifier for a keystore
+ */
 keystoreId: string,
 requestBody: CreateEntryRequest,
 }): CancelablePromise<Error | Entry> {

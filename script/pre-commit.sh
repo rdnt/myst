@@ -1,0 +1,3 @@
+
+echo "Formatting server packages..."
+go fmt ./go/...

@@ -1,2 +1,2 @@
-go build -o builder.exe .\cmd\builder
-.\builder bootstrap
+go build -o myst.exe .\cmd\builder
+.\myst bootstrap

@@ -17,7 +17,9 @@
 *.exe
 *.myst
 myst.exe
+myst
 mystd
+mystd.exe
 builder.exe
 builder
 cmd/client/static/*

@@ -1,3 +1,3 @@
 #!/bin/sh
-go build -o builder ./cmd/builder
-./builder bootstrap
+go build -o myst ./cmd/builder
+./myst bootstrap

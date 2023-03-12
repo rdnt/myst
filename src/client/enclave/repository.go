@@ -1,4 +1,4 @@
-package repository
+package enclave
 
 import (
 	"crypto/sha256"
@@ -12,9 +12,9 @@ import (
 	"myst/pkg/crypto"
 	"myst/pkg/logger"
 	"myst/src/client/application"
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/remote"
 )
 
 var log = logger.New("repository", logger.Green)
@@ -24,7 +24,7 @@ type Repository struct {
 	key             []byte
 	lastHealthCheck time.Time
 	path            string
-	// remote          remote.Remote
+	// remote          remote.Credentials
 }
 
 func New(path string) (*Repository, error) {
@@ -456,7 +456,7 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 //	return r.sealAndWrite(e)
 // }
 
-func (r *Repository) SetRemote(address, username, password string, publicKey, privateKey []byte) error {
+func (r *Repository) SetCredentials(address, username, password string, publicKey, privateKey []byte) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -469,7 +469,7 @@ func (r *Repository) SetRemote(address, username, password string, publicKey, pr
 		return err
 	}
 
-	e.SetRemote(remote.Remote{
+	e.SetRemote(credentials.Credentials{
 		Address:    address,
 		Username:   username,
 		Password:   password,
@@ -480,22 +480,22 @@ func (r *Repository) SetRemote(address, username, password string, publicKey, pr
 	return r.sealAndWrite(e)
 }
 
-func (r *Repository) Remote() (remote.Remote, error) {
+func (r *Repository) Credentials() (credentials.Credentials, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return remote.Remote{}, fmt.Errorf("authentication required")
+		return credentials.Credentials{}, fmt.Errorf("authentication required")
 	}
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return remote.Remote{}, err
+		return credentials.Credentials{}, err
 	}
 
 	rem := e.Remote()
 	if rem == nil {
-		return remote.Remote{}, enclave.ErrRemoteNotSet
+		return credentials.Credentials{}, enclave.ErrRemoteNotSet
 	}
 
 	return *rem, nil

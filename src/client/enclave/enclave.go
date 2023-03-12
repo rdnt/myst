@@ -1,4 +1,4 @@
-package repository
+package enclave
 
 import (
 	"crypto/sha256"
@@ -10,9 +10,9 @@ import (
 	"github.com/pkg/errors"
 
 	"myst/pkg/crypto"
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/remote"
 )
 
 func (r *Repository) enclavePath() string {
@@ -98,11 +98,11 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 		ks[k.Id] = k
 	}
 
-	var rem *remote.Remote
+	var rem *credentials.Credentials
 	jrem := e.Remote
 
 	if jrem != nil {
-		rem = &remote.Remote{
+		rem = &credentials.Credentials{
 			Address:    jrem.Address,
 			Username:   jrem.Username,
 			Password:   jrem.Password,

@@ -10,7 +10,7 @@ import (
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/repository"
+	"myst/src/client/enclave"
 	"myst/src/server/rest/generated"
 )
 
@@ -19,7 +19,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	jk := repository.KeystoreToJSON(k)
+	jk := enclave.KeystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
 	if err != nil {
@@ -118,7 +118,7 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrSignedOut
 	}
 
-	jk := repository.KeystoreToJSON(k)
+	jk := enclave.KeystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
 	if err != nil {

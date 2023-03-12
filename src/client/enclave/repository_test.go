@@ -1,4 +1,4 @@
-package repository_test
+package enclave_test
 
 import (
 	"testing"
@@ -7,11 +7,11 @@ import (
 
 	"myst/pkg/rand"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/repository"
+	"myst/src/client/enclave"
 )
 
 func TestRepository(t *testing.T) {
-	repo, err := repository.New(t.TempDir())
+	repo, err := enclave.New(t.TempDir())
 	assert.NilError(t, err)
 
 	pass, err := rand.String(16)

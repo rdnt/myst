@@ -12,9 +12,9 @@ func (app *application) Sync() error {
 		return errors.New("signed out")
 	}
 
-	keystores, err := app.keystores.Keystores()
+	keystores, err := app.enclave.Keystores()
 	if err != nil {
-		return errors.WithMessage(err, "failed to get keystores")
+		return errors.WithMessage(err, "failed to get enclave")
 	}
 
 	for _, k := range keystores {
@@ -24,7 +24,7 @@ func (app *application) Sync() error {
 				return err
 			}
 
-			err = app.keystores.UpdateKeystore(k)
+			err = app.enclave.UpdateKeystore(k)
 			if err != nil {
 				return err
 			}
@@ -40,7 +40,7 @@ func (app *application) Sync() error {
 		}
 
 		if rk.Version > k.Version {
-			err = app.keystores.UpdateKeystore(rk)
+			err = app.enclave.UpdateKeystore(rk)
 			if err != nil {
 				return err
 			}
@@ -52,7 +52,7 @@ func (app *application) Sync() error {
 				return err
 			}
 
-			log.Println("Remote keystore updated", k.Id, k.RemoteId)
+			log.Println("Credentials keystore updated", k.Id, k.RemoteId)
 		} else {
 			log.Println("No change", k.Id, k.RemoteId)
 		}
@@ -67,7 +67,7 @@ func (app *application) Sync() error {
 //		return err
 //	}
 //
-//	ks, err := app.keystores.Keystores()
+//	ks, err := app.enclave.Keystores()
 //	if err != nil {
 //		return err
 //	}

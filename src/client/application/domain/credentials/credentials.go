@@ -1,6 +1,6 @@
-package remote
+package credentials
 
-type Remote struct {
+type Credentials struct {
 	Address    string
 	Username   string
 	Password   string

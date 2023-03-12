@@ -9,7 +9,7 @@ import (
 func (app *application) CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error) {
 	// TODO: needs refinement. app services should have access to the remote, not the other way around.
 	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
-	k, err := app.keystores.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
@@ -19,7 +19,7 @@ func (app *application) CreateInvitation(keystoreId string, inviteeUsername stri
 		return invitation.Invitation{}, err
 	}
 
-	err = app.keystores.UpdateKeystore(k)
+	err = app.enclave.UpdateKeystore(k)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
@@ -61,7 +61,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
 	}
 
-	rem, err := app.credentials.Remote()
+	rem, err := app.enclave.Credentials()
 	if err != nil {
 		return invitation.Invitation{}, err
 	}

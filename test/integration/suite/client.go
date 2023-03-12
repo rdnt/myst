@@ -8,8 +8,8 @@ import (
 	"gotest.tools/v3/assert"
 
 	"myst/src/client/application"
+	"myst/src/client/enclave"
 	"myst/src/client/remote"
-	"myst/src/client/repository"
 	"myst/src/client/rest"
 	"myst/src/client/rest/generated"
 )
@@ -36,7 +36,7 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	err = os.Chmod(dir, os.ModePerm)
 	assert.NilError(t, err)
 
-	repo, err := repository.New(dir)
+	repo, err := enclave.New(dir)
 	assert.NilError(t, err)
 
 	rem, err := remote.New(
@@ -45,7 +45,7 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	assert.NilError(t, err)
 
 	app, err := application.New(
-		application.WithKeystoreRepository(repo),
+		application.WithEnclave(repo),
 		application.WithRemote(rem),
 		application.WithInvitationRepository(rem),
 		application.WithRepository(repo),

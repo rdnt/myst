@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/keystore/entry"
-	"myst/src/client/application/domain/remote"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 )
 
 func (app *application) HealthCheck() {
-	app.repo.HealthCheck()
+	app.enclave.HealthCheck()
 }
 
 func (app *application) UpdateKeystoreEntry(keystoreId, entryId string, password, notes *string) (entry.Entry, error) {
@@ -29,7 +29,7 @@ func (app *application) UpdateKeystoreEntry(keystoreId, entryId string, password
 		return entry.Entry{}, ErrInvalidPassword
 	}
 
-	k, err := app.keystores.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return entry.Entry{}, err
 	}
@@ -57,7 +57,7 @@ func (app *application) UpdateKeystoreEntry(keystoreId, entryId string, password
 }
 
 func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
-	k, err := app.keystores.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return err
 	}
@@ -75,15 +75,15 @@ func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 }
 
 func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
-	return app.keystores.CreateKeystore(k)
+	return app.enclave.CreateKeystore(k)
 }
 
 func (app *application) DeleteKeystore(id string) error {
-	return app.keystores.DeleteKeystore(id)
+	return app.enclave.DeleteKeystore(id)
 }
 
 func (app *application) CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error) {
-	k, err := app.keystores.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return entry.Entry{}, err
 	}
@@ -94,19 +94,19 @@ func (app *application) CreateKeystoreEntry(keystoreId string, opts ...entry.Opt
 	entries[e.Id] = e
 	k.Entries = entries
 
-	return e, app.keystores.UpdateKeystore(k)
+	return e, app.enclave.UpdateKeystore(k)
 }
 
 func (app *application) Initialize(password string) error {
-	return app.repo.Initialize(password)
+	return app.enclave.Initialize(password)
 }
 
 func (app *application) IsInitialized() error {
-	return app.repo.IsInitialized()
+	return app.enclave.IsInitialized()
 }
 
 func (app *application) Keystore(id string) (keystore.Keystore, error) {
-	k, err := app.keystores.Keystore(id)
+	k, err := app.enclave.Keystore(id)
 	// if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return nil, ErrAuthenticationRequired
 	// }
@@ -115,9 +115,9 @@ func (app *application) Keystore(id string) (keystore.Keystore, error) {
 }
 
 func (app *application) KeystoreByRemoteId(id string) (keystore.Keystore, error) {
-	ks, err := app.keystores.Keystores()
+	ks, err := app.enclave.Keystores()
 	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystores")
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
 	for _, k2 := range ks {
@@ -130,9 +130,9 @@ func (app *application) KeystoreByRemoteId(id string) (keystore.Keystore, error)
 }
 
 func (app *application) Keystores() (map[string]keystore.Keystore, error) {
-	ks, err := app.keystores.Keystores()
+	ks, err := app.enclave.Keystores()
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get keystores")
+		return nil, errors.WithMessage(err, "failed to get enclave")
 	}
 
 	for id, k := range ks {
@@ -140,7 +140,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	}
 
 	if app.remote.SignedIn() {
-		rem, err := app.credentials.Remote()
+		rem, err := app.enclave.Credentials()
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get remote")
 		}
@@ -161,7 +161,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 }
 
 func (app *application) UpdateKeystore(k keystore.Keystore) error {
-	err := app.keystores.UpdateKeystore(k)
+	err := app.enclave.UpdateKeystore(k)
 	// if errors.Is(err, keystore.ErrAuthenticationRequired) {
 	//	return ErrAuthenticationRequired
 	// }
@@ -169,10 +169,10 @@ func (app *application) UpdateKeystore(k keystore.Keystore) error {
 	return err
 }
 
-func (app *application) SetRemote(address, username, password string, publicKey, privateKey []byte) error {
-	return app.credentials.SetRemote(address, username, password, publicKey, privateKey)
+func (app *application) SetCredentials(address, username, password string, publicKey, privateKey []byte) error {
+	return app.enclave.SetCredentials(address, username, password, publicKey, privateKey)
 }
 
-func (app *application) Remote() (remote.Remote, error) {
-	return app.credentials.Remote()
+func (app *application) Credentials() (credentials.Credentials, error) {
+	return app.enclave.Credentials()
 }

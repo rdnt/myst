@@ -1,8 +1,8 @@
 package enclave
 
 import (
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/remote"
 )
 
 type Option func(*Enclave) error
@@ -28,7 +28,7 @@ func WithSalt(salt []byte) Option {
 	}
 }
 
-func WithRemote(remote *remote.Remote) Option {
+func WithRemote(remote *credentials.Credentials) Option {
 	return func(e *Enclave) error {
 		e.remote = remote
 

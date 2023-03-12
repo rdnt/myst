@@ -10,8 +10,8 @@ import (
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/client/application"
+	"myst/src/client/enclave"
 	"myst/src/client/remote"
-	"myst/src/client/repository"
 	"myst/src/client/rest"
 	"myst/src/client/scheduler"
 
@@ -52,12 +52,7 @@ func main() {
 
 	logger.EnableDebug = config.Debug
 
-	// rem, err := remote.NewServer("http://localhost:8080")
-	// if err != nil {
-	//	panic(err)
-	// }
-
-	repo, err := repository.New(cfg.DataDir)
+	enc, err := enclave.New(cfg.DataDir)
 	if err != nil {
 		panic(err)
 	}
@@ -70,11 +65,8 @@ func main() {
 	}
 
 	app, err := application.New(
-		application.WithKeystoreRepository(repo),
-		application.WithInvitationRepository(rem),
-		application.WithRepository(repo),
+		application.WithEnclave(enc),
 		application.WithRemote(rem),
-		application.WithCredentials(repo),
 	)
 	if err != nil {
 		panic(err)

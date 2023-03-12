@@ -12,7 +12,7 @@ import (
 func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
 
-	rem, err := app.credentials.Remote()
+	rem, err := app.enclave.Credentials()
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
@@ -40,7 +40,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 		return user.User{}, err
 	}
 
-	err = app.credentials.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
 		return user.User{}, err
 	}
@@ -53,7 +53,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 
 	var mustInit bool
 
-	rem, err := app.credentials.Remote()
+	rem, err := app.enclave.Credentials()
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
@@ -81,7 +81,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 		return user.User{}, err
 	}
 
-	err = app.credentials.SetRemote(app.remote.Address(), username, password, publicKey, privateKey)
+	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
 		return user.User{}, err
 	}
@@ -90,7 +90,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 }
 
 func (app *application) CurrentUser() (*user.User, error) {
-	rem, err := app.credentials.Remote()
+	rem, err := app.enclave.Credentials()
 	if err != nil {
 		return nil, err
 
@@ -107,13 +107,13 @@ func (app *application) SignOut() error {
 }
 
 func (app *application) Authenticate(password string) error {
-	err := app.repo.Authenticate(password)
+	err := app.enclave.Authenticate(password)
 	if err != nil {
 		return err
 	}
 
 	var trySignIn bool
-	rem, err := app.credentials.Remote()
+	rem, err := app.enclave.Credentials()
 	if err == nil {
 		trySignIn = true
 	} else if !errors.Is(err, enclave.ErrRemoteNotSet) {

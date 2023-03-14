@@ -7,7 +7,7 @@ import (
 	"myst/src/client/application/domain/user"
 )
 
-// Enclave is the local repository, i.e. where the keystores and the user's
+// Enclave is the aggregate where the keystores and the user's
 // credentials are stored. It requires initialization and authentication
 // before it can be used. Authentication status can expire after some time
 // if the HealthCheck method is not called regularly.

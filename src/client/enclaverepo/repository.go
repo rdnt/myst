@@ -1,8 +1,9 @@
-package enclave
+package enclaverepo
 
 import (
 	"crypto/sha256"
 	"fmt"
+	enclave2 "myst/src/client/enclaverepo/enclave"
 	"os"
 	"sync"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/credentials"
-	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
 )
 
@@ -225,8 +225,8 @@ func (r *Repository) Initialize(password string) error {
 	}
 
 	// TODO: check if enclave is already created, if it is, return error
-	e, err := enclave.New(
-		enclave.WithSalt(salt),
+	e, err := enclave2.New(
+		enclave2.WithSalt(salt),
 	)
 	if err != nil {
 		return err
@@ -354,7 +354,7 @@ func (r *Repository) startHealthCheck() {
 	}
 }
 
-func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
+func (r *Repository) sealAndWrite(e *enclave2.Enclave) error {
 	b, err := enclaveToJSON(e)
 	if err != nil {
 		return errors.WithMessage(err, "failed to marshal enclave")
@@ -495,7 +495,7 @@ func (r *Repository) Credentials() (credentials.Credentials, error) {
 
 	rem := e.Remote()
 	if rem == nil {
-		return credentials.Credentials{}, enclave.ErrRemoteNotSet
+		return credentials.Credentials{}, enclave2.ErrRemoteNotSet
 	}
 
 	return *rem, nil

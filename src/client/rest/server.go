@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"myst/src/client/enclaverepo/enclave"
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -14,7 +15,6 @@ import (
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
-	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/rest/generated"

@@ -9,7 +9,7 @@ import (
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/user"
-	"myst/src/client/enclave"
+	"myst/src/client/enclaverepo"
 	"myst/src/server/rest/generated"
 )
 
@@ -67,14 +67,14 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc decrypt failed when parsing keystore")
 	}
 
-	var jk enclave.Keystore
+	var jk enclaverepo.Keystore
 
 	err = json.Unmarshal(decryptedKeystorePayload, &jk)
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "failed to unmarshal keystore")
 	}
 
-	k, err := enclave.KeystoreFromJSON(jk)
+	k, err := enclaverepo.KeystoreFromJSON(jk)
 	if err != nil {
 		return keystore.Keystore{}, err
 	}

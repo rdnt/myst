@@ -7,11 +7,12 @@ import (
 	"myst/src/client/application/domain/user"
 )
 
-// Enclave is the aggregate where the keystores and the user's
-// credentials are stored. It requires initialization and authentication
-// before it can be used. Authentication status can expire after some time
-// if the HealthCheck method is not called regularly.
-type Enclave interface {
+// EnclaveRepository is the repository that handles storing and retrieving of the
+// user's keystores and credentials. It requires initialization and
+// authentication before it can be used. Authentication status can
+// expire after some time if the HealthCheck method is not called
+// regularly.
+type EnclaveRepository interface {
 	Initialize(password string) error
 	IsInitialized() error
 	Authenticate(password string) error

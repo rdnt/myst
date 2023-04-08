@@ -44,7 +44,7 @@ type Application interface {
 }
 
 type application struct {
-	enclave Enclave
+	enclave EnclaveRepository
 	remote  Remote
 }
 

@@ -3,9 +3,9 @@ package application
 import (
 	"errors"
 	"fmt"
+	"myst/src/client/enclaverepo/enclave"
 
 	"myst/pkg/crypto"
-	"myst/src/client/application/domain/enclave"
 	"myst/src/client/application/domain/user"
 )
 

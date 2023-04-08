@@ -10,7 +10,7 @@ import (
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/client/application"
-	"myst/src/client/enclave"
+	"myst/src/client/enclaverepo"
 	"myst/src/client/remote"
 	"myst/src/client/rest"
 	"myst/src/client/scheduler"
@@ -52,7 +52,7 @@ func main() {
 
 	logger.EnableDebug = config.Debug
 
-	enc, err := enclave.New(cfg.DataDir)
+	enc, err := enclaverepo.New(cfg.DataDir)
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func main() {
 	}
 
 	app, err := application.New(
-		application.WithEnclave(enc),
+		application.WithEnclaveRepository(enc),
 		application.WithRemote(rem),
 	)
 	if err != nil {

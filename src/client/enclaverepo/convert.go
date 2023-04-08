@@ -1,4 +1,4 @@
-package enclave
+package enclaverepo
 
 import (
 	"myst/src/client/application/domain/keystore"

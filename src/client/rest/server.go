@@ -190,12 +190,9 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 }
 
 func (s *Server) Enclave(c *gin.Context) {
-	err := s.app.IsInitialized()
+	_, err := s.app.IsInitialized()
 	if errors.Is(err, application.ErrInitializationRequired) {
 		Error(c, http.StatusNotFound, err)
-		return
-	} else if errors.Is(err, application.ErrAuthenticationRequired) {
-		Error(c, http.StatusUnauthorized, err)
 		return
 	} else if err != nil {
 		log.Error(err)

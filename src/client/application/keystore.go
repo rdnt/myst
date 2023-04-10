@@ -101,7 +101,7 @@ func (app *application) Initialize(password string) error {
 	return app.enclave.Initialize(password)
 }
 
-func (app *application) IsInitialized() error {
+func (app *application) IsInitialized() (bool, error) {
 	return app.enclave.IsInitialized()
 }
 

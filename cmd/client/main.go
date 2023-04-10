@@ -65,7 +65,7 @@ func main() {
 	}
 
 	app, err := application.New(
-		application.WithEnclaveRepository(enc),
+		application.WithEnclave(enc),
 		application.WithRemote(rem),
 	)
 	if err != nil {

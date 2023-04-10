@@ -9,7 +9,7 @@ func WithRemote(remote Remote) Option {
 	}
 }
 
-func WithEnclaveRepository(enclave EnclaveRepository) Option {
+func WithEnclave(enclave Enclave) Option {
 	return func(app *application) error {
 		app.enclave = enclave
 		return nil

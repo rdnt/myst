@@ -45,7 +45,7 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	assert.NilError(t, err)
 
 	app, err := application.New(
-		application.WithEnclaveRepository(enclaveRepo),
+		application.WithEnclave(enclaveRepo),
 		application.WithRemote(rem),
 	)
 	assert.NilError(t, err)

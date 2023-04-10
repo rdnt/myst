@@ -34,7 +34,7 @@ type Application interface {
 
 	HealthCheck()
 	Initialize(password string) error
-	IsInitialized() error
+	IsInitialized() (bool, error)
 	Authenticate(password string) error
 
 	Sync() error
@@ -44,7 +44,7 @@ type Application interface {
 }
 
 type application struct {
-	enclave EnclaveRepository
+	enclave Enclave
 	remote  Remote
 }
 

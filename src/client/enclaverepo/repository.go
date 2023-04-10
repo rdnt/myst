@@ -133,22 +133,18 @@ func (r *Repository) Keystores() (map[string]keystore.Keystore, error) {
 	return e.Keystores()
 }
 
-func (r *Repository) IsInitialized() error {
+func (r *Repository) IsInitialized() (bool, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	_, err := os.ReadFile(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
-		return application.ErrInitializationRequired
+		return false, application.ErrInitializationRequired
 	} else if err != nil {
-		return err
+		return false, err
 	}
 
-	if r.key == nil {
-		return application.ErrAuthenticationRequired
-	}
-
-	return nil
+	return true, nil
 }
 
 func (r *Repository) DeleteKeystore(id string) error {

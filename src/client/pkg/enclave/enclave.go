@@ -23,8 +23,10 @@ var (
 // Create creates a new encrypted enclave. We use encrypt then MAC so that we
 // get integrity of ciphertext. The enclave consists of:
 // [salt][mac][ciphertext]
-//                 ^
-//            [checkKey][payload] (encrypted)
+//
+//	     ^
+//	[checkKey][payload] (encrypted)
+//
 // The sealed enclave must have a length not less than:
 // len(salt) + len(mac) + len(encryptedCheckKey)
 func Create(b []byte, key []byte, salt []byte) ([]byte, error) {

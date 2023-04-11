@@ -2,12 +2,13 @@ package application
 
 import (
 	"errors"
-	"fmt"
 	"myst/src/client/enclaverepo/enclave"
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/user"
 )
+
+var ErrRemoteAddressMismatch = errors.New("remote address mismatch")
 
 func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
@@ -21,7 +22,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 
 	if !mustInit {
 		if rem.Address != app.remote.Address() {
-			return user.User{}, fmt.Errorf("remote address mismatch")
+			return user.User{}, ErrRemoteAddressMismatch
 		}
 
 		_, err = app.remote.SignIn(username, password, rem.PublicKey)
@@ -62,7 +63,7 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 
 	if !mustInit {
 		if rem.Address != app.remote.Address() {
-			return user.User{}, fmt.Errorf("remote address mismatch")
+			return user.User{}, ErrRemoteAddressMismatch
 		}
 
 		_, err = app.remote.SignIn(username, password, rem.PublicKey)
@@ -122,7 +123,7 @@ func (app *application) Authenticate(password string) error {
 
 	if trySignIn {
 		if rem.Address != app.remote.Address() {
-			return fmt.Errorf("remote address mismatch")
+			return ErrRemoteAddressMismatch
 		}
 
 		_, err = app.remote.SignIn(rem.Username, rem.Password, rem.PublicKey)

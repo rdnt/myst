@@ -49,46 +49,46 @@ func (app *application) Register(username, password string) (user.User, error) {
 	return u, nil
 }
 
-func (app *application) SignIn(username, password string) (user.User, error) {
-	panic("disabled")
-
-	var mustInit bool
-
-	rem, err := app.enclave.Credentials()
-	if errors.Is(err, enclave.ErrRemoteNotSet) {
-		mustInit = true
-	} else if err != nil {
-		return user.User{}, err
-	}
-
-	if !mustInit {
-		if rem.Address != app.remote.Address() {
-			return user.User{}, ErrRemoteAddressMismatch
-		}
-
-		_, err = app.remote.SignIn(username, password, rem.PublicKey)
-		if err != nil {
-			return user.User{}, err
-		}
-	}
-
-	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
-	if err != nil {
-		return user.User{}, err
-	}
-
-	u, err := app.remote.SignIn(username, password, rem.PublicKey)
-	if err != nil {
-		return user.User{}, err
-	}
-
-	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
-	if err != nil {
-		return user.User{}, err
-	}
-
-	return u, nil
-}
+//func (app *application) SignIn(username, password string) (user.User, error) {
+//	panic("disabled")
+//
+//	var mustInit bool
+//
+//	rem, err := app.enclave.Credentials()
+//	if errors.Is(err, enclave.ErrRemoteNotSet) {
+//		mustInit = true
+//	} else if err != nil {
+//		return user.User{}, err
+//	}
+//
+//	if !mustInit {
+//		if rem.Address != app.remote.Address() {
+//			return user.User{}, ErrRemoteAddressMismatch
+//		}
+//
+//		_, err = app.remote.SignIn(username, password, rem.PublicKey)
+//		if err != nil {
+//			return user.User{}, err
+//		}
+//	}
+//
+//	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
+//	if err != nil {
+//		return user.User{}, err
+//	}
+//
+//	u, err := app.remote.SignIn(username, password, rem.PublicKey)
+//	if err != nil {
+//		return user.User{}, err
+//	}
+//
+//	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
+//	if err != nil {
+//		return user.User{}, err
+//	}
+//
+//	return u, nil
+//}
 
 func (app *application) CurrentUser() (*user.User, error) {
 	rem, err := app.enclave.Credentials()

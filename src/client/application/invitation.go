@@ -66,7 +66,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, err
 	}
 
-	k, err := app.KeystoreByRemoteId(inv.Keystore.RemoteId)
+	k, err := app.keystoreByRemoteId(inv.Keystore.RemoteId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}

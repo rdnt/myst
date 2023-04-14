@@ -2,13 +2,14 @@ package application
 
 import (
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/curve25519"
 
+	"myst/pkg/crypto"
 	"myst/src/client/application/domain/invitation"
 )
 
-func (app *application) CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error) {
-	// TODO: needs refinement. app services should have access to the remote, not the other way around.
-	//   for consideration: move keystoreKey to keystore.Repository (maybe the extended one)
+func (app *application) CreateInvitation(
+	keystoreId string, inviteeUsername string) (invitation.Invitation, error) {
 	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
@@ -71,7 +72,22 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	inv, err = app.remote.FinalizeInvitation(id, k.Key, rem.PrivateKey)
+	if inv.Status != "accepted" {
+		return invitation.Invitation{}, errors.New("invitation has not been accepted")
+	}
+
+	asymKey, err := curve25519.X25519(rem.PrivateKey, inv.Invitee.PublicKey)
+	if err != nil {
+		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
+	}
+
+	// encrypt the keystore key with the asymmetric key
+	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(asymKey, k.Key)
+	if err != nil {
+		return invitation.Invitation{}, errors.Wrap(err, "failed to encrypt keystore key")
+	}
+
+	inv, err = app.remote.FinalizeInvitation(id, encryptedKeystoreKey)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
 	}

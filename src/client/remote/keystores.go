@@ -73,7 +73,7 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 	}
 
 	if res.JSON200 == nil {
-		return keystore.Keystore{}, fmt.Errorf("invalid response")
+		return keystore.Keystore{}, fmt.Errorf("invalid response: %s", string(res.Body))
 	}
 
 	// TODO: do this on the applicationrefactor layer

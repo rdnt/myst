@@ -76,6 +76,7 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, errors.New("invitation has not been accepted")
 	}
 
+	// derive asymmetric key using the inviter's private key and the invitee's public key
 	asymKey, err := curve25519.X25519(rem.PrivateKey, inv.Invitee.PublicKey)
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to create asymmetric key")
@@ -95,12 +96,12 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 	return inv, nil
 }
 
-func (app *application) Invitations() (map[string]invitation.Invitation, error) {
-	return app.remote.Invitations()
-}
-
 func (app *application) Invitation(id string) (invitation.Invitation, error) {
 	return app.remote.Invitation(id)
+}
+
+func (app *application) Invitations() (map[string]invitation.Invitation, error) {
+	return app.remote.Invitations()
 }
 
 // func (app *applicationrefactor) AcceptInvitation(keystoreId, invitationId string) (*invitation.Invitation, error) {

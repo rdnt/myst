@@ -47,9 +47,7 @@ type Remote interface {
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
-	UpdateInvitation(inv invitation.Invitation) error
 	Invitations() (map[string]invitation.Invitation, error)
-	DeleteInvitation(id string) error
 
 	SignIn(username, password string, publicKey []byte) (user.User, error)
 	Register(username, password string, publicKey []byte) (user.User, error)

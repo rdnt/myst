@@ -27,14 +27,6 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 	return InvitationFromJSON(*res.JSON200)
 }
 
-func (r *remote) UpdateInvitation(k invitation.Invitation) error {
-	panic("implement me")
-}
-
-func (r *remote) DeleteInvitation(id string) error {
-	panic("implement me")
-}
-
 func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
 	if !r.SignedIn() {
 		return invitation.Invitation{}, ErrSignedOut

@@ -3,7 +3,6 @@ package enclaverepo
 import (
 	"crypto/sha256"
 	"fmt"
-	enclave2 "myst/src/client/enclaverepo/enclave"
 	"os"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"myst/src/client/application"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/enclaverepo/enclave"
 )
 
 var log = logger.New("repository", logger.Green)
@@ -203,10 +203,22 @@ func (r *Repository) createKeystore(k keystore.Keystore) (keystore.Keystore, err
 	return k, nil
 }
 
-// CreateEnclave initializes the enclave with the given password
+// Initialize initializes the enclave with the given password
 func (r *Repository) Initialize(password string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
+	exists := true
+	_, err := os.Stat(r.enclavePath())
+	if errors.Is(err, os.ErrNotExist) {
+		exists = false
+	} else if err != nil {
+		return err
+	}
+
+	if exists {
+		return errors.New("enclave already initialized")
+	}
 
 	p := crypto.DefaultArgon2IdParams
 
@@ -220,9 +232,8 @@ func (r *Repository) Initialize(password string) error {
 		return err
 	}
 
-	// TODO: check if enclave is already created, if it is, return error
-	e, err := enclave2.New(
-		enclave2.WithSalt(salt),
+	e, err := enclave.New(
+		enclave.WithSalt(salt),
 	)
 	if err != nil {
 		return err
@@ -350,7 +361,7 @@ func (r *Repository) startHealthCheck() {
 	}
 }
 
-func (r *Repository) sealAndWrite(e *enclave2.Enclave) error {
+func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 	b, err := enclaveToJSON(e)
 	if err != nil {
 		return errors.WithMessage(err, "failed to marshal enclave")
@@ -491,7 +502,7 @@ func (r *Repository) Credentials() (credentials.Credentials, error) {
 
 	rem := e.Remote()
 	if rem == nil {
-		return credentials.Credentials{}, enclave2.ErrRemoteNotSet
+		return credentials.Credentials{}, enclave.ErrRemoteNotSet
 	}
 
 	return *rem, nil

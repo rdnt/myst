@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	enclave2 "myst/src/client/enclaverepo/enclave"
 	"os"
 	"path"
 
@@ -13,13 +12,14 @@ import (
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/client/enclaverepo/enclave"
 )
 
 func (r *Repository) enclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
 
-func (r *Repository) enclave(argon2idKey []byte) (*enclave2.Enclave, error) {
+func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave2.Enclave, error) {
 	return enclaveFromJSON(b, salt)
 }
 
-func enclaveToJSON(e *enclave2.Enclave) ([]byte, error) {
+func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 	ks := map[string]Keystore{}
 
 	eks, err := e.Keystores()
@@ -79,7 +79,7 @@ func enclaveToJSON(e *enclave2.Enclave) ([]byte, error) {
 	})
 }
 
-func enclaveFromJSON(b, salt []byte) (*enclave2.Enclave, error) {
+func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 	e := &Enclave{}
 
 	err := json.Unmarshal(b, e)
@@ -111,10 +111,10 @@ func enclaveFromJSON(b, salt []byte) (*enclave2.Enclave, error) {
 		}
 	}
 
-	return enclave2.New(
-		enclave2.WithKeystores(ks),
-		enclave2.WithSalt(salt),
-		enclave2.WithRemote(rem),
+	return enclave.New(
+		enclave.WithKeystores(ks),
+		enclave.WithSalt(salt),
+		enclave.WithRemote(rem),
 	)
 }
 

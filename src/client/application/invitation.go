@@ -15,14 +15,17 @@ func (app *application) CreateInvitation(
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
-	k, err = app.remote.CreateKeystore(k)
-	if err != nil {
-		return invitation.Invitation{}, err
-	}
+	// if keystore's remoteId is empty, then upload the keystore and save remoteId
+	if k.RemoteId == "" {
+		k, err = app.remote.CreateKeystore(k)
+		if err != nil {
+			return invitation.Invitation{}, err
+		}
 
-	err = app.enclave.UpdateKeystore(k)
-	if err != nil {
-		return invitation.Invitation{}, err
+		err = app.enclave.UpdateKeystore(k)
+		if err != nil {
+			return invitation.Invitation{}, err
+		}
 	}
 
 	inv := invitation.New(

@@ -19,18 +19,7 @@ func (app *application) Sync() error {
 
 	for _, k := range keystores {
 		if k.RemoteId == "" {
-			k, err = app.remote.CreateKeystore(k)
-			if err != nil {
-				return err
-			}
-
-			err = app.enclave.UpdateKeystore(k)
-			if err != nil {
-				return err
-			}
-
-			log.Println("Keystore uploaded", k.Id, k.RemoteId)
-
+			// no need to sync keystore
 			continue
 		}
 

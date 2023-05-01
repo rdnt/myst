@@ -81,9 +81,8 @@ type KeystoreName struct {
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
-	Password  string `json:"password"`
-	PublicKey []byte `json:"publicKey"`
-	Username  string `json:"username"`
+	Password string `json:"password"`
+	Username string `json:"username"`
 }
 
 // RegisterRequest defines model for RegisterRequest.

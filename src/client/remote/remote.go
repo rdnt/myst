@@ -104,16 +104,15 @@ func New(opts ...Option) (application.Remote, error) {
 //	return k, nil
 // }
 
-func (r *remote) SignIn(username, password string, publicKey []byte) (user.User, error) {
+func (r *remote) SignIn(username, password string) (user.User, error) {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
 		ctx, generated.LoginJSONRequestBody{
-			Username:  username,
-			Password:  password,
-			PublicKey: publicKey,
+			Username: username,
+			Password: password,
 		},
 	)
 	if err != nil {
@@ -208,7 +207,6 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 
 	resp := *res.JSON201
 
-	// TODO: properly sign in after registration
 	if resp.Token == "" {
 		return user.User{}, errors.New("invalid token")
 	}

@@ -137,9 +137,13 @@ func (r *Repository) IsInitialized() (bool, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, err := os.ReadFile(r.enclavePath())
+	return r.enclaveExists()
+}
+
+func (r *Repository) enclaveExists() (bool, error) {
+	_, err := os.Stat(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
-		return false, application.ErrInitializationRequired
+		return false, nil
 	} else if err != nil {
 		return false, err
 	}
@@ -181,10 +185,6 @@ func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, err
 		return keystore.Keystore{}, fmt.Errorf("authentication required")
 	}
 
-	return r.createKeystore(k)
-}
-
-func (r *Repository) createKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	e, err := r.enclave(r.key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
@@ -208,11 +208,8 @@ func (r *Repository) Initialize(password string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	exists := true
-	_, err := os.Stat(r.enclavePath())
-	if errors.Is(err, os.ErrNotExist) {
-		exists = false
-	} else if err != nil {
+	exists, err := r.enclaveExists()
+	if err != nil {
 		return err
 	}
 
@@ -294,10 +291,6 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) error {
 		return fmt.Errorf("authentication required")
 	}
 
-	return r.updateKeystore(k)
-}
-
-func (r *Repository) updateKeystore(k keystore.Keystore) error {
 	e, err := r.enclave(r.key)
 	if err != nil {
 		return err
@@ -350,10 +343,7 @@ func (r *Repository) startHealthCheck() {
 			}
 
 			if r.key != nil {
-				// TODO: re-enable health check
-				// r.key = nil
-
-				// log.Debug("health check failed")
+				r.key = nil
 			}
 
 			r.mux.Unlock()
@@ -463,7 +453,8 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 //	return r.sealAndWrite(e)
 // }
 
-func (r *Repository) SetCredentials(address, username, password string, publicKey, privateKey []byte) error {
+func (r *Repository) SetCredentials(
+	address, username, password string, publicKey, privateKey []byte) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

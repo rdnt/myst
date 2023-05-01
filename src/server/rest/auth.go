@@ -71,15 +71,6 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	err = s.app.DebugUpdateUserPublicKey(u.Id, params.PublicKey)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	log.Error("public key updated", params.PublicKey)
-
 	token, err := s.loginUser(u.Id)
 	if err != nil {
 		log.Error(err)

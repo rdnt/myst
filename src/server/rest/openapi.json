@@ -515,7 +515,6 @@
         "required": [
           "username",
           "password",
-          "publicKey"
         ],
         "properties": {
           "username": {
@@ -523,10 +522,6 @@
           },
           "password": {
             "type": "string"
-          },
-          "publicKey": {
-            "type": "string",
-            "format": "byte"
           }
         }
       },

@@ -49,7 +49,7 @@ type Remote interface {
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 
-	SignIn(username, password string, publicKey []byte) (user.User, error)
+	SignIn(username, password string) (user.User, error)
 	Register(username, password string, publicKey []byte) (user.User, error)
 	SignOut() error
 	SignedIn() bool

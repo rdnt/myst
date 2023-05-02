@@ -1,4 +1,4 @@
-package integration_test
+package suite
 
 import (
 	"testing"
@@ -6,21 +6,12 @@ import (
 	"gotest.tools/v3/assert"
 
 	"myst/src/client/rest/generated"
-	"myst/test/integration/suite"
 )
 
-type Suite struct {
-	*suite.Suite
-}
-
-func setup(t *testing.T) *Suite {
-	return &Suite{suite.New(t)}
-}
-
-func (s *Suite) createKeystore(t *testing.T) (keystore generated.Keystore) {
+func (s *Suite) CreateKeystore(t *testing.T) (keystore generated.Keystore) {
 	keystoreName := s.Random(t)
 
-	s.Run(t, "Create a keystore", func(t *testing.T) {
+	t.Run("Create a keystore", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateKeystoreWithResponse(s.Ctx,
 			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
 		)
@@ -34,7 +25,7 @@ func (s *Suite) createKeystore(t *testing.T) (keystore generated.Keystore) {
 	website, username, password, notes :=
 		s.Random(t), s.Random(t), s.Random(t), s.Random(t)
 
-	s.Run(t, "Add an entry to the keystore", func(t *testing.T) {
+	t.Run("Add an entry to the keystore", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateEntryWithResponse(s.Ctx, keystore.Id,
 			generated.CreateEntryJSONRequestBody{
 				Website:  website,
@@ -55,8 +46,8 @@ func (s *Suite) createKeystore(t *testing.T) (keystore generated.Keystore) {
 	return keystore
 }
 
-func (s *Suite) createInvitation(t *testing.T, keystoreId string) (invitationId string) {
-	s.Run(t, "Invite someone to access the keystore", func(t *testing.T) {
+func (s *Suite) CreateInvitation(t *testing.T, keystoreId string) (invitationId string) {
+	t.Run("Invite someone to access the keystore", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateInvitationWithResponse(s.Ctx, keystoreId,
 			generated.CreateInvitationJSONRequestBody{
 				Invitee: s.Client2.Username,

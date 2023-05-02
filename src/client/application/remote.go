@@ -74,6 +74,31 @@ func (app *application) SignIn(username, password string) (user.User, error) {
 	return u, nil
 }
 
+func (app *application) SignOut() error {
+	rem, err := app.enclave.Credentials()
+	if err != nil {
+		return err
+	}
+
+	if rem.Address != app.remote.Address() {
+		return ErrRemoteAddressMismatch
+	}
+
+	err = app.remote.SignOut()
+	if err != nil {
+		return err
+	}
+
+	// update credentials, keeping addr, pub and priv keys intact
+	err = app.enclave.SetCredentials(app.remote.Address(), "", "", rem.PublicKey, rem.PrivateKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CurrentUser returns the current user if there is one
 func (app *application) CurrentUser() (*user.User, error) {
 	rem, err := app.enclave.Credentials()
 	if err != nil {
@@ -82,13 +107,12 @@ func (app *application) CurrentUser() (*user.User, error) {
 	}
 
 	u := app.remote.CurrentUser()
+	if u == nil {
+		return nil, nil
+	}
 	u.PublicKey = rem.PublicKey
 
 	return u, nil
-}
-
-func (app *application) SignOut() error {
-	return app.remote.SignOut()
 }
 
 func (app *application) Authenticate(password string) error {

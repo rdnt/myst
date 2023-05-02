@@ -15,15 +15,7 @@ import (
 	"myst/pkg/rand"
 )
 
-func random(t *testing.T) string {
-	str, err := rand.String(16)
-	assert.NilError(t, err)
-
-	return str
-}
-
 type Suite struct {
-	t       *testing.T
 	Ctx     context.Context
 	Server  *Server
 	Client1 *Client
@@ -32,8 +24,6 @@ type Suite struct {
 }
 
 func New(t *testing.T) *Suite {
-	t.Parallel()
-
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	config.Debug = true
@@ -60,6 +50,7 @@ func New(t *testing.T) *Suite {
 	client3.start(t)
 
 	t.Cleanup(func() {
+		fmt.Println("cleanup")
 		cancel()
 
 		client1.stop(t)
@@ -70,7 +61,6 @@ func New(t *testing.T) *Suite {
 	})
 
 	return &Suite{
-		t:       t,
 		Ctx:     ctx,
 		Server:  server,
 		Client1: client1,
@@ -79,12 +69,19 @@ func New(t *testing.T) *Suite {
 	}
 }
 
-func (s *Suite) Run(t *testing.T, name string, fn func(*testing.T)) {
-	if !t.Run(name, fn) {
-		t.FailNow()
-	}
-}
+// func (s *Suite) Run(t *testing.T, name string, fn func(*testing.T)) {
+// 	if !t.Run(name, fn) {
+// 		t.FailNow()
+// 	}
+// }
 
 func (s *Suite) Random(t *testing.T) string {
 	return random(t)
+}
+
+func random(t *testing.T) string {
+	str, err := rand.String(16)
+	assert.NilError(t, err)
+
+	return str
 }

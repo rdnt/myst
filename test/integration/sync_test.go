@@ -6,14 +6,27 @@ import (
 	"gotest.tools/v3/assert"
 
 	"myst/src/client/rest/generated"
+	"myst/test/integration/suite"
 )
 
 func TestKeystoreSyncUpStream(t *testing.T) {
-	s := setup(t)
+	s := suite.New(t)
+
+	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+
+	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	assert.NilError(t, err)
+
+	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
+	assert.NilError(t, err)
+
+	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	assert.NilError(t, err)
 
 	var keystore generated.Keystore
-	s.Run(t, "Keystore is created", func(t *testing.T) {
-		keystore = s.createKeystore(t)
+	t.Run("Keystore is created", func(t *testing.T) {
+		keystore = s.CreateKeystore(t)
 
 		ks, err := s.Client1.App.Keystores()
 		assert.NilError(t, err)
@@ -22,7 +35,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Equal(t, ks[keystore.Id].Version, 2) // we added an entry
 	})
 
-	s.Run(t, "Keystore is not uploaded yet", func(t *testing.T) {
+	t.Run("Keystore is not uploaded yet", func(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 
@@ -31,18 +44,18 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Equal(t, len(rks), 0)
 	})
 
-	s.Run(t, "Create invitation for this keystore", func(t *testing.T) {
-		_ = s.createInvitation(t, keystore.Id)
+	t.Run("Create invitation for this keystore", func(t *testing.T) {
+		_ = s.CreateInvitation(t, keystore.Id)
 	})
 
-	s.Run(t, "Keystore is uploaded", func(t *testing.T) {
+	t.Run("Keystore is uploaded", func(t *testing.T) {
 		rks, err := s.Server.App.Keystores()
 		assert.NilError(t, err)
 		assert.Equal(t, len(rks), 1)
 		assert.Assert(t, rks[0].Id != "")
 	})
 
-	s.Run(t, "Keystore is synced", func(t *testing.T) {
+	t.Run("Keystore is synced", func(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 
@@ -63,7 +76,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Equal(t, ks[keystore.Id].Version, 3)
 	})
 
-	s.Run(t, "Additional sync noop", func(t *testing.T) {
+	t.Run("Additional sync noop", func(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 

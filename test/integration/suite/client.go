@@ -74,12 +74,6 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 func (c *Client) start(t *testing.T) {
 	err := c.Server.Start(c.Address)
 	assert.NilError(t, err)
-
-	err = c.App.Initialize(c.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = c.App.Register(c.Username, c.Password)
-	assert.NilError(t, err)
 }
 
 func (c *Client) stop(t *testing.T) {

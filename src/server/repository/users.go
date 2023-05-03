@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"myst/pkg/crypto"
 	"myst/src/server/application/domain/user"
@@ -43,6 +45,11 @@ func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 	}
 
 	r.users[ru.Id] = ru
+
+	{ // debug
+		b, _ := json.Marshal(r.users)
+		_ = os.WriteFile("users.json", b, 0666)
+	}
 
 	return ru.User, nil
 }
@@ -100,16 +107,21 @@ func (r *Repository) UpdateUser(u *user.User) error {
 
 	r.users[ru2.Id] = ru2
 
+	{ // debug
+		b, _ := json.Marshal(r.users)
+		_ = os.WriteFile("users.json", b, 0666)
+	}
+
 	return nil
 }
 
-func (r *Repository) DeleteUser(id string) error {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	delete(r.users, id)
-	return nil
-}
+// func (r *Repository) DeleteUser(id string) error {
+// 	r.mux.Lock()
+// 	defer r.mux.Unlock()
+//
+// 	delete(r.users, id)
+// 	return nil
+// }
 
 func (r *Repository) VerifyPassword(userId, password string) (bool, error) {
 	r.mux.Lock()

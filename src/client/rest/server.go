@@ -6,8 +6,9 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"myst/src/client/enclaverepo/enclave"
 	"net/http"
+
+	"myst/src/client/enclaverepo/enclave"
 
 	"github.com/gin-contrib/static"
 
@@ -190,8 +191,8 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 }
 
 func (s *Server) Enclave(c *gin.Context) {
-	_, err := s.app.IsInitialized()
-	if errors.Is(err, application.ErrInitializationRequired) {
+	exists, err := s.app.IsInitialized()
+	if !exists {
 		Error(c, http.StatusNotFound, err)
 		return
 	} else if err != nil {

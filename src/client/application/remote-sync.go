@@ -9,7 +9,7 @@ func (app *application) Sync() error {
 	defer log.Print("Sync finished.")
 
 	if !app.remote.SignedIn() {
-		return errors.New("signed out")
+		return nil
 	}
 
 	keystores, err := app.enclave.Keystores()

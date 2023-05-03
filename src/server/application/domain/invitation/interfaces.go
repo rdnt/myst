@@ -13,7 +13,7 @@ type Repository interface {
 	Invitation(id string) (Invitation, error)
 	UpdateInvitation(*Invitation) error
 	Invitations() ([]Invitation, error)
-	Delete(id string) error
+	// Delete(id string) error
 	// UserInvitations(userId string) ([]Invitation, error)
 	// UserInvitation(userId, invitationId string) (Invitation, error)
 }

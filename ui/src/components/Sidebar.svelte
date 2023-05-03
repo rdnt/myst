@@ -77,7 +77,7 @@
         <span class="auth-link btn" on:click={() => showAuthModal = true}>Register</span>
       </h6>
     {:else if $currentUser === null}
-      Disconnected
+      <h6>Disconnected</h6>
     {:else}
       <h6>Signed in as <strong style="color: {hash($currentUser.username)}">{$currentUser.username}</strong></h6>
     {/if}

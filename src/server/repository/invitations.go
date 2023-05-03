@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"myst/src/server/application/domain/invitation"
 )
@@ -58,6 +60,11 @@ func (r *Repository) CreateInvitation(opts ...invitation.Option) (invitation.Inv
 
 	r.invitations[i.Id] = i
 
+	{ // debug
+		b, _ := json.Marshal(r.invitations)
+		_ = os.WriteFile("invitations.json", b, 0666)
+	}
+
 	return i, nil
 }
 
@@ -96,13 +103,18 @@ func (r *Repository) UpdateInvitation(i *invitation.Invitation) error {
 
 	r.invitations[i.Id] = *i
 
+	{ // debug
+		b, _ := json.Marshal(r.invitations)
+		_ = os.WriteFile("invitations.json", b, 0666)
+	}
+
 	return nil
 }
 
-func (r *Repository) Delete(id string) error {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	delete(r.invitations, id)
-	return nil
-}
+// func (r *Repository) Delete(id string) error {
+// 	r.mux.Lock()
+// 	defer r.mux.Unlock()
+//
+// 	delete(r.invitations, id)
+// 	return nil
+// }

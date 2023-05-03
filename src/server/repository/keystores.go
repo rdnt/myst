@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"myst/src/server/application/domain/keystore"
 )
@@ -16,6 +18,11 @@ func (r *Repository) CreateKeystore(opts ...keystore.Option) (keystore.Keystore,
 	}
 
 	r.keystores[k.Id] = k
+
+	{ // debug
+		b, _ := json.Marshal(r.keystores)
+		_ = os.WriteFile("keystores.json", b, 0666)
+	}
 
 	return k, nil
 }
@@ -54,6 +61,12 @@ func (r *Repository) UpdateKeystore(s *keystore.Keystore) error {
 	}
 
 	r.keystores[s.Id] = *s
+
+	{ // debug
+		b, _ := json.Marshal(r.keystores)
+		_ = os.WriteFile("keystores.json", b, 0666)
+	}
+
 	return nil
 }
 
@@ -62,6 +75,12 @@ func (r *Repository) DeleteKeystore(id string) error {
 	defer r.mux.Unlock()
 
 	delete(r.keystores, id)
+
+	{ // debug
+		b, _ := json.Marshal(r.keystores)
+		_ = os.WriteFile("keystores.json", b, 0666)
+	}
+
 	return nil
 }
 

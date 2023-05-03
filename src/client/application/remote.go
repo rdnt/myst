@@ -103,7 +103,6 @@ func (app *application) CurrentUser() (*user.User, error) {
 	rem, err := app.enclave.Credentials()
 	if err != nil {
 		return nil, err
-
 	}
 
 	u := app.remote.CurrentUser()

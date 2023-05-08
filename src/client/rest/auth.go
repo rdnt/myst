@@ -29,25 +29,25 @@ func (s *Server) Authenticate(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *Server) Login(c *gin.Context) {
-	var req generated.LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	// TODO: re-enable sign-in
-	//if _, err := s.app.SignIn(req.Username, req.Password); err != nil {
-	//	log.Error(err)
-	//	c.Status(http.StatusInternalServerError)
-	//	return
-	//}
-
-	c.Status(http.StatusOK)
-}
+// func (s *Server) Login(c *gin.Context) {
+// 	var req generated.LoginRequest
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.Status(http.StatusBadRequest)
+// 		return
+// 	}
+//
+// 	u, err := s.app.SignIn(req.Username, req.Password)
+// 	if err != nil {
+// 		log.Error(err)
+// 		c.Status(http.StatusInternalServerError)
+// 		return
+// 	}
+//
+// 	c.JSON(http.StatusOK, UserToRest(u))
+// }
 
 func (s *Server) Register(c *gin.Context) {
-	var req generated.LoginRequest
+	var req generated.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Status(http.StatusBadRequest)
 		return

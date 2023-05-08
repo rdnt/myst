@@ -118,8 +118,8 @@ type User struct {
 	Username  string `json:"username"`
 }
 
-// LoginJSONRequestBody defines body for Login for application/json ContentType.
-type LoginJSONRequestBody = LoginRequest
+// LoginDeprecatedJSONRequestBody defines body for LoginDeprecated for application/json ContentType.
+type LoginDeprecatedJSONRequestBody = LoginRequest
 
 // RegisterJSONRequestBody defines body for Register for application/json ContentType.
 type RegisterJSONRequestBody = RegisterRequest

@@ -8,9 +8,9 @@ func WithUsername(username string) Option {
 	}
 }
 
-func WithPassword(password string) Option {
+func WithPasswordHash(hash string) Option {
 	return func(u *User) {
-		u.Password = password
+		u.PasswordHash = hash
 	}
 }
 

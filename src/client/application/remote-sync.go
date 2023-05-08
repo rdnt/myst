@@ -5,17 +5,30 @@ import (
 )
 
 func (app *application) Sync() error {
-	log.Println("Sync started.")
-	defer log.Print("Sync finished.")
+	log.Println("sync: started")
+	defer log.Print("sync: finished")
 
 	if !app.remote.SignedIn() {
+		log.Print("sync: not signed in")
 		return nil
+	}
+
+	rem, err := app.enclave.Credentials()
+	if err != nil {
+		return err
 	}
 
 	keystores, err := app.enclave.Keystores()
 	if err != nil {
 		return errors.WithMessage(err, "failed to get enclave")
 	}
+
+	remoteKeystores, err := app.remote.Keystores(rem.PrivateKey)
+	if err != nil {
+		return err
+	}
+
+	log.Debugln(remoteKeystores)
 
 	for _, k := range keystores {
 		if k.RemoteId == "" {

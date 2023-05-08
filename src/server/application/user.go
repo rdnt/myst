@@ -3,34 +3,53 @@ package application
 import (
 	"github.com/pkg/errors"
 
+	"myst/pkg/crypto"
 	"myst/src/server/application/domain/invitation"
 	"myst/src/server/application/domain/user"
 )
 
-func (app *application) CreateUser(username, password string, publicKey []byte) (user.User, error) {
-	return app.users.CreateUser(
-		user.WithUsername(username),
-		user.WithPassword(password),
-		user.WithPublicKey(publicKey),
-	)
-}
+var (
+	ErrInvalidUsername = errors.New("invalid username")
+	ErrInvalidPassword = errors.New("invalid password")
+)
 
-func (app *application) AuthorizeUser(username, password string) error {
-	u, err := app.users.UserByUsername(username)
-	if err != nil {
-		return err
+func (app *application) CreateUser(username, password string, publicKey []byte) (user.User, error) {
+	if username == "" {
+		return user.User{}, ErrInvalidUsername
 	}
 
-	ok, err := app.users.VerifyPassword(u.Id, password)
+	if password == "" {
+		return user.User{}, ErrInvalidPassword
+	}
+
+	hash, err := crypto.HashPassword(password)
 	if err != nil {
-		return err
+		return user.User{}, err
+	}
+
+	return app.users.CreateUser(user.New(
+		user.WithUsername(username),
+		user.WithPasswordHash(hash),
+		user.WithPublicKey(publicKey),
+	))
+}
+
+func (app *application) AuthorizeUser(username, password string) (user.User, error) {
+	u, err := app.users.UserByUsername(username)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	ok, err := crypto.VerifyPassword(password, u.PasswordHash)
+	if err != nil {
+		return user.User{}, err
 	}
 
 	if !ok {
-		return errors.New("invalid password")
+		return user.User{}, errors.New("invalid password")
 	}
 
-	return nil
+	return u, nil
 }
 
 func (app *application) User(userId string) (user.User, error) {

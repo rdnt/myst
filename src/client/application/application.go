@@ -26,8 +26,8 @@ type Application interface {
 	DeleteKeystoreEntry(keystoreId, entryId string) error
 	Keystores() (map[string]keystore.Keystore, error)
 
-	SignIn(username, password string) (user.User, error)
-	SignOut() error
+	// SignIn(username, password string) (user.User, error)
+	// SignOut() error
 	Register(username, password string) (user.User, error)
 	CurrentUser() (*user.User, error)
 

@@ -18,7 +18,7 @@ func (s *Server) initRoutes(r *gin.RouterGroup) {
 
 	r.GET("/health", s.HealthCheck)
 	r.POST("/authenticate", s.Authenticate)
-	r.POST("/auth/login", s.Login)
+	// r.POST("/auth/login", s.Login)
 	r.POST("/auth/register", s.Register)
 	r.POST("/keystores", s.CreateKeystore)
 	r.GET("/keystores", s.Keystores)

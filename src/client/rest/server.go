@@ -192,12 +192,17 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 
 func (s *Server) Enclave(c *gin.Context) {
 	exists, err := s.app.IsInitialized()
-	if !exists {
-		Error(c, http.StatusNotFound, err)
+	if errors.Is(err, application.ErrAuthenticationRequired) {
+		Error(c, http.StatusUnauthorized, err)
 		return
 	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !exists {
+		Error(c, http.StatusNotFound, err)
 		return
 	}
 
@@ -494,7 +499,7 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 func (s *Server) Keystores(c *gin.Context) {
 	ks, err := s.app.Keystores()
 	if errors.Is(err, application.ErrInitializationRequired) {
-		Error(c, http.StatusNotFound, err)
+		Error(c, http.StatusUnauthorized, err)
 		return
 	} else if errors.Is(err, application.ErrAuthenticationRequired) {
 		Error(c, http.StatusUnauthorized, err)

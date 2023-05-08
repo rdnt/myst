@@ -4,24 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
-	"myst/pkg/crypto"
 	"myst/src/server/application/domain/user"
 )
 
 type User struct {
-	user.User
-	passwordHash string
+	Id           string    `json:"id"`
+	Username     string    `json:"username"`
+	PasswordHash string    `json:"passwordHash"`
+	PublicKey    []byte    `json:"publicKey"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
-func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
+func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-
-	u, err := user.New(opts...)
-	if err != nil {
-		return user.User{}, err
-	}
 
 	_, ok := r.users[u.Id]
 	if ok {
@@ -29,29 +28,19 @@ func (r *Repository) CreateUser(opts ...user.Option) (user.User, error) {
 	}
 
 	for _, u2 := range r.users {
-		if u2.User.Username == u.Username {
+		if u2.Username == u.Username {
 			return user.User{}, fmt.Errorf("already exists")
 		}
 	}
 
-	hash, err := crypto.HashPassword(u.Password)
-	if err != nil {
-		return user.User{}, err
-	}
-
-	ru := User{
-		User:         u,
-		passwordHash: hash,
-	}
-
-	r.users[ru.Id] = ru
+	r.users[u.Id] = UserToJSON(u)
 
 	{ // debug
 		b, _ := json.Marshal(r.users)
 		_ = os.WriteFile("users.json", b, 0666)
 	}
 
-	return ru.User, nil
+	return u, nil
 }
 
 func (r *Repository) User(id string) (user.User, error) {
@@ -63,7 +52,7 @@ func (r *Repository) User(id string) (user.User, error) {
 		return user.User{}, user.ErrNotFound
 	}
 
-	return u.User, nil
+	return UserFromJSON(u), nil
 }
 
 func (r *Repository) UserByUsername(username string) (user.User, error) {
@@ -72,7 +61,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 
 	for _, u := range r.users {
 		if u.Username == username {
-			return u.User, nil
+			return UserFromJSON(u), nil
 		}
 	}
 
@@ -85,34 +74,30 @@ func (r *Repository) Users() ([]user.User, error) {
 
 	users := make([]user.User, 0, len(r.users))
 	for _, u := range r.users {
-		users = append(users, u.User)
+		users = append(users, UserFromJSON(u))
 	}
 
 	return users, nil
 }
 
-func (r *Repository) UpdateUser(u *user.User) error {
+func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	ru, ok := r.users[u.Id]
+	_, ok := r.users[u.Id]
 	if !ok {
-		return fmt.Errorf("not found")
+		return user.User{}, fmt.Errorf("not found")
 	}
 
-	ru2 := User{
-		User:         *u,
-		passwordHash: ru.passwordHash,
-	}
-
-	r.users[ru2.Id] = ru2
+	u2 := UserToJSON(u)
+	r.users[u.Id] = u2
 
 	{ // debug
 		b, _ := json.Marshal(r.users)
 		_ = os.WriteFile("users.json", b, 0666)
 	}
 
-	return nil
+	return UserFromJSON(u2), nil
 }
 
 // func (r *Repository) DeleteUser(id string) error {
@@ -122,15 +107,3 @@ func (r *Repository) UpdateUser(u *user.User) error {
 // 	delete(r.users, id)
 // 	return nil
 // }
-
-func (r *Repository) VerifyPassword(userId, password string) (bool, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	u, ok := r.users[userId]
-	if !ok {
-		return false, user.ErrNotFound
-	}
-
-	return crypto.VerifyPassword(password, u.passwordHash)
-}

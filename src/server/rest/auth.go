@@ -59,12 +59,7 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	// // TODO: proper password hash check
-	// if !((params.Username == "rdnt" && params.Password == "1234") || (params.Username == "abcd" && params.Password == "5678")) {
-	// 	panic("invalid username or password")
-	// }
-
-	err = s.app.AuthorizeUser(params.Username, params.Password)
+	u, err = s.app.AuthorizeUser(params.Username, params.Password)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)
@@ -79,10 +74,7 @@ func (s *Server) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, generated.AuthorizationResponse{
-		User: generated.User{
-			Id:       u.Id,
-			Username: u.Username,
-		},
+		User:  UserToJSON(u),
 		Token: token,
 	})
 }

@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	debug                 = true
+	debug                 = true // TODO: set to false by default
 	DefaultArgon2IdParams = Argon2IdParams{
 		Memory:      64 * 1024,
 		Time:        1,

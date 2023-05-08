@@ -1,43 +1,48 @@
 <script lang="ts">
-  import AuthModal from "@/components/AuthModal.svelte";
+  import SignInModal from "@/components/SignInModal.svelte";
+  import RegisterModal from "@/components/RegisterModal.svelte";
   import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {getKeystores, keystores} from "@/stores/keystores.ts";
+  import {getKeystores} from "@/stores/keystores.ts";
   import {Route, Router} from "svelte-navigator";
-  import {currentUser} from "@/stores/user";
+  import {onMount} from "svelte";
 
   let showCreateKeystoreModal: boolean = false;
-  let showAuthModal: boolean = false;
+  let showSignInModal: boolean = false;
+  let showRegisterModal: boolean = false;
 </script>
 <Router>
-  <Sidebar keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal} bind:showAuthModal={showAuthModal}/>
+  <Sidebar
+           bind:showCreateKeystoreModal={showCreateKeystoreModal}
+           bind:showSignInModal={showSignInModal}
+           bind:showRegisterModal={showRegisterModal}
+  />
 
   <main>
     <Route>
       <Keystores keystores={$keystores}/>
     </Route>
 
-    <Route path="/keystore/:keystoreId">
-      <Keystores keystores={$keystores}/>
-    </Route>
+<!--    <Route path="/keystore/:keystoreId">-->
+<!--      <Keystores keystores={$keystores}/>-->
+<!--    </Route>-->
 
-    <Route path="/keystore/:keystoreId/entry/:entryId">
-      <Keystores keystores={$keystores}/>
-    </Route>
+<!--    <Route path="/keystore/:keystoreId/entry/:entryId">-->
+<!--      <Keystores keystores={$keystores}/>-->
+<!--    </Route>-->
 
-    {#if $currentUser}
-      <Route path="/invitations">
-        <Invitations/>
-      </Route>
-    {/if}
+    <Route path="/invitations">
+      <Invitations/>
+    </Route>
   </main>
 </Router>
 
 <CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
 
-<AuthModal bind:show={showAuthModal}/>
+<SignInModal bind:show={showSignInModal}/>
+<RegisterModal bind:show={showRegisterModal}/>
 
 <style lang="scss">
   $bg: #0a0e11;

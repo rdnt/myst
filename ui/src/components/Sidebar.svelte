@@ -8,28 +8,12 @@
 
   export let keystores;
   export let showCreateKeystoreModal: boolean;
-  export let showAuthModal: boolean;
+  export let showSignInModal: boolean = false;
+  export let showRegisterModal: boolean = false;
 
   let username, password: string;
 
   $: newInvitationsCount = $invitations.filter(inv => inv.invitee.id === $currentUser.id && inv.status === 'pending').length;
-
-  onMount(() => {
-
-  })
-
-  function login() {
-    if (!username || !password) {
-      return;
-    }
-
-    api.login({
-      requestBody: {
-        username,
-        password
-      }
-    })
-  }
 </script>
 
 <div class="sidebar">
@@ -70,19 +54,17 @@
         <!--      </Link>-->
       </div>
     {/if}
-    {#if $currentUser === undefined}
+    {#if $currentUser === null}
       <h6>
-        <span class="auth-link btn" on:click={() => showAuthModal = true}>Sign in</span>
-        <span class="auth-link">or</span>
-        <span class="auth-link btn" on:click={() => showAuthModal = true}>Register</span>
+<!--        <span class="auth-link btn" on:click={() => showSignInModal = true}>Sign in</span>-->
+<!--        <span class="auth-link">or</span>-->
+        <span class="auth-link btn" on:click={() => showRegisterModal = true}>Register</span>
       </h6>
-    {:else if $currentUser === null}
-      <h6>Disconnected</h6>
-    {:else}
+    {:else if $currentUser !== undefined}
       <h6>Signed in as <strong style="color: {hash($currentUser.username)}">{$currentUser.username}</strong></h6>
     {/if}
 
-    <h5 class="version">v0.0.0-0123456</h5>
+<!--    <h5 class="version">v0.0.0-0123456</h5>-->
   </div>
 
 </div>

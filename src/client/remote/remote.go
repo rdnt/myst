@@ -104,7 +104,7 @@ func New(opts ...Option) (application.Remote, error) {
 //	return k, nil
 // }
 
-func (r *remote) SignIn(username, password string) (user.User, error) {
+func (r *remote) SignIn(username, password string) error {
 	fmt.Println("Signing in to remote...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -113,20 +113,21 @@ func (r *remote) SignIn(username, password string) (user.User, error) {
 		ctx, generated.LoginJSONRequestBody{
 			Username: username,
 			Password: password,
+			// PublicKey: publicKey,
 		},
 	)
 	if err != nil {
-		return user.User{}, errors.Wrap(err, "failed to sign in")
+		return errors.Wrap(err, "failed to sign in")
 	}
 
 	if res.JSON200 == nil {
-		return user.User{}, ErrInvalidResponse
+		return ErrInvalidResponse
 	}
 
 	resp := *res.JSON200
 
 	if resp.Token == "" {
-		return user.User{}, errors.New("invalid token")
+		return errors.New("invalid token")
 	}
 
 	u := user.User{
@@ -140,7 +141,7 @@ func (r *remote) SignIn(username, password string) (user.User, error) {
 
 	fmt.Println("Signed in.")
 
-	return u, nil
+	return nil
 }
 
 func (r *remote) SignedIn() bool {
@@ -175,16 +176,16 @@ func (r *remote) UserByUsername(username string) (user.User, error) {
 	return u, nil
 }
 
-func (r *remote) SignOut() error {
-	fmt.Println("Signing out from remote...")
-
-	r.bearerToken = ""
-	r.user = nil
-
-	fmt.Println("Signed out.")
-
-	return nil
-}
+// func (r *remote) SignOut() error {
+// 	fmt.Println("Signing out from remote...")
+//
+// 	r.bearerToken = ""
+// 	r.user = nil
+//
+// 	fmt.Println("Signed out.")
+//
+// 	return nil
+// }
 
 func (r *remote) Register(username, password string, publicKey []byte) (user.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

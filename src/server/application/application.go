@@ -115,7 +115,7 @@ func (app *application) DebugUpdateUserPublicKey(userId string, publicKey []byte
 
 	u.PublicKey = publicKey
 
-	err = app.users.UpdateUser(&u)
+	_, err = app.users.UpdateUser(u)
 	if err != nil {
 		return err
 	}

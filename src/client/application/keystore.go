@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -140,6 +141,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 
 		rks, err := app.remote.Keystores(rem.PrivateKey)
 		if err != nil {
+			fmt.Print("FAILED TO GET REMOTE KEYSTORES")
 			return nil, err
 		}
 

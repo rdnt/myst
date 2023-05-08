@@ -106,12 +106,13 @@ requestBody: RegisterRequest,
     }
 
     /**
+     * @deprecated
      * Logs in to the remote
      * @returns any Successfully logged in
      * @returns Error Error
      * @throws ApiError
      */
-    public static login({
+    public static loginDeprecated({
 requestBody,
 }: {
 requestBody: LoginRequest,

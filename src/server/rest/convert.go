@@ -62,7 +62,8 @@ func (s *Server) ToJSONInvitation(i invitation.Invitation) (generated.Invitation
 
 func UserToJSON(u user.User) generated.User {
 	return generated.User{
-		Id:       u.Id,
-		Username: u.Username,
+		Id:        u.Id,
+		PublicKey: u.PublicKey,
+		Username:  u.Username,
 	}
 }

@@ -89,10 +89,10 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// Login request with any body
-	LoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// LoginDeprecated request with any body
+	LoginDeprecatedWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	LoginDeprecated(ctx context.Context, body LoginDeprecatedJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// Register request with any body
 	RegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -166,8 +166,8 @@ type ClientInterface interface {
 	CurrentUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) LoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewLoginRequestWithBody(c.Server, contentType, body)
+func (c *Client) LoginDeprecatedWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewLoginDeprecatedRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -178,8 +178,8 @@ func (c *Client) LoginWithBody(ctx context.Context, contentType string, body io.
 	return c.Client.Do(req)
 }
 
-func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewLoginRequest(c.Server, body)
+func (c *Client) LoginDeprecated(ctx context.Context, body LoginDeprecatedJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewLoginDeprecatedRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -502,19 +502,19 @@ func (c *Client) CurrentUser(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-// NewLoginRequest calls the generic Login builder with application/json body
-func NewLoginRequest(server string, body LoginJSONRequestBody) (*http.Request, error) {
+// NewLoginDeprecatedRequest calls the generic LoginDeprecated builder with application/json body
+func NewLoginDeprecatedRequest(server string, body LoginDeprecatedJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewLoginRequestWithBody(server, "application/json", bodyReader)
+	return NewLoginDeprecatedRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewLoginRequestWithBody generates requests for Login with any type of body
-func NewLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewLoginDeprecatedRequestWithBody generates requests for LoginDeprecated with any type of body
+func NewLoginDeprecatedRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1273,10 +1273,10 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// Login request with any body
-	LoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*LoginResponse, error)
+	// LoginDeprecated request with any body
+	LoginDeprecatedWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*LoginDeprecatedResponse, error)
 
-	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
+	LoginDeprecatedWithResponse(ctx context.Context, body LoginDeprecatedJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginDeprecatedResponse, error)
 
 	// Register request with any body
 	RegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*RegisterResponse, error)
@@ -1350,14 +1350,14 @@ type ClientWithResponsesInterface interface {
 	CurrentUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*CurrentUserResponse, error)
 }
 
-type LoginResponse struct {
+type LoginDeprecatedResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSONDefault  *Error
 }
 
 // Status returns HTTPResponse.Status
-func (r LoginResponse) Status() string {
+func (r LoginDeprecatedResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1365,7 +1365,7 @@ func (r LoginResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r LoginResponse) StatusCode() int {
+func (r LoginDeprecatedResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1802,21 +1802,21 @@ func (r CurrentUserResponse) StatusCode() int {
 	return 0
 }
 
-// LoginWithBodyWithResponse request with arbitrary body returning *LoginResponse
-func (c *ClientWithResponses) LoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*LoginResponse, error) {
-	rsp, err := c.LoginWithBody(ctx, contentType, body, reqEditors...)
+// LoginDeprecatedWithBodyWithResponse request with arbitrary body returning *LoginDeprecatedResponse
+func (c *ClientWithResponses) LoginDeprecatedWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*LoginDeprecatedResponse, error) {
+	rsp, err := c.LoginDeprecatedWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseLoginResponse(rsp)
+	return ParseLoginDeprecatedResponse(rsp)
 }
 
-func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error) {
-	rsp, err := c.Login(ctx, body, reqEditors...)
+func (c *ClientWithResponses) LoginDeprecatedWithResponse(ctx context.Context, body LoginDeprecatedJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginDeprecatedResponse, error) {
+	rsp, err := c.LoginDeprecated(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseLoginResponse(rsp)
+	return ParseLoginDeprecatedResponse(rsp)
 }
 
 // RegisterWithBodyWithResponse request with arbitrary body returning *RegisterResponse
@@ -2046,15 +2046,15 @@ func (c *ClientWithResponses) CurrentUserWithResponse(ctx context.Context, reqEd
 	return ParseCurrentUserResponse(rsp)
 }
 
-// ParseLoginResponse parses an HTTP response from a LoginWithResponse call
-func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
+// ParseLoginDeprecatedResponse parses an HTTP response from a LoginDeprecatedWithResponse call
+func ParseLoginDeprecatedResponse(rsp *http.Response) (*LoginDeprecatedResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &LoginResponse{
+	response := &LoginDeprecatedResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

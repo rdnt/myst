@@ -46,7 +46,7 @@
   }
 </script>
 
-<form class="form" on:submit|preventDefault={submit}>
+<form class="form" on:submit|preventDefault={submit} id="test-123">
   <div class="content">
     <h4>Myst</h4>
 

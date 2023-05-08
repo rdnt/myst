@@ -14,11 +14,11 @@ export const getCurrentUser = () => {
   }).catch((e: ApiError) => {
     if (e.status === 404) {
       if (setFunc) {
-        setFunc(undefined)
+        setFunc(null)
       }
     } else if (e.status === 401) {
       if (setFunc) {
-        setFunc(null)
+        setFunc(undefined)
       }
     } else {
       console.log(e)

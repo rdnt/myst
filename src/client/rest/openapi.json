@@ -154,8 +154,9 @@
     },
     "/auth/login": {
       "post": {
+        "deprecated": true,
         "description": "Logs in to the remote",
-        "operationId": "Login",
+        "operationId": "LoginDeprecated",
         "requestBody": {
           "required": true,
           "content": {

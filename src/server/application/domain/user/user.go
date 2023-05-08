@@ -2,31 +2,28 @@ package user
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"time"
 
 	"myst/pkg/uuid"
 )
 
-var (
-	ErrInvalidUsername = errors.New("invalid username")
-)
+var ()
 
 type User struct {
-	Id        string
-	Username  string
-	Password  string
-	PublicKey []byte
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id           string
+	Username     string
+	PasswordHash string
+	PublicKey    []byte
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (u User) String() string {
 	return fmt.Sprintln(u.Id, u.Username, "****", hex.EncodeToString(u.PublicKey))
 }
 
-func New(opts ...Option) (User, error) {
+func New(opts ...Option) User {
 	u := User{
 		Id:        uuid.New().String(),
 		CreatedAt: time.Now(),
@@ -37,9 +34,5 @@ func New(opts ...Option) (User, error) {
 		opt(&u)
 	}
 
-	if u.Username == "" {
-		return User{}, ErrInvalidUsername
-	}
-
-	return u, nil
+	return u
 }

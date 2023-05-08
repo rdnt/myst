@@ -31,7 +31,7 @@
       return;
     }
 
-    api.register({
+    api.login({
       requestBody: {
         username,
         password,
@@ -59,7 +59,7 @@
 
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class="button green" type="submit">Log In</button>
+      <button class="button green" type="submit">Sign In</button>
     </div>
   </Modal>
 </form>

@@ -137,7 +137,20 @@ func (r *Repository) IsInitialized() (bool, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	return r.enclaveExists()
+	exists, err := r.enclaveExists()
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
+		return false, nil
+	}
+
+	if r.key == nil {
+		return false, application.ErrAuthenticationRequired
+	}
+
+	return true, nil
 }
 
 func (r *Repository) enclaveExists() (bool, error) {
@@ -343,7 +356,10 @@ func (r *Repository) startHealthCheck() {
 			}
 
 			if r.key != nil {
-				r.key = nil
+				fmt.Println("Health check failed")
+				// TODO: figure out why healthcheck causes Disconnected
+				//  and can't be restored
+				// r.key = nil
 			}
 
 			r.mux.Unlock()

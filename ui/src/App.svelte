@@ -6,7 +6,10 @@
   import Main from "@/pages/Main.svelte";
   import {getKeystores} from "@/stores/keystores.ts";
   import {onMount} from 'svelte';
-  import {Router} from "svelte-navigator";
+  import {Router, useNavigate} from "svelte-navigator";
+  import Keystore from "@/components/Keystore.svelte";
+  import {currentUser, getCurrentUser} from "@/stores/user";
+  import {ca} from "date-fns/locale";
 
   let onboarding = false;
   let ready = false;
@@ -26,53 +29,48 @@
   // const interval = setInterval(healthCheck, 1000);
   // onDestroy(() => clearInterval(interval));
 
-  const initialize = () => {
+  const initialize = async () => {
     // return $keystores;
 
-    api.enclave().then((response) => {
-      onboarding = false
-      login = false
+    onboarding = false
+    login = false
 
-      // checkIfInitialized()
 
-      getKeystores().then(keystores => {
-        if (keystores.length > 0) {
-          keystore = keystores[0];
+    try {
+      await api.enclave().catch(err => {
+        if (err.status == 404) {
+          onboarding = true;
+          return Promise.resolve()
+        } else if (err.status == 401) {
+          login = true;
+          return Promise.resolve()
+        } else {
+          return Promise.reject(err)
         }
       })
-      // console.log(response)
 
-      // onboarding = response.length == 0;
-      // login = false
-      //
-      // if (response.length > 0) {
-      //   //
-      //   // keystores = response.sort((a, b) => {
-      //   //   return a.id < b.id ? 1 : -1;
-      //   // });
-      //
-      //   keystore = response[0];
-      // }
-
-    }).catch((error: Response) => {
-      if (error.status == 404) {
-        onboarding = true;
-        return
-      } else if (error.status == 401) {
-        login = true;
-        return
-      } else {
-        console.error(error);
+      if (!onboarding && !login) {
+        // const navigate = useNavigate();
+        // navigate(`/keystore/`)
       }
-    }).finally(() => {
+
       ready = true;
-    });
+    } catch (err) {
+      console.log('caught error', err)
+    }
+  }
+
+  const onSignIn = () => {
 
   }
 
+  // currentUser.subscribe(() => {
+  //   initialize()
+  // })
   onMount(() => {
     initialize()
   });
+  // initialize()
 </script>
 
 <Router>
@@ -82,7 +80,10 @@
     {#if onboarding}
       <OnboardingForm on:initialized={initialize}/>
     {:else if login}
-      <LoginForm on:login={initialize}/>
+      <LoginForm on:login={async () => {
+        onboarding = false
+        login = false
+      }}/>
     {:else}
       <Main/>
     {/if}

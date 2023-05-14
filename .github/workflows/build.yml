@@ -41,6 +41,7 @@ jobs:
     strategy:
       matrix:
         go-version: [ 1.18 ]
+        node-version: [ 16, 17, 18 ]
     steps:
       - name: Checkout repository
         id: checkout-repository
@@ -57,9 +58,22 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Download go modules
-        id: download-go-modules
-        run: go mod download
+      - name: Install Node ${{ matrix.node-version }}
+        id: install-node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install node modules
+        id: install-node-modules
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: ui
+      - name: Build UI
+        id: build-ui
+        run: npm --prefix ui run build
+      - name: Copy UI
+        id: copy-ui
+        run: cp -r static cmd/client
       - name: Build client
         id: build-client
         run: go build ./cmd/client
@@ -91,9 +105,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Download go modules
-        id: download-go-modules
-        run: go mod download
       - name: Run tests
         id: run-tests
         run: go test ./test/... ./pkg/...

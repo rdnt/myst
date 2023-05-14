@@ -5,44 +5,72 @@
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {getKeystores} from "@/stores/keystores.ts";
+  import {getKeystores, keystores} from "@/stores/keystores.ts";
   import {Route, Router} from "svelte-navigator";
   import {onMount} from "svelte";
+  import {getCurrentUser} from "@/stores/user";
+  import {getInvitations} from "@/stores/invitations";
+  import {useNavigate} from "svelte-navigator";
+  import type {Keystore} from "@/api";
+
+  const navigate = useNavigate();
 
   let showCreateKeystoreModal: boolean = false;
   let showSignInModal: boolean = false;
   let showRegisterModal: boolean = false;
+
+  let ready: boolean = false;
+  $: ready;
+
+  onMount(async () => {
+    await getKeystores()
+    const u = await getCurrentUser()
+    if (u) {
+      await getInvitations().then((invs) => {console.log('got invs', invs)})
+    }
+    ready = true
+  })
+
+  const onKeystoreCreated = async (keystore: Keystore) => {
+    await getKeystores()
+    navigate(`/keystore/${keystore.id}`)
+  }
 </script>
-<Router>
-  <Sidebar
-           bind:showCreateKeystoreModal={showCreateKeystoreModal}
-           bind:showSignInModal={showSignInModal}
-           bind:showRegisterModal={showRegisterModal}
-  />
 
-  <main>
-    <Route>
-      <Keystores keystores={$keystores}/>
-    </Route>
+{#if ready}
+  <Router>
+    <Sidebar
+             bind:showCreateKeystoreModal={showCreateKeystoreModal}
+             bind:showSignInModal={showSignInModal}
+             bind:showRegisterModal={showRegisterModal}
+             keystores={$keystores}
+    />
 
-<!--    <Route path="/keystore/:keystoreId">-->
-<!--      <Keystores keystores={$keystores}/>-->
-<!--    </Route>-->
+    <main>
+      <Route>
+        <Keystores keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
+      </Route>
 
-<!--    <Route path="/keystore/:keystoreId/entry/:entryId">-->
-<!--      <Keystores keystores={$keystores}/>-->
-<!--    </Route>-->
+      <Route path="/keystore/:keystoreId">
+        <Keystores keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
+      </Route>
 
-    <Route path="/invitations">
-      <Invitations/>
-    </Route>
-  </main>
-</Router>
+      <Route path="/keystore/:keystoreId/entry/:entryId">
+        <Keystores keystores={$keystores} bind:showCreateKeystoreModal={showCreateKeystoreModal}/>
+      </Route>
 
-<CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={() => {getKeystores()}}/>
+      <Route path="/invitations">
+        <Invitations/>
+      </Route>
+    </main>
+  </Router>
 
-<SignInModal bind:show={showSignInModal}/>
-<RegisterModal bind:show={showRegisterModal}/>
+  <CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={(e) => {onKeystoreCreated(e.detail)}}/>
+
+  <!--<SignInModal bind:show={showSignInModal}/>-->
+  <RegisterModal bind:show={showRegisterModal}/>
+
+{/if}
 
 <style lang="scss">
   $bg: #0a0e11;

@@ -13,7 +13,7 @@
 
   let username, password: string;
 
-  $: newInvitationsCount = $invitations.filter(inv => inv.invitee.id === $currentUser.id && inv.status === 'pending').length;
+  $: newInvitationsCount = $invitations?.filter(inv => inv.invitee.id === $currentUser.id && inv.status === 'pending').length;
 </script>
 
 <div class="sidebar">

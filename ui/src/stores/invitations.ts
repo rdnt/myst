@@ -1,45 +1,28 @@
 import type {Invitation} from "@/api";
 import api, {ApiError} from "@/api";
-import {currentUser} from "@/stores/user";
-import {get, readable} from "svelte/store";
+import {writable} from "svelte/store";
+import type {Readable} from "svelte/store";
 
-let setFunc
-export const getInvitations = () => {
-  if (!get(currentUser)) {
-    return []
-  }
+const {subscribe, update} = writable<Invitation[]>(undefined);
 
-  return api.getInvitations().then((invs: Invitation[]) => {
-    invs = invs.sort((a, b) => {
-      return a.updatedAt < b.updatedAt ? 1 : -1;
+export const invitations = {subscribe} as Readable<Invitation[]>;
+
+export const getInvitations = async () => {
+  try {
+    await api.getInvitations().then((invitations: Invitation[]) => {
+      // sort by updatedAtDesc: TODO: backend should return defined order
+      invitations = invitations.sort((a, b) => {
+        return a.updatedAt < b.updatedAt ? 1 : -1;
+      })
+
+      update(() => invitations);
+      return Promise.resolve(invitations)
+    }).catch((e: ApiError) => {
+      console.error(e)
+      return Promise.reject(e)
     })
-
-    if (setFunc) {
-      setFunc(invs)
-    }
-
-    return Promise.resolve(invs)
-  }).catch((e: ApiError) => {
-    console.error(e)
-
-    if (setFunc) {
-      setFunc([])
-    }
-
+  } catch (e: any) {
+    console.error(e);
     return Promise.reject(e)
-  })
-}
-
-export const invitations = readable<Invitation[]>([], (set) => {
-  setFunc = set
-
-  getInvitations()
-
-  let interval = window.setInterval(getInvitations, 5000)
-
-  return () => {
-    window.clearInterval(interval)
-    setFunc([]);
-    setFunc = undefined
   }
-});
+}

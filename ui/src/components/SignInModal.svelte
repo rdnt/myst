@@ -3,7 +3,7 @@
   import InputField from "@/components/InputField.svelte";
   import Modal from "@/components/Modal.svelte";
   import {showError, showMessage} from "@/stores/messages";
-  import {getCurrentUser} from "@/stores/user";
+  // import {getCurrentUser} from "@/stores/user";
 
   export let show: boolean = false;
 
@@ -39,7 +39,7 @@
     }).then(() => {
       showMessage("Signed in.");
       reset()
-      getCurrentUser()
+      // getCurrentUser()
       show = false;
     }).catch((err) => {
       showError("Signing in failed.");

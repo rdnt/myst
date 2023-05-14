@@ -4,6 +4,7 @@
   import {useNavigate, useParams} from "svelte-navigator";
   import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
   import {getKeystores} from "@/stores/keystores";
+  import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
 
   const navigate = useNavigate();
   const params = useParams();
@@ -11,10 +12,11 @@
   export let keystores;
   let keystore;
 
+  export let showCreateKeystoreModal: boolean;
+
   onMount(async () => {
     await getKeystores()
-    console.log("KEYSTORES MOUNTED")
-    console.log("===", $params.keystoreId)
+
     if (!$params.keystoreId) {
       // TODO: always select first (right now it's buggy on login)
       // TODO: maybe select default keystore once that functionality is implemented
@@ -23,9 +25,14 @@
       console.log(keystores)
       if (keystores.length > 0 ) {
         console.log("NAVIGATING")
-        navigate("/keystore/" + keystores[0].id);
+        navigate("/keystore/" + keystores[0].id, {replace: true});
       }
 
+    } else {
+        const keystore = keystores.find((keystore) => keystore.id === $params.keystoreId);
+        if (!keystore) {
+            navigate("/", {replace: true});
+        }
     }
   });
 
@@ -39,7 +46,7 @@
 {:else}
   <div class="empty">
     <div class="title">Create a new keystore to get started</div>
-    <button class="button green" type="submit">Login</button>
+    <button class="button green" on:click={() => {showCreateKeystoreModal = true}}>Create</button>
   </div>
 {/if}
 

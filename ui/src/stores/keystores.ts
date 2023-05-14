@@ -1,45 +1,35 @@
-import api, {ApiError} from "@/api";
 import type {Keystore} from "@/api";
-import {readable} from "svelte/store";
+import api, {ApiError} from "@/api";
+import {writable} from "svelte/store";
+import type {Readable} from "svelte/store";
 
-let setFunc
-export const getKeystores = () => {
-  return api.keystores().then((keystores: Keystore[]) => {
-    keystores = keystores.sort((a, b) => {
-      return a.id < b.id ? 1 : -1;
-    })
+const {subscribe, update} = writable<Keystore[]>(undefined);
 
-    keystores.forEach((keystore, i) => {
-      keystore.entries = keystore.entries.sort((a, b) => {
-        return a.id < b.id ? 1 : -1;
-      })
-    })
+export const keystores = {subscribe} as Readable<Keystore[]>;
 
-    if (setFunc) {
-      setFunc(keystores)
+export const getKeystores = async () => {
+    try {
+        await api.keystores().then((keystores: Keystore[]) => {
+            // sort by id: TODO: backend should return defined order
+            keystores = keystores.sort((a, b) => {
+                return a.id < b.id ? 1 : -1;
+            })
+
+            // sort entries by id: TODO: backend should return defined order
+            keystores.forEach((keystore, i) => {
+                keystore.entries = keystore.entries.sort((a, b) => {
+                    return a.id < b.id ? 1 : -1;
+                })
+            })
+
+            update(() => keystores);
+            return Promise.resolve(keystores)
+        }).catch((e: ApiError) => {
+            console.error(e)
+            return Promise.reject(e)
+        })
+    } catch (e: any) {
+        console.error(e);
+        return Promise.reject(e)
     }
-
-    return Promise.resolve(keystores)
-  }).catch((e: ApiError) => {
-    console.error(e)
-
-    if (setFunc) {
-      setFunc([])
-    }
-
-    return Promise.reject(e)
-  })
 }
-
-export const keystores = readable<Keystore[]>([], (set) => {
-  setFunc = set
-  getKeystores()
-
-  let interval = window.setInterval(getKeystores, 5000)
-
-  return () => {
-    window.clearInterval(interval)
-    setFunc([]);
-    setFunc = undefined
-  }
-});

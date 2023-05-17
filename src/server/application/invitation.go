@@ -26,11 +26,13 @@ func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername 
 		return invitation.Invitation{}, err
 	}
 
-	return app.invitations.CreateInvitation(
+	inv := invitation.New(
 		invitation.WithKeystoreId(k.Id),
 		invitation.WithInviterId(inviter.Id),
 		invitation.WithInviteeId(invitee.Id),
 	)
+
+	return app.invitations.CreateInvitation(inv)
 }
 
 func (app *application) AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error) {
@@ -48,7 +50,7 @@ func (app *application) AcceptInvitation(userId string, invitationId string) (in
 		return invitation.Invitation{}, err
 	}
 
-	err = app.invitations.UpdateInvitation(&inv)
+	inv, err = app.invitations.UpdateInvitation(inv)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
@@ -83,7 +85,7 @@ func (app *application) DeclineOrCancelInvitation(userId, invitationId string) (
 		}
 	}
 
-	err = app.invitations.UpdateInvitation(&inv)
+	inv, err = app.invitations.UpdateInvitation(inv)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}
@@ -102,7 +104,7 @@ func (app *application) FinalizeInvitation(invitationId string, encryptedKeystor
 		return invitation.Invitation{}, err
 	}
 
-	err = app.invitations.UpdateInvitation(&inv)
+	inv, err = app.invitations.UpdateInvitation(inv)
 	if err != nil {
 		return invitation.Invitation{}, err
 	}

@@ -44,28 +44,23 @@ func (r *Repository) UserInvitation(userId, invitationId string) (invitation.Inv
 	return invitation.Invitation{}, invitation.ErrNotFound
 }
 
-func (r *Repository) CreateInvitation(opts ...invitation.Option) (invitation.Invitation, error) {
+func (r *Repository) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	i, err := invitation.New(opts...)
-	if err != nil {
-		return invitation.Invitation{}, err
-	}
-
-	_, ok := r.invitations[i.Id]
+	_, ok := r.invitations[inv.Id]
 	if ok {
 		return invitation.Invitation{}, fmt.Errorf("already exists")
 	}
 
-	r.invitations[i.Id] = i
+	r.invitations[inv.Id] = inv
 
 	{ // debug
 		b, _ := json.Marshal(r.invitations)
 		_ = os.WriteFile("invitations.json", b, 0666)
 	}
 
-	return i, nil
+	return inv, nil
 }
 
 func (r *Repository) Invitation(id string) (invitation.Invitation, error) {
@@ -92,23 +87,23 @@ func (r *Repository) Invitations() ([]invitation.Invitation, error) {
 	return invitations, nil
 }
 
-func (r *Repository) UpdateInvitation(i *invitation.Invitation) error {
+func (r *Repository) UpdateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.invitations[i.Id]
+	_, ok := r.invitations[inv.Id]
 	if !ok {
-		return invitation.ErrNotFound
+		return invitation.Invitation{}, invitation.ErrNotFound
 	}
 
-	r.invitations[i.Id] = *i
+	r.invitations[inv.Id] = inv
 
 	{ // debug
 		b, _ := json.Marshal(r.invitations)
 		_ = os.WriteFile("invitations.json", b, 0666)
 	}
 
-	return nil
+	return inv, nil
 }
 
 // func (r *Repository) Delete(id string) error {

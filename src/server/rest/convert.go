@@ -18,24 +18,24 @@ func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
 	}
 }
 
-func (s *Server) ToJSONInvitation(i invitation.Invitation) (generated.Invitation, error) {
-	inviter, err := s.app.User(i.InviterId)
+func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitation, error) {
+	inviter, err := s.app.User(inv.InviterId)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
 
-	invitee, err := s.app.User(i.InviteeId)
+	invitee, err := s.app.User(inv.InviteeId)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
 
-	k, err := s.app.Keystore(i.KeystoreId)
+	k, err := s.app.Keystore(inv.KeystoreId)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
 
 	return generated.Invitation{
-		Id: i.Id,
+		Id: inv.Id,
 		Keystore: generated.KeystoreName{
 			Id:   k.Id,
 			Name: k.Name,
@@ -50,13 +50,13 @@ func (s *Server) ToJSONInvitation(i invitation.Invitation) (generated.Invitation
 			Username:  invitee.Username,
 			PublicKey: invitee.PublicKey,
 		},
-		Status:               generated.InvitationStatus(i.Status.String()),
-		EncryptedKeystoreKey: i.EncryptedKeystoreKey,
-		CreatedAt:            i.CreatedAt,
-		UpdatedAt:            i.UpdatedAt,
-		AcceptedAt:           i.AcceptedAt,
-		DeclinedAt:           i.DeclinedAt,
-		DeletedAt:            i.DeletedAt,
+		Status:               generated.InvitationStatus(inv.Status.String()),
+		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
+		CreatedAt:            inv.CreatedAt,
+		UpdatedAt:            inv.UpdatedAt,
+		AcceptedAt:           inv.AcceptedAt,
+		DeclinedAt:           inv.DeclinedAt,
+		DeletedAt:            inv.DeletedAt,
 	}, nil
 }
 

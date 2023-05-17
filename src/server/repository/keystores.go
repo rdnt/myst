@@ -8,14 +8,9 @@ import (
 	"myst/src/server/application/domain/keystore"
 )
 
-func (r *Repository) CreateKeystore(opts ...keystore.Option) (keystore.Keystore, error) {
+func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-
-	k, err := keystore.New(opts...)
-	if err != nil {
-		return keystore.Keystore{}, err
-	}
 
 	r.keystores[k.Id] = k
 
@@ -51,23 +46,23 @@ func (r *Repository) Keystores() ([]keystore.Keystore, error) {
 	return keystores, nil
 }
 
-func (r *Repository) UpdateKeystore(s *keystore.Keystore) error {
+func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.keystores[s.Id]
+	_, ok := r.keystores[k.Id]
 	if !ok {
-		return fmt.Errorf("not found")
+		return keystore.Keystore{}, fmt.Errorf("not found")
 	}
 
-	r.keystores[s.Id] = *s
+	r.keystores[k.Id] = k
 
 	{ // debug
 		b, _ := json.Marshal(r.keystores)
 		_ = os.WriteFile("keystores.json", b, 0666)
 	}
 
-	return nil
+	return k, nil
 }
 
 func (r *Repository) DeleteKeystore(id string) error {

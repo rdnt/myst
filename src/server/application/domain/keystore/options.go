@@ -1,25 +1,21 @@
 package keystore
 
-type Option func(*Keystore) error
+type Option func(*Keystore)
 
 func WithName(name string) Option {
-	return func(k *Keystore) error {
-		//k.Id = name // TODO: remove
+	return func(k *Keystore) {
 		k.Name = name
-		return nil
 	}
 }
 
 func WithPayload(payload []byte) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.Payload = payload
-		return nil
 	}
 }
 
 func WithOwnerId(id string) Option {
-	return func(k *Keystore) error {
+	return func(k *Keystore) {
 		k.OwnerId = id
-		return nil
 	}
 }

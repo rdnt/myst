@@ -60,7 +60,7 @@ func (app *application) UserByUsername(username string) (user.User, error) {
 	return app.users.UserByUsername(username)
 }
 
-func (app *application) UserInvitations(userId string, opts *invitation.UserInvitationsOptions) ([]invitation.Invitation, error) {
+func (app *application) UserInvitations(userId string, opts UserInvitationsOptions) ([]invitation.Invitation, error) {
 	u, err := app.users.User(userId)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (app *application) UserInvitations(userId string, opts *invitation.UserInvi
 			continue
 		}
 
-		if opts != nil && opts.Status != nil && *opts.Status != inv.Status {
+		if opts.Status != nil && *opts.Status != inv.Status {
 			continue
 		}
 

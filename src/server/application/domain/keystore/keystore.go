@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"myst/pkg/logger"
 	"myst/pkg/uuid"
 )
 
@@ -34,7 +33,7 @@ func (k *Keystore) SetPayload(payload []byte) {
 	k.Payload = payload
 }
 
-func New(opts ...Option) (Keystore, error) {
+func New(opts ...Option) Keystore {
 	k := Keystore{
 		Id:        uuid.New().String(),
 		CreatedAt: time.Now(),
@@ -42,15 +41,10 @@ func New(opts ...Option) (Keystore, error) {
 	}
 
 	for _, opt := range opts {
-		err := opt(&k)
-		if err != nil {
-			logger.Error(err)
-			return Keystore{}, err
+		if opt != nil {
+			opt(&k)
 		}
 	}
 
-	// TODO: remove this
-	//k.Id = "0000000000000000000000"
-
-	return k, nil
+	return k
 }

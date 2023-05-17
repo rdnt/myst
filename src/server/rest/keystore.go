@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"myst/src/server/application/domain/keystore"
+	"myst/src/server/application"
 	"myst/src/server/rest/generated"
 )
 
@@ -48,7 +48,7 @@ func (s *Server) UpdateKeystore(c *gin.Context) {
 		panic(err)
 	}
 
-	k, err := s.app.UpdateKeystore(userId, keystoreId, keystore.UpdateParams{
+	k, err := s.app.UpdateKeystore(userId, keystoreId, application.KeystoreUpdateParams{
 		Name:    req.Name,
 		Payload: req.Payload,
 	})

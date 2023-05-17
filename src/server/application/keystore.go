@@ -13,11 +13,13 @@ func (app *application) CreateKeystore(name, ownerId string, payload []byte) (ke
 		return keystore.Keystore{}, err
 	}
 
-	return app.keystores.CreateKeystore(
+	k := keystore.New(
 		keystore.WithName(name),
 		keystore.WithOwnerId(u.Id),
 		keystore.WithPayload(payload),
 	)
+
+	return app.keystores.CreateKeystore(k)
 }
 
 func (app *application) Keystore(keystoreId string) (keystore.Keystore, error) {
@@ -33,7 +35,7 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 	return app.keystores.Keystores()
 }
 
-func (app *application) UpdateKeystore(userId, keystoreId string, params keystore.UpdateParams) (keystore.
+func (app *application) UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.
 	Keystore,
 	error) {
 	_, err := app.users.User(userId)
@@ -58,7 +60,7 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params keystor
 		k.Payload = *params.Payload
 	}
 
-	err = app.keystores.UpdateKeystore(&k)
+	k, err = app.keystores.UpdateKeystore(k)
 	if err != nil {
 		return keystore.Keystore{}, err
 	}
@@ -73,7 +75,7 @@ func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error
 	}
 
 	status := invitation.Finalized
-	invs, err := app.UserInvitations(u.Id, &invitation.UserInvitationsOptions{Status: &status})
+	invs, err := app.UserInvitations(u.Id, UserInvitationsOptions{Status: &status})
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")
 	}

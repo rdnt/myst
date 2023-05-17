@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"myst/src/server/application"
 	"myst/src/server/rest/generated"
 )
 
@@ -147,7 +148,7 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 func (s *Server) Invitations(c *gin.Context) {
 	userId := CurrentUser(c)
 
-	invs, err := s.app.UserInvitations(userId, nil)
+	invs, err := s.app.UserInvitations(userId, application.UserInvitationsOptions{})
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)

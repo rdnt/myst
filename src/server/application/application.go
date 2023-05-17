@@ -9,10 +9,57 @@ import (
 
 var log = logger.New("app", logger.Blue)
 
+type InvitationRepository interface {
+	CreateInvitation(invitation.Invitation) (invitation.Invitation, error)
+	Invitation(id string) (invitation.Invitation, error)
+	UpdateInvitation(invitation.Invitation) (invitation.Invitation, error)
+	Invitations() ([]invitation.Invitation, error)
+}
+
+type KeystoreRepository interface {
+	CreateKeystore(keystore.Keystore) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystores() ([]keystore.Keystore, error)
+	DeleteKeystore(id string) error
+}
+
+type UserRepository interface {
+	CreateUser(user.User) (user.User, error)
+	User(id string) (user.User, error)
+	UserByUsername(username string) (user.User, error)
+	UpdateUser(user.User) (user.User, error)
+	Users() ([]user.User, error)
+}
+
+type KeystoreUpdateParams struct {
+	Name    *string
+	Payload *[]byte
+}
+
+type UserInvitationsOptions struct {
+	Status *invitation.Status
+}
+
 type Application interface {
-	user.Service
-	keystore.Service
-	invitation.Service
+	CreateUser(username, password string, publicKey []byte) (user.User, error)
+	AuthorizeUser(username, password string) (user.User, error)
+	User(id string) (user.User, error)
+	UserByUsername(username string) (user.User, error)
+
+	CreateKeystore(name, ownerId string, payload []byte) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
+	Keystores() ([]keystore.Keystore, error)
+	UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.Keystore, error)
+	UserKeystore(userId, keystoreId string) (keystore.Keystore, error)
+	UserKeystores(userId string) ([]keystore.Keystore, error)
+
+	CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error)
+	AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error)
+	DeclineOrCancelInvitation(userId, invitationId string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
+	UserInvitation(userId, invitationId string) (invitation.Invitation, error)
+	UserInvitations(userId string, opts UserInvitationsOptions) ([]invitation.Invitation, error)
 
 	Start() error
 	Stop() error
@@ -21,9 +68,9 @@ type Application interface {
 }
 
 type application struct {
-	invitations invitation.Repository
-	users       user.Repository
-	keystores   keystore.Repository
+	invitations InvitationRepository
+	users       UserRepository
+	keystores   KeystoreRepository
 }
 
 func New(opts ...Option) (Application, error) {
@@ -38,19 +85,19 @@ func New(opts ...Option) (Application, error) {
 
 type Option func(app *application)
 
-func WithKeystoreRepository(repo keystore.Repository) Option {
+func WithKeystoreRepository(repo KeystoreRepository) Option {
 	return func(app *application) {
 		app.keystores = repo
 	}
 }
 
-func WithUserRepository(repo user.Repository) Option {
+func WithUserRepository(repo UserRepository) Option {
 	return func(app *application) {
 		app.users = repo
 	}
 }
 
-func WithInvitationRepository(repo invitation.Repository) Option {
+func WithInvitationRepository(repo InvitationRepository) Option {
 	return func(app *application) {
 		app.invitations = repo
 	}
@@ -89,20 +136,20 @@ func (app *application) Stop() error {
 func (app *application) Debug() (data map[string]any, err error) {
 	data = map[string]any{}
 
-	data["users"], err = app.users.Users()
-	if err != nil {
-		return nil, err
-	}
-
-	data["keystores"], err = app.keystores.Keystores()
-	if err != nil {
-		return nil, err
-	}
-
-	data["invitations"], err = app.invitations.Invitations()
-	if err != nil {
-		return nil, err
-	}
+	// data["users"], err = app.users.Users()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// data["keystores"], err = app.keystores.Keystores()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// data["invitations"], err = app.invitations.Invitations()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return data, nil
 }

@@ -29,7 +29,7 @@ type Invitation struct {
 	DeletedAt            time.Time
 }
 
-func New(opts ...Option) (Invitation, error) {
+func New(opts ...Option) Invitation {
 	k := Invitation{
 		Id:        uuid.New().String(),
 		CreatedAt: time.Now(),
@@ -41,7 +41,7 @@ func New(opts ...Option) (Invitation, error) {
 		opt(&k)
 	}
 
-	return k, nil
+	return k
 }
 
 type Option func(i *Invitation)

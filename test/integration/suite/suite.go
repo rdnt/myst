@@ -56,7 +56,7 @@ func New(t *testing.T) *Suite {
 		client1.stop(t)
 		client2.stop(t)
 		client3.stop(t)
-		// sto the server after clients disconnect
+		// stop the server after clients disconnect
 		server.stop(t)
 	})
 

@@ -7,7 +7,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"myst/src/server/application"
-	"myst/src/server/repository"
+	"myst/src/server/mongorepo"
 	"myst/src/server/rest"
 	"myst/src/server/rest/generated"
 )
@@ -15,13 +15,15 @@ import (
 type Server struct {
 	Address string
 
+	repo   *mongorepo.Repository
 	App    application.Application
 	Server *rest.Server
 	Client *generated.ClientWithResponses
 }
 
 func newServer(t *testing.T, address string) *Server {
-	repo := repository.New()
+	repo, err := mongorepo.New()
+	assert.NilError(t, err)
 
 	app, err := application.New(
 		application.WithKeystoreRepository(repo),
@@ -39,18 +41,24 @@ func newServer(t *testing.T, address string) *Server {
 
 	return &Server{
 		Address: address,
-
-		App:    app,
-		Server: server,
-		Client: client,
+		repo:    repo,
+		App:     app,
+		Server:  server,
+		Client:  client,
 	}
 }
 
 func (s *Server) start(t *testing.T) {
 	err := s.Server.Start(s.Address)
 	assert.NilError(t, err)
+
+	err = s.repo.FlushDB()
+	assert.NilError(t, err)
 }
 
 func (s *Server) stop(t *testing.T) {
 	_ = s.Server.Stop()
+
+	err := s.repo.FlushDB()
+	assert.NilError(t, err)
 }

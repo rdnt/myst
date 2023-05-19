@@ -40,16 +40,8 @@ func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitati
 			Id:   k.Id,
 			Name: k.Name,
 		},
-		Inviter: generated.User{
-			Id:        inviter.Id,
-			Username:  inviter.Username,
-			PublicKey: inviter.PublicKey,
-		},
-		Invitee: generated.User{
-			Id:        invitee.Id,
-			Username:  invitee.Username,
-			PublicKey: invitee.PublicKey,
-		},
+		Inviter:              UserToJSON(inviter),
+		Invitee:              UserToJSON(invitee),
 		Status:               generated.InvitationStatus(inv.Status.String()),
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		CreatedAt:            inv.CreatedAt,

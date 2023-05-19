@@ -21,7 +21,6 @@ type KeystoreRepository interface {
 	Keystore(id string) (keystore.Keystore, error)
 	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores() ([]keystore.Keystore, error)
-	DeleteKeystore(id string) error
 }
 
 type UserRepository interface {

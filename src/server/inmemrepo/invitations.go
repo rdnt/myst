@@ -1,9 +1,7 @@
-package repository
+package inmemrepo
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 
 	"myst/src/server/application/domain/invitation"
 )
@@ -55,11 +53,6 @@ func (r *Repository) CreateInvitation(inv invitation.Invitation) (invitation.Inv
 
 	r.invitations[inv.Id] = inv
 
-	{ // debug
-		b, _ := json.Marshal(r.invitations)
-		_ = os.WriteFile("invitations.json", b, 0666)
-	}
-
 	return inv, nil
 }
 
@@ -97,11 +90,6 @@ func (r *Repository) UpdateInvitation(inv invitation.Invitation) (invitation.Inv
 	}
 
 	r.invitations[inv.Id] = inv
-
-	{ // debug
-		b, _ := json.Marshal(r.invitations)
-		_ = os.WriteFile("invitations.json", b, 0666)
-	}
 
 	return inv, nil
 }

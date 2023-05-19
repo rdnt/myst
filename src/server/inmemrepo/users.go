@@ -1,22 +1,10 @@
-package repository
+package inmemrepo
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"time"
 
 	"myst/src/server/application/domain/user"
 )
-
-type User struct {
-	Id           string    `json:"id"`
-	Username     string    `json:"username"`
-	PasswordHash string    `json:"passwordHash"`
-	PublicKey    []byte    `json:"publicKey"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
-}
 
 func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
@@ -33,12 +21,7 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 		}
 	}
 
-	r.users[u.Id] = UserToJSON(u)
-
-	{ // debug
-		b, _ := json.Marshal(r.users)
-		_ = os.WriteFile("users.json", b, 0666)
-	}
+	r.users[u.Id] = u
 
 	return u, nil
 }
@@ -52,7 +35,7 @@ func (r *Repository) User(id string) (user.User, error) {
 		return user.User{}, user.ErrNotFound
 	}
 
-	return UserFromJSON(u), nil
+	return u, nil
 }
 
 func (r *Repository) UserByUsername(username string) (user.User, error) {
@@ -61,7 +44,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 
 	for _, u := range r.users {
 		if u.Username == username {
-			return UserFromJSON(u), nil
+			return u, nil
 		}
 	}
 
@@ -74,7 +57,7 @@ func (r *Repository) Users() ([]user.User, error) {
 
 	users := make([]user.User, 0, len(r.users))
 	for _, u := range r.users {
-		users = append(users, UserFromJSON(u))
+		users = append(users, u)
 	}
 
 	return users, nil
@@ -89,15 +72,9 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 		return user.User{}, fmt.Errorf("not found")
 	}
 
-	u2 := UserToJSON(u)
-	r.users[u.Id] = u2
+	r.users[u.Id] = u
 
-	{ // debug
-		b, _ := json.Marshal(r.users)
-		_ = os.WriteFile("users.json", b, 0666)
-	}
-
-	return UserFromJSON(u2), nil
+	return u, nil
 }
 
 // func (r *Repository) DeleteUser(id string) error {

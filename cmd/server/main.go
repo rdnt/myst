@@ -11,7 +11,7 @@ import (
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/server/application"
-	"myst/src/server/repository"
+	"myst/src/server/mongorepo"
 	"myst/src/server/rest"
 )
 
@@ -42,7 +42,10 @@ func main() {
 
 	logger.EnableDebug = config.Debug
 
-	repo := repository.New()
+	repo, err := mongorepo.New()
+	if err != nil {
+		panic(err)
+	}
 
 	app, err := application.New(
 		application.WithKeystoreRepository(repo),

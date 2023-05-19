@@ -63,7 +63,7 @@ func InvitationFromBSON(inv Invitation) (invitation.Invitation, error) {
 }
 
 func (r *Repository) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
-	collection := r.db.Database("myst").Collection("invitations")
+	collection := r.mdb.Database(r.database).Collection("invitations")
 
 	bsonInv := InvitationToBSON(inv)
 
@@ -81,7 +81,7 @@ func (r *Repository) CreateInvitation(inv invitation.Invitation) (invitation.Inv
 }
 
 func (r *Repository) Invitation(id string) (invitation.Invitation, error) {
-	collection := r.db.Database("myst").Collection("invitations")
+	collection := r.mdb.Database(r.database).Collection("invitations")
 
 	res := collection.FindOne(context.Background(), bson.D{{"_id", id}})
 	err := res.Err()
@@ -101,7 +101,7 @@ func (r *Repository) Invitation(id string) (invitation.Invitation, error) {
 }
 
 func (r *Repository) Invitations() ([]invitation.Invitation, error) {
-	collection := r.db.Database("myst").Collection("invitations")
+	collection := r.mdb.Database(r.database).Collection("invitations")
 
 	ctx := context.Background()
 
@@ -134,7 +134,7 @@ func (r *Repository) Invitations() ([]invitation.Invitation, error) {
 }
 
 func (r *Repository) UpdateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
-	collection := r.db.Database("myst").Collection("invitations")
+	collection := r.mdb.Database(r.database).Collection("invitations")
 
 	ctx := context.Background()
 

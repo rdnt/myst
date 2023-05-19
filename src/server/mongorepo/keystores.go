@@ -46,7 +46,7 @@ func KeystoreFromBSON(k Keystore) keystore.Keystore {
 }
 
 func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
-	collection := r.db.Database("myst").Collection("keystores")
+	collection := r.mdb.Database(r.database).Collection("keystores")
 
 	kb := KeystoreToBSON(k)
 
@@ -61,7 +61,7 @@ func (r *Repository) CreateKeystore(k keystore.Keystore) (keystore.Keystore, err
 }
 
 func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
-	collection := r.db.Database("myst").Collection("keystores")
+	collection := r.mdb.Database(r.database).Collection("keystores")
 
 	res := collection.FindOne(context.Background(), bson.D{{"_id", id}})
 	err := res.Err()
@@ -81,7 +81,7 @@ func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 }
 
 func (r *Repository) Keystores() ([]keystore.Keystore, error) {
-	collection := r.db.Database("myst").Collection("keystores")
+	collection := r.mdb.Database(r.database).Collection("keystores")
 
 	ctx := context.Background()
 
@@ -109,7 +109,7 @@ func (r *Repository) Keystores() ([]keystore.Keystore, error) {
 }
 
 func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
-	collection := r.db.Database("myst").Collection("keystores")
+	collection := r.mdb.Database(r.database).Collection("keystores")
 
 	ctx := context.Background()
 

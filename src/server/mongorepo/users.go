@@ -43,7 +43,7 @@ func UserFromBSON(u User) user.User {
 }
 
 func (r *Repository) CreateUser(u user.User) (user.User, error) {
-	collection := r.db.Database("myst").Collection("users")
+	collection := r.mdb.Database(r.database).Collection("users")
 
 	bu := UserToBSON(u)
 
@@ -58,7 +58,7 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 }
 
 func (r *Repository) User(id string) (user.User, error) {
-	collection := r.db.Database("myst").Collection("users")
+	collection := r.mdb.Database(r.database).Collection("users")
 
 	res := collection.FindOne(context.Background(), bson.D{{"_id", id}})
 	err := res.Err()
@@ -78,7 +78,7 @@ func (r *Repository) User(id string) (user.User, error) {
 }
 
 func (r *Repository) UserByUsername(username string) (user.User, error) {
-	collection := r.db.Database("myst").Collection("users")
+	collection := r.mdb.Database(r.database).Collection("users")
 
 	res := collection.FindOne(context.Background(), bson.D{{"username", username}})
 	err := res.Err()
@@ -98,7 +98,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 }
 
 func (r *Repository) Users() ([]user.User, error) {
-	collection := r.db.Database("myst").Collection("users")
+	collection := r.mdb.Database(r.database).Collection("users")
 
 	ctx := context.Background()
 
@@ -126,7 +126,7 @@ func (r *Repository) Users() ([]user.User, error) {
 }
 
 func (r *Repository) UpdateUser(u user.User) (user.User, error) {
-	collection := r.db.Database("myst").Collection("users")
+	collection := r.mdb.Database(r.database).Collection("users")
 
 	ctx := context.Background()
 

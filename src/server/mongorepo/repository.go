@@ -9,23 +9,25 @@ import (
 )
 
 type Repository struct {
-	db *mongo.Client
+	mdb      *mongo.Client
+	database string
 }
 
 func (r *Repository) FlushDB() error {
-	return r.db.Database("myst").Drop(context.Background())
+	return r.mdb.Database(r.database).Drop(context.Background())
 }
 
-func New() (*Repository, error) {
+func New(addr string, database string) (*Repository, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(addr))
 	if err != nil {
 		return nil, err
 	}
 
 	return &Repository{
-		db: client,
+		mdb:      client,
+		database: database,
 	}, nil
 }

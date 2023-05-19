@@ -16,8 +16,10 @@ import (
 )
 
 type Config struct {
-	Port int
-	Slow bool
+	Port          int
+	Slow          bool
+	MongoAddress  string
+	MongoDatabase string
 }
 
 func parseFlags() Config {
@@ -25,6 +27,10 @@ func parseFlags() Config {
 
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
 	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 500ms before starting up")
+
+	flag.StringVar(&cfg.MongoAddress, "mongo-addr", "mongodb://localhost:27017",
+		"The address of the mongodb server")
+	flag.StringVar(&cfg.MongoDatabase, "mongo-db", "myst", "The name of the mongo database")
 
 	flag.Parse()
 
@@ -42,7 +48,7 @@ func main() {
 
 	logger.EnableDebug = config.Debug
 
-	repo, err := mongorepo.New()
+	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
 	if err != nil {
 		panic(err)
 	}

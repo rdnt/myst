@@ -22,7 +22,7 @@ type Server struct {
 }
 
 func newServer(t *testing.T, address string) *Server {
-	repo, err := mongorepo.New()
+	repo, err := mongorepo.New("mongodb://localhost:27017", "myst-test")
 	assert.NilError(t, err)
 
 	app, err := application.New(

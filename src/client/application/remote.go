@@ -1,7 +1,7 @@
 package application
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	"myst/src/client/enclaverepo/enclave"
 
@@ -18,7 +18,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 	if errors.Is(err, enclave.ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
-		return user.User{}, err
+		return user.User{}, errors.Wrap(err, "failed to query credentials")
 	}
 
 	if !mustInit && rem.Address != app.remote.Address() {
@@ -27,26 +27,26 @@ func (app *application) Register(username, password string) (user.User, error) {
 
 	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
 	if err != nil {
-		return user.User{}, err
+		return user.User{}, errors.Wrap(err, "failed to generate keypair")
 	}
 
 	u, err := app.remote.Register(username, password, publicKey)
 	if err != nil {
-		return user.User{}, err
+		return user.User{}, errors.Wrap(err, "failed to register user")
 	}
 
 	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
 	if err != nil {
-		return user.User{}, err
+		return user.User{}, errors.Wrap(err, "failed to update credentials")
 	}
 
 	return u, nil
 }
 
-// Authenticate signs the user in against the remote. Username and password is used
+// SignIn signs the user in against the remote. Username and password is used
 // for authentication, and the publicKey is used to replace the upstream
 // public key in order to be able to sync keystores.
-// func (app *application) Authenticate(username, password string) (user.User, error) {
+// func (app *application) SignIn(username, password string) (user.User, error) {
 // 	var mustInit bool
 //
 // 	rem, err := app.enclave.Credentials()

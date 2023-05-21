@@ -37,10 +37,8 @@ type Remote interface {
 	Address() string
 
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
-	Keystore(id string, privateKey []byte) (keystore.Keystore, error)
 	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
-	DeleteKeystore(id string) error
 
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)

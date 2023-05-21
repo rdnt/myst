@@ -77,6 +77,7 @@
     padding: 12px 18px;
     box-sizing: border-box;
     flex-basis: 300px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     overflow-y: auto;

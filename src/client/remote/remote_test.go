@@ -28,11 +28,11 @@ package remote_test
 //	assert.NoError(t, err)
 //
 //	user1, pass1 := "rdnt", "1234"
-//	err = r1.SignIn(user1, pass1)
+//	err = r1.Authenticate(user1, pass1)
 //	assert.NoError(t, err)
 //
 //	user2, pass2 := "abcd", "5678"
-//	err = r2.SignIn(user2, pass2)
+//	err = r2.Authenticate(user2, pass2)
 //	assert.NoError(t, err)
 //
 //	err = repo.Initialize("12345678")

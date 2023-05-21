@@ -239,6 +239,9 @@
 
         a {
           padding: 5px 0;
+          overflow: hidden;
+          word-break: break-all;
+          text-overflow: ellipsis;
         }
 
       }

@@ -49,10 +49,9 @@ type Remote interface {
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 
-	SignIn(username, password string) error
+	Authenticate(username, password string) error
 	Register(username, password string, publicKey []byte) (user.User, error)
 	// SignOut() error
-	SignedIn() bool
+	Authenticated() bool
 	CurrentUser() *user.User
-	UserByUsername(username string) (user.User, error)
 }

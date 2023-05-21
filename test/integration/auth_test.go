@@ -29,7 +29,7 @@ func TestAuthorization(t *testing.T) {
 	// assert.NilError(t, err)
 	// assert.Assert(t, u == nil)
 	//
-	// _, err = s.Client1.App.SignIn(s.Client1.Username, s.Client1.Password)
+	// _, err = s.Client1.App.Authenticate(s.Client1.Username, s.Client1.Password)
 	// assert.NilError(t, err)
 	//
 	// u, err = s.Client1.App.CurrentUser()

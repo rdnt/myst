@@ -76,9 +76,12 @@
   $bg: #0a0e11;
 
   main {
+    position: relative;
     display: flex;
     align-items: stretch;
     background-color: $bg;
-    width: 100%;
+    flex-grow: 0;
+    flex-basis: 100%;
+    min-width: 0;
   }
 </style>

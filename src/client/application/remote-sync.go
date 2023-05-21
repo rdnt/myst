@@ -25,10 +25,8 @@ func (app *application) Sync() error {
 
 	remoteKeystores, err := app.remote.Keystores(rem.PrivateKey)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "failed to query remote keystores")
 	}
-
-	log.Debugln(remoteKeystores)
 
 	for _, k := range keystores {
 		if k.RemoteId == "" {
@@ -36,22 +34,24 @@ func (app *application) Sync() error {
 			continue
 		}
 
-		rk, err := app.remote.Keystore(k.RemoteId, k.Key)
-		if err != nil {
-			return err
+		rk, ok := remoteKeystores[k.RemoteId]
+		if !ok {
+			// apparently this keystore is no longer at the remote?
+			// TODO: should we sync it again?
+			continue
 		}
 
 		if rk.Version > k.Version {
 			err = app.enclave.UpdateKeystore(rk)
 			if err != nil {
-				return err
+				return errors.WithMessage(err, "failed to update local keystore")
 			}
 
 			log.Println("Local keystore updated", k.Id, k.RemoteId)
 		} else if rk.Version < k.Version {
 			_, err = app.remote.UpdateKeystore(k)
 			if err != nil {
-				return err
+				return errors.WithMessage(err, "failed to update remote keystore")
 			}
 
 			log.Println("Credentials keystore updated", k.Id, k.RemoteId)
@@ -62,16 +62,3 @@ func (app *application) Sync() error {
 
 	return nil
 }
-
-// func (app *applicationrefactor) syncKeystoreKeys() error {
-//	invs, err := app.remote.Invitations()
-//	if err != nil {
-//		return err
-//	}
-//
-//	ks, err := app.enclave.Keystores()
-//	if err != nil {
-//		return err
-//	}
-//
-// }

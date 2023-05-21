@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/client/application"
@@ -43,6 +45,22 @@ func parseFlags() Config {
 
 var log = logger.New("client", logger.Red)
 
+func createDataDir(dir string) error {
+	var create bool
+	_, err := os.Stat(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		create = true
+	} else if err != nil {
+		return err
+	}
+
+	if !create {
+		return nil
+	}
+
+	return os.Mkdir(dir, os.ModePerm)
+}
+
 func main() {
 	cfg := parseFlags()
 
@@ -51,6 +69,11 @@ func main() {
 	}
 
 	logger.EnableDebug = config.Debug
+
+	err := createDataDir(cfg.DataDir)
+	if err != nil {
+		panic(err)
+	}
 
 	enc, err := enclaverepo.New(cfg.DataDir)
 	if err != nil {

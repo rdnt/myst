@@ -133,7 +133,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 		ks[id] = k
 	}
 
-	if app.remote.SignedIn() {
+	if app.remote.Authenticated() {
 		rem, err := app.enclave.Credentials()
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get remote")

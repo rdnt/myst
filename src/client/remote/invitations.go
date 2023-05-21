@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ErrSignedOut = errors.New("signed out")
+	ErrNotAuthenticated = errors.New("not authenticated")
 )
 
 func (r *remote) Invitation(id string) (invitation.Invitation, error) {
@@ -28,8 +28,8 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 }
 
 func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
-	if !r.SignedIn() {
-		return invitation.Invitation{}, ErrSignedOut
+	if !r.Authenticated() {
+		return invitation.Invitation{}, ErrNotAuthenticated
 	}
 
 	res, err := r.client.CreateInvitationWithResponse(
@@ -58,8 +58,8 @@ func (r *remote) Address() string {
 }
 
 func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
-	if !r.SignedIn() {
-		return nil, ErrSignedOut
+	if !r.Authenticated() {
+		return nil, ErrNotAuthenticated
 	}
 
 	res, err := r.client.InvitationsWithResponse(context.Background())
@@ -105,8 +105,8 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 }
 
 func (r *remote) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
-	if !r.SignedIn() {
-		return invitation.Invitation{}, ErrSignedOut
+	if !r.Authenticated() {
+		return invitation.Invitation{}, ErrNotAuthenticated
 	}
 
 	res, err := r.client.DeclineOrCancelInvitationWithResponse(

@@ -58,7 +58,8 @@
       <Link path={`/keystore/${keystore.id}/entry/${entry.id}`}>
         <div class="entry">
           <span class="icon">
-            <img alt="" src={`https://${entry.website}/favicon.ico`}/>
+<!--            <img alt="" src={`https://${entry.website}/favicon.ico`}/>-->
+            <span class="placeholder"/>
           </span>
           <div class="info">
             <span class="name">
@@ -94,6 +95,9 @@
     background-color: #101519;
     height: 100%;
     flex-basis: 50%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 0;
 
     .entries {
       overflow-y: auto;
@@ -118,10 +122,17 @@
         text-decoration: none;
         margin-bottom: 2px;
         cursor: default;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
         .info {
           display: flex;
           flex-direction: column;
+
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
         }
 
         &.header {
@@ -179,15 +190,16 @@
 
         .name, .user, .pass {
           flex-grow: 1;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          padding-right: 20px;
+          //padding-right: 20px;
           min-height: 20px;
           box-sizing: border-box;
           vertical-align: middle;
           display: inline-block;
           line-height: 1.3;
+
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .user {

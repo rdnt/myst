@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-errors/errors"
 
@@ -14,21 +15,34 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-func NoRoute(c *gin.Context) {
-	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// serve a json 404 error if it's an Server call
-		resp := generated.Error{
-			Code:    "not-found",
-			Message: http.StatusText(http.StatusNotFound),
-		}
-
-		c.JSON(http.StatusNotFound, resp)
-	} else {
-		// serve ui and let it handle the error otherwise
-		c.File("static/index.html")
+func NoRoute(urlPrefix string, fs static.ServeFileSystem) gin.HandlerFunc {
+	fileserver := http.FileServer(fs)
+	if urlPrefix != "" {
+		fileserver = http.StripPrefix(urlPrefix, fileserver)
 	}
 
-	c.Abort()
+	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			// serve a json 404 error if it's an api call
+			resp := generated.Error{
+				Code:    "not-found",
+				Message: http.StatusText(http.StatusNotFound),
+			}
+
+			c.JSON(http.StatusNotFound, resp)
+			c.Abort()
+		} else if fs.Exists(urlPrefix, c.Request.URL.Path) {
+			// serve ui and let it handle the error otherwise
+
+			fileserver.ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+		} else {
+			// serve the / path
+			c.Request.URL.Path = "/"
+			fileserver.ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+		}
+	}
 }
 
 // Recovery is a panic recovery middleware

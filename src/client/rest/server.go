@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -74,22 +75,12 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	r.Use(LoggerMiddleware)
 
 	// error 404 handling
-	r.NoRoute(NoRoute)
+	r.NoRoute(NoRoute("/", EmbedFolder(ui, "static")))
 
 	// metrics
 	if config.Debug {
 		// p := prometheus.NewPrometheus("gin")
 		// p.Use(r)
-	}
-
-	// error 404 handling
-	r.NoRoute(NoRoute)
-
-	// serve the UI
-	if config.Debug || ui == nil {
-		r.Use(static.Serve("/", static.LocalFile("static", false)))
-	} else {
-		r.Use(static.Serve("/", EmbedFolder(ui, "static")))
 	}
 
 	r.Use(
@@ -211,7 +202,7 @@ func (s *Server) Enclave(c *gin.Context) {
 
 func (s *Server) Import(c *gin.Context) {
 
-	keystoreName := "All"
+	keystoreName := "Passwords"
 	b := []byte("")
 
 	csvReader := csv.NewReader(bytes.NewReader(b))
@@ -251,6 +242,7 @@ func (s *Server) Import(c *gin.Context) {
 			Error(c, http.StatusInternalServerError, err)
 			return
 		}
+		fmt.Println("Imported: ", website, username, "***")
 
 	}
 

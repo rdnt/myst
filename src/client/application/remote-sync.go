@@ -8,7 +8,7 @@ func (app *application) Sync() error {
 	log.Println("sync: started")
 	defer log.Print("sync: finished")
 
-	if !app.remote.SignedIn() {
+	if !app.remote.Authenticated() {
 		log.Print("sync: not signed in")
 		return nil
 	}

@@ -8,7 +8,7 @@ import (
 
 // Debug indicates if the process should show detailed debug information on the
 // logs/terminal.
-var Debug bool = true
+var Debug bool = false
 
 func init() {
 	_ = godotenv.Overload(".env.production")

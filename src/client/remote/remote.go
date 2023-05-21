@@ -52,8 +52,8 @@ func New(opts ...Option) (application.Remote, error) {
 }
 
 // func (r *remote) UploadKeystore(id string) (keystore.Keystore, error) {
-//	if !r.SignedIn() {
-//		return keystore.Keystore{}, ErrSignedOut
+//	if !r.Authenticated() {
+//		return keystore.Keystore{}, ErrNotAuthenticated
 //	}
 //
 //	k, err := r.keystores.Keystore(id)
@@ -78,8 +78,8 @@ func New(opts ...Option) (application.Remote, error) {
 //		return keystore.Keystore{}, err
 //	}
 //
-//	if !r.SignedIn() {
-//		return keystore.Keystore{}, ErrSignedOut
+//	if !r.Authenticated() {
+//		return keystore.Keystore{}, ErrNotAuthenticated
 //	}
 //
 //	res, err := r.client.CreateKeystoreWithResponse(
@@ -104,8 +104,7 @@ func New(opts ...Option) (application.Remote, error) {
 //	return k, nil
 // }
 
-func (r *remote) SignIn(username, password string) error {
-	fmt.Println("Signing in to remote...")
+func (r *remote) Authenticate(username, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -113,11 +112,10 @@ func (r *remote) SignIn(username, password string) error {
 		ctx, generated.LoginJSONRequestBody{
 			Username: username,
 			Password: password,
-			// PublicKey: publicKey,
 		},
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to sign in")
+		return errors.Wrap(err, "authentication failed")
 	}
 
 	if res.JSON200 == nil {
@@ -144,36 +142,12 @@ func (r *remote) SignIn(username, password string) error {
 	return nil
 }
 
-func (r *remote) SignedIn() bool {
+func (r *remote) Authenticated() bool {
 	return r.bearerToken != ""
 }
 
 func (r *remote) CurrentUser() *user.User {
 	return r.user
-}
-
-func (r *remote) UserByUsername(username string) (user.User, error) {
-	if !r.SignedIn() {
-		return user.User{}, ErrSignedOut
-	}
-
-	res, err := r.client.UserByUsernameWithResponse(
-		context.Background(), &generated.UserByUsernameParams{Username: &username},
-	)
-	if err != nil {
-		return user.User{}, err
-	}
-
-	if res.JSON200 == nil {
-		return user.User{}, fmt.Errorf("invalid response")
-	}
-
-	u := UserFromJSON(*res.JSON200)
-	if err != nil {
-		return user.User{}, errors.WithMessage(err, "failed to parse invitation")
-	}
-
-	return u, nil
 }
 
 // func (r *remote) SignOut() error {

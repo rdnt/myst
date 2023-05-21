@@ -43,10 +43,10 @@ func (app *application) Register(username, password string) (user.User, error) {
 	return u, nil
 }
 
-// SignIn signs the user in against the remote. Username and password is used
+// Authenticate signs the user in against the remote. Username and password is used
 // for authentication, and the publicKey is used to replace the upstream
 // public key in order to be able to sync keystores.
-// func (app *application) SignIn(username, password string) (user.User, error) {
+// func (app *application) Authenticate(username, password string) (user.User, error) {
 // 	var mustInit bool
 //
 // 	rem, err := app.enclave.Credentials()
@@ -67,7 +67,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 // 		return user.User{}, err
 // 	}
 //
-// 	u, err := app.remote.SignIn(username, password, publicKey)
+// 	u, err := app.remote.Authenticate(username, password, publicKey)
 // 	if err != nil {
 // 		return user.User{}, err
 // 	}
@@ -140,7 +140,7 @@ func (app *application) Authenticate(password string) error {
 			return ErrRemoteAddressMismatch
 		}
 
-		err = app.remote.SignIn(rem.Username, rem.Password)
+		err = app.remote.Authenticate(rem.Username, rem.Password)
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,8 @@ import (
 )
 
 func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
-	if !r.SignedIn() {
-		return keystore.Keystore{}, ErrSignedOut
+	if !r.Authenticated() {
+		return keystore.Keystore{}, ErrNotAuthenticated
 	}
 
 	jk := enclaverepo.KeystoreToJSON(k)
@@ -61,8 +61,8 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 }
 
 func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error) {
-	if !r.SignedIn() {
-		return keystore.Keystore{}, ErrSignedOut
+	if !r.Authenticated() {
+		return keystore.Keystore{}, ErrNotAuthenticated
 	}
 
 	res, err := r.client.KeystoreWithResponse(
@@ -114,8 +114,8 @@ func (r *remote) Keystore(remoteID string, key []byte) (keystore.Keystore, error
 }
 
 func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
-	if !r.SignedIn() {
-		return keystore.Keystore{}, ErrSignedOut
+	if !r.Authenticated() {
+		return keystore.Keystore{}, ErrNotAuthenticated
 	}
 
 	jk := enclaverepo.KeystoreToJSON(k)
@@ -153,8 +153,8 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 }
 
 func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {
-	if !r.SignedIn() {
-		return map[string]keystore.Keystore{}, ErrSignedOut
+	if !r.Authenticated() {
+		return map[string]keystore.Keystore{}, ErrNotAuthenticated
 	}
 
 	res, err := r.client.KeystoresWithResponse(context.Background())

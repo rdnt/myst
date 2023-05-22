@@ -26,7 +26,7 @@
     await getKeystores()
     const u = await getCurrentUser()
     if (u) {
-      await getInvitations().then((invs) => {console.log('got invs', invs)})
+      await getInvitations()
     }
     ready = true
   })

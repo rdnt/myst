@@ -7,15 +7,15 @@ const {subscribe, update} = writable<User | null | undefined>(undefined);
 
 export const currentUser = {subscribe} as Readable<User | null>;
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<User | null> => {
     try {
-        await api.currentUser().then((u: User) => {
+        return await api.currentUser().then((u: User) => {
             update(() => u);
-            return Promise.resolve(u)
+            return u;
         }).catch((e: ApiError) => {
             if (e.status === 404) {
                 update(() => null);
-                return Promise.resolve(null)
+                return null;
             }
 
             console.error(e)

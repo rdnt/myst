@@ -12,11 +12,12 @@ type Enclave struct {
 }
 
 type Remote struct {
-	Address    string `json:"address"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	PublicKey  []byte `json:"publicKey"`
-	PrivateKey []byte `json:"privateKey"`
+	Address    string            `json:"address"`
+	Username   string            `json:"username"`
+	Password   string            `json:"password"`
+	PublicKey  []byte            `json:"publicKey"`
+	PrivateKey []byte            `json:"privateKey"`
+	UserKeys   map[string][]byte `json:"userKeys"`
 }
 
 type Keystore struct {

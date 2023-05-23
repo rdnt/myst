@@ -69,6 +69,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 			Password:   rem.Password,
 			PublicKey:  rem.PublicKey,
 			PrivateKey: rem.PrivateKey,
+			UserKeys:   rem.UserKeys,
 		}
 	}
 
@@ -108,6 +109,7 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 			Password:   jrem.Password,
 			PublicKey:  jrem.PublicKey,
 			PrivateKey: jrem.PrivateKey,
+			UserKeys:   jrem.UserKeys,
 		}
 	}
 

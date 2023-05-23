@@ -24,7 +24,7 @@ type Enclave interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	SetCredentials(address, username, password string, publicKey, privateKey []byte) error
+	UpdateCredentials(creds credentials.Credentials) error
 	Credentials() (credentials.Credentials, error)
 }
 

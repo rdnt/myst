@@ -60,5 +60,11 @@ func (app *application) Sync() error {
 		}
 	}
 
+	app.finalizeSilent()
+
 	return nil
+}
+
+func (app *application) finalizeSilent() {
+	invs
 }

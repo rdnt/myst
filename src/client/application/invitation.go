@@ -162,10 +162,38 @@ func (app *application) FinalizeInvitation(id string) (invitation.Invitation, er
 }
 
 func (app *application) Invitation(id string) (invitation.Invitation, error) {
-	return app.remote.Invitation(id)
+	usr := app.remote.CurrentUser()
+	if usr == nil {
+		return invitation.Invitation{}, errors.New("no current user")
+	}
+
+	inv, err := app.remote.Invitation(id)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
+	}
+
+	creds, err := app.enclave.Credentials()
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get credentials")
+	}
+
+	if _, ok := creds.UserKeys[inv.Inviter.Id]; ok && usr.Id != inv.Inviter.Id {
+		inv.Inviter.Verified = true
+	}
+
+	if _, ok := creds.UserKeys[inv.Invitee.Id]; ok && usr.Id != inv.Invitee.Id {
+		inv.Invitee.Verified = true
+	}
+
+	return inv, nil
 }
 
 func (app *application) Invitations() (map[string]invitation.Invitation, error) {
+	usr := app.remote.CurrentUser()
+	if usr == nil {
+		return nil, errors.New("no current user")
+	}
+
 	return app.remote.Invitations()
 }
 

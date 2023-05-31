@@ -565,6 +565,16 @@
       "post": {
         "description": "Finalizes an invitation",
         "operationId": "FinalizeInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeInvitationRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Invitation",
@@ -824,6 +834,22 @@
           }
         }
       },
+      "FinalizeInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "remoteKeystoreId": {
+            "type": "string"
+          },
+          "inviteePublicKey": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "required": [
+          "remoteKeystoreId",
+          "inviteePublicKey"
+        ]
+      },
       "Invitations": {
         "type": "array",
         "items": {
@@ -914,8 +940,7 @@
         "required": [
           "id",
           "username",
-          "publicKey",
-          "icon"
+          "publicKey"
         ]
       },
       "RegisterRequest": {

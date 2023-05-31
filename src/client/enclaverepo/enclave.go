@@ -45,11 +45,16 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 		return nil, err
 	}
 
-	return enclaveFromJSON(b, salt)
+	encJson, err := enclaveFromJSON(b, salt)
+	if err != nil {
+		return nil, err
+	}
+
+	return encJson, nil
 }
 
 func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
-	ks := map[string]Keystore{}
+	ks := map[string]KeystoreJSON{}
 
 	eks, err := e.Keystores()
 	if err != nil {
@@ -59,11 +64,11 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 		ks[k.Id] = KeystoreToJSON(k)
 	}
 
-	var jrem *Remote
+	var jrem *RemoteJSON
 	rem := e.Remote()
 
 	if rem != nil {
-		jrem = &Remote{
+		jrem = &RemoteJSON{
 			Address:    rem.Address,
 			Username:   rem.Username,
 			Password:   rem.Password,
@@ -73,7 +78,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(Enclave{
+	return json.Marshal(EnclaveJSON{
 		Keystores: ks,
 		Keys:      e.Keys(),
 		Remote:    jrem,
@@ -81,7 +86,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 }
 
 func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
-	e := &Enclave{}
+	e := &EnclaveJSON{}
 
 	err := json.Unmarshal(b, e)
 	if err != nil {
@@ -117,6 +122,7 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 		enclave.WithKeystores(ks),
 		enclave.WithSalt(salt),
 		enclave.WithRemote(rem),
+		enclave.WithKeys(e.Keys),
 	)
 }
 

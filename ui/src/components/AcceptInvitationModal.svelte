@@ -15,9 +15,17 @@
 <form on:submit|preventDefault={submit}>
   <Modal bind:show={show}>
     <div class="delete-title" slot="header">Are you sure you want to accept this invitation?</div>
+    <div>Identity</div>
+    <div>
+      {#if invitation.inviter.icon}
+        <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(invitation.inviter.icon)} alt="">
+      {:else if invitation.invitee.icon}
+        <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(invitation.invitee.icon)} alt="">
+      {/if}
+    </div>
     <div class="modal-footer" slot="footer">
-      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
       <button class="button green" type="submit">Accept</button>
+      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
     </div>
   </Modal>
 </form>

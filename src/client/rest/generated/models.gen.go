@@ -59,6 +59,12 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// FinalizeInvitationRequest defines model for FinalizeInvitationRequest.
+type FinalizeInvitationRequest struct {
+	InviteePublicKey []byte `json:"inviteePublicKey"`
+	RemoteKeystoreId string `json:"remoteKeystoreId"`
+}
+
 // Invitation defines model for Invitation.
 type Invitation struct {
 	AcceptedAt           time.Time        `json:"acceptedAt"`
@@ -112,10 +118,10 @@ type UpdateEntryRequest struct {
 
 // User defines model for User.
 type User struct {
-	Icon      string `json:"icon"`
-	Id        string `json:"id"`
-	PublicKey []byte `json:"publicKey"`
-	Username  string `json:"username"`
+	Icon      *string `json:"icon,omitempty"`
+	Id        string  `json:"id"`
+	PublicKey []byte  `json:"publicKey"`
+	Username  string  `json:"username"`
 }
 
 // LoginDeprecatedJSONRequestBody defines body for LoginDeprecated for application/json ContentType.
@@ -129,6 +135,9 @@ type AuthenticateJSONRequestBody = AuthenticateRequest
 
 // CreateEnclaveJSONRequestBody defines body for CreateEnclave for application/json ContentType.
 type CreateEnclaveJSONRequestBody = CreateEnclaveRequest
+
+// FinalizeInvitationJSONRequestBody defines body for FinalizeInvitation for application/json ContentType.
+type FinalizeInvitationJSONRequestBody = FinalizeInvitationRequest
 
 // CreateEntryJSONRequestBody defines body for CreateEntry for application/json ContentType.
 type CreateEntryJSONRequestBody = CreateEntryRequest

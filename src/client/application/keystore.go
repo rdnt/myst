@@ -155,9 +155,9 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 	return ks, nil
 }
 
-func (app *application) UpdateCredentials(creds credentials.Credentials) error {
-	return app.enclave.UpdateCredentials(creds)
-}
+// func (app *application) UpdateCredentials(creds credentials.Credentials) error {
+// 	return app.enclave.UpdateCredentials(creds)
+// }
 
 func (app *application) Credentials() (credentials.Credentials, error) {
 	return app.enclave.Credentials()

@@ -60,5 +60,12 @@ func (s *Server) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, UserToRest(u))
+	restUser, err := s.userToRest(u)
+	if err != nil {
+		log.Error(err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusCreated, restUser)
 }

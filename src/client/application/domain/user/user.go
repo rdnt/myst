@@ -9,7 +9,11 @@ type User struct {
 	Id        string
 	Username  string
 	PublicKey []byte
-	Verified  bool
+	// TODO: do not expose the shared secret directly, hash it and store
+	// the hash internally on the enclave for each user that has an invitation
+	// accepted/finalized.
+	SharedSecret []byte
+	Verified     bool
 }
 
 func (u User) String() string {

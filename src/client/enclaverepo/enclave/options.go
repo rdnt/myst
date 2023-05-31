@@ -9,12 +9,15 @@ type Option func(*Enclave) error
 
 func WithKeystores(keystores map[string]keystore.Keystore) Option {
 	return func(e *Enclave) error {
-		for _, k := range keystores {
-			err := e.AddKeystore(k)
-			if err != nil {
-				return err
-			}
-		}
+		e.keystores = keystores
+
+		return nil
+	}
+}
+
+func WithKeys(keys map[string][]byte) Option {
+	return func(e *Enclave) error {
+		e.keys = keys
 
 		return nil
 	}

@@ -40,6 +40,7 @@ func New(opts ...Option) (*Enclave, error) {
 func (e *Enclave) AddKeystore(k keystore.Keystore) error {
 	p := crypto.DefaultArgon2IdParams
 
+	fmt.Println("TODO @rdnt RANDOM BYTES @@@@@@@@@@@@@@@@@@@@")
 	key, err := crypto.GenerateRandomBytes(uint(p.KeyLength))
 	if err != nil {
 		return err

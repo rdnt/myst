@@ -124,8 +124,10 @@ type ClientInterface interface {
 	// AcceptInvitation request
 	AcceptInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// FinalizeInvitation request
-	FinalizeInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// FinalizeInvitation request with any body
+	FinalizeInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	FinalizeInvitation(ctx context.Context, invitationId string, body FinalizeInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetInvitations request
 	GetInvitations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -322,8 +324,20 @@ func (c *Client) AcceptInvitation(ctx context.Context, invitationId string, reqE
 	return c.Client.Do(req)
 }
 
-func (c *Client) FinalizeInvitation(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewFinalizeInvitationRequest(c.Server, invitationId)
+func (c *Client) FinalizeInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFinalizeInvitationRequestWithBody(c.Server, invitationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FinalizeInvitation(ctx context.Context, invitationId string, body FinalizeInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFinalizeInvitationRequest(c.Server, invitationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -818,8 +832,19 @@ func NewAcceptInvitationRequest(server string, invitationId string) (*http.Reque
 	return req, nil
 }
 
-// NewFinalizeInvitationRequest generates requests for FinalizeInvitation
-func NewFinalizeInvitationRequest(server string, invitationId string) (*http.Request, error) {
+// NewFinalizeInvitationRequest calls the generic FinalizeInvitation builder with application/json body
+func NewFinalizeInvitationRequest(server string, invitationId string, body FinalizeInvitationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewFinalizeInvitationRequestWithBody(server, invitationId, "application/json", bodyReader)
+}
+
+// NewFinalizeInvitationRequestWithBody generates requests for FinalizeInvitation with any type of body
+func NewFinalizeInvitationRequestWithBody(server string, invitationId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -844,10 +869,12 @@ func NewFinalizeInvitationRequest(server string, invitationId string) (*http.Req
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1308,8 +1335,10 @@ type ClientWithResponsesInterface interface {
 	// AcceptInvitation request
 	AcceptInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*AcceptInvitationResponse, error)
 
-	// FinalizeInvitation request
-	FinalizeInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error)
+	// FinalizeInvitation request with any body
+	FinalizeInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error)
+
+	FinalizeInvitationWithResponse(ctx context.Context, invitationId string, body FinalizeInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error)
 
 	// GetInvitations request
 	GetInvitationsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetInvitationsResponse, error)
@@ -1915,9 +1944,17 @@ func (c *ClientWithResponses) AcceptInvitationWithResponse(ctx context.Context, 
 	return ParseAcceptInvitationResponse(rsp)
 }
 
-// FinalizeInvitationWithResponse request returning *FinalizeInvitationResponse
-func (c *ClientWithResponses) FinalizeInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error) {
-	rsp, err := c.FinalizeInvitation(ctx, invitationId, reqEditors...)
+// FinalizeInvitationWithBodyWithResponse request with arbitrary body returning *FinalizeInvitationResponse
+func (c *ClientWithResponses) FinalizeInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error) {
+	rsp, err := c.FinalizeInvitationWithBody(ctx, invitationId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFinalizeInvitationResponse(rsp)
+}
+
+func (c *ClientWithResponses) FinalizeInvitationWithResponse(ctx context.Context, invitationId string, body FinalizeInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*FinalizeInvitationResponse, error) {
+	rsp, err := c.FinalizeInvitation(ctx, invitationId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}

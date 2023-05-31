@@ -10,6 +10,7 @@
   import {currentUser} from "@/stores/user";
   import {useFocus} from "svelte-navigator";
   import {onMount} from "svelte";
+  import VerifyInvitationModal from "@/components/VerifyInvitationModal.svelte";
 
   const registerFocus = useFocus();
 
@@ -17,8 +18,11 @@
   $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending' || inv.status === 'accepted'));
   $: pastInvitations = $invitations.filter((inv) => (inv.status !== 'pending' && inv.status !== 'accepted'))
 
+  $: console.log($invitations)
+
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
+  let showVerifyInvitationModal: boolean = false;
   let showDeclineInvitationModal: boolean = false;
   let showFinalizeInvitationModal: boolean = false;
 
@@ -42,7 +46,11 @@
 
   function finalizeInvitation() {
     api.finalizeInvitation({
-      invitationId: invitation.id
+      invitationId: invitation.id,
+      requestBody: {
+        remoteKeystoreId: invitation.keystore.remoteId,
+        inviteePublicKey: invitation.invitee.publicKey
+      }
     }).then(() => {
       showFinalizeInvitationModal = false;
       getInvitations();
@@ -52,6 +60,11 @@
   function showAcceptInvitationModalFunc(inv: Invitation) {
     invitation = inv;
     showAcceptInvitationModal = true;
+  }
+
+  function showVerifyInvitationModalFunc(inv: Invitation) {
+    invitation = inv;
+    showVerifyInvitationModal = true;
   }
 
   function showDeclineInvitationModalFunc(inv: Invitation) {
@@ -85,13 +98,28 @@
               {inv.keystore.name}
             </span>
             <span class="user">
-              Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
+              {#if inv.status === 'accepted'}
+                Invitation accepted {format(inv.acceptedAt)}.
+                  Waiting for <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> to verify.
+              {:else}
+                Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
+              {/if}
             </span>
           </div>
-          <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
+          <div>
+            {#if inv.inviter.icon}
+              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
+            {:else if inv.invitee.icon}
+              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">
+            {/if}
+          </div>
           <div class="actions">
-            <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
-            <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
+            {#if inv.status === 'pending'}
+              <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
+              <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Decline</button>
+            {:else if inv.status === 'accepted'}
+              <button class="button green" on:click={() => {showVerifyInvitationModalFunc(inv)}}>Verify</button>
+            {/if}
           </div>
         </div>
       {/each}
@@ -117,11 +145,18 @@
               Invited <strong>{inv.invitee.username}</strong> {format(inv.createdAt)}
             </span>
           </div>
+          <div>
+            {#if inv.inviter.icon}
+              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
+            {:else if inv.invitee.icon}
+              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">
+            {/if}
+          </div>
           <div class="actions">
             {#if inv.status === 'accepted'}
-              <button class="button green" on:click={() => {showFinalizeInvitationModalFunc(inv)}}>Finalize Invitation</button>
+              <button class="button green" on:click={() => {showFinalizeInvitationModalFunc(inv)}}>Verify</button>
             {/if}
-            <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete Invitation</button>
+            <button class="button red" on:click={() => {showDeclineInvitationModalFunc(inv)}}>Delete</button>
           </div>
         </div>
       {/each}
@@ -147,14 +182,7 @@
             {inv.keystore.name}
           </span>
             <span class="user">
-            {#if inv.status === 'accepted'}
-              {#if inv.inviter.id === $currentUser.id}
-                Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}
-              {:else}
-                Invitation accepted {format(inv.acceptedAt)}.
-                Waiting for <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> to come online.
-              {/if}
-            {:else if inv.status === 'finalized'}
+            {#if inv.status === 'finalized'}
               {#if inv.inviter.id === $currentUser.id}
                 Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}
               {:else}
@@ -192,6 +220,7 @@
   <AcceptInvitationModal bind:show={showAcceptInvitationModal} {invitation} on:submit={() => {acceptInvitation()}}/>
   <DeclineInvitationModal bind:show={showDeclineInvitationModal} {invitation} on:submit={() => {declineInvitation()}}/>
   <FinalizeInvitationModal bind:show={showFinalizeInvitationModal} {invitation} on:submit={() => {finalizeInvitation()}}/>
+  <VerifyInvitationModal bind:show={showVerifyInvitationModal} {invitation} />
 {/if}
 
 {#if invitation}

@@ -8,15 +8,25 @@ import (
 	"myst/src/client/rest/generated"
 )
 
-func InvitationToRest(inv invitation.Invitation) generated.Invitation {
+func (s *Server) InvitationToRest(inv invitation.Invitation) (generated.Invitation, error) {
+	inviter, err := s.userToRest(inv.Inviter)
+	if err != nil {
+		return generated.Invitation{}, err
+	}
+
+	invitee, err := s.userToRest(inv.Invitee)
+	if err != nil {
+		return generated.Invitation{}, err
+	}
+
 	return generated.Invitation{
 		Id: inv.Id,
 		Keystore: generated.Keystore{
 			RemoteId: inv.Keystore.RemoteId,
 			Name:     inv.Keystore.Name,
 		},
-		Inviter:              UserToRest(inv.Inviter),
-		Invitee:              UserToRest(inv.Invitee),
+		Inviter:              inviter,
+		Invitee:              invitee,
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		Status:               generated.InvitationStatus(inv.Status.String()),
 		CreatedAt:            inv.CreatedAt,
@@ -24,21 +34,27 @@ func InvitationToRest(inv invitation.Invitation) generated.Invitation {
 		AcceptedAt:           inv.AcceptedAt,
 		DeclinedAt:           inv.DeclinedAt,
 		DeletedAt:            inv.DeletedAt,
-	}
+	}, nil
 }
 
-func UserToRest(u user.User) generated.User {
-	h, err := hashicon.New(u.PublicKey)
-	if err != nil {
-		panic(err)
+func (s *Server) userToRest(u user.User) (generated.User, error) {
+	var icon *string
+	if u.SharedSecret != nil {
+		ic, err := hashicon.New(u.SharedSecret)
+		if err != nil {
+			return generated.User{}, err
+		}
+
+		str := ic.ToSVG()
+		icon = &str
 	}
 
 	return generated.User{
 		Id:        u.Id,
 		Username:  u.Username,
 		PublicKey: u.PublicKey,
-		Icon:      h.ToSVG(),
-	}
+		Icon:      icon,
+	}, nil
 }
 
 func KeystoreToRest(k keystore.Keystore) generated.Keystore {

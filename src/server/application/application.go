@@ -55,6 +55,7 @@ type Application interface {
 
 	CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error)
+	// VerifyInvitation(userId string, invitationId string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(userId, invitationId string) (invitation.Invitation, error)
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
 	UserInvitation(userId, invitationId string) (invitation.Invitation, error)

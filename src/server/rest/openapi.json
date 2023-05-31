@@ -514,7 +514,7 @@
         "type": "object",
         "required": [
           "username",
-          "password",
+          "password"
         ],
         "properties": {
           "username": {

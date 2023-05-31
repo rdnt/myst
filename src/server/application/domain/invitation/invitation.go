@@ -22,6 +22,8 @@ type Invitation struct {
 	InviteeId            string
 	EncryptedKeystoreKey []byte
 	Status               Status
+	InviterVerified      bool
+	InviteeVerified      bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 	AcceptedAt           time.Time

@@ -34,10 +34,12 @@ func (app *application) Sync() error {
 			continue
 		}
 
-		rk, ok := remoteKeystores[k.RemoteId]
+		rk, ok := remoteKeystores[k.Id]
 		if !ok {
 			// apparently this keystore is no longer at the remote?
 			// TODO: should we sync it again?
+
+			log.Println("Keystore missing:", k.Id, k.RemoteId, remoteKeystores)
 			continue
 		}
 

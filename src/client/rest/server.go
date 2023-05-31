@@ -124,9 +124,14 @@ func (s *Server) CurrentUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(
-		http.StatusOK, UserToRest(*u),
-	)
+	restUser, err := s.userToRest(*u)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, restUser)
 }
 
 func (s *Server) CreateKeystore(c *gin.Context) {
@@ -409,7 +414,15 @@ func (s *Server) GetInvitations(c *gin.Context) {
 
 	restInvs := generated.Invitations{}
 	for _, inv := range invs {
-		restInvs = append(restInvs, InvitationToRest(inv))
+		restInv, err := s.InvitationToRest(inv)
+		if err != nil {
+
+			log.Error(err)
+			Error(c, http.StatusInternalServerError, err)
+			return
+		}
+
+		restInvs = append(restInvs, restInv)
 	}
 
 	Success(c, restInvs)
@@ -433,7 +446,14 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, InvitationToRest(inv))
+	restInv, err := s.InvitationToRest(inv)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, restInv)
 }
 
 func (s *Server) AcceptInvitation(c *gin.Context) {
@@ -446,7 +466,14 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	Success(c, InvitationToRest(inv))
+	restInv, err := s.InvitationToRest(inv)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, restInv)
 }
 
 func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
@@ -459,7 +486,14 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 		return
 	}
 
-	Success(c, InvitationToRest(inv))
+	restInv, err := s.InvitationToRest(inv)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, restInv)
 }
 
 func (s *Server) GetInvitation(c *gin.Context) {
@@ -472,20 +506,41 @@ func (s *Server) GetInvitation(c *gin.Context) {
 		return
 	}
 
-	Success(c, InvitationToRest(inv))
-}
-
-func (s *Server) FinalizeInvitation(c *gin.Context) {
-	invitationId := c.Param("invitationId")
-
-	inv, err := s.app.FinalizeInvitation(invitationId)
+	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	Success(c, InvitationToRest(inv))
+	Success(c, restInv)
+}
+
+func (s *Server) FinalizeInvitation(c *gin.Context) {
+	invitationId := c.Param("invitationId")
+
+	var req generated.FinalizeInvitationRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	inv, err := s.app.FinalizeInvitation(invitationId, req.RemoteKeystoreId, req.InviteePublicKey)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	restInv, err := s.InvitationToRest(inv)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	Success(c, restInv)
 }
 
 func (s *Server) Keystores(c *gin.Context) {

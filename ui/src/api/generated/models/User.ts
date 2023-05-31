@@ -6,5 +6,5 @@ export type User = {
     id: string;
     username: string;
     publicKey: string;
-    icon: string;
+    icon?: string;
 };

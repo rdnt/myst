@@ -67,7 +67,7 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 		return keystore.Keystore{}, errors.Wrap(err, "aes256cbc decrypt failed when parsing keystore")
 	}
 
-	var jk enclaverepo.Keystore
+	var jk enclaverepo.KeystoreJSON
 
 	err = json.Unmarshal(decryptedKeystorePayload, &jk)
 	if err != nil {

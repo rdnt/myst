@@ -3,6 +3,7 @@ package application
 import (
 	"github.com/pkg/errors"
 
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/enclaverepo/enclave"
 
 	"myst/pkg/crypto"
@@ -35,7 +36,14 @@ func (app *application) Register(username, password string) (user.User, error) {
 		return user.User{}, errors.Wrap(err, "failed to register user")
 	}
 
-	err = app.enclave.SetCredentials(app.remote.Address(), username, password, publicKey, privateKey)
+	err = app.enclave.UpdateCredentials(credentials.Credentials{
+		Address:    app.remote.Address(),
+		Username:   username,
+		Password:   password,
+		PublicKey:  publicKey,
+		PrivateKey: privateKey,
+		UserKeys:   nil,
+	})
 	if err != nil {
 		return user.User{}, errors.Wrap(err, "failed to update credentials")
 	}

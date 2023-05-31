@@ -5,30 +5,31 @@ import (
 	"myst/src/client/application/domain/keystore/entry"
 )
 
-type Enclave struct {
-	Keystores map[string]Keystore `json:"keystores"`
-	Keys      map[string][]byte   `json:"keys"`
-	Remote    *Remote             `json:"remote,omitempty"`
+type EnclaveJSON struct {
+	Keystores map[string]KeystoreJSON `json:"keystores"`
+	Keys      map[string][]byte       `json:"keys"`
+	Remote    *RemoteJSON             `json:"remote,omitempty"`
 }
 
-type Remote struct {
-	Address    string `json:"address"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	PublicKey  []byte `json:"publicKey"`
-	PrivateKey []byte `json:"privateKey"`
+type RemoteJSON struct {
+	Address    string            `json:"address"`
+	Username   string            `json:"username"`
+	Password   string            `json:"password"`
+	PublicKey  []byte            `json:"publicKey"`
+	PrivateKey []byte            `json:"privateKey"`
+	UserKeys   map[string][]byte `json:"userKeys"`
 }
 
-type Keystore struct {
+type KeystoreJSON struct {
 	Id       string      `json:"id"`
 	RemoteId string      `json:"remoteId"`
 	ReadOnly bool        `json:"readOnly"`
 	Name     string      `json:"name"`
 	Version  int         `json:"version"`
-	Entries  []JSONEntry `json:"entries"`
+	Entries  []EntryJSON `json:"entries"`
 }
 
-type JSONEntry struct {
+type EntryJSON struct {
 	Id       string `json:"id"`
 	Website  string `json:"website"`
 	Username string `json:"username"`
@@ -36,11 +37,11 @@ type JSONEntry struct {
 	Notes    string `json:"notes"`
 }
 
-func KeystoreToJSON(k keystore.Keystore) Keystore {
-	entries := []JSONEntry{}
+func KeystoreToJSON(k keystore.Keystore) KeystoreJSON {
+	entries := []EntryJSON{}
 
 	for _, e := range k.Entries {
-		entries = append(entries, JSONEntry{
+		entries = append(entries, EntryJSON{
 			Id:       e.Id,
 			Website:  e.Website,
 			Username: e.Username,
@@ -49,7 +50,7 @@ func KeystoreToJSON(k keystore.Keystore) Keystore {
 		})
 	}
 
-	return Keystore{
+	return KeystoreJSON{
 		Id:       k.Id,
 		RemoteId: k.RemoteId,
 		ReadOnly: k.ReadOnly,
@@ -59,7 +60,7 @@ func KeystoreToJSON(k keystore.Keystore) Keystore {
 	}
 }
 
-func KeystoreFromJSON(k Keystore) (keystore.Keystore, error) {
+func KeystoreFromJSON(k KeystoreJSON) (keystore.Keystore, error) {
 	entries := make(map[string]entry.Entry, len(k.Entries))
 
 	for _, e := range k.Entries {

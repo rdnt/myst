@@ -469,8 +469,7 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 //	return r.sealAndWrite(e)
 // }
 
-func (r *Repository) SetCredentials(
-	address, username, password string, publicKey, privateKey []byte) error {
+func (r *Repository) UpdateCredentials(creds credentials.Credentials) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -483,13 +482,12 @@ func (r *Repository) SetCredentials(
 		return err
 	}
 
-	e.SetRemote(credentials.Credentials{
-		Address:    address,
-		Username:   username,
-		Password:   password,
-		PublicKey:  publicKey,
-		PrivateKey: privateKey,
-	})
+	// make sure creds is always initialized
+	if creds.UserKeys == nil {
+		creds.UserKeys = make(map[string][]byte)
+	}
+
+	e.SetRemote(creds)
 
 	return r.sealAndWrite(e)
 }

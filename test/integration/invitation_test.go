@@ -258,6 +258,8 @@ func TestInvitationFinalize(t *testing.T) {
 
 	keystore := s.CreateKeystore(t)
 	invitationId := s.CreateInvitation(t, keystore.Id)
+	var inviteePublicKey []byte
+	var keystoreRemoteId string
 
 	t.Run("The invitee accepts the invitation", func(t *testing.T) {
 		res, err := s.Client2.Client.AcceptInvitationWithResponse(s.Ctx, invitationId)
@@ -273,10 +275,17 @@ func TestInvitationFinalize(t *testing.T) {
 		assert.NilError(t, err)
 		assert.Assert(t, res2.JSON200 != nil)
 		assert.Equal(t, res2.JSON200.Status, generated.Accepted)
+
+		inviteePublicKey = res2.JSON200.Invitee.PublicKey
+		keystoreRemoteId = res2.JSON200.Keystore.RemoteId
 	})
 
 	t.Run("The inviter eventually finalizes the invitation", func(t *testing.T) {
-		res, err := s.Client1.Client.FinalizeInvitationWithResponse(s.Ctx, invitationId)
+		res, err := s.Client1.Client.FinalizeInvitationWithResponse(s.Ctx, invitationId,
+			generated.FinalizeInvitationRequest{
+				InviteePublicKey: inviteePublicKey,
+				RemoteKeystoreId: keystoreRemoteId,
+			})
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 	})

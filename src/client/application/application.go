@@ -2,6 +2,7 @@ package application
 
 import (
 	"myst/pkg/logger"
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/keystore/entry"
@@ -14,7 +15,9 @@ type Application interface {
 	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(id string) (invitation.Invitation, error)
+	// VerifyInvitation(id string) error
+	FinalizeInvitation(invitationId, remoteKeystoreId string,
+		inviteePublicKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 
@@ -25,6 +28,7 @@ type Application interface {
 	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
 	DeleteKeystoreEntry(keystoreId, entryId string) error
 	Keystores() (map[string]keystore.Keystore, error)
+	Credentials() (credentials.Credentials, error)
 
 	// Authenticate(username, password string) (user.User, error)
 	// SignOut() error

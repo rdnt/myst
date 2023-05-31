@@ -58,6 +58,34 @@ func (app *application) AcceptInvitation(userId string, invitationId string) (in
 	return inv, nil
 }
 
+// func (app *application) VerifyInvitation(userId string, invitationId string) (invitation.Invitation, error) {
+// 	u, err := app.users.User(userId)
+// 	if err != nil {
+// 		return invitation.Invitation{}, err
+// 	}
+//
+// 	inv, err := app.invitations.Invitation(invitationId)
+// 	if err != nil {
+// 		return invitation.Invitation{}, err
+// 	}
+//
+// 	if u.Id != inv.InviterId && u.Id != inv.InviteeId {
+// 		return invitation.Invitation{}, errors.New("unauthorized")
+// 	}
+//
+// 	if u.Id == inv.InviterId {
+// 		err = inv.Delete()
+// 		if err != nil {
+// 			return invitation.Invitation{}, err
+// 		}
+// 	} else if u.Id == inv.InviteeId {
+// 		err = inv.Decline()
+// 		if err != nil {
+// 			return invitation.Invitation{}, err
+// 		}
+// 	}
+// }
+
 func (app *application) DeclineOrCancelInvitation(userId, invitationId string) (invitation.Invitation, error) {
 	u, err := app.users.User(userId)
 	if err != nil {

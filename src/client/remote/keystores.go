@@ -47,12 +47,12 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 
 	// err = r.keystores.UpdateKeystore(k)
 	// if err != nil {
-	//	return keystore.Keystore{}, errors.Wrap(err, "failed to update keystore with remote id")
+	//	return keystore.KeystoreJSON{}, errors.Wrap(err, "failed to update keystore with remote id")
 	// }
 
 	// k, err = KeystoreFromJSON(*res.JSON200, k.Key)
 	// if err != nil {
-	//	return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
+	//	return keystore.KeystoreJSON{}, errors.WithMessage(err, "failed to parse keystore")
 	// }
 
 	k.RemoteId = (*res.JSON201).Id
@@ -124,8 +124,17 @@ func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, err
 	for _, restKeystore := range restKeystores {
 		var keystoreKey []byte
 		for _, inv := range invs {
-			if restKeystore.OwnerId != r.CurrentUser().Id && inv.Keystore.RemoteId == restKeystore.Id && inv.Finalized() {
-				symKey, err := curve25519.X25519(privateKey, inv.Inviter.PublicKey)
+			// find the finalized invitation for this keystore and decrypt its payload
+			if inv.Keystore.RemoteId == restKeystore.Id && inv.Finalized() {
+
+				var pub []byte
+				if inv.Inviter.Id == r.CurrentUser().Id {
+					pub = inv.Invitee.PublicKey
+				} else {
+					pub = inv.Inviter.PublicKey
+				}
+
+				symKey, err := curve25519.X25519(privateKey, pub)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to create asymmetric key")
 				}
@@ -151,7 +160,7 @@ func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, err
 		keystores[k.Id] = k
 	}
 
-	// ks := map[string]keystore.Keystore{}
+	// ks := map[string]keystore.KeystoreJSON{}
 	// for _, k := range *res.JSON200 {
 	//	k2, err := KeystoreFromJSON(k)
 	//	if err != nil {

@@ -1,34 +1,22 @@
 <script lang="ts">
   import type {Invitation} from "@/api";
   import Modal from "@/components/Modal.svelte";
-  import {createEventDispatcher} from "svelte";
   import {hash} from "@/lib/color-hash.js";
-
-  const dispatch = createEventDispatcher();
-  const submit = () => {
-    dispatch("submit");
-  }
 
   export let show: boolean = false;
   export let invitation: Invitation;
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form on:submit|preventDefault>
   <Modal bind:show={show}>
-    <div class="delete-title" slot="header">
-      Are you sure you want to verify this invitation?
-    </div>
-
     <div class="modal-content">
-      Make sure the invitee's identity icon below matches the one on their side, and then proceed to verify.
+      Make sure the identity icons on both yours and the inviter's side are the same.
 
       <div class="identity">
-        <strong style="color: {hash(invitation.invitee.username)}">{invitation.invitee.username}</strong>'s identity:
+        <strong style="color: {hash(invitation.invitee.username)}">{invitation.inviter.username}</strong>'s identity:
         <div>
           {#if invitation.inviter.icon}
             <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(invitation.inviter.icon)} alt="">
-          {:else if invitation.invitee.icon}
-            <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(invitation.invitee.icon)} alt="">
           {/if}
         </div>
       </div>
@@ -36,7 +24,7 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button green" type="submit">Verify</button>
+      <button class="button green" on:click={() => show = false} type="button">Verify</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
     </div>
   </Modal>

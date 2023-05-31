@@ -3,6 +3,7 @@
   import InputField from "@/components/InputField.svelte";
   import Modal from "@/components/Modal.svelte";
   import {showError, showMessage} from "@/stores/messages";
+  import {getCurrentUser} from "@/stores/user";
   // import {getCurrentUser} from "@/stores/user";
 
   export let show: boolean = false;
@@ -36,10 +37,10 @@
         username,
         password,
       }
-    }).then(() => {
+    }).then(async () => {
       showMessage("Signed in.");
       reset()
-      getCurrentUser()
+      await getCurrentUser()
       show = false;
     }).catch((err) => {
       showError("Signing in failed.");
@@ -58,8 +59,8 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
       <button class="button green" type="submit">Register</button>
+      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
     </div>
   </Modal>
 </form>

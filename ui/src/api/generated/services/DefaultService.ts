@@ -8,6 +8,7 @@ import type { CreateInvitationRequest } from '../models/CreateInvitationRequest'
 import type { CreateKeystoreRequest } from '../models/CreateKeystoreRequest';
 import type { Entry } from '../models/Entry';
 import type { Error } from '../models/Error';
+import type { FinalizeInvitationRequest } from '../models/FinalizeInvitationRequest';
 import type { Invitation } from '../models/Invitation';
 import type { Invitations } from '../models/Invitations';
 import type { Keystore } from '../models/Keystore';
@@ -347,8 +348,10 @@ invitationId?: string,
      * @throws ApiError
      */
     public static finalizeInvitation({
+requestBody,
 invitationId,
 }: {
+requestBody: FinalizeInvitationRequest,
 invitationId?: string,
 }): CancelablePromise<Invitation | Error> {
         return __request(OpenAPI, {
@@ -357,6 +360,8 @@ invitationId?: string,
             path: {
                 'invitationId': invitationId,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

@@ -6,7 +6,6 @@
   export let error: string | undefined = undefined;
   export let placeholder: string = '';
   export let value: string;
-  export let autocomplete: string | undefined = undefined;
 
   const dispatch = createEventDispatcher();
 </script>
@@ -15,7 +14,7 @@
   {#if label}
     <label>{label}</label>
   {/if}
-  <input bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder} class:has-error={error} {autocomplete}/>
+  <input bind:this={ref} bind:value={value} on:input={dispatch('input', value)} {placeholder} class:has-error={error} type="password" autocomplete="dont-autocomplete" />
   {#if error}
     <span>{error}</span>
   {/if}

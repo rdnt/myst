@@ -2,6 +2,7 @@
   import api from "@/api";
   import InputField from "@/components/InputField.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
+  import PasswordInputField from "@/components/PasswordInputField.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -12,7 +13,7 @@
   let name: string = '';
   $: nameValid = name.length > 0;
 
-  let password: string = '12345678';
+  let password: string = '';
   $: passwordValid = password.length >= 8;
 
   // $: valid = (step === 1 && nameValid) || (step === 2 && passwordValid)
@@ -46,7 +47,7 @@
   }
 </script>
 
-<form class="form" on:submit|preventDefault={submit} id="test-123">
+<form class="form" on:submit|preventDefault={submit}>
   <div class="content">
     <h4>Myst</h4>
 
@@ -73,9 +74,11 @@
 
     {#if step === 2}
       <div class="step-2">
-        <InputField
+        <PasswordInputField
           bind:value={password}
           class="password-input"
+          name="text"
+          type="password"
           error={!passwordValid && warnings ? 'Password too weak' : ''}
           readonly={step !== 1}
           label="Your data will be encrypted with a master password. The security of your secrets will

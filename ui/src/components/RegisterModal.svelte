@@ -4,6 +4,7 @@
   import Modal from "@/components/Modal.svelte";
   import {showError, showMessage} from "@/stores/messages";
   import {getCurrentUser} from "@/stores/user";
+  import PasswordInputField from "@/components/PasswordInputField.svelte";
   // import {getCurrentUser} from "@/stores/user";
 
   export let show: boolean = false;
@@ -49,13 +50,13 @@
   };
 </script>
 
-<form class="create-entry-modal" on:submit|preventDefault={submit}>
+<form class="create-entry-modal" on:submit|preventDefault={submit} autocomplete="off">
   <Modal bind:show>
     <div class="create-title" slot="header">Register</div>
 
     <div class="modal-content">
-      <InputField bind:value={username} label="Username"/>
-      <InputField bind:value={password} label="Password"/>
+      <InputField bind:value={username} label="Username" name="text" autocomplete="dont-autocomplete" />
+      <PasswordInputField bind:value={password} label="Password" name="telephone" />
     </div>
 
     <div class="modal-footer" slot="footer">

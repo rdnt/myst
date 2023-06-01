@@ -34,8 +34,9 @@ func parseFlags() Config {
 	cfg := Config{}
 
 	flag.StringVar(&cfg.RemoteAddress, "remote", "https://myst-abgx5.ondigitalocean.app/api", "URL address of the remote server API")
-	flag.StringVar(&cfg.DataDir, "dir", "data", "Directory used to store the keystores")
-	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
+	flag.StringVar(&cfg.DataDir, "dir", ".",
+		"Directory within which the user's enclave is stored. If the directory does not exist, it will be created.")
+	flag.IntVar(&cfg.Port, "port", 8081, "Port the client should listen on")
 	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 500ms before starting up")
 
 	flag.Parse()

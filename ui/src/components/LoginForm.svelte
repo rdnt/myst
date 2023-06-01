@@ -2,10 +2,11 @@
   import api from "@/api";
   import InputField from "@/components/InputField.svelte";
   import {createEventDispatcher} from 'svelte';
+  import PasswordInputField from "@/components/PasswordInputField.svelte";
 
   const dispatch = createEventDispatcher();
 
-  let password: string = '12345678';
+  let password: string = '';
   $: passwordValid = password.length >= 8;
 
   let error: boolean = false;
@@ -38,9 +39,11 @@
 <form class="form" on:submit|preventDefault={submit}>
   <div class="content">
     <h4>Myst</h4>
-    <InputField
+    <PasswordInputField
       bind:value={password}
+      name="text"
       class="password-input"
+      type="password"
       error={error ? 'Incorrect Password' : ''}
       label="Use your master password to access your secrets."
       placeholder="Master Password"

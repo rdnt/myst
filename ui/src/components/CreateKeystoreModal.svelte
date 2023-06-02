@@ -1,83 +1,88 @@
 <script lang="ts">
-  import api from "@/api";
-  import type {Entry, Invitation, Keystore} from "@/api";
-  import InputField from "@/components/InputField.svelte";
-  import Modal from "@/components/Modal.svelte";
-  import {showError, showMessage} from "@/stores/messages";
-  import {createEventDispatcher} from 'svelte';
-  import {keystores} from "@/stores/keystores";
+    import type {Keystore} from "@/api";
+    import api from "@/api";
+    import InputField from "@/components/InputField.svelte";
+    import Modal from "@/components/Modal.svelte";
+    import {showError, showMessage} from "@/stores/messages";
+    import {createEventDispatcher} from 'svelte';
+    import {keystores} from "@/stores/keystores";
 
-  const dispatchCreated = createEventDispatcher();
+    const dispatchCreated = createEventDispatcher();
 
-  export let show: boolean = false;
+    export let show: boolean = false;
 
-  let name;
-  $: name = '';
-  let showErrors = false;
+    let name;
+    $: name = '';
+    let showErrors = false;
 
-  $: {
-    name;
-    if (name !== '') {
-      showErrors = true
-    }
-  }
+    $: {
+      name;
 
-  $: nameEmpty = name.trim() === '';
-  $: nameTooLong = name.trim().length > 24;
-  $: nameAlreadyExists = $keystores.find((k) => k.name === name.trim()) !== undefined;
-
-  $: nameValid = !nameEmpty && !nameTooLong && !nameAlreadyExists;
-  $: nameError = nameEmpty ? 'Name cannot be empty' :
-          nameTooLong ? 'Name cannot be longer than 24 characters' :
-                  nameAlreadyExists ? 'Name already exists' : '';
-
-  $: allowSubmit = nameValid;
-
-  $: {
-    if (!show) {
-      name = ''
-    }
-  }
-
-  const reset = () => {
-    name = '';
-    showErrors = false;
-  }
-
-  const submit = () => {
-    if (!allowSubmit) {
-      return;
-    }
-
-    api.createKeystore({
-      requestBody: {
-        name,
+      if (name !== '') {
+          showErrors = true
       }
-    }).then((k: Keystore) => {
-      showMessage("Keystore created");
-      dispatchCreated('created', {id: k.id})
-      reset()
-      show = false;
-    }).catch((err) => {
-      showError("Create Keystore Failed");
-      console.error(err)
-    })
-  };
+    }
+
+    const reset = () => {
+      name = '';
+      showErrors = false;
+    }
+
+    $: {
+      show;
+
+      if (!show) {
+        reset()
+      }
+    }
+
+    $: nameEmpty = name.trim() === '';
+    $: nameTooLong = name.trim().length > 24;
+    $: nameAlreadyExists = $keystores.find((k) => k.name === name.trim()) !== undefined;
+
+    $: nameValid = !nameEmpty && !nameTooLong && !nameAlreadyExists;
+    $: nameError = nameEmpty ? 'Name cannot be empty' :
+        nameTooLong ? 'Name cannot be longer than 24 characters' :
+            nameAlreadyExists ? 'Name already exists' : '';
+
+    $: allowSubmit = nameValid;
+
+    const submit = () => {
+        if (!allowSubmit) {
+            return;
+        }
+
+        api.createKeystore({
+            requestBody: {
+                name,
+            }
+        }).then((k: Keystore) => {
+            showMessage("Keystore created");
+            dispatchCreated('created', {id: k.id})
+            show = false;
+        }).catch((err) => {
+            showError("Create Keystore Failed");
+            console.error(err)
+        })
+    };
 </script>
 
 <form class="create-entry-modal" on:submit|preventDefault={submit}>
-  <Modal bind:show>
-    <div class="create-title" slot="header">Create Keystore</div>
+    <Modal bind:show>
+        <div class="create-title" slot="header">Create Keystore</div>
 
-    <div class="modal-content">
-      <InputField bind:value={name} label="Name" error={!nameValid && showErrors && nameError}/>
-    </div>
+        <div class="modal-content">
+            <InputField bind:value={name} label="Name"
+                        error={!nameValid && showErrors && nameError}/>
+        </div>
 
-    <div class="modal-footer" slot="footer">
-      <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class:disabled={!allowSubmit} class="button green" type="submit">Create</button>
-    </div>
-  </Modal>
+        <div class="modal-footer" slot="footer">
+            <button class="button transparent" on:click={() => {show = false}}
+                    type="button">Cancel
+            </button>
+            <button class:disabled={!allowSubmit} class="button green" type="submit">Create</button>
+        </div>
+    </Modal>
 </form>
 
 <style lang="scss">

@@ -4,6 +4,7 @@
   import InputField from "@/components/InputField.svelte";
   import Modal from "@/components/Modal.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
+  import {showMessage} from "@/stores/messages";
 
   const dispatch = createEventDispatcher();
 
@@ -17,6 +18,7 @@
   $: passwordChanged = entry && password.trim() !== entry.password;
   $: notesChanged = entry && notes.trim() !== entry.notes;
 
+  let allowSubmit: boolean = false;
   $: allowSubmit = passwordValid && (passwordChanged || notesChanged);
 
   $: {
@@ -65,7 +67,7 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button green" type="submit">Save Changes</button>
+      <button class:disabled={!allowSubmit} class="button green" type="submit">Save</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
     </div>
   </Modal>

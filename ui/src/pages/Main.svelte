@@ -1,5 +1,4 @@
 <script lang="ts">
-  import SignInModal from "@/components/SignInModal.svelte";
   import RegisterModal from "@/components/RegisterModal.svelte";
   import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
   import Sidebar from "@/components/Sidebar.svelte";
@@ -7,11 +6,12 @@
   import Keystores from "@/pages/Keystores.svelte";
   import {getKeystores, keystores} from "@/stores/keystores.ts";
   import {Route, Router} from "svelte-navigator";
-  import {onMount} from "svelte";
+  import {onDestroy, onMount} from "svelte";
   import {getCurrentUser} from "@/stores/user";
   import {getInvitations} from "@/stores/invitations";
   import {useNavigate} from "svelte-navigator";
   import type {Keystore} from "@/api";
+  import api from "@/api";
 
   const navigate = useNavigate();
 
@@ -22,6 +22,10 @@
   let ready: boolean = false;
   $: ready;
 
+  const interval = setInterval(() => api.healthCheck(), 30000);
+
+  onDestroy(() => clearInterval(interval));
+
   onMount(async () => {
     await getKeystores()
     const u = await getCurrentUser()
@@ -29,6 +33,7 @@
       await getInvitations()
     }
     ready = true
+    api.healthCheck()
   })
 
   const onKeystoreCreated = async (keystore: Keystore) => {
@@ -68,7 +73,7 @@
   <CreateKeystoreModal bind:show={showCreateKeystoreModal} on:created={(e) => {onKeystoreCreated(e.detail)}}/>
 
   <!--<SignInModal bind:show={showSignInModal}/>-->
-  <RegisterModal bind:show={showRegisterModal}/>
+  <RegisterModal bind:show={showRegisterModal} />
 
 {/if}
 

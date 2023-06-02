@@ -359,7 +359,7 @@ func (r *Repository) startHealthCheck() {
 				fmt.Println("Health check failed")
 				// TODO: figure out why healthcheck causes Disconnected
 				//  and can't be restored
-				// r.key = nil
+				r.key = nil
 			}
 
 			r.mux.Unlock()

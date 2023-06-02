@@ -60,8 +60,8 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button green" type="submit">Register</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
+      <button class="button green" type="submit">Register</button>
     </div>
   </Modal>
 </form>

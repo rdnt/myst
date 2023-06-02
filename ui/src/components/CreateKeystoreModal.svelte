@@ -5,6 +5,7 @@
   import Modal from "@/components/Modal.svelte";
   import {showError, showMessage} from "@/stores/messages";
   import {createEventDispatcher} from 'svelte';
+  import {keystores} from "@/stores/keystores";
 
   const dispatchCreated = createEventDispatcher();
 
@@ -21,7 +22,14 @@
     }
   }
 
-  $: nameValid = name.trim() !== '';
+  $: nameEmpty = name.trim() === '';
+  $: nameTooLong = name.trim().length > 24;
+  $: nameAlreadyExists = $keystores.find((k) => k.name === name.trim()) !== undefined;
+
+  $: nameValid = !nameEmpty && !nameTooLong && !nameAlreadyExists;
+  $: nameError = nameEmpty ? 'Name cannot be empty' :
+          nameTooLong ? 'Name cannot be longer than 24 characters' :
+                  nameAlreadyExists ? 'Name already exists' : '';
 
   $: allowSubmit = nameValid;
 
@@ -62,12 +70,12 @@
     <div class="create-title" slot="header">Create Keystore</div>
 
     <div class="modal-content">
-      <InputField bind:value={name} label="Name" error={!nameValid && showErrors && 'Name cannot be empty'}/>
+      <InputField bind:value={name} label="Name" error={!nameValid && showErrors && nameError}/>
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button green" type="submit">Create</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
+      <button class:disabled={!allowSubmit} class="button green" type="submit">Create</button>
     </div>
   </Modal>
 </form>

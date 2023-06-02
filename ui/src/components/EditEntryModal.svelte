@@ -67,8 +67,8 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class:disabled={!allowSubmit} class="button green" type="submit">Save</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
+        <button class:disabled={!allowSubmit} class="button green" type="submit">Save</button>
     </div>
   </Modal>
 </form>

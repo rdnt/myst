@@ -7,7 +7,7 @@
   $: active = $location.pathname.startsWith(path);
 </script>
 
-<div class="link" class:active>
+<div class="link" class:active style="max-width: 100%">
   <Link to={path}>
     <slot/>
   </Link>

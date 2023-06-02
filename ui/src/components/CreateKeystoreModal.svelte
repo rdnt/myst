@@ -132,7 +132,6 @@
     .modal-content {
       padding-top: 40px;
       box-sizing: border-box;
-      box-sizing: border-box;
     }
 
     .modal-footer {

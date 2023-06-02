@@ -9,23 +9,54 @@
 
   export let show: boolean = false;
 
-  let username, password: string;
+  let username: string = '';
+  let password: string = '';
 
-  $: usernameValid = username.trim() !== '';
-  $: passwordValid = password.trim() !== '';
+  $: showErrors = false;
 
-  $: allowSubmit = usernameValid && passwordValid;
+  let usernameChanged = false;
+  let passwordChanged = false;
 
   $: {
-    if (!show) {
-      username = ''
-      password = ''
+    username;
+
+    if (username !== '') {
+      usernameChanged = true
     }
   }
+
+  $: {
+    password;
+
+    if (password !== '') {
+      passwordChanged = true
+    }
+  }
+
+  $: showErrors = usernameChanged && passwordChanged;
+
+  $: usernameEmpty = username.trim() === '';
+  $: passwordEmpty = password.trim() === '';
+
+  $: usernameValid = !usernameEmpty;
+  $: passwordValid = !passwordEmpty;
+
+  $: usernameError = usernameEmpty ? 'Username cannot be empty.' : '';
+  $: passwordError = passwordEmpty ? 'Password cannot be empty.' : '';
+
+  $: allowSubmit = !usernameEmpty && !passwordEmpty;
 
   const reset = () => {
     username = '';
     password = ''
+  }
+
+  $: {
+    show;
+
+    if (!show) {
+      reset();
+    }
   }
 
   const submit = () => {
@@ -40,7 +71,6 @@
       }
     }).then(async () => {
       showMessage("Signed in.");
-      reset()
       await getCurrentUser()
       show = false;
     }).catch((err) => {
@@ -50,18 +80,18 @@
   };
 </script>
 
-<form class="create-entry-modal" on:submit|preventDefault={submit} autocomplete="off">
+<form class="create-entry-modal" on:submit|preventDefault={submit}>
   <Modal bind:show>
     <div class="create-title" slot="header">Register</div>
 
     <div class="modal-content">
-      <InputField bind:value={username} label="Username" name="text" autocomplete="dont-autocomplete" />
-      <PasswordInputField bind:value={password} label="Password" name="telephone" />
+      <InputField bind:value={username} label="Username" name="text" error={!usernameValid && showErrors && usernameError} />
+      <PasswordInputField bind:value={password} label="Password" name="telephone" error={!passwordValid && showErrors && passwordError} />
     </div>
 
     <div class="modal-footer" slot="footer">
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
-      <button class="button green" type="submit">Register</button>
+      <button class:disabled={!allowSubmit} class="button green" type="submit">Register</button>
     </div>
   </Modal>
 </form>

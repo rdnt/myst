@@ -22,9 +22,7 @@
       // TODO: maybe select default keystore once that functionality is implemented
       // keystore = keystores[0];
       // keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      console.log(keystores)
       if (keystores.length > 0 ) {
-        console.log("NAVIGATING")
         navigate("/keystore/" + keystores[0].id, {replace: true});
       }
 

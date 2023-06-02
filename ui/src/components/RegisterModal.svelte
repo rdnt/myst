@@ -5,6 +5,7 @@
   import {showError, showMessage} from "@/stores/messages";
   import {getCurrentUser} from "@/stores/user";
   import PasswordInputField from "@/components/PasswordInputField.svelte";
+  import {getInvitations} from "@/stores/invitations";
   // import {getCurrentUser} from "@/stores/user";
 
   export let show: boolean = false;
@@ -72,6 +73,7 @@
     }).then(async () => {
       showMessage("Signed in.");
       await getCurrentUser()
+      await getInvitations()
       show = false;
     }).catch((err) => {
       showError("Signing in failed.");

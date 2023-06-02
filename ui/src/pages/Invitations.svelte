@@ -18,8 +18,6 @@
   $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending' || inv.status === 'accepted'));
   $: pastInvitations = $invitations.filter((inv) => (inv.status !== 'pending' && inv.status !== 'accepted'))
 
-  $: console.log($invitations)
-
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
   let showVerifyInvitationModal: boolean = false;

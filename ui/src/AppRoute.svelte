@@ -33,7 +33,6 @@
         }
       })
 
-      console.log('current path', $location.pathname)
       if ((onboarding || login) && $location.pathname !== '/') {
         navigate('/', {replace: true})
         await initialize()
@@ -62,7 +61,6 @@
       <LoginForm on:login={async () => {
         onboarding = false
         login = false
-        console.log('logged in')
       }}/>
     {:else}
       <Main/>

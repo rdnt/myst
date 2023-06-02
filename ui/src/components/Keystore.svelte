@@ -25,13 +25,11 @@
   $: entry = keystore?.entries.find(e => e.id === $params.entryId);
 
   function onInvitationCreated(e: { id: string }) {
-    console.log("onInvitationCreated", e);
     showCreateInvitationModal = false
     getInvitations()
   }
 
   function onEntryCreated(e: {id: string}) {
-    console.log("onEntryCreated", e);
     showCreateEntryModal = false;
     getKeystores()
   }

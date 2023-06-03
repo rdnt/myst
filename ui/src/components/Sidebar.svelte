@@ -19,7 +19,6 @@
 <div class="sidebar">
   <h4>Myst</h4>
 
-
   <div class="list">
     <h5 style="display: flex">
       Keystores
@@ -28,7 +27,9 @@
     </h5>
 
     {#each keystores as keystore}
-      <Link path="/keystore/{keystore.id}">{keystore.name}</Link>
+      <Link path="/keystore/{keystore.id}">
+        <div class="keystore-link">{keystore.name}</div>
+      </Link>
     {/each}
   </div>
 
@@ -205,6 +206,13 @@
       color: #fff !important;
       text-decoration: underline;
     }
+  }
+
+  .keystore-link {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   $accent: #00edb1;

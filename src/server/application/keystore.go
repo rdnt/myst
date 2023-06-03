@@ -22,6 +22,39 @@ func (app *application) CreateKeystore(name, ownerId string, payload []byte) (ke
 	return app.keystores.CreateKeystore(k)
 }
 
+func (app *application) DeleteKeystore(userId string, keystoreId string) error {
+	u, err := app.users.User(userId)
+	if err != nil {
+		return err
+	}
+
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return err
+	}
+
+	if k.OwnerId != u.Id {
+		return errors.New("not allowed")
+	}
+
+	invs, err := app.invitations.Invitations()
+	if err != nil {
+		return errors.WithMessage(err, "failed to get invitations")
+	}
+
+	// delete any associated invitations
+	for _, inv := range invs {
+		if inv.KeystoreId == keystoreId {
+			err = app.invitations.DeleteInvitation(inv.Id)
+			if err != nil {
+				return errors.WithMessage(err, "failed to delete invitation")
+			}
+		}
+	}
+
+	return app.keystores.DeleteKeystore(keystoreId)
+}
+
 func (app *application) Keystore(keystoreId string) (keystore.Keystore, error) {
 	k, err := app.keystores.Keystore(keystoreId)
 	if err != nil {
@@ -48,9 +81,9 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params Keystor
 		return keystore.Keystore{}, err
 	}
 
-	// if k.OwnerId != u.Id {
-	// 	return keystore.Keystore{}, errors.New("not allowed")
-	// }
+	if k.OwnerId != userId {
+		return keystore.Keystore{}, errors.New("not allowed")
+	}
 
 	if params.Name != nil {
 		k.Name = *params.Name
@@ -83,7 +116,9 @@ func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error
 	keystores := []keystore.Keystore{}
 	for _, inv := range invs {
 		k, err := app.keystores.Keystore(inv.KeystoreId)
-		if err != nil {
+		if errors.Is(err, keystore.ErrNotFound) {
+			continue
+		} else if err != nil {
 			return nil, errors.WithMessage(err, "failed to get keystore")
 		}
 		keystores = append(keystores, k)

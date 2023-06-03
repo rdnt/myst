@@ -6,6 +6,7 @@ import (
 
 	"gotest.tools/v3/assert"
 
+	"myst/pkg/uuid"
 	"myst/src/server/application"
 	"myst/src/server/mongorepo"
 	"myst/src/server/rest"
@@ -22,7 +23,7 @@ type Server struct {
 }
 
 func newServer(t *testing.T, address string) *Server {
-	repo, err := mongorepo.New("mongodb://localhost:27017", "myst-test")
+	repo, err := mongorepo.New("mongodb://localhost:27017", "myst-test-"+uuid.New().String())
 	assert.NilError(t, err)
 
 	app, err := application.New(

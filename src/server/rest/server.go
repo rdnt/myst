@@ -120,6 +120,7 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 	sec.POST("/keystores", s.CreateKeystore)
 	sec.GET("/keystore/:keystoreId", s.Keystore)
 	sec.PATCH("/keystore/:keystoreId", s.UpdateKeystore)
+	sec.DELETE("/keystore/:keystoreId", s.DeleteKeystore)
 	sec.GET("/keystores", s.Keystores)
 
 	// invitation
@@ -160,4 +161,16 @@ func (s *Server) Stop() error {
 	}
 
 	return firstErr
+}
+
+func (s *Server) DeleteKeystore(c *gin.Context) {
+	userId := CurrentUser(c)
+	keystoreId := c.Param("keystoreId")
+
+	err := s.app.DeleteKeystore(userId, keystoreId)
+	if err != nil {
+		panic(err)
+	}
+
+	c.Status(http.StatusOK)
 }

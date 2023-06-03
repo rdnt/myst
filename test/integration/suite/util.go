@@ -1,6 +1,7 @@
 package suite
 
 import (
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -9,7 +10,7 @@ import (
 )
 
 func (s *Suite) CreateKeystore(t *testing.T) (keystore generated.Keystore) {
-	keystoreName := s.Random(t)
+	keystoreName := strings.TrimSpace(s.Random(t))
 
 	t.Run("Create a keystore", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateKeystoreWithResponse(s.Ctx,

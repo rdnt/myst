@@ -19,7 +19,6 @@
       }
     }).then((res) => {
       if (res) {
-        console.log(res)
         entry.password = password;
         entry.notes = notes;
         showEditModal = false
@@ -36,7 +35,6 @@
       entryId: entry.id
     }).then((res) => {
       if (res) {
-        console.log(res)
         showDeleteModal = false
       }
     });

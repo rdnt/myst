@@ -11,6 +11,7 @@ const (
 	Accepted  Status = "accepted"
 	Declined  Status = "declined"
 	Deleted   Status = "deleted"
+	Cancelled Status = "cancelled"
 	Finalized Status = "finalized"
 )
 
@@ -28,6 +29,8 @@ func StatusFromString(s string) (Status, error) {
 		return Declined, nil
 	case Deleted:
 		return Deleted, nil
+	case Cancelled:
+		return Cancelled, nil
 	case Finalized:
 		return Finalized, nil
 	default:

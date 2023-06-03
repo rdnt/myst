@@ -13,6 +13,7 @@ type InvitationRepository interface {
 	CreateInvitation(invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	UpdateInvitation(invitation.Invitation) (invitation.Invitation, error)
+	DeleteInvitation(id string) error
 	Invitations() ([]invitation.Invitation, error)
 }
 
@@ -20,6 +21,7 @@ type KeystoreRepository interface {
 	CreateKeystore(keystore.Keystore) (keystore.Keystore, error)
 	Keystore(id string) (keystore.Keystore, error)
 	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	DeleteKeystore(id string) error
 	Keystores() ([]keystore.Keystore, error)
 }
 
@@ -50,6 +52,7 @@ type Application interface {
 	Keystore(id string) (keystore.Keystore, error)
 	Keystores() ([]keystore.Keystore, error)
 	UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.Keystore, error)
+	DeleteKeystore(userId string, keystoreId string) error
 	UserKeystore(userId, keystoreId string) (keystore.Keystore, error)
 	UserKeystores(userId string) ([]keystore.Keystore, error)
 

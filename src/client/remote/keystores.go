@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/curve25519"
@@ -97,6 +98,23 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	k2.Key = k.Key
 
 	return k2, nil
+}
+
+func (r *remote) DeleteKeystore(id string) error {
+	if !r.Authenticated() {
+		return ErrNotAuthenticated
+	}
+
+	res, err := r.client.DeleteKeystoreWithResponse(context.Background(), id)
+	if err != nil {
+		return errors.Wrap(err, "failed to get keystores")
+	}
+
+	if res.StatusCode() != http.StatusOK {
+		return fmt.Errorf("request failed with status code %d", res.StatusCode())
+	}
+
+	return nil
 }
 
 func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {

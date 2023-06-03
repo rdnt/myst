@@ -17,7 +17,6 @@ import (
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
-	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/rest/generated"
 
@@ -143,10 +142,11 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.CreateKeystore(
-		keystore.New(keystore.WithName(req.Name)),
-	)
-	if err != nil {
+	k, err := s.app.CreateKeystore(req.Name)
+	if errors.Is(err, application.ErrInvalidKeystoreName) {
+		Error(c, http.StatusBadRequest, err)
+		return
+	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
 		return
@@ -219,7 +219,7 @@ func (s *Server) Import(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.CreateKeystore(keystore.New(keystore.WithName(keystoreName)))
+	k, err := s.app.CreateKeystore(keystoreName)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)

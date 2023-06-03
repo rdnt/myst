@@ -125,6 +125,21 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 	return KeystoreFromBSON(kb), nil
 }
 
+func (r *Repository) DeleteKeystore(id string) error {
+	collection := r.mdb.Database(r.database).Collection("keystores")
+	ctx := context.Background()
+
+	res := collection.FindOneAndDelete(ctx, bson.D{{"_id", id}})
+	err := res.Err()
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return keystore.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *Repository) UserKeystores(userId string) ([]keystore.Keystore, error) {
 	userKeystores := []keystore.Keystore{}
 

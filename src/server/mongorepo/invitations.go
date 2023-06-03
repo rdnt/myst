@@ -100,6 +100,21 @@ func (r *Repository) Invitation(id string) (invitation.Invitation, error) {
 	return InvitationFromBSON(bsonInv)
 }
 
+func (r *Repository) DeleteInvitation(id string) error {
+	collection := r.mdb.Database(r.database).Collection("invitations")
+	ctx := context.Background()
+
+	res := collection.FindOneAndDelete(ctx, bson.D{{"_id", id}})
+	err := res.Err()
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return invitation.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *Repository) Invitations() ([]invitation.Invitation, error) {
 	collection := r.mdb.Database(r.database).Collection("invitations")
 

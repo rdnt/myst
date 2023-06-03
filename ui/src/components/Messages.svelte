@@ -26,6 +26,7 @@
     bottom: 0;
     right: 0;
     margin: 20px;
+    z-index: 1000;
   }
 
   .message {

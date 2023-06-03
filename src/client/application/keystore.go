@@ -18,6 +18,7 @@ var (
 	ErrInitializationRequired    = errors.New("initialization required")
 	ErrInvalidPassword           = errors.New("invalid password")
 	ErrEntryNotFound             = errors.New("entry not found")
+	ErrInvalidKeystoreName       = errors.New("invalid keystore name")
 )
 
 func (app *application) HealthCheck() {
@@ -69,11 +70,42 @@ func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 	return app.enclave.UpdateKeystore(k)
 }
 
-func (app *application) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
+func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
+	name = strings.TrimSpace(name)
+
+	if len(name) == 0 || len(name) > 24 {
+		return keystore.Keystore{}, ErrInvalidKeystoreName
+	}
+
+	ks, err := app.enclave.Keystores()
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
+
+	for _, k2 := range ks {
+		if k2.Name == name {
+			return keystore.Keystore{}, ErrInvalidKeystoreName
+		}
+	}
+
+	k := keystore.New(keystore.WithName(name))
+
 	return app.enclave.CreateKeystore(k)
 }
 
 func (app *application) DeleteKeystore(id string) error {
+	k, err := app.enclave.Keystore(id)
+	if err != nil {
+		return err
+	}
+
+	if k.RemoteId != "" {
+		err = app.remote.DeleteKeystore(k.RemoteId)
+		if err != nil {
+			return err
+		}
+	}
+
 	return app.enclave.DeleteKeystore(id)
 }
 

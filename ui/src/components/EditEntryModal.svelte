@@ -4,6 +4,7 @@
   import InputField from "@/components/InputField.svelte";
   import Modal from "@/components/Modal.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
+  import {showMessage} from "@/stores/messages";
 
   const dispatch = createEventDispatcher();
 
@@ -17,6 +18,7 @@
   $: passwordChanged = entry && password.trim() !== entry.password;
   $: notesChanged = entry && notes.trim() !== entry.notes;
 
+  let allowSubmit: boolean = false;
   $: allowSubmit = passwordValid && (passwordChanged || notesChanged);
 
   $: {
@@ -46,10 +48,10 @@
 <form class="edit-entry-modal" on:submit|preventDefault={submit}>
   <Modal bind:show>
     <div class="modal-header" slot="header">
-      <div class="image">
-        <img alt={entry.website}
-             src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png"/>
-      </div>
+<!--      <div class="image">-->
+<!--        <img alt={entry.website}-->
+<!--             src="https://www.nicepng.com/png/full/52-520535_free-files-github-github-icon-png-white.png"/>-->
+<!--      </div>-->
 
       <div class="title">
         <span class="website">{entry.website}</span>
@@ -65,8 +67,8 @@
     </div>
 
     <div class="modal-footer" slot="footer">
-      <button class="button green" type="submit">Save Changes</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
+        <button class:disabled={!allowSubmit} class="button green" type="submit">Save</button>
     </div>
   </Modal>
 </form>

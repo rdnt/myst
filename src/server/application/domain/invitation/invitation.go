@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
-	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
-	ErrCannotDecline  = errors.New("cannot decline non-pending invitation")
-	ErrCannotCancel   = errors.New("cannot cancel non-pending invitation")
+	ErrCannotAccept   = errors.New("cannot accept invitation")
+	ErrCannotFinalize = errors.New("cannot finalize invitation")
+	ErrCannotDecline  = errors.New("cannot decline invitation")
+	ErrCannotDelete   = errors.New("cannot delete invitation")
+	ErrCannotCancel   = errors.New("cannot cancel invitation")
 )
 
 type Invitation struct {
@@ -22,12 +23,11 @@ type Invitation struct {
 	InviteeId            string
 	EncryptedKeystoreKey []byte
 	Status               Status
-	InviterVerified      bool
-	InviteeVerified      bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 	AcceptedAt           time.Time
 	DeclinedAt           time.Time
+	CancelledAt          time.Time
 	DeletedAt            time.Time
 }
 
@@ -130,11 +130,22 @@ func (i *Invitation) Decline() error {
 
 func (i *Invitation) Delete() error {
 	if i.Status != Pending {
-		return ErrCannotCancel
+		return ErrCannotDelete
 	}
 
 	i.Status = Deleted
 	i.DeletedAt = time.Now()
+
+	return nil
+}
+
+func (i *Invitation) Cancel() error {
+	if i.Status != Accepted {
+		return ErrCannotCancel
+	}
+
+	i.Status = Cancelled
+	i.CancelledAt = time.Now()
 
 	return nil
 }

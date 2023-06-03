@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -23,7 +24,7 @@ func TestKeystores(t *testing.T) {
 		assert.Assert(t, len(*res.JSON200) == 0)
 	})
 
-	keystoreName := s.Random(t)
+	keystoreName := strings.TrimSpace(s.Random(t))
 	var keystoreId string
 
 	t.Run("Keystore created", func(t *testing.T) {

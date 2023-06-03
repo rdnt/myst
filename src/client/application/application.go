@@ -21,7 +21,7 @@ type Application interface {
 	Invitations() (map[string]invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 
-	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	CreateKeystore(name string) (keystore.Keystore, error)
 	DeleteKeystore(id string) error
 	Keystore(id string) (keystore.Keystore, error)
 	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)

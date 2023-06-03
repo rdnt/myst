@@ -18,8 +18,6 @@
   $: outgoingInvitations = $invitations.filter((inv) => inv.inviter.id === $currentUser.id && (inv.status === 'pending' || inv.status === 'accepted'));
   $: pastInvitations = $invitations.filter((inv) => (inv.status !== 'pending' && inv.status !== 'accepted'))
 
-  $: console.log($invitations)
-
   let invitation: Invitation;
   let showAcceptInvitationModal: boolean = false;
   let showVerifyInvitationModal: boolean = false;
@@ -202,13 +200,13 @@
           </span>
           </div>
           <div class="actions">
-            {#if inv.status === 'finalized' || inv.status === 'accepted'}
-              {#if inv.inviter.id === $currentUser.id}
-                <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
-              {:else}
-                <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
-              {/if}
-            {/if}
+            <!--{#if inv.status === 'finalized' || inv.status === 'accepted'}-->
+            <!--  {#if inv.inviter.id === $currentUser.id}-->
+            <!--    <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>-->
+            <!--  {:else}-->
+            <!--    <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>-->
+            <!--  {/if}-->
+            <!--{/if}-->
           </div>
         </div>
       {/each}
@@ -221,12 +219,8 @@
   <DeclineInvitationModal bind:show={showDeclineInvitationModal} {invitation} on:submit={() => {declineInvitation()}}/>
   <FinalizeInvitationModal bind:show={showFinalizeInvitationModal} {invitation} on:submit={() => {finalizeInvitation()}}/>
   <VerifyInvitationModal bind:show={showVerifyInvitationModal} {invitation} />
-{/if}
-
-{#if invitation}
   <!--  <Invitation {invitation}/>-->
 {/if}
-
 
 <style lang="scss">
   $accent: #00edb1;

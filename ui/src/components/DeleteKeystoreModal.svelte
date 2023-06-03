@@ -14,8 +14,8 @@
   <Modal bind:show={show}>
     <div class="delete-title" slot="header">Are you sure you want to delete this keystore?</div>
     <div class="modal-footer" slot="footer">
-      <button class="button red" type="submit">Delete</button>
       <button class="button transparent" on:click={() => show = false} type="button">Cancel</button>
+      <button class="button red" type="submit">Delete</button>
     </div>
   </Modal>
 </form>

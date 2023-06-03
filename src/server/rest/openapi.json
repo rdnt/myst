@@ -313,6 +313,34 @@
             }
           }
         }
+      },
+      "delete": {
+        "description": "Deletes a keystore",
+        "operationId": "DeleteKeystore",
+        "parameters": [
+          {
+            "name": "keystoreId",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/keystore/{keystoreId}/invitations": {

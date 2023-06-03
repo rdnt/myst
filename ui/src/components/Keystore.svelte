@@ -9,7 +9,7 @@
   import {getInvitations} from "@/stores/invitations";
   import {getKeystores} from "@/stores/keystores";
   import {showMessage} from "@/stores/messages";
-  import {useFocus, useParams} from "svelte-navigator";
+  import {navigate, useFocus, useParams} from "svelte-navigator";
 
   export let keystore;
 
@@ -25,22 +25,21 @@
   $: entry = keystore?.entries.find(e => e.id === $params.entryId);
 
   function onInvitationCreated(e: { id: string }) {
-    console.log("onInvitationCreated", e);
     showCreateInvitationModal = false
     getInvitations()
   }
 
   function onEntryCreated(e: {id: string}) {
-    console.log("onEntryCreated", e);
     showCreateEntryModal = false;
     getKeystores()
   }
 
   function deleteKeystore() {
-    api.deleteKeystore({keystoreId: keystore.id}).then(() => {
+    api.deleteKeystore({keystoreId: keystore.id}).then(async () => {
+        await navigate("/", {replace: true})
       showMessage("Keystore deleted");
       showDeleteKeystoreModal = false;
-      getKeystores();
+        await getKeystores();
     });
   }
 </script>

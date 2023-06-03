@@ -8,6 +8,7 @@
     import api from "@/api";
     import {AuthState, getAuthState} from "@/stores/authState";
     import {authState, setAuthState} from "@/stores/authState.js";
+    import {showError} from "@/stores/messages";
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -16,19 +17,22 @@
         const state = $authState;
 
         if ((state === AuthState.Onboarding || state === AuthState.SignedOut) && $location.pathname !== '/') {
-            console.log('navigating');
             navigate('/', {replace: true})
         }
     }
 
     const checkState = async () => {
+        const oldState = $authState;
         const state = await getAuthState();
         if (state === AuthState.SignedIn) {
             await api.healthCheck()
+        } else if (state === AuthState.SignedOut && oldState === AuthState.SignedIn) {
+            // was logged out, notify
+            showError("Signed out", "You have been signed out due to inactivity.");
         }
     }
 
-    const interval = setInterval(checkState, 30000);
+    const interval = setInterval(checkState, 20000);
 
     onDestroy(() => clearInterval(interval));
 
@@ -42,9 +46,15 @@
         <!--        <span>Loading...</span>-->
     {:else}
         {#if $authState === AuthState.Onboarding}
-            <OnboardingForm on:initialized={async () => setAuthState(() => AuthState.SignedIn)}/>
+            <OnboardingForm on:initialized={async () => {
+                //setAuthState(() => AuthState.SignedIn)
+                await checkState()
+            }}/>
         {:else if $authState === AuthState.SignedOut}
-            <LoginForm on:login={async () => setAuthState(() => AuthState.SignedIn) }/>
+            <LoginForm on:login={async () => {
+                //setAuthState(() => AuthState.SignedIn)
+                await checkState()
+            } }/>
         {:else if $authState === AuthState.SignedIn}
             <Main/>
         {/if}

@@ -94,6 +94,18 @@ func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
 }
 
 func (app *application) DeleteKeystore(id string) error {
+	k, err := app.enclave.Keystore(id)
+	if err != nil {
+		return err
+	}
+
+	if k.RemoteId != "" {
+		err = app.remote.DeleteKeystore(k.RemoteId)
+		if err != nil {
+			return err
+		}
+	}
+
 	return app.enclave.DeleteKeystore(id)
 }
 

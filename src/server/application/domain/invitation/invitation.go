@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
-	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
-	ErrCannotDecline  = errors.New("cannot decline non-pending invitation")
-	ErrCannotCancel   = errors.New("cannot cancel non-pending invitation")
+	ErrCannotAccept   = errors.New("cannot accept invitation")
+	ErrCannotFinalize = errors.New("cannot finalize invitation")
+	ErrCannotDecline  = errors.New("cannot decline invitation")
+	ErrCannotCancel   = errors.New("cannot cancel invitation")
 )
 
 type Invitation struct {
@@ -129,7 +129,7 @@ func (i *Invitation) Decline() error {
 }
 
 func (i *Invitation) Delete() error {
-	if i.Status != Pending {
+	if i.Status != Pending && i.Status != Accepted {
 		return ErrCannotCancel
 	}
 

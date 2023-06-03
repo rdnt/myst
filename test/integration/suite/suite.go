@@ -24,6 +24,10 @@ type Suite struct {
 }
 
 func New(t *testing.T) *Suite {
+	// all suites should be able to run in parallel. we can run multiple tests
+	// for 'brute forcing' them to catch flaky tests
+	t.Parallel()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	config.Debug = true

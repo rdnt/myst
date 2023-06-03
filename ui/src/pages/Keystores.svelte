@@ -1,38 +1,60 @@
 <script lang="ts">
   import Keystore from "@/components/Keystore.svelte";
   import {onMount} from "svelte";
-  import {useNavigate, useParams} from "svelte-navigator";
+  import {useLocation, useNavigate, useParams} from "svelte-navigator";
   import EntryPlaceholder from "@/components/EntryPlaceholder.svelte";
   import {getKeystores} from "@/stores/keystores";
   import CreateKeystoreModal from "@/components/CreateKeystoreModal.svelte";
 
   const navigate = useNavigate();
   const params = useParams();
+  const location = useLocation();
 
   export let keystores;
   let keystore;
 
   export let showCreateKeystoreModal: boolean;
 
-  onMount(async () => {
-    await getKeystores()
+  $: {
+    keystores;
 
-    if (!$params.keystoreId) {
-      // TODO: always select first (right now it's buggy on login)
-      // TODO: maybe select default keystore once that functionality is implemented
-      // keystore = keystores[0];
-      // keystore = keystores.find((keystore) => keystore.name === "Passwords");
-      if (keystores.length > 0 ) {
-        navigate("/keystore/" + keystores[0].id, {replace: true});
-      }
-
-    } else {
-        const keystore = keystores.find((keystore) => keystore.id === $params.keystoreId);
-        if (!keystore) {
-            navigate("/", {replace: true});
-        }
+    // redirect to root if no keystores
+    if (keystores && keystores.length === 0 && $location.pathname !== '/') {
+      navigate("/", {replace: true})
     }
-  });
+
+    // if no keystore selected try to select the first one
+    if (!$params.keystoreId && keystores?.length > 0) {
+        navigate("/keystore/" + keystores?.[0].id, {replace: true});
+    } else {
+      // navigate to root if keystore not found, otherwise render
+      const keystore = keystores.find((keystore) => keystore.id === $params.keystoreId);
+      if (!keystore && $location.pathname !== '/') {
+        console.log('redirect loop')
+        navigate("/", {replace: true})
+      }
+    }
+  }
+
+  // onMount(async () => {
+  //   if (!$params.keystoreId) {
+  //     // TODO: always select first (right now it's buggy on login)
+  //     // TODO: maybe select default keystore once that functionality is implemented
+  //     // keystore = keystores[0];
+  //     // keystore = keystores.find((keystore) => keystore.name === "Passwords");
+  //     if (keystores.length > 0 ) {
+  //       navigate("/keystore/" + keystores[0].id, {replace: true});
+  //     }
+  //
+  //   } else {
+  //       const keystore = keystores.find((keystore) => keystore.id === $params.keystoreId);
+  //       if (!keystore) {
+  //
+  //         console.log("NO KEYSTORE FOUND??")
+  //           navigate("/", {replace: true})
+  //       }
+  //   }
+  // });
 
   $: keystore = (keystores || []).find(
     (keystore) => keystore.id === $params.keystoreId

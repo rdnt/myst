@@ -22,10 +22,6 @@
   let ready: boolean = false;
   $: ready;
 
-  const interval = setInterval(() => api.healthCheck(), 30000);
-
-  onDestroy(() => clearInterval(interval));
-
   onMount(async () => {
     await getKeystores()
     const u = await getCurrentUser()
@@ -33,7 +29,6 @@
       await getInvitations()
     }
     ready = true
-    api.healthCheck()
   })
 
   const onKeystoreCreated = async (keystore: Keystore) => {

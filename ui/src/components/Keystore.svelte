@@ -9,7 +9,7 @@
   import {getInvitations} from "@/stores/invitations";
   import {getKeystores} from "@/stores/keystores";
   import {showMessage} from "@/stores/messages";
-  import {useFocus, useParams} from "svelte-navigator";
+  import {navigate, useFocus, useParams} from "svelte-navigator";
 
   export let keystore;
 
@@ -35,10 +35,11 @@
   }
 
   function deleteKeystore() {
-    api.deleteKeystore({keystoreId: keystore.id}).then(() => {
+    api.deleteKeystore({keystoreId: keystore.id}).then(async () => {
+        await navigate("/", {replace: true})
       showMessage("Keystore deleted");
       showDeleteKeystoreModal = false;
-      getKeystores();
+        await getKeystores();
     });
   }
 </script>

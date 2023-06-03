@@ -1,71 +1,54 @@
 <script lang="ts">
-  import LoginForm from "@/components/LoginForm.svelte";
-  import Messages from "@/components/Messages.svelte";
-  import OnboardingForm from "@/components/OnboardingForm.svelte";
-  import Main from "@/pages/Main.svelte";
-  import {getKeystores, keystores} from "@/stores/keystores.ts";
-  import {onMount} from 'svelte';
-  import {Router, useNavigate} from "svelte-navigator";
-  import {Link, useLocation} from "svelte-navigator";
-  import api from "@/api";
+    import LoginForm from "@/components/LoginForm.svelte";
+    import Messages from "@/components/Messages.svelte";
+    import OnboardingForm from "@/components/OnboardingForm.svelte";
+    import Main from "@/pages/Main.svelte";
+    import {onDestroy, onMount} from 'svelte';
+    import {Router, useLocation, useNavigate} from "svelte-navigator";
+    import api from "@/api";
+    import {AuthState, getAuthState} from "@/stores/authState";
+    import {authState, setAuthState} from "@/stores/authState.js";
 
-  const location = useLocation();
-  const navigate = useNavigate();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  let onboarding = false;
-  let ready = false;
-  let login = false;
+    $: {
+        const state = $authState;
 
-  const initialize = async () => {
-    onboarding = false
-    login = false
-
-    try {
-      await api.enclave().catch(err => {
-        if (err.status == 404) {
-          onboarding = true;
-          return Promise.resolve()
-        } else if (err.status == 401) {
-          login = true;
-          return Promise.resolve()
-        } else {
-          return Promise.reject(err)
+        if ((state === AuthState.Onboarding || state === AuthState.SignedOut) && $location.pathname !== '/') {
+            console.log('navigating');
+            navigate('/', {replace: true})
         }
-      })
-
-      if ((onboarding || login) && $location.pathname !== '/') {
-        navigate('/', {replace: true})
-        await initialize()
-      }
-
-      ready = true
-      // getCurrentUser()
-      // ready = true;
-    } catch (err) {
-      console.log('caught error', err)
     }
-  }
 
-  onMount(async () => {
-    await initialize()
-  });
+    const checkState = async () => {
+        const state = await getAuthState();
+        if (state === AuthState.SignedIn) {
+            await api.healthCheck()
+        }
+    }
+
+    const interval = setInterval(checkState, 30000);
+
+    onDestroy(() => clearInterval(interval));
+
+    onMount(async () => {
+        await checkState()
+    });
 </script>
 
 <Router>
-  {#if !ready}
-<!--    <span>Loading...</span>-->
-  {:else}
-    {#if onboarding}
-      <OnboardingForm on:initialized={initialize}/>
-    {:else if login}
-      <LoginForm on:login={async () => {
-        onboarding = false
-        login = false
-      }}/>
+    {#if $authState === undefined}
+        <!--        <span>Loading...</span>-->
     {:else}
-      <Main/>
+        {#if $authState === AuthState.Onboarding}
+            <OnboardingForm on:initialized={async () => setAuthState(() => AuthState.SignedIn)}/>
+        {:else if $authState === AuthState.SignedOut}
+            <LoginForm on:login={async () => setAuthState(() => AuthState.SignedIn) }/>
+        {:else if $authState === AuthState.SignedIn}
+            <Main/>
+        {/if}
     {/if}
-  {/if}
 </Router>
 
 <Messages/>

@@ -200,13 +200,13 @@
           </span>
           </div>
           <div class="actions">
-            {#if inv.status === 'finalized' || inv.status === 'accepted'}
-              {#if inv.inviter.id === $currentUser.id}
-                <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>
-              {:else}
-                <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>
-              {/if}
-            {/if}
+            <!--{#if inv.status === 'finalized' || inv.status === 'accepted'}-->
+            <!--  {#if inv.inviter.id === $currentUser.id}-->
+            <!--    <button class="button red" on:click={() => {/*todo*/}}>Revoke Access</button>-->
+            <!--  {:else}-->
+            <!--    <button class="button red" on:click={() => {/*todo*/}}>Deny Access</button>-->
+            <!--  {/if}-->
+            <!--{/if}-->
           </div>
         </div>
       {/each}

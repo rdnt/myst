@@ -102,9 +102,16 @@ func (app *application) DeclineOrCancelInvitation(userId, invitationId string) (
 	}
 
 	if u.Id == inv.InviterId {
-		err = inv.Delete()
-		if err != nil {
-			return invitation.Invitation{}, err
+		if inv.Status == invitation.Pending {
+			err = inv.Delete()
+			if err != nil {
+				return invitation.Invitation{}, err
+			}
+		} else if inv.Status == invitation.Accepted {
+			err = inv.Cancel()
+			if err != nil {
+				return invitation.Invitation{}, err
+			}
 		}
 	} else if u.Id == inv.InviteeId {
 		err = inv.Decline()

@@ -219,12 +219,8 @@
   <DeclineInvitationModal bind:show={showDeclineInvitationModal} {invitation} on:submit={() => {declineInvitation()}}/>
   <FinalizeInvitationModal bind:show={showFinalizeInvitationModal} {invitation} on:submit={() => {finalizeInvitation()}}/>
   <VerifyInvitationModal bind:show={showVerifyInvitationModal} {invitation} />
-{/if}
-
-{#if invitation}
   <!--  <Invitation {invitation}/>-->
 {/if}
-
 
 <style lang="scss">
   $accent: #00edb1;

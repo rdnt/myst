@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/curve25519"
 )
 
@@ -10,7 +11,7 @@ func NewCurve25519Keypair() (publicKey []byte, privateKey []byte, err error) {
 
 	b, err := GenerateRandomBytes(32)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.WithMessage(err, "failed to generate random bytes")
 	}
 
 	copy(key[:], b)

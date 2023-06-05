@@ -14,11 +14,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/argon2"
 )
 
 var (
-	debug                 = false
 	DefaultArgon2IdParams = Argon2IdParams{
 		Memory:      64 * 1024,
 		Time:        1,
@@ -28,12 +28,22 @@ var (
 	}
 )
 
+var (
+	ErrInvalidKeyLength    = errors.New("invalid key length")
+	ErrInvalidBlockSize    = errors.New("invalid blocksize")
+	ErrInvalidPKCS7Data    = errors.New("invalid PKCS7 data")
+	ErrInvalidPKCS7Padding = errors.New("invalid padding on input")
+	ErrInvalidCiphertext   = errors.New("invalid ciphertext")
+	ErrInvalidHashFormat   = errors.New("invalid hash format")
+	ErrParamsDiffer        = errors.New("params differ")
+)
+
 // HashPassword hashes a password and returns the hash in modular script format, or error on failure
 func HashPassword(password string) (string, error) {
 	// Generate a cryptographically secure random salt.
 	salt, err := GenerateRandomBytes(uint(DefaultArgon2IdParams.SaltLength))
 	if err != nil {
-		return "", err
+		return "", errors.WithMessage(err, "salt generation failed")
 	}
 	// Pass the password, salt and parameters to the argon2.IDKey function.
 	// This will generate a hash of the password using the Argon2id algorithm
@@ -68,8 +78,9 @@ func GenerateRandomBytes(n uint) ([]byte, error) {
 
 	_, err := rand.Read(b)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error reading random bytes")
 	}
+
 	return b, nil
 }
 
@@ -81,7 +92,7 @@ func GenerateRandomString(n int) (string, error) {
 	for i := 0; i < n; i++ {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
 		if err != nil {
-			return "", err
+			return "", errors.Wrap(err, "error reading random bytes")
 		}
 		ret[i] = letters[num.Int64()]
 	}
@@ -105,51 +116,35 @@ func VerifyHMAC_SHA256(key, givenMAC, data []byte) bool {
 	return hmac.Equal(givenMAC, expectedMAC)
 }
 
-var (
-	// ErrInvalidBlockSize indicates hash blocksize <= 0.
-	ErrInvalidBlockSize = fmt.Errorf("invalid blocksize")
-
-	// ErrInvalidPKCS7Data indicates bad input to PKCS7 pad or unpad.
-	ErrInvalidPKCS7Data = fmt.Errorf("invalid PKCS7 data (empty or not padded)")
-
-	// ErrInvalidPKCS7Padding indicates PKCS7 unpad fails to bad input.
-	ErrInvalidPKCS7Padding = fmt.Errorf("invalid padding on input")
-)
-
 // AES256CBC_Encrypt encrypts the given plaintext with AES-256 in CBC mode.
 func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 	// Make sure key is valid length (256 bits)
 	if len(key) != 32 {
-		return nil, fmt.Errorf("invalid key length")
+		return nil, ErrInvalidKeyLength
 	}
 	// Initialize the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "aes cipher creation failed")
 	}
 	// Pad the plaintext so that its size is multiple of the default AES
 	// block size
 	plaintext, err = PKCS7Pad(plaintext, aes.BlockSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "padding failed")
 	}
 	// Generate a random initialization vector.
 	iv, err := GenerateRandomBytes(aes.BlockSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "iv generation failed")
 	}
 	// CreateInvitation a CBC Encrypter
 	mode := cipher.NewCBCEncrypter(block, iv)
+
 	// Encrypt the plaintext
-	ciphertext := make([]byte, len(plaintext))
-
-	if debug {
-		copy(ciphertext, plaintext)
-	} else {
-		mode.CryptBlocks(ciphertext, plaintext)
-	}
-
+	ciphertext := plaintext // just reference plaintext; cryptBlocks will work in-place
 	mode.CryptBlocks(plaintext, ciphertext)
+
 	// Return the ciphertext with the initialization vector prepended
 	return append(iv, ciphertext...), nil
 }
@@ -158,39 +153,36 @@ func AES256CBC_Encrypt(key, plaintext []byte) ([]byte, error) {
 func AES256CBC_Decrypt(key, ciphertext []byte) ([]byte, error) {
 	// Make sure key is valid length (256 bits)
 	if len(key) != 32 {
-		return nil, fmt.Errorf("invalid key length")
+		return nil, ErrInvalidKeyLength
 	}
 	// Check if the ciphertext is smaller than AES's default blocksize.
 	// We multiply by two because the IV will be prepended to the ciphertext
 	if len(ciphertext) < aes.BlockSize*2 {
-		return nil, fmt.Errorf("ciphertext too short")
+		return nil, ErrInvalidCiphertext
 	}
 	// Initialize the AES cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "aes cipher creation failed")
 	}
 	// Split the initialization vector from the ciphertext
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 	// Return an error if the ciphertext is not multiple of AES's blocksize
 	if len(ciphertext)%aes.BlockSize != 0 {
-		return nil, fmt.Errorf("ciphertext not multiple of blocksize")
+		return nil, ErrInvalidCiphertext
 	}
 	// CreateInvitation a CBC Decrypter
 	mode := cipher.NewCBCDecrypter(block, iv)
+
 	// Decrypt the ciphertext
-	plaintext := make([]byte, len(ciphertext))
-	if debug {
-		copy(plaintext, ciphertext)
-	} else {
-		mode.CryptBlocks(plaintext, ciphertext)
-	}
+	plaintext := ciphertext // work in-place
+	mode.CryptBlocks(plaintext, ciphertext)
 
 	// Unpad the plaintext
 	plaintext, err = PKCS7Unpad(plaintext, aes.BlockSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "pkcs7unpad failed")
 	}
 	// Return the plaintext
 	return plaintext, nil
@@ -276,11 +268,11 @@ func VerifyPassword(password, encodedHash string) (bool, error) {
 	// Decode the querried hash into the argon2id parameters, salt and hash
 	p, salt, hash, err := decodeHash(encodedHash)
 	if err != nil {
-		return false, err
+		return false, errors.WithMessage(err, "decoding hash failed")
 	}
 
 	if !reflect.DeepEqual(p, &DefaultArgon2IdParams) {
-		return false, err
+		return false, errors.WithMessage(ErrParamsDiffer, "cannot compare hash with different computation parameters")
 	}
 	// Calculate a new hash with the given password and the parameters and salt
 	// of the stored password
@@ -304,33 +296,33 @@ func VerifyPassword(password, encodedHash string) (bool, error) {
 func decodeHash(enc string) (*Argon2IdParams, []byte, []byte, error) {
 	vals := strings.Split(enc, "$")
 	if len(vals) != 6 {
-		return nil, nil, nil, fmt.Errorf("invalid hash")
+		return nil, nil, nil, ErrInvalidHashFormat
 	}
 
 	var version int
 	_, err := fmt.Sscanf(vals[2], "v=%d", &version)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, errors.Wrap(err, "invalid version")
 	}
 	if version != argon2.Version {
-		return nil, nil, nil, fmt.Errorf("incompatible algorithm version")
+		return nil, nil, nil, ErrInvalidHashFormat
 	}
 
 	p := Argon2IdParams{}
 	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Time, &p.Parallelism)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, errors.Wrap(err, "invalid computation params")
 	}
 
 	salt, err := base64.RawStdEncoding.DecodeString(vals[4])
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, errors.Wrap(err, "invalid salt")
 	}
 	p.SaltLength = uint32(len(salt))
 
 	hash, err := base64.RawStdEncoding.DecodeString(vals[5])
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, errors.Wrap(err, "invalid hash")
 	}
 	p.KeyLength = uint32(len(hash))
 

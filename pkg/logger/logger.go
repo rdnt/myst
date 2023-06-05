@@ -13,6 +13,7 @@ import (
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
+	"github.com/pkg/errors"
 )
 
 var EnableDebug bool = true
@@ -174,7 +175,7 @@ func Init() error {
 		err = os.Mkdir("logs", os.ModePerm)
 		if err != nil {
 			_ = defaultLogger.stderr.Output(0, err.Error())
-			return err
+			return errors.Wrap(err, "failed to create logs folder")
 		}
 	}
 	// get debug and error log file
@@ -184,7 +185,7 @@ func Init() error {
 	)
 	if err != nil {
 		_ = defaultLogger.stderr.Output(0, err.Error())
-		return err
+		return errors.Wrap(err, "failed to open debug log file")
 	}
 	errorLog, err := os.OpenFile(
 		"logs/error.log",
@@ -192,7 +193,7 @@ func Init() error {
 	)
 	if err != nil {
 		_ = defaultLogger.stderr.Output(0, err.Error())
-		return err
+		return errors.Wrap(err, "failed to open error log file")
 	}
 	// update the writers and loggers
 	DebugLogWriter.SetWriter(colorable.NewNonColorable(debugLog))

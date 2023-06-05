@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/ajstarks/svgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -167,13 +168,16 @@ func (h *Hashicon) ToSVG() string {
 func (h *Hashicon) Export(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to create file")
 	}
+	defer f.Close()
+
 	_, err = f.Write([]byte(h.ToSVG()))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to write to file")
 	}
-	return f.Close()
+
+	return nil
 }
 
 // Returns 1 or 0 depending on the bit specified in the given byte's position.

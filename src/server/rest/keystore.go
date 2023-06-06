@@ -26,18 +26,6 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 	c.JSON(http.StatusCreated, ToJSONKeystore(k))
 }
 
-func (s *Server) Keystore(c *gin.Context) {
-	userId := CurrentUser(c)
-	keystoreId := c.Param("keystoreId")
-
-	k, err := s.app.UserKeystore(userId, keystoreId)
-	if err != nil {
-		panic(err)
-	}
-
-	c.JSON(http.StatusOK, ToJSONKeystore(k))
-}
-
 func (s *Server) UpdateKeystore(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")

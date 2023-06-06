@@ -55,10 +55,12 @@ func New(opts ...Option) (Application, error) {
 	app := &application{}
 
 	for _, opt := range opts {
-		err := opt(app)
-		if err != nil {
-			logger.Error(err)
-			return nil, err
+		if opt != nil {
+			err := opt(app)
+			if err != nil {
+				logger.Error(err)
+				return nil, err
+			}
 		}
 	}
 

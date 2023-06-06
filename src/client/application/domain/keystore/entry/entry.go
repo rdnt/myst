@@ -34,7 +34,9 @@ func New(opts ...Option) Entry {
 	}
 
 	for _, opt := range opts {
-		opt(&e)
+		if opt != nil {
+			opt(&e)
+		}
 	}
 
 	return e

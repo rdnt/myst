@@ -101,14 +101,6 @@ func NewServer(app application.Application) *Server {
 }
 
 func (s *Server) initRoutes(g *gin.RouterGroup) {
-	g.GET("/debug", func(c *gin.Context) {
-		data, err := s.app.Debug()
-		if err != nil {
-			panic(err)
-		}
-
-		c.JSON(http.StatusOK, data)
-	})
 	g.POST("/auth/login", s.Login)
 	g.POST("/auth/register", s.Register)
 
@@ -133,10 +125,7 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 }
 
 func (s *Server) Start(addr string) error {
-	log.Println("starting app on", addr)
-
-	s.app.Start()
-	log.Println("app started")
+	log.Println("app started on", addr)
 
 	httpServer, err := server.New(addr, s.Engine)
 	if err != nil {
@@ -148,19 +137,7 @@ func (s *Server) Start(addr string) error {
 }
 
 func (s *Server) Stop() error {
-	var firstErr error
-
-	err := s.server.Stop()
-	if err != nil && firstErr == nil {
-		firstErr = err
-	}
-
-	err = s.app.Stop()
-	if err != nil && firstErr == nil {
-		firstErr = err
-	}
-
-	return firstErr
+	return s.server.Stop()
 }
 
 func (s *Server) DeleteKeystore(c *gin.Context) {

@@ -464,7 +464,7 @@ func NewRegisterRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
-// NewDeclineOrCancelInvitationRequest generates requests for DeclineOrCancelInvitation
+// NewDeclineOrCancelInvitationRequest generates requests for DeleteInvitation
 func NewDeclineOrCancelInvitationRequest(server string, invitationId string) (*http.Request, error) {
 	var err error
 
@@ -969,7 +969,7 @@ type ClientWithResponsesInterface interface {
 
 	RegisterWithResponse(ctx context.Context, body RegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*RegisterResponse, error)
 
-	// DeclineOrCancelInvitation request
+	// DeleteInvitation request
 	DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error)
 
 	// GetInvitation request

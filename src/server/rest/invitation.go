@@ -93,7 +93,7 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
-	inv, err := s.app.DeclineOrCancelInvitation(
+	inv, err := s.app.DeleteInvitation(
 		userId, invitationId,
 	)
 	if err != nil {
@@ -125,10 +125,7 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 
 	keystoreKey := params.KeystoreKey
 
-	inv, err := s.app.FinalizeInvitation(
-		invitationId,
-		keystoreKey,
-	)
+	inv, err := s.app.FinalizeInvitation("", invitationId, keystoreKey)
 	if err != nil {
 		log.Error(err)
 		c.Status(http.StatusInternalServerError)

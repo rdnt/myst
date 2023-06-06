@@ -8,10 +8,6 @@ import (
 	"myst/src/server/application/domain/invitation"
 )
 
-var (
-	ErrInvalidInvitee = errors.New("invalid inviter")
-)
-
 // CreateInvitation creates an invitation for the given keystoreId, from the
 // given inviter to the invitee. The inviter should be the owner of the keystore.
 // Errors returned:

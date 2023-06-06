@@ -41,6 +41,7 @@ var (
 	ErrKeystoreNotFound   = errors.New("keystore not found")
 	ErrInvalidUsername    = errors.New("invalid username")
 	ErrInvalidPassword    = errors.New("invalid password")
+	ErrInvalidInvitee     = errors.New("invalid inviter")
 )
 
 type KeystoreUpdateParams struct {

@@ -2,18 +2,11 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
 
 	"github.com/labstack/gommon/log"
-)
-
-var (
-	// httpSrv *http.Server
-	// log     = logger.New("server", logger.DefaultColor)
-
-	ErrInvalidNetwork = fmt.Errorf("invalid server network")
+	"github.com/pkg/errors"
 )
 
 type Server struct {
@@ -24,7 +17,7 @@ type Server struct {
 func New(addr string, h http.Handler) (*Server, error) {
 	httpLn, err := net.Listen("tcp", addr)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to listen to address: %s", addr)
 	}
 
 	s := &Server{
@@ -32,15 +25,15 @@ func New(addr string, h http.Handler) (*Server, error) {
 		listener: httpLn,
 	}
 
-	s.server.RegisterOnShutdown(
-		func() {
-			// cleanup upgraded/hijacked connections (e.g. websocket)
-		},
-	)
+	// s.server.RegisterOnShutdown(
+	// 	func() {
+	// 		// cleanup upgraded/hijacked connections (e.g. websocket)
+	// 	},
+	// )
 
 	go func() {
 		err := s.server.Serve(httpLn)
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error(err)
 			s.Stop()
 			return
@@ -51,7 +44,6 @@ func New(addr string, h http.Handler) (*Server, error) {
 }
 
 func (s *Server) Stop() error {
-	// TODO wait at most 1 minute for server to shutdown
 	err := s.server.Shutdown(context.Background())
 	if err != nil {
 		log.Error(err)

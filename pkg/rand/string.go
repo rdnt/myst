@@ -2,6 +2,8 @@ package rand
 
 import (
 	"crypto/rand"
+
+	"github.com/pkg/errors"
 )
 
 func String(length int) (string, error) {
@@ -9,7 +11,7 @@ func String(length int) (string, error) {
 
 	_, err := rand.Read(result)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to generate random string")
 	}
 
 	for i := 0; i < length; i++ {
@@ -18,7 +20,7 @@ func String(length int) (string, error) {
 		for result[i] < 32 || result[i] == 127 {
 			_, err = rand.Read(result[i : i+1])
 			if err != nil {
-				return "", err
+				return "", errors.Wrap(err, "failed to generate random string")
 			}
 
 			result[i] &= 0x7F
@@ -35,7 +37,7 @@ func Bytes(n uint) ([]byte, error) {
 
 	_, err := rand.Read(b)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to generate random bytes")
 	}
 
 	return b, nil

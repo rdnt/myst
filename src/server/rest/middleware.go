@@ -13,7 +13,6 @@ import (
 	"github.com/golang-jwt/jwt"
 
 	"myst/pkg/logger"
-	"myst/pkg/regex"
 	"myst/src/server/rest/generated"
 )
 
@@ -162,12 +161,6 @@ func (s *Server) TokenAuthentication(c *gin.Context) error {
 
 	if auth == "" {
 		return fmt.Errorf("authentication required")
-	}
-
-	// Validate token format
-	match := regex.Match("jwt", auth)
-	if !match {
-		return fmt.Errorf("authentication failed")
 	}
 
 	// Check if authentication token is in the valid format

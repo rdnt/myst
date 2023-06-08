@@ -2,8 +2,8 @@ package mongorepo
 
 import (
 	"context"
-	"time"
 
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -13,17 +13,21 @@ type Repository struct {
 	database string
 }
 
-func (r *Repository) FlushDB() error {
-	return r.mdb.Database(r.database).Drop(context.Background())
+func (r *Repository) DropDatabase() error {
+	err := r.mdb.Database(r.database).Drop(context.Background())
+	if err != nil {
+		return errors.Wrap(err, "failed to drop database")
+	}
+
+	return nil
 }
 
 func New(addr string, database string) (*Repository, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(addr))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to connect to mongodb")
 	}
 
 	return &Repository{

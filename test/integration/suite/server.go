@@ -53,13 +53,13 @@ func (s *Server) start(t *testing.T) {
 	err := s.Server.Start(s.Address)
 	assert.NilError(t, err)
 
-	err = s.repo.FlushDB()
+	err = s.repo.DropDatabase()
 	assert.NilError(t, err)
 }
 
 func (s *Server) stop(t *testing.T) {
 	_ = s.Server.Stop()
 
-	err := s.repo.FlushDB()
+	err := s.repo.DropDatabase()
 	assert.NilError(t, err)
 }

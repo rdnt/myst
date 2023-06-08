@@ -1,8 +1,7 @@
 package inmemrepo
 
 import (
-	"fmt"
-
+	"myst/src/server/application"
 	"myst/src/server/application/domain/keystore"
 )
 
@@ -21,7 +20,7 @@ func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 
 	k, ok := r.keystores[id]
 	if !ok {
-		return keystore.Keystore{}, keystore.ErrNotFound
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
 	}
 
 	return k, nil
@@ -45,7 +44,7 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 
 	_, ok := r.keystores[k.Id]
 	if !ok {
-		return keystore.Keystore{}, fmt.Errorf("not found")
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
 	}
 
 	r.keystores[k.Id] = k
@@ -101,5 +100,5 @@ func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore,
 		}
 	}
 
-	return keystore.Keystore{}, keystore.ErrNotFound
+	return keystore.Keystore{}, application.ErrKeystoreNotFound
 }

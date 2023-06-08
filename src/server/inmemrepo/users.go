@@ -3,6 +3,7 @@ package inmemrepo
 import (
 	"fmt"
 
+	"myst/src/server/application"
 	"myst/src/server/application/domain/user"
 )
 
@@ -32,7 +33,7 @@ func (r *Repository) User(id string) (user.User, error) {
 
 	u, ok := r.users[id]
 	if !ok {
-		return user.User{}, user.ErrNotFound
+		return user.User{}, application.ErrKeystoreNotFound
 	}
 
 	return u, nil
@@ -48,7 +49,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 		}
 	}
 
-	return user.User{}, user.ErrNotFound
+	return user.User{}, application.ErrKeystoreNotFound
 }
 
 func (r *Repository) Users() ([]user.User, error) {
@@ -69,7 +70,7 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 
 	_, ok := r.users[u.Id]
 	if !ok {
-		return user.User{}, fmt.Errorf("not found")
+		return user.User{}, application.ErrUserNotFound
 	}
 
 	r.users[u.Id] = u

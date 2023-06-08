@@ -38,6 +38,7 @@ type UserRepository interface {
 var (
 	ErrInvitationNotFound = errors.New("invitation not found")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrUsernameTaken      = errors.New("username taken")
 	ErrNotAllowed         = errors.New("not allowed")
 	ErrKeystoreNotFound   = errors.New("keystore not found")
 	ErrInvalidUsername    = errors.New("invalid username")

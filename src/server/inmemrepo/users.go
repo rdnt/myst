@@ -1,8 +1,6 @@
 package inmemrepo
 
 import (
-	"fmt"
-
 	"myst/src/server/application"
 	"myst/src/server/application/domain/user"
 )
@@ -10,17 +8,6 @@ import (
 func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-
-	_, ok := r.users[u.Id]
-	if ok {
-		return user.User{}, fmt.Errorf("already exists")
-	}
-
-	for _, u2 := range r.users {
-		if u2.Username == u.Username {
-			return user.User{}, fmt.Errorf("already exists")
-		}
-	}
 
 	r.users[u.Id] = u
 
@@ -77,11 +64,3 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 
 	return u, nil
 }
-
-// func (r *Repository) DeleteUser(id string) error {
-// 	r.mux.Lock()
-// 	defer r.mux.Unlock()
-//
-// 	delete(r.users, id)
-// 	return nil
-// }

@@ -61,44 +61,44 @@ func (r *Repository) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (r *Repository) UserKeystores(userId string) ([]keystore.Keystore, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	ks := []keystore.Keystore{}
-
-	for _, k := range r.keystores {
-		if k.OwnerId == userId {
-			ks = append(ks, k)
-		} else {
-			for _, uid := range k.ViewerIds {
-				if uid == userId {
-					ks = append(ks, k)
-				}
-			}
-		}
-	}
-
-	return ks, nil
-}
-
-func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	for _, k := range r.keystores {
-		if k.Id == keystoreId {
-			if k.OwnerId == userId {
-				return k, nil
-			}
-
-			for _, uid := range k.ViewerIds {
-				if uid == userId {
-					return k, nil
-				}
-			}
-		}
-	}
-
-	return keystore.Keystore{}, application.ErrKeystoreNotFound
-}
+// func (r *Repository) UserKeystores(userId string) ([]keystore.Keystore, error) {
+// 	r.mux.Lock()
+// 	defer r.mux.Unlock()
+//
+// 	ks := []keystore.Keystore{}
+//
+// 	for _, k := range r.keystores {
+// 		if k.OwnerId == userId {
+// 			ks = append(ks, k)
+// 		} else {
+// 			for _, uid := range k.ViewerIds {
+// 				if uid == userId {
+// 					ks = append(ks, k)
+// 				}
+// 			}
+// 		}
+// 	}
+//
+// 	return ks, nil
+// }
+//
+// func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
+// 	r.mux.Lock()
+// 	defer r.mux.Unlock()
+//
+// 	for _, k := range r.keystores {
+// 		if k.Id == keystoreId {
+// 			if k.OwnerId == userId {
+// 				return k, nil
+// 			}
+//
+// 			for _, uid := range k.ViewerIds {
+// 				if uid == userId {
+// 					return k, nil
+// 				}
+// 			}
+// 		}
+// 	}
+//
+// 	return keystore.Keystore{}, application.ErrKeystoreNotFound
+// }

@@ -25,6 +25,18 @@ func (app *application) CreateUser(username, password string, publicKey []byte) 
 		return user.User{}, errors.WithMessage(err, "failed to hash password")
 	}
 
+	// make sure username is not taken
+	users, err := app.users.Users()
+	if err != nil {
+		return user.User{}, errors.WithMessage(err, "failed to get users")
+	}
+
+	for _, u := range users {
+		if u.Username == username {
+			return user.User{}, ErrUsernameTaken
+		}
+	}
+
 	u, err := app.users.CreateUser(user.New(
 		user.WithUsername(username),
 		user.WithPasswordHash(hash),

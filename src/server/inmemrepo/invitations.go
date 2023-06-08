@@ -1,8 +1,6 @@
 package inmemrepo
 
 import (
-	"github.com/pkg/errors"
-
 	"myst/src/server/application"
 	"myst/src/server/application/domain/invitation"
 )
@@ -10,11 +8,6 @@ import (
 func (r *Repository) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-
-	_, ok := r.invitations[inv.Id]
-	if ok {
-		return invitation.Invitation{}, errors.New("already exists")
-	}
 
 	r.invitations[inv.Id] = inv
 

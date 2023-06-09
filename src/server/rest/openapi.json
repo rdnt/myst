@@ -32,7 +32,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -234,41 +235,6 @@
       }
     },
     "/keystore/{keystoreId}": {
-      "get": {
-        "description": "Returns a keystore",
-        "operationId": "Keystore",
-        "parameters": [
-          {
-            "name": "keystoreId",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Keystore",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Keystore"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
       "patch": {
         "description": "Updates a keystore",
         "operationId": "UpdateKeystore",
@@ -453,8 +419,8 @@
         }
       },
       "delete": {
-        "description": "Declines/cancels an invitation",
-        "operationId": "DeclineOrCancelInvitation",
+        "description": "Deletes/declines/cancels an invitation, depending on the invitation's state",
+        "operationId": "DeleteInvitation",
         "responses": {
           "200": {
             "description": "Invitation",
@@ -520,11 +486,6 @@
     "schemas": {
       "RegisterRequest": {
         "type": "object",
-        "required": [
-          "username",
-          "password",
-          "publicKey"
-        ],
         "properties": {
           "username": {
             "type": "string"
@@ -536,14 +497,15 @@
             "type": "string",
             "format": "byte"
           }
-        }
+        },
+        "required": [
+          "username",
+          "password",
+          "publicKey"
+        ]
       },
       "LoginRequest": {
         "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
         "properties": {
           "username": {
             "type": "string"
@@ -551,7 +513,11 @@
           "password": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
       },
       "AuthorizationResponse": {
         "type": "object",
@@ -590,33 +556,29 @@
       },
       "CreateInvitationRequest": {
         "type": "object",
-        "required": [
-          "invitee"
-        ],
         "properties": {
           "invitee": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "invitee"
+        ]
       },
       "FinalizeInvitationRequest": {
         "type": "object",
-        "required": [
-          "keystoreKey"
-        ],
         "properties": {
           "keystoreKey": {
             "type": "string",
             "format": "byte"
           }
-        }
+        },
+        "required": [
+          "keystoreKey"
+        ]
       },
       "CreateKeystoreRequest": {
         "type": "object",
-        "required": [
-          "name",
-          "payload"
-        ],
         "properties": {
           "name": {
             "type": "string"
@@ -625,7 +587,11 @@
             "type": "string",
             "format": "byte"
           }
-        }
+        },
+        "required": [
+          "name",
+          "payload"
+        ]
       },
       "UpdateKeystoreRequest": {
         "type": "object",
@@ -641,15 +607,6 @@
       },
       "Keystore": {
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "payload",
-          "ownerId",
-          "version",
-          "createdAt",
-          "updatedAt"
-        ],
         "properties": {
           "id": {
             "type": "string"
@@ -675,14 +632,19 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "id",
+          "name",
+          "payload",
+          "ownerId",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "KeystoreName": {
         "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
         "properties": {
           "id": {
             "type": "string"
@@ -690,23 +652,14 @@
           "name": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "Invitation": {
         "type": "object",
-        "required": [
-          "id",
-          "keystore",
-          "inviter",
-          "invitee",
-          "encryptedKeystoreKey",
-          "status",
-          "createdAt",
-          "updatedAt",
-          "acceptedAt",
-          "declinedAt",
-          "deletedAt"
-        ],
         "properties": {
           "id": {
             "type": "string"
@@ -742,10 +695,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "acceptedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
           "declinedAt": {
             "type": "string",
             "format": "date-time"
@@ -753,15 +702,38 @@
           "deletedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "id",
+          "keystore",
+          "inviter",
+          "invitee",
+          "encryptedKeystoreKey",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "declinedAt",
+          "deletedAt",
+          "acceptedAt",
+          "cancelledAt",
+          "finalizedAt"
+        ]
       },
       "Error": {
         "type": "object",
-        "required": [
-          "code",
-          "message"
-        ],
         "properties": {
           "code": {
             "type": "string"
@@ -769,7 +741,11 @@
           "message": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
       }
     }
   }

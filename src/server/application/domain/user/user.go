@@ -31,7 +31,9 @@ func New(opts ...Option) User {
 	}
 
 	for _, opt := range opts {
-		opt(&u)
+		if opt != nil {
+			opt(&u)
+		}
 	}
 
 	return u

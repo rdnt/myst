@@ -47,10 +47,12 @@ type FinalizeInvitationRequest struct {
 // Invitation defines model for Invitation.
 type Invitation struct {
 	AcceptedAt           time.Time        `json:"acceptedAt"`
+	CancelledAt          time.Time        `json:"cancelledAt"`
 	CreatedAt            time.Time        `json:"createdAt"`
 	DeclinedAt           time.Time        `json:"declinedAt"`
 	DeletedAt            time.Time        `json:"deletedAt"`
 	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
+	FinalizedAt          time.Time        `json:"finalizedAt"`
 	Id                   string           `json:"id"`
 	Invitee              User             `json:"invitee"`
 	Inviter              User             `json:"inviter"`
@@ -107,7 +109,7 @@ type User struct {
 
 // UserByUsernameParams defines parameters for UserByUsername.
 type UserByUsernameParams struct {
-	Username *string `form:"username,omitempty" json:"username,omitempty"`
+	Username string `form:"username" json:"username"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.

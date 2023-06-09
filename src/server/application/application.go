@@ -1,6 +1,8 @@
 package application
 
 import (
+	"github.com/pkg/errors"
+
 	"myst/pkg/logger"
 	"myst/src/server/application/domain/invitation"
 	"myst/src/server/application/domain/keystore"
@@ -33,6 +35,20 @@ type UserRepository interface {
 	Users() ([]user.User, error)
 }
 
+var (
+	ErrInvitationNotFound   = errors.New("invitation not found")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrUsernameTaken        = errors.New("username taken")
+	ErrForbidden            = errors.New("forbidden")
+	ErrKeystoreNotFound     = errors.New("keystore not found")
+	ErrInvalidUsername      = errors.New("invalid username")
+	ErrInvalidPassword      = errors.New("invalid password")
+	ErrAuthenticationFailed = errors.New("authorization failed")
+	ErrInvalidInvitee       = errors.New("invalid inviter")
+	ErrInviterNotFound      = errors.New("inviter not found")
+	ErrInviteeNotFound      = errors.New("invitee not found")
+)
+
 type KeystoreUpdateParams struct {
 	Name    *string
 	Payload *[]byte
@@ -44,7 +60,7 @@ type UserInvitationsOptions struct {
 
 type Application interface {
 	CreateUser(username, password string, publicKey []byte) (user.User, error)
-	AuthorizeUser(username, password string) (user.User, error)
+	AuthenticateUser(username, password string) (user.User, error)
 	User(id string) (user.User, error)
 	UserByUsername(username string) (user.User, error)
 
@@ -53,21 +69,14 @@ type Application interface {
 	Keystores() ([]keystore.Keystore, error)
 	UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.Keystore, error)
 	DeleteKeystore(userId string, keystoreId string) error
-	UserKeystore(userId, keystoreId string) (keystore.Keystore, error)
 	UserKeystores(userId string) ([]keystore.Keystore, error)
 
 	CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error)
-	// VerifyInvitation(userId string, invitationId string) (invitation.Invitation, error)
-	DeclineOrCancelInvitation(userId, invitationId string) (invitation.Invitation, error)
-	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
+	DeleteInvitation(userId, invitationId string) (invitation.Invitation, error)
+	FinalizeInvitation(userId string, invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
 	UserInvitation(userId, invitationId string) (invitation.Invitation, error)
 	UserInvitations(userId string, opts UserInvitationsOptions) ([]invitation.Invitation, error)
-
-	Start() error
-	Stop() error
-	Debug() (map[string]any, error)
-	DebugUpdateUserPublicKey(userId string, publicKey []byte) error
 }
 
 type application struct {
@@ -76,14 +85,16 @@ type application struct {
 	keystores   KeystoreRepository
 }
 
-func New(opts ...Option) (Application, error) {
+func New(opts ...Option) Application {
 	app := &application{}
 
 	for _, opt := range opts {
-		opt(app)
+		if opt != nil {
+			opt(app)
+		}
 	}
 
-	return app, nil
+	return app
 }
 
 type Option func(app *application)
@@ -104,71 +115,4 @@ func WithInvitationRepository(repo InvitationRepository) Option {
 	return func(app *application) {
 		app.invitations = repo
 	}
-}
-
-func (app *application) Start() error {
-	log.Print("App started")
-
-	// app.setup()
-
-	return nil
-}
-
-// func (app *application) setup() {
-// 	u, err := app.CreateUser("rdnt", "1234", []byte("rdntPublicKey"))
-// 	if err != nil {
-// 		panic(err)
-// 	}
-//
-// 	log.Debug(u)
-//
-// 	u, err = app.CreateUser("abcd", "5678", []byte("abcdPublicKey"))
-// 	if err != nil {
-// 		panic(err)
-// 	}
-//
-// 	log.Debug(u)
-// }
-
-func (app *application) Stop() error {
-	log.Print("App stopped")
-
-	return nil
-}
-
-func (app *application) Debug() (data map[string]any, err error) {
-	data = map[string]any{}
-
-	// data["users"], err = app.users.Users()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// data["keystores"], err = app.keystores.Keystores()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// data["invitations"], err = app.invitations.Invitations()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	return data, nil
-}
-
-func (app *application) DebugUpdateUserPublicKey(userId string, publicKey []byte) error {
-	u, err := app.users.User(userId)
-	if err != nil {
-		return err
-	}
-
-	u.PublicKey = publicKey
-
-	_, err = app.users.UpdateUser(u)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

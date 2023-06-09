@@ -42,7 +42,9 @@ func New(opts ...Option) Invitation {
 	}
 
 	for _, opt := range opts {
-		opt(&inv)
+		if opt != nil {
+			opt(&inv)
+		}
 	}
 
 	return inv

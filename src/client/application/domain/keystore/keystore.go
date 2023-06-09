@@ -36,7 +36,9 @@ func New(opts ...Option) Keystore {
 	}
 
 	for _, opt := range opts {
-		opt(&k)
+		if opt != nil {
+			opt(&k)
+		}
 	}
 
 	return k

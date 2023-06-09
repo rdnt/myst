@@ -1,88 +1,17 @@
 package rest
 
 import (
-	"encoding/base64"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-
-	"myst/src/server/rest/generated"
 )
 
-func (s *Server) Register(c *gin.Context) {
-	var req generated.RegisterRequest
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	u, err := s.app.CreateUser(req.Username, req.Password, req.PublicKey)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	token, err := s.loginUser(u.Id)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusCreated, generated.AuthorizationResponse{
-		User: generated.User{
-			Id:        u.Id,
-			Username:  u.Username,
-			PublicKey: u.PublicKey,
-		},
-		Token: token,
-	})
-}
-
-func (s *Server) Login(c *gin.Context) {
-	var params generated.LoginRequest
-	err := c.ShouldBindJSON(&params)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	u, err := s.app.UserByUsername(params.Username)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	u, err = s.app.AuthorizeUser(params.Username, params.Password)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	token, err := s.loginUser(u.Id)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusOK, generated.AuthorizationResponse{
-		User:  UserToJSON(u),
-		Token: token,
-	})
-}
-
-func (s *Server) loginUser(userId string) (string, error) {
+// signedToken creates a jwt token for the given user
+func (s *Server) signedToken(userId string) (string, error) {
 	now := time.Now()
 
-	exp := now.Unix() + int64(jwtCookieLifetime)
+	exp := now.Unix() + jwtLifetime
 	iat := now.Unix()
 	nbf := now.Unix()
 
@@ -96,37 +25,15 @@ func (s *Server) loginUser(userId string) (string, error) {
 		},
 	)
 
-	key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return token.SignedString(key)
+	return token.SignedString(s.jwtSigningKey)
 }
 
-type UserByUsernameRequest struct {
-	Username *string `form:"username"`
-}
-
-func (s *Server) User(c *gin.Context) {
-	var req UserByUsernameRequest
-	err := c.ShouldBindQuery(&req)
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
+func CurrentUser(c *gin.Context) string {
+	// GetCurrentUserID returns the username of the currently logged-in user
+	userId, ok := c.Get("userId")
+	if !ok {
+		panic("userId not set")
 	}
 
-	if req.Username == nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	u, err := s.app.UserByUsername(*req.Username)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusOK, UserToJSON(u))
+	return userId.(string)
 }

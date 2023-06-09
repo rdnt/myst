@@ -109,7 +109,7 @@ func (r *remote) DeclineOrCancelInvitation(id string) (invitation.Invitation, er
 		return invitation.Invitation{}, ErrNotAuthenticated
 	}
 
-	res, err := r.client.DeclineOrCancelInvitationWithResponse(
+	res, err := r.client.DeleteInvitationWithResponse(
 		context.Background(), id,
 	)
 	if err != nil {

@@ -36,7 +36,9 @@ func New(opts ...Option) (application.Remote, error) {
 	}
 
 	for _, opt := range opts {
-		opt(r)
+		if opt != nil {
+			opt(r)
+		}
 	}
 
 	var err error

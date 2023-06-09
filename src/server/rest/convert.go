@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"github.com/pkg/errors"
+
 	"myst/src/server/application/domain/invitation"
 	"myst/src/server/application/domain/keystore"
 	"myst/src/server/application/domain/user"
@@ -21,17 +23,17 @@ func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
 func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitation, error) {
 	inviter, err := s.app.User(inv.InviterId)
 	if err != nil {
-		return generated.Invitation{}, err
+		return generated.Invitation{}, errors.WithMessage(err, "failed to get inviter")
 	}
 
 	invitee, err := s.app.User(inv.InviteeId)
 	if err != nil {
-		return generated.Invitation{}, err
+		return generated.Invitation{}, errors.WithMessage(err, "failed to get invitee")
 	}
 
 	k, err := s.app.Keystore(inv.KeystoreId)
 	if err != nil {
-		return generated.Invitation{}, err
+		return generated.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
 	return generated.Invitation{
@@ -46,9 +48,11 @@ func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitati
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		CreatedAt:            inv.CreatedAt,
 		UpdatedAt:            inv.UpdatedAt,
-		AcceptedAt:           inv.AcceptedAt,
-		DeclinedAt:           inv.DeclinedAt,
 		DeletedAt:            inv.DeletedAt,
+		DeclinedAt:           inv.DeclinedAt,
+		AcceptedAt:           inv.AcceptedAt,
+		CancelledAt:          inv.CancelledAt,
+		FinalizedAt:          inv.FinalizedAt,
 	}, nil
 }
 

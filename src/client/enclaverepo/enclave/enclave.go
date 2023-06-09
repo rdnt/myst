@@ -28,9 +28,11 @@ func New(opts ...Option) (*Enclave, error) {
 	}
 
 	for _, opt := range opts {
-		err := opt(e)
-		if err != nil {
-			return nil, err
+		if opt != nil {
+			err := opt(e)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

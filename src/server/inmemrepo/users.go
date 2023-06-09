@@ -1,25 +1,13 @@
 package inmemrepo
 
 import (
-	"fmt"
-
+	"myst/src/server/application"
 	"myst/src/server/application/domain/user"
 )
 
 func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-
-	_, ok := r.users[u.Id]
-	if ok {
-		return user.User{}, fmt.Errorf("already exists")
-	}
-
-	for _, u2 := range r.users {
-		if u2.Username == u.Username {
-			return user.User{}, fmt.Errorf("already exists")
-		}
-	}
 
 	r.users[u.Id] = u
 
@@ -32,7 +20,7 @@ func (r *Repository) User(id string) (user.User, error) {
 
 	u, ok := r.users[id]
 	if !ok {
-		return user.User{}, user.ErrNotFound
+		return user.User{}, application.ErrKeystoreNotFound
 	}
 
 	return u, nil
@@ -48,7 +36,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 		}
 	}
 
-	return user.User{}, user.ErrNotFound
+	return user.User{}, application.ErrKeystoreNotFound
 }
 
 func (r *Repository) Users() ([]user.User, error) {
@@ -69,18 +57,10 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 
 	_, ok := r.users[u.Id]
 	if !ok {
-		return user.User{}, fmt.Errorf("not found")
+		return user.User{}, application.ErrUserNotFound
 	}
 
 	r.users[u.Id] = u
 
 	return u, nil
 }
-
-// func (r *Repository) DeleteUser(id string) error {
-// 	r.mux.Lock()
-// 	defer r.mux.Unlock()
-//
-// 	delete(r.users, id)
-// 	return nil
-// }

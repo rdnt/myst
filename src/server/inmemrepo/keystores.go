@@ -1,8 +1,7 @@
 package inmemrepo
 
 import (
-	"fmt"
-
+	"myst/src/server/application"
 	"myst/src/server/application/domain/keystore"
 )
 
@@ -21,7 +20,7 @@ func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 
 	k, ok := r.keystores[id]
 	if !ok {
-		return keystore.Keystore{}, keystore.ErrNotFound
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
 	}
 
 	return k, nil
@@ -45,7 +44,7 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 
 	_, ok := r.keystores[k.Id]
 	if !ok {
-		return keystore.Keystore{}, fmt.Errorf("not found")
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
 	}
 
 	r.keystores[k.Id] = k
@@ -60,46 +59,4 @@ func (r *Repository) DeleteKeystore(id string) error {
 	delete(r.keystores, id)
 
 	return nil
-}
-
-func (r *Repository) UserKeystores(userId string) ([]keystore.Keystore, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	ks := []keystore.Keystore{}
-
-	for _, k := range r.keystores {
-		if k.OwnerId == userId {
-			ks = append(ks, k)
-		} else {
-			for _, uid := range k.ViewerIds {
-				if uid == userId {
-					ks = append(ks, k)
-				}
-			}
-		}
-	}
-
-	return ks, nil
-}
-
-func (r *Repository) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
-	for _, k := range r.keystores {
-		if k.Id == keystoreId {
-			if k.OwnerId == userId {
-				return k, nil
-			}
-
-			for _, uid := range k.ViewerIds {
-				if uid == userId {
-					return k, nil
-				}
-			}
-		}
-	}
-
-	return keystore.Keystore{}, keystore.ErrNotFound
 }

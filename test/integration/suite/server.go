@@ -6,6 +6,7 @@ import (
 
 	"gotest.tools/v3/assert"
 
+	"myst/pkg/crypto"
 	"myst/pkg/uuid"
 	"myst/src/server/application"
 	"myst/src/server/mongorepo"
@@ -26,14 +27,17 @@ func newServer(t *testing.T, address string) *Server {
 	repo, err := mongorepo.New("mongodb://localhost:27017", "myst-test-"+uuid.New().String())
 	assert.NilError(t, err)
 
-	app, err := application.New(
+	jwtSigningKey, err := crypto.GenerateRandomBytes(32)
+	assert.NilError(t, err)
+
+	app := application.New(
 		application.WithKeystoreRepository(repo),
 		application.WithUserRepository(repo),
 		application.WithInvitationRepository(repo),
 	)
 	assert.NilError(t, err)
 
-	server := rest.NewServer(app)
+	server := rest.NewServer(app, jwtSigningKey)
 
 	clientAddr := fmt.Sprintf("http://%s/api", address)
 

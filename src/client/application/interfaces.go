@@ -9,7 +9,7 @@ import (
 
 // Enclave is the repository that handles storing and retrieving of the
 // user's keystores and credentials. It requires initialization and
-// authentication before it can be used. Authentication status can
+// authentication before it can be used. authenticationMiddleware status can
 // expire after some time if the HealthCheck method is not called
 // regularly.
 type Enclave interface {
@@ -31,7 +31,7 @@ type Enclave interface {
 // Remote is a remote repository that holds upstream enclave/invitations. It is
 // used to sync keystores with a remote server in a secure manner, and to
 // facilitate inviting users to access keystores or accepting invitations to
-// access a keystore from another user. Authentication with a username and
+// access a keystore from another user. authenticationMiddleware with a username and
 // password is required to interface with a remote.
 type Remote interface {
 	Address() string
@@ -40,7 +40,7 @@ type Remote interface {
 	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
-	
+
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)

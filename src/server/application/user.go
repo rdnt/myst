@@ -10,7 +10,8 @@ import (
 
 // CreateUser creates a user with the given username, password and public key.
 // If the username or password are invalid, ErrInvalidUsername or
-// ErrInvalidPassword will be returned respectively.
+// ErrInvalidPassword will be returned respectively. If a user with the given
+// username already exists, ErrUsernameTaken will be returned.
 func (app *application) CreateUser(username, password string, publicKey []byte) (user.User, error) {
 	if username == "" {
 		return user.User{}, ErrInvalidUsername
@@ -49,11 +50,14 @@ func (app *application) CreateUser(username, password string, publicKey []byte) 
 	return u, nil
 }
 
-// AuthorizeUser authorizes a user with the given username and password.
-// If the password does not match, ErrInvalidPassword is returned.
-func (app *application) AuthorizeUser(username, password string) (user.User, error) {
+// AuthenticateUser authenticates a user with the given username and password.
+// If the user doesn't exist, or the password does not match,
+// ErrAuthenticationFailed is returned.
+func (app *application) AuthenticateUser(username, password string) (user.User, error) {
 	u, err := app.users.UserByUsername(username)
-	if err != nil {
+	if errors.Is(err, ErrUserNotFound) {
+		return user.User{}, ErrAuthenticationFailed
+	} else if err != nil {
 		return user.User{}, errors.WithMessage(err, "failed to get user by username")
 	}
 
@@ -63,7 +67,7 @@ func (app *application) AuthorizeUser(username, password string) (user.User, err
 	}
 
 	if !ok {
-		return user.User{}, ErrInvalidPassword
+		return user.User{}, ErrAuthenticationFailed
 	}
 
 	return u, nil
@@ -127,10 +131,11 @@ func (app *application) UserInvitations(userId string, opts UserInvitationsOptio
 	return invitations, nil
 }
 
-// UserInvitation returns an invitation, if the user is associated with it.
-// If the invitation is not found, ErrInvitationNotFound is returned.
-// Additionally, if the invitation is deleted and the user is the invitee,
-// ErrInvitationNotFound is returned.
+// UserInvitation returns an invitation.
+// ErrUserNotFound will be returned if the user is not found.
+// ErrInvitationNotFound will be returned if the invitation doesn't exist, if
+// the user is not associated with it, or if the user is the invitee and
+// the invitation is marked as deleted.
 func (app *application) UserInvitation(userId, invitationId string) (invitation.Invitation, error) {
 	u, err := app.users.User(userId)
 	if err != nil {

@@ -3,6 +3,7 @@ package application
 import (
 	"github.com/pkg/errors"
 
+	"myst/pkg/optional"
 	"myst/src/server/application/domain/invitation"
 	"myst/src/server/application/domain/keystore"
 )
@@ -34,11 +35,11 @@ func (app *application) CreateKeystore(name, ownerId string, payload []byte) (ke
 
 // DeleteKeystore deletes a keystore with the given id. The userId initiating
 // the deletion should be the owner of the keystore for it to be deleted,
-// otherwise ErrNotAllowed is returned. Before deletion, all associated
+// otherwise ErrForbidden is returned. Before deletion, all associated
 // invitations are deleted, and then the keystore is also deleted.
 // If the keystore is not found, ErrKeystoreNotFound is returned.
 func (app *application) DeleteKeystore(userId string, keystoreId string) error {
-	u, err := app.users.User(userId)
+	_, err := app.users.User(userId)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get user")
 	}
@@ -48,8 +49,29 @@ func (app *application) DeleteKeystore(userId string, keystoreId string) error {
 		return errors.WithMessage(err, "failed to get keystore")
 	}
 
-	if k.OwnerId != u.Id {
-		return ErrNotAllowed
+	// check to see if the user should be able to delete this keystore
+	if k.OwnerId != userId {
+		invs, err := app.UserInvitations(
+			userId,
+			UserInvitationsOptions{Status: optional.Ref(invitation.Finalized)},
+		)
+		if err != nil {
+			return errors.WithMessage(err, "failed to get user invitations")
+		}
+
+		var found bool
+		for _, inv := range invs {
+			if inv.KeystoreId == keystoreId {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			return ErrForbidden
+		} else {
+			return ErrKeystoreNotFound
+		}
 	}
 
 	invs, err := app.invitations.Invitations()
@@ -97,24 +119,40 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 }
 
 // UpdateKeystore updates a keystore with the provided params. Only non-nil
-// params are processed. The userId passed is the initiator of the update, and
-// should be the keystore's owner, otherwise ErrNotAllowed is returned.
-// If the keystore is not found, ErrKeystoreNotFound is returned.
+// params are processed. If the keystore is not found, ErrKeystoreNotFound is
+// returned. The userId passed is the initiator of the update, and should be
+// the keystore's owner, otherwise ErrForbidden is returned.
 func (app *application) UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.
-Keystore,
+	Keystore,
 	error) {
-	_, err := app.users.User(userId)
-	if err != nil {
-		return keystore.Keystore{}, errors.WithMessage(err, "failed to get user")
-	}
-
 	k, err := app.keystores.Keystore(keystoreId)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
+	// check to see if the user should be able to see this keystore
 	if k.OwnerId != userId {
-		return keystore.Keystore{}, ErrNotAllowed
+		invs, err := app.UserInvitations(
+			userId,
+			UserInvitationsOptions{Status: optional.Ref(invitation.Finalized)},
+		)
+		if err != nil {
+			return keystore.Keystore{}, errors.WithMessage(err, "failed to get user invitations")
+		}
+
+		var found bool
+		for _, inv := range invs {
+			if inv.KeystoreId == keystoreId {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			return keystore.Keystore{}, ErrForbidden
+		} else {
+			return keystore.Keystore{}, ErrKeystoreNotFound
+		}
 	}
 
 	// update the keystore's properties
@@ -144,11 +182,9 @@ func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error
 		return nil, errors.WithMessage(err, "failed to get user")
 	}
 
-	finalized := invitation.Finalized
-
 	invs, err := app.UserInvitations(
 		u.Id,
-		UserInvitationsOptions{Status: &finalized},
+		UserInvitationsOptions{Status: optional.Ref(invitation.Finalized)},
 	)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get user invitations")

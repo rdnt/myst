@@ -36,7 +36,6 @@ func KeystoreToBSON(k keystore.Keystore) Keystore {
 		Name:      k.Name,
 		Payload:   k.Payload,
 		OwnerId:   k.OwnerId,
-		ViewerIds: k.ViewerIds,
 		CreatedAt: k.CreatedAt,
 		UpdatedAt: k.UpdatedAt,
 	}
@@ -48,7 +47,6 @@ func KeystoreFromBSON(k Keystore) keystore.Keystore {
 		Name:      k.Name,
 		Payload:   k.Payload,
 		OwnerId:   k.OwnerId,
-		ViewerIds: k.ViewerIds,
 		CreatedAt: k.CreatedAt,
 		UpdatedAt: k.UpdatedAt,
 	}

@@ -12,13 +12,12 @@ type Keystore struct {
 	Name      string
 	Payload   []byte
 	OwnerId   string
-	ViewerIds []string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 func (k Keystore) String() string {
-	return fmt.Sprintln(k.Id, k.Name, k.OwnerId, k.ViewerIds, k.CreatedAt, k.UpdatedAt)
+	return fmt.Sprintln(k.Id, k.Name, k.OwnerId, k.CreatedAt, k.UpdatedAt)
 }
 
 func New(opts ...Option) Keystore {

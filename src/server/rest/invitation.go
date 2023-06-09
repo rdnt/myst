@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 
 	"myst/src/server/application"
 	"myst/src/server/rest/generated"
@@ -13,13 +14,10 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	keystoreId := c.Param("keystoreId")
 
-	log.Println("SERVER Creating invitation", keystoreId)
-
 	var params generated.CreateInvitationRequest
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusBadRequest)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
@@ -28,16 +26,31 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 		userId,
 		params.Invitee,
 	)
-	if err != nil {
+	if errors.Is(err, application.ErrInviterNotFound) {
+		Error(c, http.StatusNotFound, "inviter-not-found")
+		return
+	} else if errors.Is(err, application.ErrKeystoreNotFound) {
+		Error(c, http.StatusNotFound, "keystore-not-found")
+		return
+	} else if errors.Is(err, application.ErrInviteeNotFound) {
+		Error(c, http.StatusNotFound, "invitee-not-found")
+		return
+	} else if errors.Is(err, application.ErrInvalidInvitee) {
+		Error(c, http.StatusBadRequest, "invalid-invitee")
+		return
+	} else if errors.Is(err, application.ErrForbidden) {
+		Error(c, http.StatusForbidden)
+		return
+	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -49,16 +62,19 @@ func (s *Server) Invitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	inv, err := s.app.UserInvitation(userId, invitationId)
-	if err != nil {
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -73,39 +89,51 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 		userId,
 		invitationId,
 	)
-	if err != nil {
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if errors.Is(err, application.ErrForbidden) {
+		Error(c, http.StatusForbidden)
+		return
+	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	c.JSON(http.StatusOK, restInv)
 }
 
-func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
+func (s *Server) DeleteInvitation(c *gin.Context) {
 	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
 	inv, err := s.app.DeleteInvitation(
 		userId, invitationId,
 	)
-	if err != nil {
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if errors.Is(err, application.ErrForbidden) {
+		Error(c, http.StatusForbidden)
+		return
+	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -113,29 +141,33 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 }
 
 func (s *Server) FinalizeInvitation(c *gin.Context) {
+	userId := CurrentUser(c)
 	invitationId := c.Param("invitationId")
 
-	var params generated.FinalizeInvitationRequest
-	err := c.ShouldBindJSON(&params)
+	var req generated.FinalizeInvitationRequest
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusBadRequest)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
-	keystoreKey := params.KeystoreKey
-
-	inv, err := s.app.FinalizeInvitation("", invitationId, keystoreKey)
-	if err != nil {
+	inv, err := s.app.FinalizeInvitation(userId, invitationId, req.KeystoreKey)
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if errors.Is(err, application.ErrForbidden) {
+		Error(c, http.StatusForbidden)
+		return
+	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.ToJSONInvitation(inv)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -148,7 +180,7 @@ func (s *Server) Invitations(c *gin.Context) {
 	invs, err := s.app.UserInvitations(userId, application.UserInvitationsOptions{})
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -158,7 +190,7 @@ func (s *Server) Invitations(c *gin.Context) {
 		restInv, err := s.ToJSONInvitation(inv)
 		if err != nil {
 			log.Error(err)
-			c.Status(http.StatusInternalServerError)
+			Error(c, http.StatusInternalServerError)
 			return
 		}
 

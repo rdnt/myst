@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -9,36 +8,36 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-errors/errors"
+	goerrors "github.com/go-errors/errors"
 	"github.com/golang-jwt/jwt"
+	"github.com/pkg/errors"
 
 	"myst/pkg/logger"
 	"myst/src/server/rest/generated"
 )
 
-func NoRoute(c *gin.Context) {
+// noRouteMiddleware is the middleware that processes 404 - not found errors.
+// if the route is prefixed with /api/ it will return a json error response,
+// otherwise the UI's index.html will be served so that the frontend can render
+// the error.
+func noRouteMiddleware(c *gin.Context) {
 	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// serve a json 404 error if it's an Server call
-		resp := generated.Error{
-			Code:    "not-found",
-			Message: http.StatusText(http.StatusNotFound),
-		}
-
-		c.JSON(http.StatusNotFound, resp)
+		Error(c, http.StatusNotFound, "not-found", http.StatusText(http.StatusNotFound))
 	} else {
 		// serve ui and let it handle the error otherwise
+		// TODO @rdnt @@@: serve from in-memory filesystem
 		c.File("static/index.html")
 	}
 
 	c.Abort()
 }
 
-// Recovery is a panic recovery middleware
-func Recovery(c *gin.Context) {
+// recoveryMiddleware is a panic recovery middleware
+func recoveryMiddleware(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			httprequest, _ := httputil.DumpRequest(c.Request, false)
-			goErr := errors.Wrap(err, 0)
+			goErr := goerrors.Wrap(err, 0)
 			log.Errorf("Panic recovered:\n\n%s%s\n%s", httprequest, goErr.Error(), goErr.Stack())
 			recoveryHandler(c, err)
 		}
@@ -68,20 +67,18 @@ func recoveryHandler(c *gin.Context, err interface{}) {
 	c.Abort()
 }
 
-// PrintRoutes prints all active routes to the console on startup
-func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
+// printRoutes prints all active routes to the console on startup
+func printRoutes(httpMethod, absolutePath, handlerName string, _ int) {
 	if handlerName == "" {
 		return
 	}
+
 	log.Printf("%-7s %s\n\t -> %s\n", httpMethod, absolutePath, handlerName)
 }
 
-func LoggerMiddleware(c *gin.Context) {
-	// Start timer
+func loggerMiddleware(c *gin.Context) {
 	start := time.Now()
-	// Process request
 	c.Next()
-	// calculate latency
 	latency := time.Since(start)
 
 	path := c.Request.URL.Path
@@ -95,16 +92,16 @@ func LoggerMiddleware(c *gin.Context) {
 
 	log.Printf(
 		"%5s  %13v  %15s  %-21s  %s\n%s",
-		logger.Colorize(fmt.Sprintf(" %d ", status), StatusColor(status)),
+		logger.Colorize(fmt.Sprintf(" %d ", status), statusColor(status)),
 		latency,
 		c.ClientIP(),
-		logger.Colorize(fmt.Sprintf(" %s ", method), MethodColor(method)),
+		logger.Colorize(fmt.Sprintf(" %s ", method), methodColor(method)),
 		path,
 		c.Errors.ByType(gin.ErrorTypePrivate).String(),
 	)
 }
 
-func StatusColor(status int) logger.Color {
+func statusColor(status int) logger.Color {
 	switch {
 	case status >= http.StatusOK && status < http.StatusMultipleChoices:
 		return logger.GreenBg | logger.Black
@@ -117,7 +114,7 @@ func StatusColor(status int) logger.Color {
 	}
 }
 
-func MethodColor(method string) logger.Color {
+func methodColor(method string) logger.Color {
 	switch method {
 	case http.MethodGet:
 		return logger.GreenBg | logger.Black
@@ -134,86 +131,69 @@ func MethodColor(method string) logger.Color {
 	}
 }
 
-func (s *Server) Authentication() gin.HandlerFunc {
+func (s *Server) authenticationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := s.TokenAuthentication(c)
+		err := s.authenticateWithToken(c)
 		if err != nil {
 			log.Error(err)
-			c.JSON(403, gin.H{"error": "Forbidden"})
+			Error(c, http.StatusForbidden)
 			c.Abort()
-
-			return
 		}
 	}
 }
 
-func (s *Server) TokenAuthentication(c *gin.Context) error {
+func (s *Server) authenticateWithToken(c *gin.Context) error {
 	auth := c.GetHeader("Authorization")
 	if auth == "" {
-		return fmt.Errorf("authentication required")
+		return errors.New("authentication required")
 	}
 
 	parts := strings.Split(auth, "Bearer")
 	if len(parts) != 2 {
-		return fmt.Errorf("authentication failed")
+		return errors.New("authentication failed")
 	}
 	auth = strings.TrimSpace(parts[1])
 
 	if auth == "" {
-		return fmt.Errorf("authentication required")
+		return errors.New("authentication required")
 	}
 
-	// Check if authentication token is in the valid format
+	// Check if the authentication token is valid
 	token, err := jwt.Parse(
 		auth, func(token *jwt.Token) (interface{}, error) {
 			// Verify signing method
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected token signing method: %v", token.Header["alg"])
+				return nil, errors.Errorf("unexpected token signing method: %v", token.Header["alg"])
 			}
-			key, err := base64.StdEncoding.DecodeString(jwtSecretKey)
-			if err != nil {
-				return nil, fmt.Errorf("jwt secret decode failed")
-			}
-			// return the secret when token is valid format
-			return key, nil
+
+			return s.jwtSigningKey, nil
 		},
 	)
-
 	if err != nil {
-		return fmt.Errorf("authentication failed")
+		return errors.Wrap(err, "invalid jwt format")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return fmt.Errorf("authentication failed")
+		return errors.New("invalid claims type")
 	}
 
 	err = claims.Valid()
 	if err != nil {
-		return fmt.Errorf("authentication failed")
+		return errors.Wrap(err, "invalid claims")
 	}
 
 	userId, ok := claims["usr"].(string)
 	if !ok {
-		return fmt.Errorf("authentication failed")
+		return errors.New("invalid user claim")
 	}
 
 	u, err := s.app.User(userId)
 	if err != nil {
-		return errors.New("user not found")
+		return errors.Wrap(err, "user not found")
 	}
 
 	c.Set("userId", u.Id)
 
 	return nil
-}
-
-func CurrentUser(c *gin.Context) string {
-	// GetCurrentUserID returns the username of the currently logged-in user
-	userId, ok := c.Get("userId")
-	if !ok {
-		panic("userId not set for authenticated route")
-	}
-
-	return userId.(string)
 }

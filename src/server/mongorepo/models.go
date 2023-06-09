@@ -18,7 +18,6 @@ type Keystore struct {
 	Name      string    `bson:"name"`
 	Payload   []byte    `bson:"payload"`
 	OwnerId   string    `bson:"ownerId"`
-	ViewerIds []string  `bson:"viewerIds"`
 	CreatedAt time.Time `bson:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt"`
 }

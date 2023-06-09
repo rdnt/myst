@@ -36,14 +36,17 @@ type UserRepository interface {
 }
 
 var (
-	ErrInvitationNotFound = errors.New("invitation not found")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrUsernameTaken      = errors.New("username taken")
-	ErrNotAllowed         = errors.New("not allowed")
-	ErrKeystoreNotFound   = errors.New("keystore not found")
-	ErrInvalidUsername    = errors.New("invalid username")
-	ErrInvalidPassword    = errors.New("invalid password")
-	ErrInvalidInvitee     = errors.New("invalid inviter")
+	ErrInvitationNotFound   = errors.New("invitation not found")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrUsernameTaken        = errors.New("username taken")
+	ErrForbidden            = errors.New("forbidden")
+	ErrKeystoreNotFound     = errors.New("keystore not found")
+	ErrInvalidUsername      = errors.New("invalid username")
+	ErrInvalidPassword      = errors.New("invalid password")
+	ErrAuthenticationFailed = errors.New("authorization failed")
+	ErrInvalidInvitee       = errors.New("invalid inviter")
+	ErrInviterNotFound      = errors.New("inviter not found")
+	ErrInviteeNotFound      = errors.New("invitee not found")
 )
 
 type KeystoreUpdateParams struct {
@@ -57,7 +60,7 @@ type UserInvitationsOptions struct {
 
 type Application interface {
 	CreateUser(username, password string, publicKey []byte) (user.User, error)
-	AuthorizeUser(username, password string) (user.User, error)
+	AuthenticateUser(username, password string) (user.User, error)
 	User(id string) (user.User, error)
 	UserByUsername(username string) (user.User, error)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/signal"
@@ -20,6 +21,7 @@ type Config struct {
 	Slow          bool
 	MongoAddress  string
 	MongoDatabase string
+	JWTSigningKey string
 }
 
 func parseFlags() Config {
@@ -32,6 +34,8 @@ func parseFlags() Config {
 		"The address of the mongodb server")
 	flag.StringVar(&cfg.MongoDatabase, "mongo-db", "myst", "The name of the mongo database")
 
+	flag.StringVar(&cfg.JWTSigningKey, "jwt-signing-key", "", "The key used for signing JWT tokens")
+
 	flag.Parse()
 
 	return cfg
@@ -41,6 +45,11 @@ var log = logger.New("app", logger.Red)
 
 func main() {
 	cfg := parseFlags()
+
+	jwtSigningKey, err := base64.StdEncoding.DecodeString(cfg.JWTSigningKey)
+	if err != nil {
+		panic(err)
+	}
 
 	if cfg.Slow {
 		time.Sleep(500 * time.Millisecond)
@@ -53,7 +62,7 @@ func main() {
 		panic(err)
 	}
 
-	app, err := application.New(
+	app := application.New(
 		application.WithKeystoreRepository(repo),
 		application.WithUserRepository(repo),
 		application.WithInvitationRepository(repo),
@@ -62,7 +71,7 @@ func main() {
 		panic(err)
 	}
 
-	server := rest.NewServer(app)
+	server := rest.NewServer(app, jwtSigningKey)
 
 	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {

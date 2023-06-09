@@ -16,19 +16,9 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-// noRouteMiddleware is the middleware that processes 404 - not found errors.
-// if the route is prefixed with /api/ it will return a json error response,
-// otherwise the UI's index.html will be served so that the frontend can render
-// the error.
+// noRouteMiddleware is the middleware that processes http 404 errors.
 func noRouteMiddleware(c *gin.Context) {
-	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		Error(c, http.StatusNotFound, "not-found", http.StatusText(http.StatusNotFound))
-	} else {
-		// serve ui and let it handle the error otherwise
-		// TODO @rdnt @@@: serve from in-memory filesystem
-		c.File("static/index.html")
-	}
-
+	Error(c, http.StatusNotFound)
 	c.Abort()
 }
 

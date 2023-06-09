@@ -8,11 +8,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	cors "github.com/rs/cors/wrapper/gin"
-	// prometheus "github.com/zsais/go-gin-prometheus"
+	prometheus "github.com/zsais/go-gin-prometheus"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -70,48 +68,24 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 
 	// metrics
 	if config.Debug {
-		// p := prometheus.NewPrometheus("gin")
-		// p.Use(r)
+		p := prometheus.NewPrometheus("rest-api")
+		p.Use(r)
 	}
 
-	// TODO @rdnt: @@@ server also doesn't need a UI.
-	// Attach static serve middleware for / and /assets
-	r.Use(static.Serve("/", static.LocalFile("static", false)))
-	r.Use(static.Serve("/assets", static.LocalFile("assets", false)))
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, ":)")
+	})
 
-	// TODO @rdnt: @@@ does the server really need CORS? I think not.
-	r.Use(
-		cors.New(
-			cors.Options{
-				AllowOriginFunc: func(origin string) bool {
-					// TODO: @rdnt @@@ fix ASAP
-					return true
-				},
-				// AllowedOrigins: []string{"http://localhost:80", "http://localhost:8082"},
-				// // TODO allow more methods (DELETE?)
-				// AllowedMethods: []string{rest.MethodGet, rest.MethodPost},
-				// // TODO expose ratelimiting headers
-				// ExposedHeaders: []string{},
-				// // TODO check if we can disable this on release mode so that no
-				// // authentication tokens are passed on to the frontend.
-				// // No harm, but no need either.
-				// // Required to pass authentication headers on development environment
-				// AllowCredentials: true,
-				Debug: false, // too verbose, only enable for testing CORS
-			},
-		),
-	)
+	r.GET("/health", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 
-	s.initRoutes(r.Group("api"))
+	api := r.Group("api")
 
-	return s
-}
+	api.POST("/auth/login", s.Login)
+	api.POST("/auth/register", s.Register)
 
-func (s *Server) initRoutes(g *gin.RouterGroup) {
-	g.POST("/auth/login", s.Login)
-	g.POST("/auth/register", s.Register)
-
-	sec := g.Group("")
+	sec := api.Group("")
 	sec.Use(s.authenticationMiddleware())
 
 	sec.GET("/user", s.UserByUsername)
@@ -127,6 +101,8 @@ func (s *Server) initRoutes(g *gin.RouterGroup) {
 	sec.POST("/invitation/:invitationId", s.FinalizeInvitation)
 	sec.DELETE("/invitation/:invitationId", s.DeleteInvitation)
 	sec.GET("/invitations", s.Invitations)
+
+	return s
 }
 
 func (s *Server) Start(addr string) error {

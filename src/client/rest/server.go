@@ -9,20 +9,17 @@ import (
 	"io/fs"
 	"net/http"
 
-	"myst/src/client/application/domain/entry"
-	"myst/src/client/enclaverepo/enclave"
-
 	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
+	"myst/src/client/application/domain/entry"
+	"myst/src/client/enclaverepo/enclave"
 	"myst/src/client/rest/generated"
-
-	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
-	// prometheus "github.com/zsais/go-gin-prometheus"
 )
 
 //go:generate oapi-codegen --config oapi-codegen-models.yaml openapi.json
@@ -75,12 +72,6 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 
 	// error 404 handling
 	r.NoRoute(NoRoute("/", EmbedFolder(ui, "static")))
-
-	// metrics
-	if config.Debug {
-		// p := prometheus.NewPrometheus("gin")
-		// p.Use(r)
-	}
 
 	r.Use(
 		cors.New(
@@ -573,10 +564,7 @@ func (s *Server) HealthCheck(_ *gin.Context) {
 }
 
 func (s *Server) Start(addr string) error {
-	log.Println("starting app on", addr)
-
-	s.app.Start()
-	log.Println("app started")
+	log.Println("app started on", addr)
 
 	httpServer, err := server.New(addr, s.Engine)
 	if err != nil {
@@ -588,21 +576,7 @@ func (s *Server) Start(addr string) error {
 }
 
 func (s *Server) Stop() error {
-	// TODO: find way to return all errors, maybe (find) an errgroup-esque package
-	// that just runs all functions sequentially and returns all errors as one?
-	var firstErr error
-
-	err := s.server.Stop()
-	if err != nil && firstErr == nil {
-		firstErr = err
-	}
-
-	err = s.app.Stop()
-	if err != nil && firstErr == nil {
-		firstErr = err
-	}
-
-	return firstErr
+	return s.server.Stop()
 }
 
 type embedFileSystem struct {
@@ -611,10 +585,7 @@ type embedFileSystem struct {
 
 func (e embedFileSystem) Exists(prefix string, path string) bool {
 	_, err := e.Open(path)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func EmbedFolder(fsEmbed fs.FS, targetPath string) static.ServeFileSystem {

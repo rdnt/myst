@@ -41,8 +41,6 @@ type Application interface {
 	Authenticate(password string) error
 
 	Sync() error
-	Start() error
-	Stop() error
 	Debug() (map[string]any, error)
 }
 
@@ -65,18 +63,6 @@ func New(opts ...Option) (Application, error) {
 	}
 
 	return app, nil
-}
-
-func (app *application) Start() error {
-	defer log.Print("App started")
-
-	return nil
-}
-
-func (app *application) Stop() error {
-	log.Print("App stopped")
-
-	return nil
 }
 
 func (app *application) Debug() (data map[string]any, err error) {

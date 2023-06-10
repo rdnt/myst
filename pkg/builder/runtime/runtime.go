@@ -29,7 +29,7 @@ func Panic(v any) {
 	file = strings.Replace(file, wd, "", 1)
 	file = filepath.Clean(file)
 
-	fmt.Println(fmt.Sprintf("%s:%d: %s", file, line, v))
+	fmt.Printf("%s:%d: %s\n", file, line, v)
 
 	panic(panicCalled{})
 }

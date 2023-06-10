@@ -35,7 +35,7 @@ func New(addr string, h http.Handler) (*Server, error) {
 		err := s.server.Serve(httpLn)
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error(err)
-			s.Stop()
+			_ = s.Stop()
 			return
 		}
 	}()

@@ -2,35 +2,26 @@ package invitation
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"time"
 
 	"myst/pkg/uuid"
-	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/user"
-)
-
-var (
-	// ErrAccepted    = errors.New("invitation already accepted")
-	// ErrNotAccepted = errors.New("invitation not accepted")
-	// ErrFinalized   = errors.New("invitation already finalized")
-	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
-	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
 )
 
 type Invitation struct {
 	Id                   string
-	Keystore             keystore.Keystore
-	Inviter              user.User
-	Invitee              user.User
+	KeystoreId           string
+	InviterId            string
+	InviteeId            string
 	EncryptedKeystoreKey []byte
 	Status               Status
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
-	AcceptedAt           time.Time
-	DeclinedAt           time.Time
 	DeletedAt            time.Time
+	DeclinedAt           time.Time
+	AcceptedAt           time.Time
+	CancelledAt          time.Time
+	FinalizedAt          time.Time
 }
 
 func New(opts ...Option) Invitation {
@@ -50,6 +41,26 @@ func New(opts ...Option) Invitation {
 	return inv
 }
 
+type Option func(i *Invitation)
+
+func WithKeystoreId(id string) Option {
+	return func(i *Invitation) {
+		i.KeystoreId = id
+	}
+}
+
+func WithInviterId(id string) Option {
+	return func(i *Invitation) {
+		i.InviterId = id
+	}
+}
+
+func WithInviteeId(id string) Option {
+	return func(i *Invitation) {
+		i.InviteeId = id
+	}
+}
+
 func (i Invitation) Pending() bool {
 	return i.Status == Pending
 }
@@ -65,7 +76,7 @@ func (i Invitation) Finalized() bool {
 func (i Invitation) String() string {
 	return fmt.Sprintln(
 		i.Id,
-		i.Keystore, i.Inviter, i.Invitee,
+		i.KeystoreId, i.InviterId, i.InviteeId,
 		i.Status,
 		base64.StdEncoding.EncodeToString(i.EncryptedKeystoreKey),
 		i.CreatedAt, i.UpdatedAt,

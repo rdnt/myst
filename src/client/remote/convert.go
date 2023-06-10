@@ -80,6 +80,7 @@ func KeystoreFromJSON(gen generated.Keystore, keystoreKey []byte) (keystore.Keys
 	}
 
 	k.ReadOnly = true
+	k.Key = keystoreKey
 
 	return k, nil
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 
 	"myst/src/client/application/domain/credentials"
+	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/keystore/entry"
 )
 
 var (
@@ -43,11 +43,11 @@ func (app *application) UpdateKeystoreEntry(
 	}
 
 	if password != nil {
-		e.SetPassword(*password)
+		e.Password = *password
 	}
 
 	if notes != nil {
-		e.SetNotes(*notes)
+		e.Notes = *notes
 	}
 
 	k.Entries[e.Id] = e

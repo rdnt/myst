@@ -3,9 +3,9 @@ package application
 import (
 	"myst/pkg/logger"
 	"myst/src/client/application/domain/credentials"
+	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/application/domain/user"
 )
 

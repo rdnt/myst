@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"net/http"
 
+	"myst/src/client/application/domain/entry"
 	"myst/src/client/enclaverepo/enclave"
 
 	"github.com/gin-contrib/static"
@@ -17,7 +18,6 @@ import (
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
-	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/rest/generated"
 
 	"github.com/gin-gonic/gin"

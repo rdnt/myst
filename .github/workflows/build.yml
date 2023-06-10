@@ -4,6 +4,13 @@ on:
     branches: [ main ]
   pull_request:
 jobs:
+  lint:
+    name: Build and test server
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run golangci-lint
+      id: run-golangci-lint
+      uses: golangci/golangci-lint-action@v3.5.0
   build-server:
     name: Build and test server
     runs-on: ubuntu-latest

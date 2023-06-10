@@ -73,25 +73,21 @@ func New(b []byte) (*Hashicon, error) {
 				// move top
 				y = y - 1
 			}
-			break
 		case 1:
 			if x != stride-1 {
 				// move right
 				x = x + 1
 			}
-			break
 		case 2:
 			if y != stride-1 {
 				// move bottom
 				y = y + 1
 			}
-			break
 		case 3:
 			if x != 0 {
 				// move left
 				x = x - 1
 			}
-			break
 		}
 
 		pix[x*stride+y] += 1

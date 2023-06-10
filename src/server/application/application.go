@@ -3,13 +3,10 @@ package application
 import (
 	"github.com/pkg/errors"
 
-	"myst/pkg/logger"
 	"myst/src/server/application/domain/invitation"
 	"myst/src/server/application/domain/keystore"
 	"myst/src/server/application/domain/user"
 )
-
-var log = logger.New("app", logger.Blue)
 
 type InvitationRepository interface {
 	CreateInvitation(invitation.Invitation) (invitation.Invitation, error)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"myst/src/server/application"
@@ -31,7 +32,7 @@ func (r *Repository) User(id string) (user.User, error) {
 	collection := r.mdb.Database(r.database).Collection("users")
 	ctx := context.Background()
 
-	res := collection.FindOne(ctx, bson.D{{"_id", id}})
+	res := collection.FindOne(ctx, bson.D{primitive.E{Key: "_id", Value: id}})
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return user.User{}, application.ErrUserNotFound
@@ -52,7 +53,7 @@ func (r *Repository) UserByUsername(username string) (user.User, error) {
 	collection := r.mdb.Database(r.database).Collection("users")
 	ctx := context.Background()
 
-	res := collection.FindOne(ctx, bson.D{{"username", username}})
+	res := collection.FindOne(ctx, bson.D{primitive.E{Key: "username", Value: username}})
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return user.User{}, application.ErrUserNotFound
@@ -102,7 +103,7 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 
 	usr := UserToBSON(u)
 
-	res := collection.FindOneAndReplace(ctx, bson.D{{"_id", u.Id}}, usr)
+	res := collection.FindOneAndReplace(ctx, bson.D{primitive.E{Key: "_id", Value: u.Id}}, usr)
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return user.User{}, application.ErrUserNotFound

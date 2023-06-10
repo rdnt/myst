@@ -28,7 +28,7 @@ func TestPKCS7PadUnpad(t *testing.T) {
 
 func FuzzPKCS7PadUnpad(f *testing.F) {
 	f.Fuzz(func(t *testing.T, b []byte) {
-		if b == nil || len(b) == 0 {
+		if len(b) == 0 {
 			t.Skip()
 		}
 		b2, err := crypto.PKCS7Pad(b, aes.BlockSize)

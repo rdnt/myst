@@ -13,13 +13,13 @@ import (
 func Error(c *gin.Context, code int, v interface{}) {
 	msg := "unknown error"
 
-	switch v.(type) {
+	switch v := v.(type) {
 	case string:
-		msg = v.(string)
+		msg = v
 	case fmt.Stringer:
-		msg = v.(fmt.Stringer).String()
+		msg = v.String()
 	case error:
-		msg = v.(error).Error()
+		msg = v.Error()
 	default:
 		b, err := json.Marshal(v)
 		if err == nil {

@@ -24,9 +24,6 @@ type Cmd struct {
 	interrupted bool
 	err         chan error
 	lastErr     error
-	storePaths  []string
-	useNix      bool
-	env         []string
 }
 
 type pipe struct {
@@ -100,8 +97,6 @@ func (c *Cmd) Start() error {
 	}
 	c.cmd.Dir = path.Join(wd, currentDir)
 
-	env := c.env
-	c.cmd.Env = env
 	// assign the pipes to the command
 	c.cmd.Stdout = c.stdout.w
 	c.cmd.Stderr = c.stderr.w

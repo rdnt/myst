@@ -10,14 +10,11 @@ import (
 	"github.com/pkg/errors"
 
 	"myst/pkg/crypto"
-	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/enclaverepo/enclave"
 )
-
-var log = logger.New("repository", logger.Green)
 
 type Repository struct {
 	mux             sync.Mutex
@@ -343,27 +340,24 @@ func (r *Repository) startHealthCheck() {
 	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			r.mux.Lock()
-			elapsed := time.Since(r.lastHealthCheck)
+	for range ticker.C {
+		r.mux.Lock()
+		elapsed := time.Since(r.lastHealthCheck)
 
-			if elapsed < time.Minute {
-				r.mux.Unlock()
-
-				continue
-			}
-
-			if r.key != nil {
-				fmt.Println("Health check failed")
-				// TODO: figure out why healthcheck causes Disconnected
-				//  and can't be restored
-				r.key = nil
-			}
-
+		if elapsed < time.Minute {
 			r.mux.Unlock()
+
+			continue
 		}
+
+		if r.key != nil {
+			fmt.Println("Health check failed")
+			// TODO: figure out why healthcheck causes Disconnected
+			//  and can't be restored
+			r.key = nil
+		}
+
+		r.mux.Unlock()
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"myst/src/server/application"
@@ -31,7 +32,7 @@ func (r *Repository) Keystore(id string) (keystore.Keystore, error) {
 	collection := r.mdb.Database(r.database).Collection("keystores")
 	ctx := context.Background()
 
-	res := collection.FindOne(ctx, bson.D{{"_id", id}})
+	res := collection.FindOne(ctx, bson.D{primitive.E{Key: "_id", Value: id}})
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return keystore.Keystore{}, application.ErrKeystoreNotFound
@@ -80,7 +81,7 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 	ctx := context.Background()
 
 	kb := KeystoreToBSON(k)
-	res := collection.FindOneAndReplace(ctx, bson.D{{"_id", kb.Id}}, kb)
+	res := collection.FindOneAndReplace(ctx, bson.D{primitive.E{Key: "_id", Value: kb.Id}}, kb)
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return keystore.Keystore{}, application.ErrKeystoreNotFound
@@ -95,7 +96,7 @@ func (r *Repository) DeleteKeystore(id string) error {
 	collection := r.mdb.Database(r.database).Collection("keystores")
 	ctx := context.Background()
 
-	res := collection.FindOneAndDelete(ctx, bson.D{{"_id", id}})
+	res := collection.FindOneAndDelete(ctx, bson.D{primitive.E{Key: "_id", Value: id}})
 	err := res.Err()
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return application.ErrKeystoreNotFound

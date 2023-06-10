@@ -195,7 +195,7 @@ func PKCS7Pad(b []byte, blocksize int) ([]byte, error) {
 	if blocksize <= 0 {
 		return nil, ErrInvalidBlockSize
 	}
-	if b == nil || len(b) == 0 {
+	if len(b) == 0 {
 		return nil, ErrInvalidPKCS7Data
 	}
 	n := blocksize - (len(b) % blocksize)
@@ -212,7 +212,7 @@ func PKCS7Unpad(b []byte, blocksize int) ([]byte, error) {
 	if blocksize <= 0 {
 		return nil, ErrInvalidBlockSize
 	}
-	if b == nil || len(b) == 0 {
+	if len(b) == 0 {
 		return nil, ErrInvalidPKCS7Data
 	}
 	if len(b)%blocksize != 0 {

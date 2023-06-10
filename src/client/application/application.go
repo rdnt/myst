@@ -11,11 +11,57 @@ import (
 
 var log = logger.New("app", logger.Blue)
 
+// Enclave is the repository that handles storing and retrieving of the
+// user's keystores and credentials. It requires initialization and
+// authentication before it can be used. authenticationMiddleware status can
+// expire after some time if the HealthCheck method is not called
+// regularly.
+type Enclave interface {
+	Initialize(password string) error
+	IsInitialized() (bool, error)
+	Authenticate(password string) error
+	HealthCheck()
+
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) error
+	Keystores() (map[string]keystore.Keystore, error)
+	DeleteKeystore(id string) error
+
+	UpdateCredentials(creds credentials.Credentials) error
+	Credentials() (credentials.Credentials, error)
+}
+
+// Remote is a remote repository that holds upstream enclave/invitations. It is
+// used to sync keystores with a remote server in a secure manner, and to
+// facilitate inviting users to access keystores or accepting invitations to
+// access a keystore from another user. authenticationMiddleware with a username and
+// password is required to interface with a remote.
+type Remote interface {
+	Address() string
+
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
+	DeleteKeystore(id string) error
+
+	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
+	Invitation(id string) (invitation.Invitation, error)
+	AcceptInvitation(id string) (invitation.Invitation, error)
+	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
+	Invitations() (map[string]invitation.Invitation, error)
+
+	Authenticate(username, password string) error
+	Register(username, password string, publicKey []byte) (user.User, error)
+	Authenticated() bool
+	CurrentUser() *user.User
+}
+
 type Application interface {
 	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	// VerifyInvitation(id string) error
 	FinalizeInvitation(invitationId, remoteKeystoreId string,
 		inviteePublicKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
@@ -30,8 +76,6 @@ type Application interface {
 	Keystores() (map[string]keystore.Keystore, error)
 	Credentials() (credentials.Credentials, error)
 
-	// Authenticate(username, password string) (user.User, error)
-	// SignOut() error
 	Register(username, password string) (user.User, error)
 	CurrentUser() (*user.User, error)
 
@@ -41,7 +85,6 @@ type Application interface {
 	Authenticate(password string) error
 
 	Sync() error
-	Debug() (map[string]any, error)
 }
 
 type application struct {
@@ -49,39 +92,28 @@ type application struct {
 	remote  Remote
 }
 
-func New(opts ...Option) (Application, error) {
+func New(opts ...Option) Application {
 	app := &application{}
 
 	for _, opt := range opts {
 		if opt != nil {
-			err := opt(app)
-			if err != nil {
-				logger.Error(err)
-				return nil, err
-			}
+			opt(app)
 		}
 	}
 
-	return app, nil
+	return app
 }
 
-func (app *application) Debug() (data map[string]any, err error) {
-	data = map[string]any{}
+type Option func(app *application)
 
-	data["keystores"], err = app.enclave.Keystores()
-	if err != nil {
-		return nil, err
+func WithRemote(remote Remote) Option {
+	return func(app *application) {
+		app.remote = remote
 	}
+}
 
-	data["credentials"], err = app.enclave.Credentials()
-	if err != nil {
-		return nil, err
+func WithEnclave(enclave Enclave) Option {
+	return func(app *application) {
+		app.enclave = enclave
 	}
-
-	data["invitations"], err = app.remote.Invitations()
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }

@@ -1,21 +1,10 @@
 package rest
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) initRoutes(r *gin.RouterGroup) {
-	r.GET("/debug", func(c *gin.Context) {
-		data, err := s.app.Debug()
-		if err != nil {
-			panic(err)
-		}
-
-		c.JSON(http.StatusOK, data)
-	})
-
 	r.GET("/health", s.HealthCheck)
 	r.POST("/authenticate", s.Authenticate)
 	// r.POST("/auth/login", s.Login)

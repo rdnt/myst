@@ -23,6 +23,7 @@ mystd.exe
 builder.exe
 /builder
 /cmd/client/static/
+!/cmd/client/static/.gitkeepg
 
 /.idea
 /.vscode

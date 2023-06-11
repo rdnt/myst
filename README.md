@@ -10,10 +10,11 @@
 #### Development requirements
 - Go v1.20
 - Node.JS 18
+- golangci-lint v1.53.2 https://golangci-lint.run/usage/install/
 
 ---
 
-#### Setting up
+#### Bootstrap
 
 On Windows, you might need to set script execution
 policy to unresticted. Open an elevated Powershell terminal and
@@ -30,8 +31,10 @@ Then to build the builder binary, run
 ```
 
 This will create the `myst.exe` binary
-on the root of the project. Use that to build the actual
-project:
+on the root of the project. You can use that to build the actual
+project.
+
+### Building
 
 ```bash
 .\myst build

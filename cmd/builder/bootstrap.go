@@ -10,10 +10,10 @@ var bootstrapCmd = &cobra.Command{
 	Use:   "bootstrap",
 	Short: "Install dependencies and generate code",
 	Run: func(cmd *cobra.Command, args []string) {
-		Step("Bootstrapping", func() {
-			CommandExists("go")
-			CommandExists("npm")
+		CommandExists("go")
+		CommandExists("npm")
 
+		Step("Bootstrapping", func() {
 			Run("go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest")
 
 			Run("go mod download")

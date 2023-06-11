@@ -19,7 +19,7 @@ On Windows, you might need to set script execution
 policy to unresticted. Open an elevated Powershell terminal and
 type the following:
 
-```ps1
+```powershell
 Set-ExecutionPolicy Unrestricted
 ```
 

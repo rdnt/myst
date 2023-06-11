@@ -1,9 +1,8 @@
 package main
 
 import (
-	"runtime"
-
 	"github.com/spf13/cobra"
+	"runtime"
 
 	. "myst/pkg/builder/util"
 )
@@ -40,7 +39,9 @@ var buildCmd = &cobra.Command{
 			SetCurrentDir(".")
 
 			CopyDir("static", "cmd/client/static")
-			Run("touch cmd/client/static/.gitkeep") // just to be sure we don't delete this file
+
+			// just to be sure the static dir will continue being pushed delete this file
+			Touch("cmd/client/static/.gitkeep")
 		})
 
 		Step("Building client", func() {

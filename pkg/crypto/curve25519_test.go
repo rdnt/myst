@@ -10,7 +10,7 @@ import (
 	"myst/pkg/crypto"
 )
 
-func TestKex(t *testing.T) {
+func TestKeyExchange(t *testing.T) {
 	pub, key, err := crypto.NewCurve25519Keypair()
 	assert.NilError(t, err)
 

@@ -1,6 +1,8 @@
 <!---[![go-build status](https://github.com/rdnt/myst/workflows/go-build/badge.svg)](https://github.com/SHT/myst/actions?query=workflow%3Ago-build)
 [![vue-build status](https://github.com/rdnt/myst/workflows/vue-build/badge.svg)](https://github.com/SHT/myst/actions?query=workflow%3Avue-build)-->
 
+[![Build status](https://github.com/rdnt/myst/actions/workflows/build.yml/badge.svg)](https://github.com/rdnt/myst/actions/workflows/build.yml)
+
 # myst 
 
 ### Zero-knowledge, end-to-end encrypted password manager

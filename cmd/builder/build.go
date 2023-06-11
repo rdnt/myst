@@ -11,6 +11,9 @@ var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build client and server",
 	Run: func(cmd *cobra.Command, args []string) {
+		CommandExists("go")
+		CommandExists("npm")
+
 		Step("Setting up", func() {
 			CleanDir("build")
 			CleanDir("static")

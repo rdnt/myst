@@ -98,6 +98,18 @@ func CopyDir(src, dst string) {
 	}
 }
 
+func Touch(name string) {
+	f, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.Panic(err)
+	}
+
+	err = f.Close()
+	if err != nil {
+		runtime.Panic(err)
+	}
+}
+
 func CommandExists(binary string) {
 	_, err := exec.LookPath(binary)
 	if errors.Is(err, exec.ErrNotFound) {

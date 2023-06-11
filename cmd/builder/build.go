@@ -40,7 +40,6 @@ var buildCmd = &cobra.Command{
 			SetCurrentDir(".")
 
 			CopyDir("static", "cmd/client/static")
-			Run("touch cmd/client/static/.gitkeep") // just to be sure we don't delete this file
 		})
 
 		Step("Building client", func() {

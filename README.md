@@ -1,14 +1,15 @@
+
+# Myst 
+
 [![Build status](https://github.com/rdnt/myst/actions/workflows/build.yml/badge.svg)](https://github.com/rdnt/myst/actions/workflows/build.yml)
 
-# myst 
-
-### Zero-knowledge, end-to-end encrypted password manager
+### Zero-knowledge, end-to-end encrypted password manager.
 
 ---
 
 #### Development requirements
 - Go v1.20
-- Node 18
+- Node.JS 18
 
 ---
 

@@ -25,7 +25,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.7.0
 	github.com/zsais/go-gin-prometheus v0.1.0
-	go.mongodb.org/mongo-driver v1.11.6
+	go.mongodb.org/mongo-driver v1.11.7
 	golang.org/x/crypto v0.9.0
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	gotest.tools/v3 v3.4.0

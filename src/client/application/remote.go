@@ -3,10 +3,8 @@ package application
 import (
 	"github.com/pkg/errors"
 
-	"myst/src/client/application/domain/credentials"
-	"myst/src/client/enclaverepo/enclave"
-
 	"myst/pkg/crypto"
+	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/user"
 )
 
@@ -16,7 +14,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
 
 	rem, err := app.enclave.Credentials()
-	if errors.Is(err, enclave.ErrRemoteNotSet) {
+	if errors.Is(err, ErrRemoteNotSet) {
 		mustInit = true
 	} else if err != nil {
 		return user.User{}, errors.WithMessage(err, "failed to query credentials")

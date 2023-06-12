@@ -12,14 +12,13 @@ import (
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/enclaverepo/enclave"
 )
 
 func (r *Repository) enclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
 
-func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
+func (r *Repository) enclave(argon2idKey []byte) (*Enclave, error) {
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return nil, err
@@ -53,7 +52,7 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 	return encJson, nil
 }
 
-func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
+func enclaveToJSON(e *Enclave) ([]byte, error) {
 	ks := map[string]KeystoreJSON{}
 
 	eks, err := e.Keystores()
@@ -74,7 +73,6 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 			Password:   rem.Password,
 			PublicKey:  rem.PublicKey,
 			PrivateKey: rem.PrivateKey,
-			UserKeys:   rem.UserKeys,
 		}
 	}
 
@@ -85,7 +83,7 @@ func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
 	})
 }
 
-func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
+func enclaveFromJSON(b, salt []byte) (*Enclave, error) {
 	e := &EnclaveJSON{}
 
 	err := json.Unmarshal(b, e)
@@ -114,16 +112,15 @@ func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
 			Password:   jrem.Password,
 			PublicKey:  jrem.PublicKey,
 			PrivateKey: jrem.PrivateKey,
-			UserKeys:   jrem.UserKeys,
 		}
 	}
 
-	return enclave.New(
-		enclave.WithKeystores(ks),
-		enclave.WithSalt(salt),
-		enclave.WithRemote(rem),
-		enclave.WithKeys(e.Keys),
-	)
+	return &Enclave{
+		keystores: ks,
+		remote:    rem,
+		salt:      salt,
+		keys:      e.Keys,
+	}, nil
 }
 
 func getSaltFromData(b []byte) ([]byte, error) {

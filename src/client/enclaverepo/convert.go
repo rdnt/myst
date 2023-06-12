@@ -14,18 +14,16 @@ type EnclaveJSON struct {
 }
 
 type RemoteJSON struct {
-	Address    string            `json:"address"`
-	Username   string            `json:"username"`
-	Password   string            `json:"password"`
-	PublicKey  []byte            `json:"publicKey"`
-	PrivateKey []byte            `json:"privateKey"`
-	UserKeys   map[string][]byte `json:"userKeys"`
+	Address    string `json:"address"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	PublicKey  []byte `json:"publicKey"`
+	PrivateKey []byte `json:"privateKey"`
 }
 
 type KeystoreJSON struct {
 	Id        string      `json:"id"`
 	RemoteId  string      `json:"remoteId"`
-	ReadOnly  bool        `json:"readOnly"`
 	Name      string      `json:"name"`
 	Version   int         `json:"version"`
 	Entries   []EntryJSON `json:"entries"`
@@ -34,11 +32,13 @@ type KeystoreJSON struct {
 }
 
 type EntryJSON struct {
-	Id       string `json:"id"`
-	Website  string `json:"website"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Notes    string `json:"notes"`
+	Id        string    `json:"id"`
+	Website   string    `json:"website"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Notes     string    `json:"notes"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func KeystoreToJSON(k keystore.Keystore) KeystoreJSON {
@@ -46,21 +46,24 @@ func KeystoreToJSON(k keystore.Keystore) KeystoreJSON {
 
 	for _, e := range k.Entries {
 		entries = append(entries, EntryJSON{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
+			Id:        e.Id,
+			Website:   e.Website,
+			Username:  e.Username,
+			Password:  e.Password,
+			Notes:     e.Notes,
+			CreatedAt: e.CreatedAt,
+			UpdatedAt: e.UpdatedAt,
 		})
 	}
 
 	return KeystoreJSON{
-		Id:       k.Id,
-		RemoteId: k.RemoteId,
-		ReadOnly: k.ReadOnly,
-		Name:     k.Name,
-		Version:  k.Version,
-		Entries:  entries,
+		Id:        k.Id,
+		RemoteId:  k.RemoteId,
+		Name:      k.Name,
+		Version:   k.Version,
+		Entries:   entries,
+		CreatedAt: k.CreatedAt,
+		UpdatedAt: k.UpdatedAt,
 	}
 }
 
@@ -69,11 +72,13 @@ func KeystoreFromJSON(k KeystoreJSON) (keystore.Keystore, error) {
 
 	for _, e := range k.Entries {
 		e := entry.Entry{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
+			Id:        e.Id,
+			Website:   e.Website,
+			Username:  e.Username,
+			Password:  e.Password,
+			Notes:     e.Notes,
+			CreatedAt: e.CreatedAt,
+			UpdatedAt: e.UpdatedAt,
 		}
 
 		entries[e.Id] = e

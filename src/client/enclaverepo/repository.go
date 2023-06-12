@@ -13,7 +13,6 @@ import (
 	"myst/src/client/application"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/enclaverepo/enclave"
 )
 
 type Repository struct {
@@ -239,12 +238,7 @@ func (r *Repository) Initialize(password string) error {
 		return err
 	}
 
-	e, err := enclave.New(
-		enclave.WithSalt(salt),
-	)
-	if err != nil {
-		return err
-	}
+	e := newEnclave(WithSalt(salt))
 
 	r.key = key
 
@@ -366,7 +360,7 @@ func (r *Repository) startHealthCheck() {
 	}
 }
 
-func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
+func (r *Repository) sealAndWrite(e *Enclave) error {
 	b, err := enclaveToJSON(e)
 	if err != nil {
 		return errors.WithMessage(err, "failed to marshal enclave")
@@ -501,7 +495,7 @@ func (r *Repository) Credentials() (credentials.Credentials, error) {
 
 	rem := e.Remote()
 	if rem == nil {
-		return credentials.Credentials{}, enclave.ErrRemoteNotSet
+		return credentials.Credentials{}, application.ErrRemoteNotSet
 	}
 
 	return *rem, nil

@@ -45,7 +45,7 @@ type Remote interface {
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
+	CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeleteInvitation(id string) (invitation.Invitation, error)
@@ -64,30 +64,29 @@ type UpdateEntryOptions struct {
 }
 
 type Application interface {
+	Initialize(password string) error
+	IsInitialized() (bool, error)
+	Authenticate(password string) error
+	HealthCheck()
+
+	CreateKeystore(name string) (keystore.Keystore, error)
+	DeleteKeystore(id string) error
+	Keystore(id string) (keystore.Keystore, error)
+	Keystores() (map[string]keystore.Keystore, error)
+
+	CreateEntry(keystoreId string, website, username, password, notes string) (entry.Entry, error)
+	UpdateEntry(keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
+	DeleteEntry(keystoreId, entryId string) error
+
+	Register(username, password string) (user.User, error)
+	CurrentUser() (*user.User, error)
+
 	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeleteInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(invitationId, remoteKeystoreId string, inviteePublicKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
-
-	CreateKeystore(name string) (keystore.Keystore, error)
-	DeleteKeystore(id string) error
-	Keystore(id string) (keystore.Keystore, error)
-
-	CreateEntry(keystoreId string, website, username, password, notes string) (entry.Entry, error)
-	UpdateEntry(keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
-	DeleteEntry(keystoreId, entryId string) error
-	Keystores() (map[string]keystore.Keystore, error)
-	Credentials() (credentials.Credentials, error)
-
-	Register(username, password string) (user.User, error)
-	CurrentUser() (*user.User, error)
-
-	HealthCheck()
-	Initialize(password string) error
-	IsInitialized() (bool, error)
-	Authenticate(password string) error
 
 	Sync() error
 }

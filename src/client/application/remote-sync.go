@@ -15,36 +15,40 @@ func (app *application) Sync() error {
 
 	rem, err := app.enclave.Credentials()
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "failed to get credentials")
 	}
 
 	keystores, err := app.enclave.Keystores()
 	if err != nil {
-		return errors.WithMessage(err, "failed to get enclave")
+		return errors.WithMessage(err, "failed to get local keystores")
 	}
 
 	remoteKeystores, err := app.remote.Keystores(rem.PrivateKey)
 	if err != nil {
-		return errors.WithMessage(err, "failed to query remote keystores")
+		return errors.WithMessage(err, "failed to get remote keystores")
 	}
 
 	for _, k := range keystores {
 		if k.RemoteId == "" {
-			// no need to sync keystore
 			continue
 		}
 
 		rk, ok := remoteKeystores[k.Id]
 		if !ok {
-			// apparently this keystore is no longer at the remote?
-			// TODO: should we sync it again?
+			log.Println("sync: resetting remoteId", k.Id, k.RemoteId)
 
-			log.Println("sync: keystore missing:", k.Id, k.RemoteId, remoteKeystores)
+			k.RemoteId = ""
+
+			_, err = app.enclave.UpdateKeystore(k)
+			if err != nil {
+				return errors.WithMessage(err, "failed to update local keystore")
+			}
+
 			continue
 		}
 
 		if rk.Version > k.Version {
-			err = app.enclave.UpdateKeystore(rk)
+			_, err = app.enclave.UpdateKeystore(rk)
 			if err != nil {
 				return errors.WithMessage(err, "failed to update local keystore")
 			}

@@ -15,6 +15,10 @@ var (
 )
 
 func (r *remote) Invitation(id string) (invitation.Invitation, error) {
+	if !r.Authenticated() {
+		return invitation.Invitation{}, ErrNotAuthenticated
+	}
+
 	res, err := r.client.GetInvitationWithResponse(context.Background(), id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
@@ -27,14 +31,14 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 	return InvitationFromJSON(*res.JSON200)
 }
 
-func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
+func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, ErrNotAuthenticated
 	}
 
 	res, err := r.client.CreateInvitationWithResponse(
-		context.Background(), inv.Keystore.RemoteId, generated.CreateInvitationJSONRequestBody{
-			Invitee: inv.Invitee.Username,
+		context.Background(), keystoreRemoteId, generated.CreateInvitationJSONRequestBody{
+			Invitee: inviteeUsername,
 		},
 	)
 	if err != nil {
@@ -45,7 +49,7 @@ func (r *remote) CreateInvitation(inv invitation.Invitation) (invitation.Invitat
 		return invitation.Invitation{}, fmt.Errorf("invalid response: %s", string(res.Body))
 	}
 
-	inv, err = InvitationFromJSON(*res.JSON201)
+	inv, err := InvitationFromJSON(*res.JSON201)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
 	}

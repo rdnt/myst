@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
-	github.com/deepmap/oapi-codegen v1.12.4
+	github.com/deepmap/oapi-codegen v1.13.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-co-op/gocron v1.27.0
@@ -52,6 +52,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/labstack/echo/v4 v4.10.2 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

@@ -118,11 +118,11 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 	return ks, nil
 }
 
-// UpdateKeystore updates a keystore with the provided params. Only non-nil
-// params are processed. If the keystore is not found, ErrKeystoreNotFound is
+// UpdateKeystore updates a keystore with the provided options. Only non-nil
+// opts are processed. If the keystore is not found, ErrKeystoreNotFound is
 // returned. The userId passed is the initiator of the update, and should be
 // the keystore's owner, otherwise ErrForbidden is returned.
-func (app *application) UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.
+func (app *application) UpdateKeystore(userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.
 	Keystore,
 	error) {
 	k, err := app.keystores.Keystore(keystoreId)
@@ -156,12 +156,12 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params Keystor
 	}
 
 	// update the keystore's properties
-	if params.Name != nil {
-		k.Name = *params.Name
+	if opts.Name != nil {
+		k.Name = *opts.Name
 	}
 
-	if params.Payload != nil {
-		k.Payload = *params.Payload
+	if opts.Payload != nil {
+		k.Payload = *opts.Payload
 	}
 
 	k, err = app.keystores.UpdateKeystore(k)

@@ -104,7 +104,7 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 	return inv, nil
 }
 
-func (r *remote) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
+func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, ErrNotAuthenticated
 	}

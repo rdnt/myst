@@ -50,8 +50,8 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 	return app.invitationWithIcon(inv)
 }
 
-func (app *application) DeclineOrCancelInvitation(id string) (invitation.Invitation, error) {
-	inv, err := app.remote.DeclineOrCancelInvitation(id)
+func (app *application) DeleteInvitation(id string) (invitation.Invitation, error) {
+	inv, err := app.remote.DeleteInvitation(id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to decline or cancel invitation")
 	}

@@ -293,25 +293,30 @@ func (r *Repository) Authenticate(password string) error {
 	return nil
 }
 
-func (r *Repository) UpdateKeystore(k keystore.Keystore) error {
+func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return fmt.Errorf("authentication required")
+		return keystore.Keystore{}, fmt.Errorf("authentication required")
 	}
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return err
+		return keystore.Keystore{}, err
 	}
 
 	err = e.UpdateKeystore(k)
 	if err != nil {
-		return err
+		return keystore.Keystore{}, err
 	}
 
-	return r.sealAndWrite(e)
+	err = r.sealAndWrite(e)
+	if err != nil {
+		return keystore.Keystore{}, err
+	}
+
+	return k, nil
 }
 
 // func (r *Repository) EncryptedKeystoreKey(keystoreId string) ([]byte, error) {
@@ -463,27 +468,22 @@ func (r *Repository) sealAndWrite(e *enclave.Enclave) error {
 //	return r.sealAndWrite(e)
 // }
 
-func (r *Repository) UpdateCredentials(creds credentials.Credentials) error {
+func (r *Repository) UpdateCredentials(creds credentials.Credentials) (credentials.Credentials, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	if r.key == nil {
-		return fmt.Errorf("authentication required")
+		return credentials.Credentials{}, fmt.Errorf("authentication required")
 	}
 
 	e, err := r.enclave(r.key)
 	if err != nil {
-		return err
-	}
-
-	// make sure creds is always initialized
-	if creds.UserKeys == nil {
-		creds.UserKeys = make(map[string][]byte)
+		return credentials.Credentials{}, err
 	}
 
 	e.SetRemote(creds)
 
-	return r.sealAndWrite(e)
+	return creds, r.sealAndWrite(e)
 }
 
 func (r *Repository) Credentials() (credentials.Credentials, error) {

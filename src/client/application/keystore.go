@@ -12,23 +12,23 @@ import (
 )
 
 var (
-	ErrInvalidKeystoreRepository = errors.New("invalid keystore repository")
-	ErrAuthenticationRequired    = errors.New("authentication required")
-	ErrAuthenticationFailed      = errors.New("authentication failed")
-	ErrInitializationRequired    = errors.New("initialization required")
-	ErrInvalidPassword           = errors.New("invalid password")
-	ErrEntryNotFound             = errors.New("entry not found")
-	ErrInvalidKeystoreName       = errors.New("invalid keystore name")
+	ErrAuthenticationRequired = errors.New("authentication required")
+	ErrAuthenticationFailed   = errors.New("authentication failed")
+	ErrInitializationRequired = errors.New("initialization required")
+	ErrInvalidPassword        = errors.New("invalid password")
+	ErrEntryNotFound          = errors.New("entry not found")
+	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
 )
 
 func (app *application) HealthCheck() {
 	app.enclave.HealthCheck()
 }
 
-func (app *application) UpdateKeystoreEntry(
-	keystoreId, entryId string, password, notes *string) (entry.Entry, error) {
+func (app *application) UpdateEntry(
+	keystoreId, entryId string, opts UpdateEntryOptions) (entry.Entry, error) {
 	// do not allow empty password
-	if password != nil && strings.TrimSpace(*password) == "" {
+
+	if opts.Password != nil && strings.TrimSpace(*opts.Password) == "" {
 		return entry.Entry{}, ErrInvalidPassword
 	}
 
@@ -42,20 +42,25 @@ func (app *application) UpdateKeystoreEntry(
 		return entry.Entry{}, ErrEntryNotFound
 	}
 
-	if password != nil {
-		e.Password = *password
+	if opts.Password != nil {
+		e.Password = *opts.Password
 	}
 
-	if notes != nil {
-		e.Notes = *notes
+	if opts.Notes != nil {
+		e.Notes = *opts.Notes
 	}
 
 	k.Entries[e.Id] = e
 
-	return e, app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(k)
+	if err != nil {
+		return entry.Entry{}, err
+	}
+
+	return e, nil
 }
 
-func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
+func (app *application) DeleteEntry(keystoreId, entryId string) error {
 	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
 		return err
@@ -67,7 +72,12 @@ func (app *application) DeleteKeystoreEntry(keystoreId, entryId string) error {
 
 	delete(k.Entries, entryId)
 
-	return app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(k)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
@@ -109,14 +119,25 @@ func (app *application) DeleteKeystore(id string) error {
 	return app.enclave.DeleteKeystore(id)
 }
 
-func (app *application) CreateKeystoreEntry(
-	keystoreId string, opts ...entry.Option) (entry.Entry, error) {
-	e := entry.New(opts...)
+//k.Id,
+//		entry.WithWebsite(req.Website),
+//		entry.WithUsername(req.Username),
+//		entry.WithPassword(req.Password),
+//		entry.WithNotes(req.Notes),
 
+func (app *application) CreateEntry(
+	keystoreId string, website, username, password, notes string) (entry.Entry, error) {
 	// do not allow empty password
-	if strings.TrimSpace(e.Password) == "" {
+	if strings.TrimSpace(password) == "" {
 		return entry.Entry{}, ErrInvalidPassword
 	}
+
+	e := entry.New(
+		entry.WithWebsite(website),
+		entry.WithUsername(username),
+		entry.WithPassword(password),
+		entry.WithNotes(notes),
+	)
 
 	k, err := app.enclave.Keystore(keystoreId)
 	if err != nil {
@@ -125,7 +146,12 @@ func (app *application) CreateKeystoreEntry(
 
 	k.Entries[e.Id] = e
 
-	return e, app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(k)
+	if err != nil {
+		return entry.Entry{}, err
+	}
+
+	return e, nil
 }
 
 func (app *application) Initialize(password string) error {

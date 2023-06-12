@@ -41,7 +41,7 @@ func (s *Server) UpdateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.UpdateKeystore(userId, keystoreId, application.KeystoreUpdateParams{
+	k, err := s.app.UpdateKeystore(userId, keystoreId, application.UpdateKeystoreOptions{
 		Name:    req.Name,
 		Payload: req.Payload,
 	})

@@ -730,7 +730,7 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewDeclineOrCancelInvitationRequest generates requests for DeclineOrCancelInvitation
+// NewDeclineOrCancelInvitationRequest generates requests for DeleteInvitation
 func NewDeclineOrCancelInvitationRequest(server string, invitationId string) (*http.Request, error) {
 	var err error
 
@@ -1326,7 +1326,7 @@ type ClientWithResponsesInterface interface {
 	// HealthCheck request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
-	// DeclineOrCancelInvitation request
+	// DeleteInvitation request
 	DeclineOrCancelInvitationWithResponse(ctx context.Context, invitationId string, reqEditors ...RequestEditorFn) (*DeclineOrCancelInvitationResponse, error)
 
 	// GetInvitation request

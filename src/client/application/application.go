@@ -13,7 +13,7 @@ var log = logger.New("app", logger.Blue)
 
 // Enclave is the repository that handles storing and retrieving of the
 // user's keystores and credentials. It requires initialization and
-// authentication before it can be used. authenticationMiddleware status can
+// authentication before it can be used. The authentication status can
 // expire after some time if the HealthCheck method is not called
 // regularly.
 type Enclave interface {
@@ -24,18 +24,18 @@ type Enclave interface {
 
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystore(id string) (keystore.Keystore, error)
-	UpdateKeystore(k keystore.Keystore) error
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores() (map[string]keystore.Keystore, error)
 	DeleteKeystore(id string) error
 
-	UpdateCredentials(creds credentials.Credentials) error
+	UpdateCredentials(creds credentials.Credentials) (credentials.Credentials, error)
 	Credentials() (credentials.Credentials, error)
 }
 
 // Remote is a remote repository that holds upstream enclave/invitations. It is
 // used to sync keystores with a remote server in a secure manner, and to
 // facilitate inviting users to access keystores or accepting invitations to
-// access a keystore from another user. authenticationMiddleware with a username and
+// access a keystore from another user. Authenticating with a username and
 // password is required to interface with a remote.
 type Remote interface {
 	Address() string
@@ -48,7 +48,7 @@ type Remote interface {
 	CreateInvitation(inv invitation.Invitation) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
-	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
+	DeleteInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 
@@ -58,21 +58,26 @@ type Remote interface {
 	CurrentUser() *user.User
 }
 
+type UpdateEntryOptions struct {
+	Password *string
+	Notes    *string
+}
+
 type Application interface {
 	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
-	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(invitationId, remoteKeystoreId string,
-		inviteePublicKey []byte) (invitation.Invitation, error)
+	DeleteInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId, remoteKeystoreId string, inviteePublicKey []byte) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
 
 	CreateKeystore(name string) (keystore.Keystore, error)
 	DeleteKeystore(id string) error
 	Keystore(id string) (keystore.Keystore, error)
-	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
-	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
-	DeleteKeystoreEntry(keystoreId, entryId string) error
+
+	CreateEntry(keystoreId string, website, username, password, notes string) (entry.Entry, error)
+	UpdateEntry(keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
+	DeleteEntry(keystoreId, entryId string) error
 	Keystores() (map[string]keystore.Keystore, error)
 	Credentials() (credentials.Credentials, error)
 

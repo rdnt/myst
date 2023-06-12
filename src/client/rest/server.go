@@ -470,7 +470,7 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
-	inv, err := s.app.DeclineOrCancelInvitation(invitationId)
+	inv, err := s.app.DeleteInvitation(invitationId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)

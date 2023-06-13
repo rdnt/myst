@@ -14,7 +14,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 	var mustInit bool
 
 	rem, err := app.enclave.Credentials()
-	if errors.Is(err, ErrRemoteNotSet) {
+	if errors.Is(err, ErrCredentialsNotFound) {
 		mustInit = true
 	} else if err != nil {
 		return user.User{}, errors.WithMessage(err, "failed to query credentials")

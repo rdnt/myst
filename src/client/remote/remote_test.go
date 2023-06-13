@@ -59,7 +59,7 @@ package remote_test
 //	inv, err = r1.FinalizeInvitation(inv.Id)
 //	assert.NoError(t, err)
 //
-//	ks, err := r2.Keystores()
+//	ks, err := r2.keystoresWithKeys()
 //	assert.NoError(t, err)
 //	assert.Len(t, ks, 1)
 // }

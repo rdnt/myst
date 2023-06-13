@@ -53,35 +53,35 @@ func New(opts ...Option) (application.Remote, error) {
 	return r, nil
 }
 
-// func (r *remote) UploadKeystore(id string) (keystore.Keystore, error) {
+// func (r *remote) UploadKeystore(id string) (keystore.keystore, error) {
 //	if !r.Authenticated() {
-//		return keystore.Keystore{}, ErrNotAuthenticated
+//		return keystore.keystore{}, ErrNotAuthenticated
 //	}
 //
-//	k, err := r.keystores.Keystore(id)
+//	k, err := r.keystores.keystore(id)
 //	if err != nil {
-//		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
+//		return keystore.keystore{}, errors.WithMessage(err, "failed to get keystore")
 //	}
 //
 //	keystoreKey, err := r.keystores.EncryptedKeystoreKey(k.Id)
 //	if err != nil {
-//		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore key")
+//		return keystore.keystore{}, errors.WithMessage(err, "failed to get keystore key")
 //	}
 //
 //	jk := repository.KeystoreToJSON(k)
 //
 //	b, err := json.Marshal(jk)
 //	if err != nil {
-//		return keystore.Keystore{}, err
+//		return keystore.keystore{}, err
 //	}
 //
 //	b, err = crypto.AES256CBC_Encrypt(keystoreKey, b)
 //	if err != nil {
-//		return keystore.Keystore{}, err
+//		return keystore.keystore{}, err
 //	}
 //
 //	if !r.Authenticated() {
-//		return keystore.Keystore{}, ErrNotAuthenticated
+//		return keystore.keystore{}, ErrNotAuthenticated
 //	}
 //
 //	res, err := r.client.CreateKeystoreWithResponse(
@@ -91,16 +91,16 @@ func New(opts ...Option) (application.Remote, error) {
 //		},
 //	)
 //	if err != nil {
-//		return keystore.Keystore{}, err
+//		return keystore.keystore{}, err
 //	}
 //
 //	if res.JSON200 == nil {
-//		return keystore.Keystore{}, fmt.Errorf("invalid response")
+//		return keystore.keystore{}, fmt.Errorf("invalid response")
 //	}
 //
 //	k, err = KeystoreFromJSON(*res.JSON200)
 //	if err != nil {
-//		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
+//		return keystore.keystore{}, errors.WithMessage(err, "failed to parse keystore")
 //	}
 //
 //	return k, nil

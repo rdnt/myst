@@ -18,7 +18,6 @@ import (
 	"myst/pkg/server"
 	"myst/src/client/application"
 	"myst/src/client/application/domain/entry"
-	"myst/src/client/enclaverepo/enclave"
 	"myst/src/client/rest/generated"
 )
 
@@ -106,7 +105,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 
 func (s *Server) CurrentUser(c *gin.Context) {
 	u, err := s.app.CurrentUser()
-	if errors.Is(err, enclave.ErrRemoteNotSet) {
+	if errors.Is(err, application.ErrCredentialsNotFound) {
 		c.Status(http.StatusNotFound)
 		return
 	} else if u == nil {
@@ -278,7 +277,7 @@ func (s *Server) Import(c *gin.Context) {
 //	}
 //
 //	Success(
-//		c, generated.Keystore{
+//		c, generated.keystore{
 //			Id:      k.Id(),
 //			Name:    k.Name(),
 //			Entries: entries,

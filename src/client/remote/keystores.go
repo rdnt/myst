@@ -11,7 +11,6 @@ import (
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/enclaverepo"
 	"myst/src/server/rest/generated"
 )
 
@@ -20,7 +19,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrNotAuthenticated
 	}
 
-	jk := enclaverepo.KeystoreToJSON(k)
+	jk := keystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
 	if err != nil {
@@ -46,7 +45,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, fmt.Errorf("invalid response: %s", string(res.Body))
 	}
 
-	// err = r.keystores.UpdateKeystore(k)
+	// err = r.keystores.updateKeystore(k)
 	// if err != nil {
 	//	return keystore.KeystoreJSON{}, errors.Wrap(err, "failed to update keystore with remote id")
 	// }
@@ -66,7 +65,7 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, ErrNotAuthenticated
 	}
 
-	jk := enclaverepo.KeystoreToJSON(k)
+	jk := keystoreToJSON(k)
 
 	b, err := json.Marshal(jk)
 	if err != nil {

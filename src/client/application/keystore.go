@@ -17,7 +17,7 @@ var (
 	ErrorInvalidUsername      = errors.New("invalid username")
 	ErrEntryNotFound          = errors.New("entry not found")
 	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
-	ErrRemoteNotSet           = errors.New("remote not set")
+	ErrCredentialsNotFound    = errors.New("credentials not found")
 )
 
 func (app *application) Initialize(password string) error {
@@ -48,7 +48,7 @@ func (app *application) Authenticate(password string) error {
 	rem, err := app.enclave.Credentials()
 	if err == nil {
 		trySignIn = true
-	} else if !errors.Is(err, ErrRemoteNotSet) {
+	} else if !errors.Is(err, ErrCredentialsNotFound) {
 		return errors.WithMessage(err, "failed to query credentials")
 	}
 

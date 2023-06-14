@@ -2,11 +2,14 @@ package remote
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/curve25519"
 
+	"myst/pkg/crypto"
 	"myst/src/client/application/domain/invitation"
+	"myst/src/client/application/domain/keystore"
 	"myst/src/server/rest/generated"
 )
 
@@ -21,14 +24,19 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 
 	res, err := r.client.GetInvitationWithResponse(context.Background(), id)
 	if err != nil {
-		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
+		return invitation.Invitation{}, errors.Wrap(err, "failed to get invitation")
 	}
 
-	if res.JSON200 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
-	return InvitationFromJSON(*res.JSON200)
+	inv, err := InvitationFromJSON(*res.JSON200)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
+	}
+
+	return inv, nil
 }
 
 func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
@@ -42,11 +50,11 @@ func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (inv
 		},
 	)
 	if err != nil {
-		return invitation.Invitation{}, err
+		return invitation.Invitation{}, errors.Wrap(err, "failed to create invitation")
 	}
 
-	if res.JSON201 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response: %s", string(res.Body))
+	if res.StatusCode() != http.StatusCreated || res.JSON201 == nil {
+		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
 	inv, err := InvitationFromJSON(*res.JSON201)
@@ -55,10 +63,6 @@ func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (inv
 	}
 
 	return inv, nil
-}
-
-func (r *remote) Address() string {
-	return r.address
 }
 
 func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
@@ -71,8 +75,8 @@ func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 		return nil, errors.Wrap(err, "failed to get invitations")
 	}
 
-	if res.JSON200 == nil {
-		return nil, fmt.Errorf("invalid response")
+	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+		return nil, errors.New("invalid response")
 	}
 
 	invs := map[string]invitation.Invitation{}
@@ -93,11 +97,11 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 		context.Background(), invitationId,
 	)
 	if err != nil {
-		return invitation.Invitation{}, err
+		return invitation.Invitation{}, errors.Wrap(err, "failed to accept invitation")
 	}
 
-	if res.JSON200 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
 	inv, err := InvitationFromJSON(*res.JSON200)
@@ -117,11 +121,11 @@ func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 		context.Background(), id,
 	)
 	if err != nil {
-		return invitation.Invitation{}, err
+		return invitation.Invitation{}, errors.Wrap(err, "failed to delete invitation")
 	}
 
-	if res.JSON200 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
 	inv, err := InvitationFromJSON(*res.JSON200)
@@ -132,17 +136,34 @@ func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (r *remote) FinalizeInvitation(invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error) {
+func (r *remote) FinalizeInvitation(invitationId string, privateKey []byte, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error) {
+	// derive shared secret using the user's private key and the invitee's public key
+	sharedSecret, err := curve25519.X25519(privateKey, inviteePublicKey)
+	if err != nil {
+		return invitation.Invitation{}, errors.Wrap(err, "failed to derive shared secret")
+	}
+
+	// encrypt the keystore key with the asymmetric key
+	encryptedKeystoreKey, err := crypto.AES256CBC_Encrypt(sharedSecret, k.Key)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to encrypt keystore key")
+	}
+
 	res, err := r.client.FinalizeInvitationWithResponse(context.Background(), invitationId, generated.FinalizeInvitationJSONRequestBody{
 		KeystoreKey: encryptedKeystoreKey,
 	})
 	if err != nil {
-		return invitation.Invitation{}, errors.WithMessage(err, "failed to finalize invitation")
+		return invitation.Invitation{}, errors.Wrap(err, "failed to finalize invitation")
 	}
 
-	if res.JSON200 == nil {
-		return invitation.Invitation{}, fmt.Errorf("invalid response")
+	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
-	return InvitationFromJSON(*res.JSON200)
+	inv, err := InvitationFromJSON(*res.JSON200)
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to parse invitation")
+	}
+
+	return inv, nil
 }

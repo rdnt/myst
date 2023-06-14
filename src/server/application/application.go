@@ -63,6 +63,7 @@ type Application interface {
 
 	CreateKeystore(name, ownerId string, payload []byte) (keystore.Keystore, error)
 	Keystore(id string) (keystore.Keystore, error)
+	UserKeystore(userId, keystoreId string) (keystore.Keystore, error)
 	Keystores() ([]keystore.Keystore, error)
 	UpdateKeystore(userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.Keystore, error)
 	DeleteKeystore(userId string, keystoreId string) error

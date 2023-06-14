@@ -1,10 +1,12 @@
 package application
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
+
 	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/keystore"
-	"strings"
 )
 
 var (

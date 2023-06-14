@@ -91,6 +91,7 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	sec.GET("/user", s.UserByUsername)
 
 	sec.POST("/keystores", s.CreateKeystore)
+	sec.GET("/keystore/:keystoreId", s.Keystore)
 	sec.PATCH("/keystore/:keystoreId", s.UpdateKeystore)
 	sec.DELETE("/keystore/:keystoreId", s.DeleteKeystore)
 	sec.GET("/keystores", s.Keystores)

@@ -108,6 +108,45 @@ func (app *application) Keystore(keystoreId string) (keystore.Keystore, error) {
 	return k, nil
 }
 
+// UserKeystore returns a keystore by id, performing the necessary checks to
+// make sure the user is allowed to see it. If the user is not allowed to see
+// the keystore, ErrKeystoreNotFound is returned.
+// If the keystore is not found, ErrKeystoreNotFound is also returned.
+func (app *application) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
+	}
+
+	// check to see if the user should be able to see this keystore
+	if k.OwnerId != userId {
+		invs, err := app.UserInvitations(
+			userId,
+			UserInvitationsOptions{Status: optional.Ref(invitation.Finalized)},
+		)
+		if err != nil {
+			return keystore.Keystore{}, errors.WithMessage(err, "failed to get user invitations")
+		}
+
+		var found bool
+		for _, inv := range invs {
+			if inv.KeystoreId == keystoreId {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			// allow read access
+			return k, nil
+		} else {
+			return keystore.Keystore{}, ErrKeystoreNotFound
+		}
+	}
+
+	return k, nil
+}
+
 // Keystores returns all stored keystores.
 func (app *application) Keystores() ([]keystore.Keystore, error) {
 	ks, err := app.keystores.Keystores()

@@ -1,8 +1,4 @@
-# Taken from https://gist.github.com/maratori/47a4d00457a92aa426dbd48a18776322 (MIT)
-
 run:
-  # Timeout for analysis, e.g. 30s, 5m.
-  # Default: 1m
   timeout: 3m
   concurrency: 32
   skip-dirs:

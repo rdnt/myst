@@ -67,21 +67,27 @@ type FinalizeInvitationRequest struct {
 
 // Invitation defines model for Invitation.
 type Invitation struct {
-	AcceptedAt           time.Time        `json:"acceptedAt"`
-	CreatedAt            time.Time        `json:"createdAt"`
-	DeclinedAt           time.Time        `json:"declinedAt"`
-	DeletedAt            time.Time        `json:"deletedAt"`
-	EncryptedKeystoreKey []byte           `json:"encryptedKeystoreKey"`
-	Id                   string           `json:"id"`
-	Invitee              User             `json:"invitee"`
-	Inviter              User             `json:"inviter"`
-	Keystore             Keystore         `json:"keystore"`
-	Status               InvitationStatus `json:"status"`
-	UpdatedAt            time.Time        `json:"updatedAt"`
+	AcceptedAt           time.Time          `json:"acceptedAt"`
+	CreatedAt            time.Time          `json:"createdAt"`
+	DeclinedAt           time.Time          `json:"declinedAt"`
+	DeletedAt            time.Time          `json:"deletedAt"`
+	EncryptedKeystoreKey []byte             `json:"encryptedKeystoreKey"`
+	Id                   string             `json:"id"`
+	Invitee              User               `json:"invitee"`
+	Inviter              User               `json:"inviter"`
+	Keystore             InvitationKeystore `json:"keystore"`
+	Status               InvitationStatus   `json:"status"`
+	UpdatedAt            time.Time          `json:"updatedAt"`
 }
 
 // InvitationStatus defines model for Invitation.Status.
 type InvitationStatus string
+
+// InvitationKeystore defines model for InvitationKeystore.
+type InvitationKeystore struct {
+	Name     string `json:"name"`
+	RemoteId string `json:"remoteId"`
+}
 
 // Invitations defines model for Invitations.
 type Invitations = []Invitation

@@ -211,10 +211,8 @@ func (app *application) UpdateKeystore(userId, keystoreId string, opts UpdateKey
 	return k, nil
 }
 
-// UserKeystores returns all keystores a user is allowed to have access to.
-// These include keystores where they are the owner, and also keystores they
-// have been successfully invited to (any keystores granted by finalized
-// invitations).
+// UserKeystores returns keystores the user has been given access to from
+// finalized invitations. It does NOT return keystores they own.
 func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error) {
 	u, err := app.users.User(userId)
 	if err != nil {

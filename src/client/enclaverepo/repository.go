@@ -257,7 +257,7 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
-	err = e.updateKeystore(k)
+	k, err = e.updateKeystore(k)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to update keystore")
 	}
@@ -271,7 +271,7 @@ func (r *Repository) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, err
 }
 
 func (r *Repository) startHealthCheck() {
-	ticker := time.NewTicker(20 * time.Second) // TODO @rdnt @@@: make this configurable
+	ticker := time.NewTicker(20 * time.Second) // FIXME @rdnt: make this configurable
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -286,8 +286,8 @@ func (r *Repository) startHealthCheck() {
 
 		if r.key != nil {
 			fmt.Println("Health check failed")
-			// TODO: figure out why healthcheck causes Disconnected
-			//  and can't be restored; @@@ @rdnt is this still reproducible?
+			// FIXME @rdnt: figure out why healthcheck causes Disconnected
+			//  and can't be restored; is this still reproducible?
 			r.key = nil
 		}
 

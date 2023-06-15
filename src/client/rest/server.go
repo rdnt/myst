@@ -17,18 +17,13 @@ import (
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
-	"myst/src/client/application/domain/entry"
 	"myst/src/client/rest/generated"
 )
 
 //go:generate oapi-codegen --config oapi-codegen-models.yaml openapi.json
 //go:generate oapi-codegen --config oapi-codegen-client.yaml openapi.json
-// TODO: remove redundant go:generate for old ui
-// //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true
-// //go:generate openapi-generator-cli generate -i openapi.json -o ../../../../ui/src/api/generated -g typescript-fetch --additional-properties=supportsES6=true,npmVersion=8.1.2,typescriptThreePlus=true,withInterfaces=true
-//go:generate npx openapi-typescript-codegen --input openapi.json --output ../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
-
 //go:generate oapi-codegen --config oapi-codegen-models.yaml openapi.json
+//go:generate npx openapi-typescript-codegen --input openapi.json --output ../../../ui/src/api/generated --client fetch --useOptions --useUnionTypes
 
 var log = logger.New("router", logger.Cyan)
 
@@ -226,11 +221,12 @@ func (s *Server) Import(c *gin.Context) {
 		username := row[2]
 		password := row[3]
 
-		_, err := s.app.CreateKeystoreEntry(
+		_, err := s.app.CreateEntry(
 			k.Id,
-			entry.WithWebsite(website),
-			entry.WithUsername(username),
-			entry.WithPassword(password),
+			website,
+			username,
+			password,
+			"",
 		)
 		if err != nil {
 			log.Error(err)
@@ -307,12 +303,12 @@ func (s *Server) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	e, err := s.app.CreateKeystoreEntry(
+	e, err := s.app.CreateEntry(
 		k.Id,
-		entry.WithWebsite(req.Website),
-		entry.WithUsername(req.Username),
-		entry.WithPassword(req.Password),
-		entry.WithNotes(req.Notes),
+		req.Website,
+		req.Username,
+		req.Password,
+		req.Notes,
 	)
 	if err != nil {
 		log.Error(err)
@@ -361,7 +357,11 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 		return
 	}
 
-	e, err := s.app.UpdateKeystoreEntry(keystoreId, entryId, req.Password, req.Notes)
+	e, err := s.app.UpdateEntry(keystoreId, entryId,
+		application.UpdateEntryOptions{
+			Password: req.Password, Notes: req.Notes,
+		},
+	)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)
@@ -384,7 +384,7 @@ func (s *Server) DeleteEntry(c *gin.Context) {
 	keystoreId := c.Param("keystoreId")
 	entryId := c.Param("entryId")
 
-	err := s.app.DeleteKeystoreEntry(keystoreId, entryId)
+	err := s.app.DeleteEntry(keystoreId, entryId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError, err)

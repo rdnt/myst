@@ -76,10 +76,7 @@ func main() {
 		panic(err)
 	}
 
-	enc, err := enclaverepo.New(cfg.DataDir)
-	if err != nil {
-		panic(err)
-	}
+	enc := enclaverepo.New(cfg.DataDir)
 
 	rem, err := remote.New(
 		remote.WithAddress(cfg.RemoteAddress),
@@ -88,13 +85,10 @@ func main() {
 		panic(err)
 	}
 
-	app, err := application.New(
+	app := application.New(
 		application.WithEnclave(enc),
 		application.WithRemote(rem),
 	)
-	if err != nil {
-		panic(err)
-	}
 
 	server := rest.NewServer(app, static)
 

@@ -21,9 +21,9 @@ func (s *Server) InvitationToRest(inv invitation.Invitation) (generated.Invitati
 
 	return generated.Invitation{
 		Id: inv.Id,
-		Keystore: generated.Keystore{
-			RemoteId: inv.Keystore.RemoteId,
-			Name:     inv.Keystore.Name,
+		Keystore: generated.InvitationKeystore{
+			RemoteId: inv.RemoteKeystoreId,
+			Name:     inv.KeystoreName,
 		},
 		Inviter:              inviter,
 		Invitee:              invitee,

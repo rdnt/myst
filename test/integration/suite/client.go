@@ -36,19 +36,17 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 	err = os.Chmod(dir, os.ModePerm)
 	assert.NilError(t, err)
 
-	enclaveRepo, err := enclaverepo.New(dir)
-	assert.NilError(t, err)
+	enclaveRepo := enclaverepo.New(dir)
 
 	rem, err := remote.New(
 		remote.WithAddress("http://" + serverAddress + "/api"),
 	)
 	assert.NilError(t, err)
 
-	app, err := application.New(
+	app := application.New(
 		application.WithEnclave(enclaveRepo),
 		application.WithRemote(rem),
 	)
-	assert.NilError(t, err)
 
 	server := rest.NewServer(app, nil)
 

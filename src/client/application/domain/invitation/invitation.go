@@ -38,13 +38,14 @@ func (i Invitation) Finalized() bool {
 }
 
 func (i Invitation) String() string {
-	return fmt.Sprintln(
+	return fmt.Sprintf(
+		"Invitation{Id: %s, RemoteKeystreId: %s, KeystoreName: %s, InviterId: %s, InviteeId: %s, Status: %s, EncryptedKeystoreKey: %s, ...}",
 		i.Id,
 		i.RemoteKeystoreId, i.KeystoreName,
 		i.Inviter.Id, i.Invitee.Id,
 		i.Status,
 		base64.StdEncoding.EncodeToString(i.EncryptedKeystoreKey),
-		i.CreatedAt, i.UpdatedAt,
-		i.AcceptedAt, i.DeclinedAt, i.DeletedAt,
+		//i.CreatedAt, i.UpdatedAt,
+		//i.AcceptedAt, i.DeclinedAt, i.DeletedAt,
 	)
 }

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ func (s *Server) Authenticate(c *gin.Context) {
 		return
 	}
 
-	if err := s.app.Authenticate(req.Password); err == application.ErrAuthenticationFailed {
+	if err := s.app.Authenticate(req.Password); errors.Is(err, application.ErrAuthenticationFailed) {
 		c.Status(http.StatusUnauthorized)
 		return
 	} else if err != nil {

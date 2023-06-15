@@ -656,9 +656,6 @@
           "ownerId": {
             "type": "string"
           },
-          "version": {
-            "type": "integer"
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"

@@ -1,6 +1,7 @@
 package keystore
 
 import (
+	"fmt"
 	"time"
 
 	"myst/pkg/uuid"
@@ -30,6 +31,11 @@ type Keystore struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+func (k Keystore) String() string {
+	return fmt.Sprintf("Keystore{Id: %s, Name: %s, Version: %d, Entries: %d, Key: %s, CreatedAt: %s, UpdatedAt: %s}",
+		k.Id, k.Name, k.Version, len(k.Entries), k.Key, k.CreatedAt, k.UpdatedAt)
 }
 
 func New(opts ...Option) Keystore {

@@ -88,7 +88,6 @@ func (s *Server) Keystores(c *gin.Context) {
 	}
 
 	gen := []generated.Keystore{}
-
 	for _, k := range ks {
 		gen = append(gen, ToJSONKeystore(k))
 	}

@@ -69,7 +69,8 @@ func WithInviteeId(id string) Option {
 }
 
 func (i Invitation) String() string {
-	return fmt.Sprintln(
+	return fmt.Sprintf(
+		"Invitation{Id: %s, KeystoreId: %s, InviterId: %s, InviteeId: %s, EncryptedKeystoreKey: %s, Status: %s}",
 		i.Id,
 		i.KeystoreId, i.InviterId, i.InviteeId,
 		i.EncryptedKeystoreKey,

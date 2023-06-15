@@ -159,7 +159,6 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 
 	if app.remote.Authenticated() {
 		// add remote keystores too
-
 		rem, err := app.enclave.Credentials()
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get credentials")

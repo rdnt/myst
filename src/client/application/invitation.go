@@ -20,7 +20,7 @@ func (app *application) CreateInvitation(
 			return invitation.Invitation{}, errors.WithMessage(err, "failed to create keystore")
 		}
 
-		_, err = app.enclave.UpdateKeystore(k)
+		k, err = app.enclave.UpdateKeystore(k)
 		if err != nil {
 			return invitation.Invitation{}, errors.WithMessage(err, "failed to update keystore")
 		}

@@ -35,14 +35,7 @@ func (app *application) Sync() error {
 
 		rk, ok := remoteKeystores[k.Id]
 		if !ok {
-			log.Println("sync: resetting remoteId", k.Id, k.RemoteId)
-
-			k.RemoteId = ""
-
-			_, err = app.enclave.UpdateKeystore(k)
-			if err != nil {
-				return errors.WithMessage(err, "failed to update local keystore")
-			}
+			log.Println("sync: skipped (not upstream)", k.Id, k.RemoteId)
 
 			continue
 		}
@@ -61,7 +54,7 @@ func (app *application) Sync() error {
 
 			log.Println("sync: credentials keystore updated", k.Id, k.RemoteId)
 		} else {
-			log.Println("sync: no change", k.Id, k.RemoteId)
+			log.Println("sync: skipped (no change)", k.Id, k.RemoteId)
 		}
 	}
 

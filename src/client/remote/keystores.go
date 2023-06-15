@@ -10,7 +10,7 @@ import (
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/keystore"
-	// TODO: @rdnt @@@: this is clearly a shared package, re-setup shared pkg
+	// FIXME: @rdnt: this is clearly a shared package, re-setup shared pkg
 	//  dir and move it there
 	"myst/src/server/rest/generated"
 )

@@ -2,15 +2,16 @@ package enclaverepo
 
 import (
 	"crypto/sha256"
-	"github.com/pkg/errors"
-	"myst/src/server/application"
 	"os"
 	"path"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
+	"myst/src/server/application"
 )
 
 type enclave struct {
@@ -77,13 +78,13 @@ func (e *enclave) keystore(id string) (keystore.Keystore, error) {
 	return k, nil
 }
 
-func (e *enclave) updateKeystore(k keystore.Keystore) error {
+func (e *enclave) updateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	k.UpdatedAt = time.Now()
 	k.Version++
 
 	e.keystores[k.Id] = k
 
-	return nil
+	return k, nil
 }
 
 func (e *enclave) deleteKeystore(id string) error {

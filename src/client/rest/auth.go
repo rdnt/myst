@@ -12,59 +12,44 @@ import (
 
 func (s *Server) Authenticate(c *gin.Context) {
 	var req generated.AuthenticateRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
-	if err := s.app.Authenticate(req.Password); errors.Is(err, application.ErrAuthenticationFailed) {
-		c.Status(http.StatusUnauthorized)
+	err = s.app.Authenticate(req.Password)
+	if errors.Is(err, application.ErrAuthenticationFailed) {
+		Error(c, http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	c.Status(http.StatusOK)
 }
 
-// func (s *Server) Login(c *gin.Context) {
-// 	var req generated.LoginRequest
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		c.Status(http.StatusBadRequest)
-// 		return
-// 	}
-//
-// 	u, err := s.app.Authenticate(req.Username, req.Password)
-// 	if err != nil {
-// 		log.Error(err)
-// 		c.Status(http.StatusInternalServerError)
-// 		return
-// 	}
-//
-// 	c.JSON(http.StatusOK, UserToRest(u))
-// }
-
 func (s *Server) Register(c *gin.Context) {
 	var req generated.RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
 	u, err := s.app.Register(req.Username, req.Password)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restUser, err := s.userToRest(u)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 

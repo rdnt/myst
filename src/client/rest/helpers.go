@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -10,31 +9,25 @@ import (
 	"myst/src/client/rest/generated"
 )
 
-func Error(c *gin.Context, code int, v interface{}) {
-	msg := "unknown error"
+func Error(c *gin.Context, statusCode int, errorCodeAndOptionalMessage ...string) {
+	code := ""
+	msg := ""
 
-	switch v := v.(type) {
-	case string:
-		msg = v
-	case fmt.Stringer:
-		msg = v.String()
-	case error:
-		msg = v.Error()
-	default:
-		b, err := json.Marshal(v)
-		if err == nil {
-			msg = string(b)
-		}
+	if len(errorCodeAndOptionalMessage) > 0 {
+		code = errorCodeAndOptionalMessage[0]
 	}
 
-	c.JSON(
-		code, generated.Error{
-			Code:    http.StatusText(code),
-			Message: msg,
-		},
-	)
-}
+	if len(errorCodeAndOptionalMessage) > 1 {
+		msg = errorCodeAndOptionalMessage[1]
+	}
 
-func Success(c *gin.Context, v interface{}) {
-	c.JSON(http.StatusOK, v)
+	if code == "" {
+		code = fmt.Sprintf("%d", statusCode)
+		msg = http.StatusText(statusCode)
+	}
+
+	c.JSON(statusCode, generated.Error{
+		Code:    code,
+		Message: msg,
+	})
 }

@@ -101,17 +101,17 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 func (s *Server) CurrentUser(c *gin.Context) {
 	u, err := s.app.CurrentUser()
 	if errors.Is(err, application.ErrCredentialsNotFound) {
-		c.Status(http.StatusNotFound)
+		Error(c, http.StatusNotFound)
 		return
 	} else if u == nil {
-		c.Status(http.StatusUnauthorized)
+		Error(c, http.StatusUnauthorized)
 		return
 	}
 
 	restUser, err := s.userToRest(*u)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -120,20 +120,19 @@ func (s *Server) CurrentUser(c *gin.Context) {
 
 func (s *Server) CreateKeystore(c *gin.Context) {
 	var req generated.CreateKeystoreRequest
-
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
 	k, err := s.app.CreateKeystore(req.Name)
 	if errors.Is(err, application.ErrInvalidKeystoreName) {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	} else if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -146,7 +145,7 @@ func (s *Server) DeleteKeystore(c *gin.Context) {
 	err := s.app.DeleteKeystore(keystoreId)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -157,14 +156,14 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 	var req generated.CreateEnclaveRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
 	err = s.app.Initialize(req.Password)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -174,16 +173,16 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 func (s *Server) Enclave(c *gin.Context) {
 	exists, err := s.app.IsInitialized()
 	if errors.Is(err, application.ErrAuthenticationRequired) {
-		Error(c, http.StatusUnauthorized, err)
+		Error(c, http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	if !exists {
-		Error(c, http.StatusNotFound, err)
+		Error(c, http.StatusNotFound)
 		return
 	}
 
@@ -200,14 +199,14 @@ func (s *Server) Import(c *gin.Context) {
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	k, err := s.app.CreateKeystore(keystoreName)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -230,7 +229,7 @@ func (s *Server) Import(c *gin.Context) {
 		)
 		if err != nil {
 			log.Error(err)
-			Error(c, http.StatusInternalServerError, err)
+			Error(c, http.StatusInternalServerError)
 			return
 		}
 		fmt.Println("Imported: ", website, username, "***")
@@ -288,7 +287,7 @@ func (s *Server) CreateEntry(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
@@ -299,7 +298,7 @@ func (s *Server) CreateEntry(c *gin.Context) {
 	// }
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -312,7 +311,7 @@ func (s *Server) CreateEntry(c *gin.Context) {
 	)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -338,7 +337,7 @@ func (s *Server) Keystore(c *gin.Context) {
 	// }
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -353,7 +352,7 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
@@ -364,13 +363,13 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 	)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	// TODO: change entries returned to be a map, implemennt the rest
-	Success(
-		c, generated.Entry{
+	c.JSON(
+		http.StatusOK, generated.Entry{
 			Id:       e.Id,
 			Website:  e.Website,
 			Username: e.Username,
@@ -387,7 +386,7 @@ func (s *Server) DeleteEntry(c *gin.Context) {
 	err := s.app.DeleteEntry(keystoreId, entryId)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -398,7 +397,7 @@ func (s *Server) GetInvitations(c *gin.Context) {
 	invs, err := s.app.Invitations()
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -406,16 +405,15 @@ func (s *Server) GetInvitations(c *gin.Context) {
 	for _, inv := range invs {
 		restInv, err := s.InvitationToRest(inv)
 		if err != nil {
-
 			log.Error(err)
-			Error(c, http.StatusInternalServerError, err)
+			Error(c, http.StatusInternalServerError)
 			return
 		}
 
 		restInvs = append(restInvs, restInv)
 	}
 
-	Success(c, restInvs)
+	c.JSON(http.StatusOK, restInvs)
 }
 
 func (s *Server) CreateInvitation(c *gin.Context) {
@@ -425,21 +423,21 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
 	inv, err := s.app.CreateInvitation(keystoreId, req.Invitee)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -452,18 +450,18 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 	inv, err := s.app.AcceptInvitation(invitationId)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	Success(c, restInv)
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
@@ -472,18 +470,18 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 	inv, err := s.app.DeleteInvitation(invitationId)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	Success(c, restInv)
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (s *Server) GetInvitation(c *gin.Context) {
@@ -492,18 +490,18 @@ func (s *Server) GetInvitation(c *gin.Context) {
 	inv, err := s.app.Invitation(invitationId)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	Success(c, restInv)
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (s *Server) FinalizeInvitation(c *gin.Context) {
@@ -512,38 +510,38 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 	var req generated.FinalizeInvitationRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		Error(c, http.StatusBadRequest, err)
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
 	inv, err := s.app.FinalizeInvitation(invitationId, req.RemoteKeystoreId, req.InviteePublicKey)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	restInv, err := s.InvitationToRest(inv)
 	if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	Success(c, restInv)
+	c.JSON(http.StatusOK, restInv)
 }
 
 func (s *Server) Keystores(c *gin.Context) {
 	ks, err := s.app.Keystores()
 	if errors.Is(err, application.ErrInitializationRequired) {
-		Error(c, http.StatusUnauthorized, err)
+		Error(c, http.StatusUnauthorized)
 		return
 	} else if errors.Is(err, application.ErrAuthenticationRequired) {
-		Error(c, http.StatusUnauthorized, err)
+		Error(c, http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		log.Error(err)
-		Error(c, http.StatusInternalServerError, err)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
@@ -555,7 +553,7 @@ func (s *Server) Keystores(c *gin.Context) {
 		)
 	}
 
-	Success(c, keystores)
+	c.JSON(http.StatusOK, keystores)
 }
 
 func (s *Server) HealthCheck(_ *gin.Context) {

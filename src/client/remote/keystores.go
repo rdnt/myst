@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"myst/pkg/crypto"
+	"myst/src/client/application"
 	"myst/src/client/application/domain/keystore"
 	// FIXME: @rdnt: this is clearly a shared package, re-setup shared pkg
 	//  dir and move it there
@@ -17,7 +18,7 @@ import (
 
 func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	if !r.Authenticated() {
-		return keystore.Keystore{}, ErrNotAuthenticated
+		return keystore.Keystore{}, application.ErrAuthenticationRequired
 	}
 
 	jk := keystoreToJSON(k)
@@ -53,7 +54,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 
 func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	if !r.Authenticated() {
-		return keystore.Keystore{}, ErrNotAuthenticated
+		return keystore.Keystore{}, application.ErrAuthenticationRequired
 	}
 
 	jk := keystoreToJSON(k)
@@ -92,7 +93,7 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 
 func (r *remote) DeleteKeystore(id string) error {
 	if !r.Authenticated() {
-		return ErrNotAuthenticated
+		return application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.DeleteKeystoreWithResponse(context.Background(), id)
@@ -109,7 +110,7 @@ func (r *remote) DeleteKeystore(id string) error {
 
 func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {
 	if !r.Authenticated() {
-		return nil, ErrNotAuthenticated
+		return nil, application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.KeystoresWithResponse(context.Background())

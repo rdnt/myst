@@ -9,6 +9,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	b := make([]byte, 16)
 	_, err := New(b)
 	assert.Assert(t, err != nil)
@@ -36,6 +38,4 @@ func TestNew(t *testing.T) {
 
 	h, err = New(b)
 	assert.Equal(t, err, nil)
-
-	t.Log(h.ToSVG())
 }

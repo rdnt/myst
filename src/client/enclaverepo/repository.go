@@ -182,7 +182,7 @@ func (r *Repository) Initialize(password string) error {
 	}
 
 	if exists {
-		return errors.New("enclave already initialized")
+		return application.ErrEnclaveExists
 	}
 
 	p := crypto.DefaultArgon2IdParams

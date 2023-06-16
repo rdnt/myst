@@ -8,23 +8,24 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"myst/pkg/crypto"
+	"myst/src/client/application"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/server/rest/generated"
 )
 
-var (
-	ErrNotAuthenticated = errors.New("not authenticated")
-)
-
 func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
-		return invitation.Invitation{}, ErrNotAuthenticated
+		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.GetInvitationWithResponse(context.Background(), id)
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to get invitation")
+	}
+
+	if res.StatusCode() == http.StatusNotFound {
+		return invitation.Invitation{}, application.ErrInvitationNotFound
 	}
 
 	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
@@ -41,7 +42,7 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 
 func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
-		return invitation.Invitation{}, ErrNotAuthenticated
+		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.CreateInvitationWithResponse(
@@ -67,7 +68,7 @@ func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (inv
 
 func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 	if !r.Authenticated() {
-		return nil, ErrNotAuthenticated
+		return nil, application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.InvitationsWithResponse(context.Background())
@@ -100,7 +101,11 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 		return invitation.Invitation{}, errors.Wrap(err, "failed to accept invitation")
 	}
 
-	if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
+	if res.StatusCode() == http.StatusNotFound {
+		return invitation.Invitation{}, application.ErrInvitationNotFound
+	} else if res.StatusCode() == http.StatusForbidden {
+		return invitation.Invitation{}, application.ErrForbidden
+	} else if res.StatusCode() != http.StatusOK || res.JSON200 == nil {
 		return invitation.Invitation{}, errors.New("invalid response")
 	}
 
@@ -114,7 +119,7 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 
 func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
-		return invitation.Invitation{}, ErrNotAuthenticated
+		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
 
 	res, err := r.client.DeleteInvitationWithResponse(

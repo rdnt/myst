@@ -19,7 +19,10 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 	}
 
 	err = s.app.Initialize(req.Password)
-	if err != nil {
+	if errors.Is(err, application.ErrEnclaveExists) {
+		Error(c, http.StatusConflict)
+		return
+	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return

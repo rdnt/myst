@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	prometheus "github.com/zsais/go-gin-prometheus"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -65,12 +64,6 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 
 	// error 404 handling
 	r.NoRoute(noRouteMiddleware)
-
-	// metrics
-	if config.Debug {
-		p := prometheus.NewPrometheus("rest-api")
-		p.Use(r)
-	}
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, ":)")

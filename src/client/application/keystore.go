@@ -20,6 +20,9 @@ var (
 	ErrEntryNotFound          = errors.New("entry not found")
 	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
 	ErrCredentialsNotFound    = errors.New("credentials not found")
+	ErrEnclaveExists          = errors.New("enclave already exists")
+	ErrInvitationNotFound     = errors.New("invitation not found")
+	ErrForbidden              = errors.New("forbidden")
 )
 
 func (app *application) Initialize(password string) error {

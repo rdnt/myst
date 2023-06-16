@@ -11,6 +11,8 @@ import (
 )
 
 func TestKeyExchange(t *testing.T) {
+	t.Parallel()
+
 	pub, key, err := crypto.NewCurve25519Keypair()
 	assert.NilError(t, err)
 

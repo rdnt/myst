@@ -11,6 +11,8 @@ import (
 )
 
 func TestRepository(t *testing.T) {
+	t.Parallel()
+
 	repo := enclaverepo.New(t.TempDir())
 
 	pass, err := rand.String(16)

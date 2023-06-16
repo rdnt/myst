@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 
+	"myst/src/client/application"
 	"myst/src/client/rest/generated"
 )
 
@@ -63,7 +65,13 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	inv, err := s.app.AcceptInvitation(invitationId)
-	if err != nil {
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if errors.Is(err, application.ErrForbidden) {
+		Error(c, http.StatusForbidden)
+		return
+	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
@@ -103,7 +111,10 @@ func (s *Server) GetInvitation(c *gin.Context) {
 	invitationId := c.Param("invitationId")
 
 	inv, err := s.app.Invitation(invitationId)
-	if err != nil {
+	if errors.Is(err, application.ErrInvitationNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return

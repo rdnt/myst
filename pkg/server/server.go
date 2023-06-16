@@ -46,8 +46,8 @@ func New(addr string, h http.Handler) (*Server, error) {
 func (s *Server) Stop() error {
 	err := s.server.Shutdown(context.Background())
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 
-	return s.listener.Close()
+	return nil
 }

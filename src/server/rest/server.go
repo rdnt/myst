@@ -64,7 +64,7 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 		c.String(http.StatusOK, ":)")
 	})
 
-	api := r.Group("api")
+	api := r.Group("/api")
 
 	api.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, map[string]any{

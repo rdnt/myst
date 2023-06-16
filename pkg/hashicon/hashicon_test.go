@@ -36,6 +36,6 @@ func TestNew(t *testing.T) {
 	b, err = rand.Bytes(256)
 	assert.Equal(t, err, nil)
 
-	h, err = New(b)
+	_, err = New(b)
 	assert.Equal(t, err, nil)
 }

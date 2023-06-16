@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/namsral/flag"
+	"github.com/pkg/errors"
 
 	"myst/pkg/config"
 	"myst/pkg/logger"
@@ -15,6 +15,8 @@ import (
 	"myst/src/server/mongorepo"
 	"myst/src/server/rest"
 )
+
+var log = logger.New("app", logger.Red)
 
 type Config struct {
 	Port          int
@@ -41,14 +43,32 @@ func parseFlags() Config {
 	return cfg
 }
 
-var log = logger.New("app", logger.Red)
-
 func main() {
+	cleanup, err := run()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+		return
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	<-c
+
+	err = cleanup()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+}
+
+func run() (cleanup func() error, err error) {
 	cfg := parseFlags()
 
 	jwtSigningKey, err := base64.StdEncoding.DecodeString(cfg.JWTSigningKey)
 	if err != nil {
-		panic(err)
+		return nil, errors.Wrap(err, "could not decode jwt signing key")
 	}
 
 	if cfg.Slow {
@@ -59,7 +79,7 @@ func main() {
 
 	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
 	if err != nil {
-		panic(err)
+		return nil, errors.WithMessage(err, "could not create mongo repository")
 	}
 
 	app := application.New(
@@ -67,26 +87,20 @@ func main() {
 		application.WithUserRepository(repo),
 		application.WithInvitationRepository(repo),
 	)
-	if err != nil {
-		panic(err)
-	}
 
 	server := rest.NewServer(app, jwtSigningKey)
 
-	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
-	if err != nil {
-		log.Error(err)
-	}
-
 	err = server.Start(":8080")
 	if err != nil {
-		log.Error(err)
+		return nil, errors.WithMessage(err, "could not start server")
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	return func() error {
+		err := server.Stop()
+		if err != nil {
+			return errors.WithMessage(err, "could not stop server")
+		}
 
-	<-c
-
-	_ = server.Stop()
+		return nil
+	}, nil
 }

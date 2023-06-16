@@ -9,7 +9,6 @@ import (
 	"github.com/namsral/flag"
 	"github.com/pkg/errors"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/server/application"
 	"myst/src/server/mongorepo"
@@ -75,7 +74,7 @@ func run() (cleanup func() error, err error) {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	logger.EnableDebug = config.Debug
+	logger.EnableDebug = true
 
 	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
 	if err != nil {

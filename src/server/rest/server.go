@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/server/application"
@@ -37,11 +36,7 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	}
 
 	// Set gin mode
-	if config.Debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.DebugMode)
 
 	gin.DefaultWriter = io.Discard
 	gin.DefaultErrorWriter = io.Discard

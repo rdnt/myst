@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/client/application"
@@ -36,11 +35,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	s.app = app
 
 	// Set gin mode
-	if config.Debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.DebugMode)
 
 	gin.DefaultWriter = io.Discard
 	gin.DefaultErrorWriter = io.Discard

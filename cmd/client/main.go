@@ -9,7 +9,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/enclaverepo"
@@ -74,7 +73,7 @@ func run() (cleanup func() error, err error) {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	logger.EnableDebug = config.Debug
+	logger.EnableDebug = true
 
 	err = createDataDir(cfg.DataDir)
 	if err != nil {

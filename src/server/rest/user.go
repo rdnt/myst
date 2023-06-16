@@ -78,7 +78,7 @@ func (s *Server) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, generated.AuthorizationResponse{
-		User:  UserToJSON(u),
+		User:  userToJSON(u),
 		Token: token,
 	})
 }
@@ -101,5 +101,5 @@ func (s *Server) UserByUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, UserToJSON(u))
+	c.JSON(http.StatusOK, userToJSON(u))
 }

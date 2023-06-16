@@ -9,7 +9,7 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
+func keystoreToJSON(k keystore.Keystore) generated.Keystore {
 	return generated.Keystore{
 		Id:        k.Id,
 		Name:      k.Name,
@@ -20,7 +20,7 @@ func ToJSONKeystore(k keystore.Keystore) generated.Keystore {
 	}
 }
 
-func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitation, error) {
+func (s *Server) invitationToJSON(inv invitation.Invitation) (generated.Invitation, error) {
 	inviter, err := s.app.User(inv.InviterId)
 	if err != nil {
 		return generated.Invitation{}, errors.WithMessage(err, "failed to get inviter")
@@ -42,8 +42,8 @@ func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitati
 			Id:   k.Id,
 			Name: k.Name,
 		},
-		Inviter:              UserToJSON(inviter),
-		Invitee:              UserToJSON(invitee),
+		Inviter:              userToJSON(inviter),
+		Invitee:              userToJSON(invitee),
 		Status:               generated.InvitationStatus(inv.Status.String()),
 		EncryptedKeystoreKey: inv.EncryptedKeystoreKey,
 		CreatedAt:            inv.CreatedAt,
@@ -56,7 +56,7 @@ func (s *Server) ToJSONInvitation(inv invitation.Invitation) (generated.Invitati
 	}, nil
 }
 
-func UserToJSON(u user.User) generated.User {
+func userToJSON(u user.User) generated.User {
 	return generated.User{
 		Id:        u.Id,
 		PublicKey: u.PublicKey,

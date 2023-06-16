@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 
 	"myst/pkg/logger"
-	"myst/src/server/rest/generated"
 )
 
 // noRouteMiddleware is the middleware that processes http 404 errors.
@@ -38,21 +37,8 @@ func recoveryMiddleware(c *gin.Context) {
 
 // recoveryHandler sends a 500 response if a panic occurs during serving
 func recoveryHandler(c *gin.Context, err interface{}) {
-	if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-		// If error occurred in an Server route print JSON error response
-		log.Error(err)
-
-		resp := generated.Error{
-			Code:    "internal-error",
-			Message: http.StatusText(http.StatusInternalServerError),
-		}
-
-		c.JSON(http.StatusInternalServerError, resp)
-	} else {
-		// Otherwise just return error 500 status code
-		// TODO: Render HTML error 500 template instead
-		c.Status(http.StatusInternalServerError)
-	}
+	log.Error(err)
+	Error(c, http.StatusInternalServerError)
 
 	c.Abort()
 }

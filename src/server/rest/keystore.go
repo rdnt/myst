@@ -27,7 +27,7 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, ToJSONKeystore(k))
+	c.JSON(http.StatusCreated, keystoreToJSON(k))
 }
 
 func (s *Server) Keystore(c *gin.Context) {
@@ -44,7 +44,7 @@ func (s *Server) Keystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONKeystore(k))
+	c.JSON(http.StatusOK, keystoreToJSON(k))
 }
 
 func (s *Server) UpdateKeystore(c *gin.Context) {
@@ -74,7 +74,7 @@ func (s *Server) UpdateKeystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONKeystore(k))
+	c.JSON(http.StatusOK, keystoreToJSON(k))
 }
 
 func (s *Server) Keystores(c *gin.Context) {
@@ -89,7 +89,7 @@ func (s *Server) Keystores(c *gin.Context) {
 
 	gen := []generated.Keystore{}
 	for _, k := range ks {
-		gen = append(gen, ToJSONKeystore(k))
+		gen = append(gen, keystoreToJSON(k))
 	}
 
 	c.JSON(http.StatusOK, gen)

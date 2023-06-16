@@ -8,13 +8,13 @@ import (
 	"myst/src/client/rest/generated"
 )
 
-func (s *Server) InvitationToRest(inv invitation.Invitation) (generated.Invitation, error) {
-	inviter, err := s.userToRest(inv.Inviter)
+func (s *Server) invitationToJSON(inv invitation.Invitation) (generated.Invitation, error) {
+	inviter, err := s.userToJSON(inv.Inviter)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
 
-	invitee, err := s.userToRest(inv.Invitee)
+	invitee, err := s.userToJSON(inv.Invitee)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
@@ -37,7 +37,7 @@ func (s *Server) InvitationToRest(inv invitation.Invitation) (generated.Invitati
 	}, nil
 }
 
-func (s *Server) userToRest(u user.User) (generated.User, error) {
+func (s *Server) userToJSON(u user.User) (generated.User, error) {
 	var icon *string
 	if u.SharedSecret != nil {
 		ic, err := hashicon.New(u.SharedSecret)
@@ -57,7 +57,7 @@ func (s *Server) userToRest(u user.User) (generated.User, error) {
 	}, nil
 }
 
-func KeystoreToRest(k keystore.Keystore) generated.Keystore {
+func keystoreToJSON(k keystore.Keystore) generated.Keystore {
 	entries := []generated.Entry{}
 
 	for _, e := range k.Entries {

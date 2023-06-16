@@ -31,27 +31,22 @@ func (s *Server) Authenticate(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *Server) Register(c *gin.Context) {
-	var req generated.RegisterRequest
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		Error(c, http.StatusBadRequest)
+func (s *Server) CurrentUser(c *gin.Context) {
+	u, err := s.app.CurrentUser()
+	if errors.Is(err, application.ErrCredentialsNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if u == nil {
+		Error(c, http.StatusUnauthorized)
 		return
 	}
 
-	u, err := s.app.Register(req.Username, req.Password)
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError)
-		return
-	}
-
-	restUser, err := s.userToRest(u)
+	restUser, err := s.userToJSON(*u)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	c.JSON(http.StatusCreated, restUser)
+	c.JSON(http.StatusOK, restUser)
 }

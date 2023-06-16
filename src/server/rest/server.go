@@ -75,7 +75,7 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	api.POST("/auth/login", s.Login)
 	api.POST("/auth/register", s.Register)
 
-	sec := api.Group("")
+	sec := api.Group("/")
 	sec.Use(s.authenticationMiddleware())
 
 	sec.GET("/user", s.UserByUsername)

@@ -17,7 +17,7 @@ func TestKeystores(t *testing.T) {
 	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
 	assert.NilError(t, err)
 
-	t.Run("Keystores are empty", func(t *testing.T) {
+	t.Run("keystoresWithKeys are empty", func(t *testing.T) {
 		res, err := s.Client1.Client.KeystoresWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
@@ -27,7 +27,7 @@ func TestKeystores(t *testing.T) {
 	keystoreName := strings.TrimSpace(s.Random(t))
 	var keystoreId string
 
-	t.Run("Keystore created", func(t *testing.T) {
+	t.Run("keystore created", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateKeystoreWithResponse(s.Ctx,
 			generated.CreateKeystoreJSONRequestBody{Name: keystoreName},
 		)
@@ -38,14 +38,14 @@ func TestKeystores(t *testing.T) {
 		keystoreId = (*res.JSON201).Id
 	})
 
-	t.Run("Keystore can be queried", func(t *testing.T) {
+	t.Run("keystore can be queried", func(t *testing.T) {
 		res, err := s.Client1.Client.KeystoreWithResponse(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
 		assert.Equal(t, res.JSON200.Id, keystoreId)
 	})
 
-	t.Run("Keystores contain created keystore", func(t *testing.T) {
+	t.Run("keystoresWithKeys contain created keystore", func(t *testing.T) {
 		res, err := s.Client1.Client.KeystoresWithResponse(s.Ctx)
 		assert.NilError(t, err)
 		assert.Assert(t, res.JSON200 != nil)
@@ -119,7 +119,7 @@ func TestKeystores(t *testing.T) {
 		assert.Assert(t, len(res.JSON200.Entries) == 0)
 	})
 
-	t.Run("Keystore can be deleted", func(t *testing.T) {
+	t.Run("keystore can be deleted", func(t *testing.T) {
 		_, err := s.Client1.Client.DeleteKeystore(s.Ctx, keystoreId)
 		assert.NilError(t, err)
 

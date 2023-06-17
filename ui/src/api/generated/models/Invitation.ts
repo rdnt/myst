@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Keystore } from './Keystore';
+import type { InvitationKeystore } from './InvitationKeystore';
 import type { User } from './User';
 
 export type Invitation = {
     id: string;
-    keystore: Keystore;
+    keystore: InvitationKeystore;
     inviter: User;
     invitee: User;
     encryptedKeystoreKey: string;

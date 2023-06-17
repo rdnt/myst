@@ -2,52 +2,27 @@ package invitation
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"time"
 
-	"myst/pkg/uuid"
-	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/user"
-)
-
-var (
-	// ErrAccepted    = errors.New("invitation already accepted")
-	// ErrNotAccepted = errors.New("invitation not accepted")
-	// ErrFinalized   = errors.New("invitation already finalized")
-	ErrCannotAccept   = errors.New("cannot accept non-pending invitation")
-	ErrCannotFinalize = errors.New("cannot finalize non-accepted invitation")
 )
 
 type Invitation struct {
 	Id                   string
-	Keystore             keystore.Keystore
+	RemoteKeystoreId     string
+	KeystoreName         string
 	Inviter              user.User
 	Invitee              user.User
 	EncryptedKeystoreKey []byte
 	Status               Status
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
-	AcceptedAt           time.Time
-	DeclinedAt           time.Time
 	DeletedAt            time.Time
-}
-
-func New(opts ...Option) Invitation {
-	inv := Invitation{
-		Id:        uuid.New().String(),
-		Status:    Pending,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	for _, opt := range opts {
-		if opt != nil {
-			opt(&inv)
-		}
-	}
-
-	return inv
+	DeclinedAt           time.Time
+	AcceptedAt           time.Time
+	CancelledAt          time.Time
+	FinalizedAt          time.Time
 }
 
 func (i Invitation) Pending() bool {
@@ -63,12 +38,14 @@ func (i Invitation) Finalized() bool {
 }
 
 func (i Invitation) String() string {
-	return fmt.Sprintln(
+	return fmt.Sprintf(
+		"Invitation{Id: %s, RemoteKeystreId: %s, KeystoreName: %s, InviterId: %s, InviteeId: %s, Status: %s, EncryptedKeystoreKey: %s, ...}",
 		i.Id,
-		i.Keystore, i.Inviter, i.Invitee,
+		i.RemoteKeystoreId, i.KeystoreName,
+		i.Inviter.Id, i.Invitee.Id,
 		i.Status,
 		base64.StdEncoding.EncodeToString(i.EncryptedKeystoreKey),
-		i.CreatedAt, i.UpdatedAt,
-		i.AcceptedAt, i.DeclinedAt, i.DeletedAt,
+		//i.CreatedAt, i.UpdatedAt,
+		//i.AcceptedAt, i.DeclinedAt, i.DeletedAt,
 	)
 }

@@ -6,5 +6,4 @@ type Credentials struct {
 	Password   string
 	PublicKey  []byte
 	PrivateKey []byte
-	UserKeys   map[string][]byte
 }

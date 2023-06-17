@@ -7,21 +7,21 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/namsral/flag"
 	"github.com/pkg/errors"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/enclaverepo"
 	"myst/src/client/remote"
 	"myst/src/client/rest"
 	"myst/src/client/scheduler"
-
-	"github.com/namsral/flag"
 )
 
 //go:embed static/*
 var static embed.FS
+
+var log = logger.New("client", logger.Red)
 
 type Config struct {
 	RemoteAddress string
@@ -44,7 +44,86 @@ func parseFlags() Config {
 	return cfg
 }
 
-var log = logger.New("client", logger.Red)
+func main() {
+	cleanup, err := run()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+		return
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	<-c
+
+	err = cleanup()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+		return
+	}
+}
+
+func run() (cleanup func() error, err error) {
+	cfg := parseFlags()
+
+	if cfg.Slow {
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	logger.EnableDebug = true
+
+	err = createDataDir(cfg.DataDir)
+	if err != nil {
+		return nil, errors.WithMessage(err, "unable to create data directory")
+	}
+
+	enc := enclaverepo.New(cfg.DataDir)
+
+	rem, err := remote.New(
+		remote.WithAddress(cfg.RemoteAddress),
+	)
+	if err != nil {
+		return nil, errors.WithMessage(err, "unable to create remote repository")
+	}
+
+	app := application.New(
+		application.WithEnclave(enc),
+		application.WithRemote(rem),
+	)
+
+	sched, err := scheduler.New(app, rem)
+	if err != nil {
+		return nil, errors.WithMessage(err, "unable to create scheduler")
+	}
+
+	server := rest.NewServer(app, static)
+
+	err = sched.Start()
+	if err != nil {
+		return nil, errors.WithMessage(err, "unable to start scheduler")
+	}
+
+	err = server.Start(fmt.Sprintf(":%d", cfg.Port))
+	if err != nil {
+		return nil, errors.WithMessage(err, "unable to start server")
+	}
+
+	return func() error {
+		err = server.Stop()
+		if err != nil {
+			return errors.WithMessage(err, "unable to stop server")
+		}
+
+		err = sched.Stop()
+		if err != nil {
+			return errors.WithMessage(err, "unable to stop scheduler")
+		}
+
+		return nil
+	}, nil
+}
 
 func createDataDir(dir string) error {
 	var create bool
@@ -60,64 +139,4 @@ func createDataDir(dir string) error {
 	}
 
 	return os.Mkdir(dir, os.ModePerm)
-}
-
-func main() {
-	cfg := parseFlags()
-
-	if cfg.Slow {
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	logger.EnableDebug = config.Debug
-
-	err := createDataDir(cfg.DataDir)
-	if err != nil {
-		panic(err)
-	}
-
-	enc, err := enclaverepo.New(cfg.DataDir)
-	if err != nil {
-		panic(err)
-	}
-
-	rem, err := remote.New(
-		remote.WithAddress(cfg.RemoteAddress),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	app, err := application.New(
-		application.WithEnclave(enc),
-		application.WithRemote(rem),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	server := rest.NewServer(app, static)
-
-	sched, err := scheduler.New(app)
-	if err != nil {
-		panic(err)
-	}
-
-	err = sched.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	err = server.Start(fmt.Sprintf(":%d", cfg.Port))
-	if err != nil {
-		log.Error(err)
-	}
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-
-	<-c
-
-	_ = server.Stop()
-	_ = sched.Stop()
 }

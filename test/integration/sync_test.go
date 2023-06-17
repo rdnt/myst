@@ -25,7 +25,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 	assert.NilError(t, err)
 
 	var keystore generated.Keystore
-	t.Run("Keystore is created", func(t *testing.T) {
+	t.Run("keystore is created", func(t *testing.T) {
 		keystore = s.CreateKeystore(t)
 
 		ks, err := s.Client1.App.Keystores()
@@ -35,7 +35,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Equal(t, ks[keystore.Id].Version, 2) // we added an entry
 	})
 
-	t.Run("Keystore is not uploaded yet", func(t *testing.T) {
+	t.Run("keystore is not uploaded yet", func(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 
@@ -48,14 +48,14 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		_ = s.CreateInvitation(t, keystore.Id)
 	})
 
-	t.Run("Keystore is uploaded", func(t *testing.T) {
+	t.Run("keystore is uploaded", func(t *testing.T) {
 		rks, err := s.Server.App.Keystores()
 		assert.NilError(t, err)
 		assert.Equal(t, len(rks), 1)
 		assert.Assert(t, rks[0].Id != "")
 	})
 
-	t.Run("Keystore is synced", func(t *testing.T) {
+	t.Run("keystore is synced", func(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 

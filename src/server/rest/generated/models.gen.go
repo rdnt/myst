@@ -72,7 +72,6 @@ type Keystore struct {
 	OwnerId   string    `json:"ownerId"`
 	Payload   []byte    `json:"payload"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	Version   int       `json:"version"`
 }
 
 // KeystoreName defines model for KeystoreName.

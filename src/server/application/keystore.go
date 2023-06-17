@@ -108,6 +108,45 @@ func (app *application) Keystore(keystoreId string) (keystore.Keystore, error) {
 	return k, nil
 }
 
+// UserKeystore returns a keystore by id, performing the necessary checks to
+// make sure the user is allowed to see it. If the user is not allowed to see
+// the keystore, ErrKeystoreNotFound is returned.
+// If the keystore is not found, ErrKeystoreNotFound is also returned.
+func (app *application) UserKeystore(userId, keystoreId string) (keystore.Keystore, error) {
+	k, err := app.keystores.Keystore(keystoreId)
+	if err != nil {
+		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
+	}
+
+	// check to see if the user should be able to see this keystore
+	if k.OwnerId != userId {
+		invs, err := app.UserInvitations(
+			userId,
+			UserInvitationsOptions{Status: optional.Ref(invitation.Finalized)},
+		)
+		if err != nil {
+			return keystore.Keystore{}, errors.WithMessage(err, "failed to get user invitations")
+		}
+
+		var found bool
+		for _, inv := range invs {
+			if inv.KeystoreId == keystoreId {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			// allow read access
+			return k, nil
+		} else {
+			return keystore.Keystore{}, ErrKeystoreNotFound
+		}
+	}
+
+	return k, nil
+}
+
 // Keystores returns all stored keystores.
 func (app *application) Keystores() ([]keystore.Keystore, error) {
 	ks, err := app.keystores.Keystores()
@@ -118,11 +157,11 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 	return ks, nil
 }
 
-// UpdateKeystore updates a keystore with the provided params. Only non-nil
-// params are processed. If the keystore is not found, ErrKeystoreNotFound is
+// UpdateKeystore updates a keystore with the provided options. Only non-nil
+// opts are processed. If the keystore is not found, ErrKeystoreNotFound is
 // returned. The userId passed is the initiator of the update, and should be
 // the keystore's owner, otherwise ErrForbidden is returned.
-func (app *application) UpdateKeystore(userId, keystoreId string, params KeystoreUpdateParams) (keystore.
+func (app *application) UpdateKeystore(userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.
 	Keystore,
 	error) {
 	k, err := app.keystores.Keystore(keystoreId)
@@ -156,12 +195,12 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params Keystor
 	}
 
 	// update the keystore's properties
-	if params.Name != nil {
-		k.Name = *params.Name
+	if opts.Name != nil {
+		k.Name = *opts.Name
 	}
 
-	if params.Payload != nil {
-		k.Payload = *params.Payload
+	if opts.Payload != nil {
+		k.Payload = *opts.Payload
 	}
 
 	k, err = app.keystores.UpdateKeystore(k)
@@ -172,10 +211,8 @@ func (app *application) UpdateKeystore(userId, keystoreId string, params Keystor
 	return k, nil
 }
 
-// UserKeystores returns all keystores a user is allowed to have access to.
-// These include keystores where they are the owner, and also keystores they
-// have been successfully invited to (any keystores granted by finalized
-// invitations).
+// UserKeystores returns keystores the user has been given access to from
+// finalized invitations. It does NOT return keystores they own.
 func (app *application) UserKeystores(userId string) ([]keystore.Keystore, error) {
 	u, err := app.users.User(userId)
 	if err != nil {

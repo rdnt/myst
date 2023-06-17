@@ -16,6 +16,7 @@ export type { Entry } from './models/Entry';
 export type { Error } from './models/Error';
 export type { FinalizeInvitationRequest } from './models/FinalizeInvitationRequest';
 export type { Invitation } from './models/Invitation';
+export type { InvitationKeystore } from './models/InvitationKeystore';
 export type { Invitations } from './models/Invitations';
 export type { Keystore } from './models/Keystore';
 export type { Keystores } from './models/Keystores';

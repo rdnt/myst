@@ -1,47 +1,117 @@
 package application
 
 import (
+	"github.com/pkg/errors"
+
 	"myst/pkg/logger"
 	"myst/src/client/application/domain/credentials"
+	"myst/src/client/application/domain/entry"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/application/domain/keystore/entry"
 	"myst/src/client/application/domain/user"
 )
 
 var log = logger.New("app", logger.Blue)
 
-type Application interface {
-	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
-	AcceptInvitation(id string) (invitation.Invitation, error)
-	DeclineOrCancelInvitation(id string) (invitation.Invitation, error)
-	// VerifyInvitation(id string) error
-	FinalizeInvitation(invitationId, remoteKeystoreId string,
-		inviteePublicKey []byte) (invitation.Invitation, error)
-	Invitations() (map[string]invitation.Invitation, error)
+// Enclave is the repository that handles storing and retrieving of the
+// user's keystores and credentials. It requires initialization and
+// authentication before it can be used. The authentication status can
+// expire after some time if the HealthCheck method is not called
+// regularly.
+type Enclave interface {
+	Initialize(password string) error
+	IsInitialized() (bool, error)
+	Authenticate(password string) error
+	HealthCheck()
+
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystore(id string) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystores() (map[string]keystore.Keystore, error)
+	DeleteKeystore(id string) error
+
+	UpdateCredentials(creds credentials.Credentials) (credentials.Credentials, error)
+	Credentials() (credentials.Credentials, error)
+}
+
+// Remote is a remote repository that holds upstream enclave/invitations. It is
+// used to sync keystores with a remote server in a secure manner, and to
+// facilitate inviting users to access keystores or accepting invitations to
+// access a keystore from another user. Authenticating with a username and
+// password is required to interface with a remote.
+type Remote interface {
+	Address() string
+
+	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
+	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
+	DeleteKeystore(id string) error
+
+	CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error)
 	Invitation(id string) (invitation.Invitation, error)
+	AcceptInvitation(id string) (invitation.Invitation, error)
+	DeleteInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, privateKey, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error)
+	Invitations() (map[string]invitation.Invitation, error)
+
+	Authenticate(username, password string) error
+	Register(username, password string, publicKey []byte) (user.User, error)
+	Authenticated() bool
+	CurrentUser() *user.User
+
+	SharedSecret(privateKey []byte, userId string) ([]byte, error)
+}
+
+var (
+	ErrKeystoreNotFound       = errors.New("keystore not found")
+	ErrAuthenticationRequired = errors.New("authentication required")
+	ErrAuthenticationFailed   = errors.New("authentication failed")
+	ErrInitializationRequired = errors.New("initialization required")
+	ErrInvalidPassword        = errors.New("invalid password")
+	ErrInvalidWebsite         = errors.New("invalid website")
+	ErrorInvalidUsername      = errors.New("invalid username")
+	ErrEntryNotFound          = errors.New("entry not found")
+	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
+	ErrCredentialsNotFound    = errors.New("credentials not found")
+	ErrEnclaveExists          = errors.New("enclave already exists")
+	ErrInvitationNotFound     = errors.New("invitation not found")
+	ErrForbidden              = errors.New("forbidden")
+	ErrSharedSecretNotFound   = errors.New("shared secret not found")
+	ErrRemoteAddressMismatch  = errors.New("remote address mismatch")
+)
+
+type UpdateEntryOptions struct {
+	Password *string
+	Notes    *string
+}
+
+type Application interface {
+	Initialize(password string) error
+	IsInitialized() (bool, error)
+	Authenticate(password string) error
+	HealthCheck()
 
 	CreateKeystore(name string) (keystore.Keystore, error)
 	DeleteKeystore(id string) error
 	Keystore(id string) (keystore.Keystore, error)
-	CreateKeystoreEntry(keystoreId string, opts ...entry.Option) (entry.Entry, error)
-	UpdateKeystoreEntry(keystoreId string, entryId string, password, notes *string) (entry.Entry, error)
-	DeleteKeystoreEntry(keystoreId, entryId string) error
 	Keystores() (map[string]keystore.Keystore, error)
-	Credentials() (credentials.Credentials, error)
 
-	// Authenticate(username, password string) (user.User, error)
-	// SignOut() error
+	CreateEntry(keystoreId string, website, username, password, notes string) (entry.Entry, error)
+	UpdateEntry(keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
+	DeleteEntry(keystoreId, entryId string) error
+
 	Register(username, password string) (user.User, error)
 	CurrentUser() (*user.User, error)
+	SharedSecret(userId string) ([]byte, error)
 
-	HealthCheck()
-	Initialize(password string) error
-	IsInitialized() (bool, error)
-	Authenticate(password string) error
+	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
+	AcceptInvitation(id string) (invitation.Invitation, error)
+	DeleteInvitation(id string) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId, remoteKeystoreId string, inviteePublicKey []byte) (invitation.Invitation, error)
+	Invitations() (map[string]invitation.Invitation, error)
+	Invitation(id string) (invitation.Invitation, error)
 
 	Sync() error
-	Debug() (map[string]any, error)
 }
 
 type application struct {
@@ -49,39 +119,28 @@ type application struct {
 	remote  Remote
 }
 
-func New(opts ...Option) (Application, error) {
+func New(opts ...Option) Application {
 	app := &application{}
 
 	for _, opt := range opts {
 		if opt != nil {
-			err := opt(app)
-			if err != nil {
-				logger.Error(err)
-				return nil, err
-			}
+			opt(app)
 		}
 	}
 
-	return app, nil
+	return app
 }
 
-func (app *application) Debug() (data map[string]any, err error) {
-	data = map[string]any{}
+type Option func(app *application)
 
-	data["keystores"], err = app.enclave.Keystores()
-	if err != nil {
-		return nil, err
+func WithRemote(remote Remote) Option {
+	return func(app *application) {
+		app.remote = remote
 	}
+}
 
-	data["credentials"], err = app.enclave.Credentials()
-	if err != nil {
-		return nil, err
+func WithEnclave(enclave Enclave) Option {
+	return func(app *application) {
+		app.enclave = enclave
 	}
-
-	data["invitations"], err = app.remote.Invitations()
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }

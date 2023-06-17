@@ -1,0 +1,5 @@
+run:
+  timeout: 3m
+  concurrency: 32
+  skip-dirs:
+    - ui

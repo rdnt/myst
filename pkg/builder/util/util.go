@@ -30,7 +30,7 @@ func Run(command ...string) {
 		return os.Getenv(s)
 	})
 	if err != nil {
-		panic(err)
+		runtime.Panic(fmt.Errorf("failed to expand command: %s\n", err))
 	}
 
 	args, err := shellquote.Split(expanded)

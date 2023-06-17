@@ -863,7 +863,7 @@
             "type": "string"
           },
           "keystore": {
-            "$ref": "#/components/schemas/Keystore"
+            "$ref": "#/components/schemas/InvitationKeystore"
           },
           "inviter": {
             "$ref": "#/components/schemas/User"
@@ -919,6 +919,21 @@
           "declinedAt",
           "deletedAt"
         ]
+      },
+      "InvitationKeystore": {
+        "type": "object",
+        "required": [
+          "remoteId",
+          "name"
+        ],
+        "properties": {
+          "remoteId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
       },
       "User": {
         "type": "object",

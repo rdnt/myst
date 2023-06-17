@@ -10,6 +10,8 @@ import (
 )
 
 func TestEnclaveEncryptDecryptLossless(t *testing.T) {
+	t.Parallel()
+
 	b := []byte("payload")
 	password := []byte("my-password")
 

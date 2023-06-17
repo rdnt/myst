@@ -2,19 +2,20 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/namsral/flag"
+	"github.com/pkg/errors"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/src/server/application"
 	"myst/src/server/mongorepo"
 	"myst/src/server/rest"
 )
+
+var log = logger.New("app", logger.Red)
 
 type Config struct {
 	Port          int
@@ -41,46 +42,12 @@ func parseFlags() Config {
 	return cfg
 }
 
-var log = logger.New("app", logger.Red)
-
 func main() {
-	cfg := parseFlags()
-
-	jwtSigningKey, err := base64.StdEncoding.DecodeString(cfg.JWTSigningKey)
-	if err != nil {
-		panic(err)
-	}
-
-	if cfg.Slow {
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	logger.EnableDebug = config.Debug
-
-	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
-	if err != nil {
-		panic(err)
-	}
-
-	app := application.New(
-		application.WithKeystoreRepository(repo),
-		application.WithUserRepository(repo),
-		application.WithInvitationRepository(repo),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	server := rest.NewServer(app, jwtSigningKey)
-
-	err = server.Run(fmt.Sprintf(":%d", cfg.Port))
+	cleanup, err := run()
 	if err != nil {
 		log.Error(err)
-	}
-
-	err = server.Start(":8080")
-	if err != nil {
-		log.Error(err)
+		os.Exit(1)
+		return
 	}
 
 	c := make(chan os.Signal, 1)
@@ -88,5 +55,51 @@ func main() {
 
 	<-c
 
-	_ = server.Stop()
+	err = cleanup()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+}
+
+func run() (cleanup func() error, err error) {
+	cfg := parseFlags()
+
+	jwtSigningKey, err := base64.StdEncoding.DecodeString(cfg.JWTSigningKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not decode jwt signing key")
+	}
+
+	if cfg.Slow {
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	logger.EnableDebug = true
+
+	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not create mongo repository")
+	}
+
+	app := application.New(
+		application.WithKeystoreRepository(repo),
+		application.WithUserRepository(repo),
+		application.WithInvitationRepository(repo),
+	)
+
+	server := rest.NewServer(app, jwtSigningKey)
+
+	err = server.Start(":8080")
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not start server")
+	}
+
+	return func() error {
+		err := server.Stop()
+		if err != nil {
+			return errors.WithMessage(err, "could not stop server")
+		}
+
+		return nil
+	}, nil
 }

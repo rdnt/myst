@@ -47,7 +47,7 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.ToJSONInvitation(inv)
+	restInv, err := s.invitationToJSON(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -71,7 +71,7 @@ func (s *Server) Invitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.ToJSONInvitation(inv)
+	restInv, err := s.invitationToJSON(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -101,7 +101,7 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.ToJSONInvitation(inv)
+	restInv, err := s.invitationToJSON(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -130,7 +130,7 @@ func (s *Server) DeleteInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.ToJSONInvitation(inv)
+	restInv, err := s.invitationToJSON(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -164,7 +164,7 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.ToJSONInvitation(inv)
+	restInv, err := s.invitationToJSON(inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -187,7 +187,7 @@ func (s *Server) Invitations(c *gin.Context) {
 	gen := []generated.Invitation{}
 
 	for _, inv := range invs {
-		restInv, err := s.ToJSONInvitation(inv)
+		restInv, err := s.invitationToJSON(inv)
 		if err != nil {
 			log.Error(err)
 			Error(c, http.StatusInternalServerError)

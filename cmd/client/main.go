@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/namsral/flag"
 	"github.com/pkg/errors"
 
 	"myst/pkg/logger"
@@ -15,8 +16,6 @@ import (
 	"myst/src/client/remote"
 	"myst/src/client/rest"
 	"myst/src/client/scheduler"
-
-	"github.com/namsral/flag"
 )
 
 //go:embed static/*
@@ -94,7 +93,7 @@ func run() (cleanup func() error, err error) {
 		application.WithRemote(rem),
 	)
 
-	sched, err := scheduler.New(app)
+	sched, err := scheduler.New(app, rem)
 	if err != nil {
 		return nil, errors.WithMessage(err, "unable to create scheduler")
 	}

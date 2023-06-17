@@ -27,6 +27,10 @@ func (app *application) IsInitialized() (bool, error) {
 	return isInit, nil
 }
 
+// Authenticate attempts to authenticate against the enclave, and log the
+// user in if they have already set-up their account.
+// If the enclave does not exist, then ErrInitializationRequired is returned.
+// If the password is incorrect, ErrAuthenticationFailed is returned.
 func (app *application) Authenticate(password string) error {
 	err := app.enclave.Authenticate(password)
 	if err != nil {

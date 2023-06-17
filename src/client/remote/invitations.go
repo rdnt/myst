@@ -14,7 +14,7 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-func (r *remote) Invitation(id string) (invitation.Invitation, error) {
+func (r *Remote) Invitation(id string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
@@ -40,7 +40,7 @@ func (r *remote) Invitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
+func (r *Remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
@@ -66,7 +66,7 @@ func (r *remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (inv
 	return inv, nil
 }
 
-func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
+func (r *Remote) Invitations() (map[string]invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return nil, application.ErrAuthenticationRequired
 	}
@@ -93,7 +93,7 @@ func (r *remote) Invitations() (map[string]invitation.Invitation, error) {
 	return invs, nil
 }
 
-func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, error) {
+func (r *Remote) AcceptInvitation(invitationId string) (invitation.Invitation, error) {
 	res, err := r.client.AcceptInvitationWithResponse(
 		context.Background(), invitationId,
 	)
@@ -117,7 +117,7 @@ func (r *remote) AcceptInvitation(invitationId string) (invitation.Invitation, e
 	return inv, nil
 }
 
-func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
+func (r *Remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}
@@ -141,7 +141,7 @@ func (r *remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (r *remote) FinalizeInvitation(invitationId string, privateKey []byte, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error) {
+func (r *Remote) FinalizeInvitation(invitationId string, privateKey []byte, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error) {
 	// derive shared secret using the user's private key and the invitee's public key
 	sharedSecret, err := curve25519.X25519(privateKey, inviteePublicKey)
 	if err != nil {

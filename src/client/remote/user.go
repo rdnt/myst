@@ -13,14 +13,41 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-func (r *remote) Authenticate(username, password string) error {
+// Reauthenticate authenticates with the previously provided username and
+// password, if the Authenticate method has been called in the past.
+func (r *Remote) Reauthenticate() error {
+	if r.username == "" || r.password == "" {
+		return nil
+	}
+
+	err := r.authenticate()
+	if err != nil {
+		return errors.WithMessage(err, "failed to reauthenticate")
+	}
+
+	return nil
+}
+
+func (r *Remote) Authenticate(username, password string) error {
+	r.username = username
+	r.password = password
+
+	err := r.authenticate()
+	if err != nil {
+		return errors.WithMessage(err, "failed to authenticate")
+	}
+
+	return nil
+}
+
+func (r *Remote) authenticate() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	res, err := r.client.LoginWithResponse(
 		ctx, generated.LoginJSONRequestBody{
-			Username: username,
-			Password: password,
+			Username: r.username,
+			Password: r.password,
 		},
 	)
 	if err != nil {
@@ -47,15 +74,15 @@ func (r *remote) Authenticate(username, password string) error {
 	return nil
 }
 
-func (r *remote) Authenticated() bool {
+func (r *Remote) Authenticated() bool {
 	return r.bearerToken != ""
 }
 
-func (r *remote) CurrentUser() *user.User {
+func (r *Remote) CurrentUser() *user.User {
 	return r.user
 }
 
-func (r *remote) Register(username, password string, publicKey []byte) (user.User, error) {
+func (r *Remote) Register(username, password string, publicKey []byte) (user.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -90,7 +117,7 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 	return u, nil
 }
 
-func (r *remote) SharedSecret(privateKey []byte, userId string) ([]byte, error) {
+func (r *Remote) SharedSecret(privateKey []byte, userId string) ([]byte, error) {
 	invs, err := r.Invitations()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to query invitations")

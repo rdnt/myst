@@ -16,7 +16,7 @@ import (
 	"myst/src/server/rest/generated"
 )
 
-func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
+func (r *Remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	if !r.Authenticated() {
 		return keystore.Keystore{}, application.ErrAuthenticationRequired
 	}
@@ -52,7 +52,7 @@ func (r *remote) CreateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	return k, nil
 }
 
-func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
+func (r *Remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
 	if !r.Authenticated() {
 		return keystore.Keystore{}, application.ErrAuthenticationRequired
 	}
@@ -91,7 +91,7 @@ func (r *remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 	return k2, nil
 }
 
-func (r *remote) DeleteKeystore(id string) error {
+func (r *Remote) DeleteKeystore(id string) error {
 	if !r.Authenticated() {
 		return application.ErrAuthenticationRequired
 	}
@@ -108,7 +108,7 @@ func (r *remote) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (r *remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {
+func (r *Remote) Keystores(privateKey []byte) (map[string]keystore.Keystore, error) {
 	if !r.Authenticated() {
 		return nil, application.ErrAuthenticationRequired
 	}

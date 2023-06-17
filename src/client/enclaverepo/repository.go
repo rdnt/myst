@@ -3,6 +3,7 @@ package enclaverepo
 import (
 	"crypto/sha256"
 	"fmt"
+	"io/fs"
 	"os"
 	"sync"
 	"time"
@@ -216,10 +217,13 @@ func (r *Repository) Initialize(password string) error {
 
 func (r *Repository) Authenticate(password string) error {
 	r.mux.Lock()
-	// we don't unlock right away because argon2id computation is (purposefully) slow
+	// we don't defer unlock because argon2id computation is slow
 
 	b, err := os.ReadFile(r.enclavePath())
-	if err != nil {
+	if errors.Is(err, fs.ErrNotExist) {
+		r.mux.Unlock()
+		return application.ErrInitializationRequired
+	} else if err != nil {
 		r.mux.Unlock()
 		return errors.Wrap(err, "failed to read enclave")
 	}

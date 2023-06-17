@@ -19,7 +19,10 @@ func (s *Server) Authenticate(c *gin.Context) {
 	}
 
 	err = s.app.Authenticate(req.Password)
-	if errors.Is(err, application.ErrAuthenticationFailed) {
+	if errors.Is(err, application.ErrInitializationRequired) {
+		Error(c, http.StatusConflict)
+		return
+	} else if errors.Is(err, application.ErrAuthenticationFailed) {
 		Error(c, http.StatusUnauthorized)
 		return
 	} else if err != nil {

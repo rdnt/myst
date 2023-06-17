@@ -1,6 +1,8 @@
 package application
 
 import (
+	"github.com/pkg/errors"
+
 	"myst/pkg/logger"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/entry"
@@ -56,7 +58,27 @@ type Remote interface {
 	Register(username, password string, publicKey []byte) (user.User, error)
 	Authenticated() bool
 	CurrentUser() *user.User
+
+	SharedSecret(privateKey []byte, userId string) ([]byte, error)
 }
+
+var (
+	ErrKeystoreNotFound       = errors.New("keystore not found")
+	ErrAuthenticationRequired = errors.New("authentication required")
+	ErrAuthenticationFailed   = errors.New("authentication failed")
+	ErrInitializationRequired = errors.New("initialization required")
+	ErrInvalidPassword        = errors.New("invalid password")
+	ErrInvalidWebsite         = errors.New("invalid website")
+	ErrorInvalidUsername      = errors.New("invalid username")
+	ErrEntryNotFound          = errors.New("entry not found")
+	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
+	ErrCredentialsNotFound    = errors.New("credentials not found")
+	ErrEnclaveExists          = errors.New("enclave already exists")
+	ErrInvitationNotFound     = errors.New("invitation not found")
+	ErrForbidden              = errors.New("forbidden")
+	ErrSharedSecretNotFound   = errors.New("shared secret not found")
+	ErrRemoteAddressMismatch  = errors.New("remote address mismatch")
+)
 
 type UpdateEntryOptions struct {
 	Password *string
@@ -80,6 +102,7 @@ type Application interface {
 
 	Register(username, password string) (user.User, error)
 	CurrentUser() (*user.User, error)
+	SharedSecret(userId string) ([]byte, error)
 
 	CreateInvitation(keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)

@@ -197,7 +197,12 @@ func (r *Repository) Initialize(password string) error {
 		return errors.WithMessage(err, "failed to generate key")
 	}
 
-	e := newEnclave(salt)
+	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
+	if err != nil {
+		return errors.WithMessage(err, "failed to generate keypair")
+	}
+
+	e := newEnclave(salt, publicKey, privateKey)
 
 	r.key = key
 

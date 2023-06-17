@@ -21,11 +21,15 @@ type enclave struct {
 	creds     *credentials.Credentials
 }
 
-func newEnclave(salt []byte) *enclave {
+func newEnclave(salt []byte, publicKey, privateKey []byte) *enclave {
 	return &enclave{
 		keystores: map[string]keystore.Keystore{},
 		keys:      map[string][]byte{},
 		salt:      salt,
+		creds: &credentials.Credentials{
+			PublicKey:  publicKey,
+			PrivateKey: privateKey,
+		},
 	}
 }
 

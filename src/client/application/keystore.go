@@ -9,22 +9,6 @@ import (
 	"myst/src/client/application/domain/keystore"
 )
 
-var (
-	ErrKeystoreNotFound       = errors.New("keystore not found")
-	ErrAuthenticationRequired = errors.New("authentication required")
-	ErrAuthenticationFailed   = errors.New("authentication failed")
-	ErrInitializationRequired = errors.New("initialization required")
-	ErrInvalidPassword        = errors.New("invalid password")
-	ErrInvalidWebsite         = errors.New("invalid website")
-	ErrorInvalidUsername      = errors.New("invalid username")
-	ErrEntryNotFound          = errors.New("entry not found")
-	ErrInvalidKeystoreName    = errors.New("invalid keystore name")
-	ErrCredentialsNotFound    = errors.New("credentials not found")
-	ErrEnclaveExists          = errors.New("enclave already exists")
-	ErrInvitationNotFound     = errors.New("invitation not found")
-	ErrForbidden              = errors.New("forbidden")
-)
-
 func (app *application) Initialize(password string) error {
 	err := app.enclave.Initialize(password)
 	if err != nil {

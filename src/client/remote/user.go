@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/curve25519"
 
+	"myst/src/client/application"
 	"myst/src/client/application/domain/user"
 	"myst/src/server/rest/generated"
 )
@@ -86,4 +88,33 @@ func (r *remote) Register(username, password string, publicKey []byte) (user.Use
 	r.bearerToken = res.JSON201.Token
 
 	return u, nil
+}
+
+func (r *remote) SharedSecret(privateKey []byte, userId string) ([]byte, error) {
+	invs, err := r.Invitations()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to query invitations")
+	}
+
+	for _, inv := range invs {
+		if inv.Inviter.Id != userId && inv.Invitee.Id != userId {
+			continue
+		}
+
+		var pub []byte
+		if inv.Inviter.Id == r.CurrentUser().Id {
+			pub = inv.Invitee.PublicKey
+		} else {
+			pub = inv.Inviter.PublicKey
+		}
+
+		sharedSecret, err := curve25519.X25519(privateKey, pub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to derive shared secret")
+		}
+
+		return sharedSecret, nil
+	}
+
+	return nil, application.ErrSharedSecretNotFound
 }

@@ -2,6 +2,7 @@ package rest
 
 import (
 	"myst/pkg/hashicon"
+	"myst/pkg/optional"
 	"myst/src/client/application/domain/invitation"
 	"myst/src/client/application/domain/keystore"
 	"myst/src/client/application/domain/user"
@@ -39,15 +40,18 @@ func (s *Server) invitationToJSON(inv invitation.Invitation) (generated.Invitati
 
 func (s *Server) userToJSON(u user.User) (generated.User, error) {
 	var icon *string
-	if u.SharedSecret != nil {
-		ic, err := hashicon.New(u.SharedSecret)
-		if err != nil {
-			return generated.User{}, err
-		}
 
-		str := ic.ToSVG()
-		icon = &str
+	sharedSecret, err := s.app.SharedSecret(u.Id)
+	if err != nil {
+		return generated.User{}, err
 	}
+
+	ic, err := hashicon.New(sharedSecret)
+	if err != nil {
+		return generated.User{}, err
+	}
+
+	icon = optional.Ref(ic.ToSVG())
 
 	return generated.User{
 		Id:        u.Id,

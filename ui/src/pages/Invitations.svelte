@@ -97,20 +97,20 @@
             </span>
             <span class="user">
               {#if inv.status === 'accepted'}
-                Invitation accepted {format(inv.acceptedAt)}.
-                  Waiting for <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> to verify.
+                Invitation from <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> accepted {format(inv.acceptedAt)}.
+<!--                  Waiting for <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> to verify.-->
               {:else}
-                Invited by <strong>{inv.inviter.username}</strong> {format(inv.createdAt)}
+                Invited by <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> {format(inv.createdAt)}.
               {/if}
             </span>
           </div>
-          <div>
-            {#if inv.inviter.icon}
-              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
-            {:else if inv.invitee.icon}
-              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">
-            {/if}
-          </div>
+<!--          <div>-->
+<!--            {#if inv.inviter.icon}-->
+<!--              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">-->
+<!--            {:else if inv.invitee.icon}-->
+<!--              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">-->
+<!--            {/if}-->
+<!--          </div>-->
           <div class="actions">
             {#if inv.status === 'pending'}
               <button class="button green" on:click={() => {showAcceptInvitationModalFunc(inv)}}>Accept</button>
@@ -140,16 +140,16 @@
               {inv.keystore.name}
             </span>
             <span class="user">
-              Invited <strong>{inv.invitee.username}</strong> {format(inv.createdAt)}
+              Invited <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> {format(inv.createdAt)}.
             </span>
           </div>
-          <div>
-            {#if inv.inviter.icon}
-              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">
-            {:else if inv.invitee.icon}
-              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">
-            {/if}
-          </div>
+<!--          <div>-->
+<!--            {#if inv.inviter.icon}-->
+<!--              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.inviter.icon)} alt="">-->
+<!--            {:else if inv.invitee.icon}-->
+<!--              <img style="width: 64px; height: 64px;" src={'data:image/svg+xml,'+encodeURIComponent(inv.invitee.icon)} alt="">-->
+<!--            {/if}-->
+<!--          </div>-->
           <div class="actions">
             {#if inv.status === 'accepted'}
               <button class="button green" on:click={() => {showFinalizeInvitationModalFunc(inv)}}>Verify</button>
@@ -182,19 +182,19 @@
             <span class="user">
             {#if inv.status === 'finalized'}
               {#if inv.inviter.id === $currentUser.id}
-                Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}
+                Shared with <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> since {format(inv.acceptedAt)}.
               {:else}
-                Being shared by <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> since {format(inv.acceptedAt)}
+                Being shared by <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> since {format(inv.acceptedAt)}.
               {/if}
             {:else if inv.status === 'deleted'}
               {#if inv.inviter.id === $currentUser.id}
-                Invitation to <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> deleted {format(inv.deletedAt)}
+                Invitation to <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> deleted {format(inv.deletedAt)}.
               {/if}
             {:else if inv.status === 'declined'}
               {#if inv.inviter.id === $currentUser.id}
-                Invitation declined by <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> {format(inv.declinedAt)}
+                Invitation declined by <strong style="color: {hash(inv.invitee.username)}">{inv.invitee.username}</strong> {format(inv.declinedAt)}.
               {:else}
-                Declined invitation from <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> {format(inv.declinedAt)}
+                Declined invitation from <strong style="color: {hash(inv.inviter.username)}">{inv.inviter.username}</strong> {format(inv.declinedAt)}.
               {/if}
             {/if}
           </span>

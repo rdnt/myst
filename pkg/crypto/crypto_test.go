@@ -10,6 +10,8 @@ import (
 )
 
 func TestPKCS7PadUnpad(t *testing.T) {
+	t.Parallel()
+
 	s := ""
 
 	for i := 0; i < 100; i++ {

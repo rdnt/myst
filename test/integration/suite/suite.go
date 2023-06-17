@@ -10,7 +10,6 @@ import (
 	"github.com/samber/lo"
 	"gotest.tools/v3/assert"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/rand"
 )
@@ -30,8 +29,7 @@ func New(t *testing.T) *Suite {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
-	config.Debug = true
-	logger.EnableDebug = config.Debug
+	logger.EnableDebug = true
 
 	ports, err := freeport.GetFreePorts(4)
 	assert.NilError(t, err)

@@ -9,6 +9,8 @@ import (
 )
 
 func TestRef(t *testing.T) {
+	t.Parallel()
+
 	stringv := optional.Ref("test")
 	assert.Equal(t, "test", *stringv)
 

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,61 +12,44 @@ import (
 
 func (s *Server) Authenticate(c *gin.Context) {
 	var req generated.AuthenticateRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		Error(c, http.StatusBadRequest)
 		return
 	}
 
-	if err := s.app.Authenticate(req.Password); err == application.ErrAuthenticationFailed {
-		c.Status(http.StatusUnauthorized)
+	err = s.app.Authenticate(req.Password)
+	if errors.Is(err, application.ErrInitializationRequired) {
+		Error(c, http.StatusConflict)
+		return
+	} else if errors.Is(err, application.ErrAuthenticationFailed) {
+		Error(c, http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
 	c.Status(http.StatusOK)
 }
 
-// func (s *Server) Login(c *gin.Context) {
-// 	var req generated.LoginRequest
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		c.Status(http.StatusBadRequest)
-// 		return
-// 	}
-//
-// 	u, err := s.app.Authenticate(req.Username, req.Password)
-// 	if err != nil {
-// 		log.Error(err)
-// 		c.Status(http.StatusInternalServerError)
-// 		return
-// 	}
-//
-// 	c.JSON(http.StatusOK, UserToRest(u))
-// }
-
-func (s *Server) Register(c *gin.Context) {
-	var req generated.RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Status(http.StatusBadRequest)
+func (s *Server) CurrentUser(c *gin.Context) {
+	u, err := s.app.CurrentUser()
+	if errors.Is(err, application.ErrCredentialsNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if u == nil {
+		Error(c, http.StatusUnauthorized)
 		return
 	}
 
-	u, err := s.app.Register(req.Username, req.Password)
+	restUser, err := s.userToJSON(*u)
 	if err != nil {
 		log.Error(err)
-		c.Status(http.StatusInternalServerError)
+		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	restUser, err := s.userToRest(u)
-	if err != nil {
-		log.Error(err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusCreated, restUser)
+	c.JSON(http.StatusOK, restUser)
 }

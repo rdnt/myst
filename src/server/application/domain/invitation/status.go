@@ -8,9 +8,9 @@ type Status string
 
 const (
 	Pending   Status = "pending"
-	Accepted  Status = "accepted"
 	Deleted   Status = "deleted"
 	Declined  Status = "declined"
+	Accepted  Status = "accepted"
 	Cancelled Status = "cancelled"
 	Finalized Status = "finalized"
 )
@@ -23,12 +23,12 @@ func StatusFromString(s string) (Status, error) {
 	switch Status(s) {
 	case Pending:
 		return Pending, nil
-	case Accepted:
-		return Accepted, nil
 	case Deleted:
 		return Deleted, nil
 	case Declined:
 		return Declined, nil
+	case Accepted:
+		return Accepted, nil
 	case Cancelled:
 		return Cancelled, nil
 	case Finalized:

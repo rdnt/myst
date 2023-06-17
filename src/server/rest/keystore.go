@@ -27,7 +27,24 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, ToJSONKeystore(k))
+	c.JSON(http.StatusCreated, keystoreToJSON(k))
+}
+
+func (s *Server) Keystore(c *gin.Context) {
+	userId := CurrentUser(c)
+	keystoreId := c.Param("keystoreId")
+
+	k, err := s.app.UserKeystore(userId, keystoreId)
+	if errors.Is(err, application.ErrKeystoreNotFound) {
+		Error(c, http.StatusNotFound)
+		return
+	} else if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, keystoreToJSON(k))
 }
 
 func (s *Server) UpdateKeystore(c *gin.Context) {
@@ -41,7 +58,7 @@ func (s *Server) UpdateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.UpdateKeystore(userId, keystoreId, application.KeystoreUpdateParams{
+	k, err := s.app.UpdateKeystore(userId, keystoreId, application.UpdateKeystoreOptions{
 		Name:    req.Name,
 		Payload: req.Payload,
 	})
@@ -57,7 +74,7 @@ func (s *Server) UpdateKeystore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ToJSONKeystore(k))
+	c.JSON(http.StatusOK, keystoreToJSON(k))
 }
 
 func (s *Server) Keystores(c *gin.Context) {
@@ -71,9 +88,8 @@ func (s *Server) Keystores(c *gin.Context) {
 	}
 
 	gen := []generated.Keystore{}
-
 	for _, k := range ks {
-		gen = append(gen, ToJSONKeystore(k))
+		gen = append(gen, keystoreToJSON(k))
 	}
 
 	c.JSON(http.StatusOK, gen)

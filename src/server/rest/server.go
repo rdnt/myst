@@ -10,9 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	prometheus "github.com/zsais/go-gin-prometheus"
 
-	"myst/pkg/config"
 	"myst/pkg/logger"
 	"myst/pkg/server"
 	"myst/src/server/application"
@@ -38,11 +36,7 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	}
 
 	// Set gin mode
-	if config.Debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.DebugMode)
 
 	gin.DefaultWriter = io.Discard
 	gin.DefaultErrorWriter = io.Discard
@@ -66,31 +60,28 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	// error 404 handling
 	r.NoRoute(noRouteMiddleware)
 
-	// metrics
-	if config.Debug {
-		p := prometheus.NewPrometheus("rest-api")
-		p.Use(r)
-	}
-
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, ":)")
 	})
 
-	r.GET("/health", func(c *gin.Context) {
-		c.Status(http.StatusOK)
-	})
+	api := r.Group("/api")
 
-	api := r.Group("api")
+	api.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, map[string]any{
+			"status": "healthy",
+		})
+	})
 
 	api.POST("/auth/login", s.Login)
 	api.POST("/auth/register", s.Register)
 
-	sec := api.Group("")
+	sec := api.Group("/")
 	sec.Use(s.authenticationMiddleware())
 
 	sec.GET("/user", s.UserByUsername)
 
 	sec.POST("/keystores", s.CreateKeystore)
+	sec.GET("/keystore/:keystoreId", s.Keystore)
 	sec.PATCH("/keystore/:keystoreId", s.UpdateKeystore)
 	sec.DELETE("/keystore/:keystoreId", s.DeleteKeystore)
 	sec.GET("/keystores", s.Keystores)

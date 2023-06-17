@@ -2,33 +2,113 @@ package enclaverepo
 
 import (
 	"crypto/sha256"
-	"encoding/json"
-	"fmt"
 	"os"
 	"path"
+	"time"
 
 	"github.com/pkg/errors"
 
 	"myst/pkg/crypto"
 	"myst/src/client/application/domain/credentials"
 	"myst/src/client/application/domain/keystore"
-	"myst/src/client/enclaverepo/enclave"
+	"myst/src/server/application"
 )
+
+type enclave struct {
+	salt      []byte
+	keystores map[string]keystore.Keystore
+	keys      map[string][]byte
+	creds     *credentials.Credentials
+}
+
+func newEnclave(salt []byte, publicKey, privateKey []byte) *enclave {
+	return &enclave{
+		keystores: map[string]keystore.Keystore{},
+		keys:      map[string][]byte{},
+		salt:      salt,
+		creds: &credentials.Credentials{
+			PublicKey:  publicKey,
+			PrivateKey: privateKey,
+		},
+	}
+}
+
+func (e *enclave) addKeystore(k keystore.Keystore) error {
+	p := crypto.DefaultArgon2IdParams
+
+	key, err := crypto.GenerateRandomBytes(uint(p.KeyLength))
+	if err != nil {
+		return errors.WithMessage(err, "failed to generate key")
+	}
+
+	k.CreatedAt = time.Now()
+	k.UpdatedAt = time.Now()
+
+	e.keystores[k.Id] = k
+	e.keys[k.Id] = key
+
+	return nil
+}
+
+func (e *enclave) keystoresWithKeys() (map[string]keystore.Keystore, error) {
+	ks := map[string]keystore.Keystore{}
+
+	for _, k := range e.keystores {
+		keystoreKey, ok := e.keys[k.Id]
+		if !ok {
+			return nil, application.ErrKeystoreNotFound
+		}
+
+		k.Key = keystoreKey
+		ks[k.Id] = k
+	}
+
+	return ks, nil
+}
+
+func (e *enclave) keystore(id string) (keystore.Keystore, error) {
+	k, ok := e.keystores[id]
+	if !ok {
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
+	}
+
+	keystoreKey, ok := e.keys[id]
+	if !ok {
+		return keystore.Keystore{}, application.ErrKeystoreNotFound
+	}
+
+	k.Key = keystoreKey
+
+	return k, nil
+}
+
+func (e *enclave) updateKeystore(k keystore.Keystore) (keystore.Keystore, error) {
+	k.UpdatedAt = time.Now()
+	k.Version++
+
+	e.keystores[k.Id] = k
+
+	return k, nil
+}
+
+func (e *enclave) deleteKeystore(id string) error {
+	delete(e.keystores, id)
+	delete(e.keys, id)
+
+	return nil
+}
 
 func (r *Repository) enclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
 
-func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
+func (r *Repository) enclave(argon2idKey []byte) (*enclave, error) {
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read enclave file")
 	}
 
-	salt, err := getSaltFromData(b)
-	if err != nil {
-		return nil, err
-	}
+	salt := getSaltFromData(b)
 
 	p := crypto.DefaultArgon2IdParams
 
@@ -37,95 +117,22 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave.Enclave, error) {
 
 	valid := crypto.VerifyHMAC_SHA256(argon2idKey, mac, b)
 	if !valid {
-		return nil, fmt.Errorf("authentication failed")
+		return nil, application.ErrAuthenticationFailed
 	}
 
 	b, err = crypto.AES256CBC_Decrypt(argon2idKey, b)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to decrypt enclave")
 	}
 
 	encJson, err := enclaveFromJSON(b, salt)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "failed to create enclave from json")
 	}
 
 	return encJson, nil
 }
 
-func enclaveToJSON(e *enclave.Enclave) ([]byte, error) {
-	ks := map[string]KeystoreJSON{}
-
-	eks, err := e.Keystores()
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get keystores")
-	}
-	for _, k := range eks {
-		ks[k.Id] = KeystoreToJSON(k)
-	}
-
-	var jrem *RemoteJSON
-	rem := e.Remote()
-
-	if rem != nil {
-		jrem = &RemoteJSON{
-			Address:    rem.Address,
-			Username:   rem.Username,
-			Password:   rem.Password,
-			PublicKey:  rem.PublicKey,
-			PrivateKey: rem.PrivateKey,
-			UserKeys:   rem.UserKeys,
-		}
-	}
-
-	return json.Marshal(EnclaveJSON{
-		Keystores: ks,
-		Keys:      e.Keys(),
-		Remote:    jrem,
-	})
-}
-
-func enclaveFromJSON(b, salt []byte) (*enclave.Enclave, error) {
-	e := &EnclaveJSON{}
-
-	err := json.Unmarshal(b, e)
-	if err != nil {
-		return nil, err
-	}
-
-	ks := map[string]keystore.Keystore{}
-
-	for _, k := range e.Keystores {
-		k, err := KeystoreFromJSON(k)
-		if err != nil {
-			return nil, err
-		}
-
-		ks[k.Id] = k
-	}
-
-	var rem *credentials.Credentials
-	jrem := e.Remote
-
-	if jrem != nil {
-		rem = &credentials.Credentials{
-			Address:    jrem.Address,
-			Username:   jrem.Username,
-			Password:   jrem.Password,
-			PublicKey:  jrem.PublicKey,
-			PrivateKey: jrem.PrivateKey,
-			UserKeys:   jrem.UserKeys,
-		}
-	}
-
-	return enclave.New(
-		enclave.WithKeystores(ks),
-		enclave.WithSalt(salt),
-		enclave.WithRemote(rem),
-		enclave.WithKeys(e.Keys),
-	)
-}
-
-func getSaltFromData(b []byte) ([]byte, error) {
-	return b[:crypto.DefaultArgon2IdParams.SaltLength], nil
+func getSaltFromData(b []byte) []byte {
+	return b[:crypto.DefaultArgon2IdParams.SaltLength]
 }

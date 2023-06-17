@@ -48,7 +48,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	r.RedirectFixedPath = true
 
 	// Custom PrintRouteFunc
-	gin.DebugPrintRouteFunc = PrintRoutes
+	gin.DebugPrintRouteFunc = printRoutes
 
 	// always use recovery middleware
 	r.Use(recoveryMiddleware)

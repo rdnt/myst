@@ -12,6 +12,7 @@ import (
 	goerrors "github.com/go-errors/errors"
 
 	"myst/pkg/logger"
+	"myst/pkg/router"
 )
 
 // noRouteMiddleware is the middleware that processes http 404 errors.
@@ -72,8 +73,8 @@ func recoveryHandler(c *gin.Context, err interface{}) {
 	c.Abort()
 }
 
-// PrintRoutes prints all active routes to the console on startup
-func PrintRoutes(httpMethod, absolutePath, handlerName string, _ int) {
+// printRoutes prints all active routes to the console on startup
+func printRoutes(httpMethod, absolutePath, handlerName string, _ int) {
 	if handlerName == "" {
 		return
 	}
@@ -99,41 +100,11 @@ func loggerMiddleware(c *gin.Context) {
 
 	log.Printf(
 		"%5s  %13v  %15s  %-21s  %s\n%s",
-		logger.Colorize(fmt.Sprintf(" %d ", status), StatusColor(status)),
+		logger.Colorize(fmt.Sprintf(" %d ", status), router.StatusColor(status)),
 		latency,
 		c.ClientIP(),
-		logger.Colorize(fmt.Sprintf(" %s ", method), MethodColor(method)),
+		logger.Colorize(fmt.Sprintf(" %s ", method), router.MethodColor(method)),
 		path,
 		c.Errors.ByType(gin.ErrorTypePrivate).String(),
 	)
-}
-
-func StatusColor(status int) logger.Color {
-	switch {
-	case status >= http.StatusOK && status < http.StatusMultipleChoices:
-		return logger.GreenBg | logger.Black
-	case status >= http.StatusMultipleChoices && status < http.StatusBadRequest:
-		return logger.WhiteBg | logger.Black
-	case status >= http.StatusBadRequest && status < http.StatusInternalServerError:
-		return logger.YellowBg | logger.Black
-	default:
-		return logger.RedBg | logger.Black
-	}
-}
-
-func MethodColor(method string) logger.Color {
-	switch method {
-	case http.MethodGet:
-		return logger.GreenBg | logger.Black
-	case http.MethodPost:
-		return logger.BlueBg | logger.Black
-	case http.MethodPut:
-		return logger.CyanBg | logger.Black
-	case http.MethodPatch:
-		return logger.YellowBg | logger.Black
-	case http.MethodDelete:
-		return logger.RedBg | logger.Black
-	default:
-		return logger.MagentaBg | logger.Black
-	}
 }

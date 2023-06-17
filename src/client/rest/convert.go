@@ -62,7 +62,7 @@ func (s *Server) userToJSON(u user.User) (generated.User, error) {
 }
 
 func keystoreToJSON(k keystore.Keystore) generated.Keystore {
-	entries := []generated.Entry{}
+	entries := make([]generated.Entry, 0)
 
 	for _, e := range k.Entries {
 		entries = append(

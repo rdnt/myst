@@ -154,16 +154,13 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 		return
 	}
 
-	// TODO: change entries returned to be a map, implemennt the rest
-	c.JSON(
-		http.StatusOK, generated.Entry{
-			Id:       e.Id,
-			Website:  e.Website,
-			Username: e.Username,
-			Password: e.Password,
-			Notes:    e.Notes,
-		},
-	)
+	c.JSON(http.StatusOK, generated.Entry{
+		Id:       e.Id,
+		Website:  e.Website,
+		Username: e.Username,
+		Password: e.Password,
+		Notes:    e.Notes,
+	})
 }
 
 func (s *Server) DeleteEntry(c *gin.Context) {

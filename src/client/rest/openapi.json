@@ -49,7 +49,14 @@
         },
         "responses": {
           "201": {
-            "description": "Enclave created"
+            "description": "authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionId"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error",
@@ -99,7 +106,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionId"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error",
@@ -1002,6 +1016,9 @@
           "id",
           "token"
         ]
+      },
+      "SessionId": {
+        "type": "string"
       },
       "Error": {
         "type": "object",

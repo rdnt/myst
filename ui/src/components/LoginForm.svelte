@@ -1,5 +1,6 @@
 <script lang="ts">
-  import api from "@/api";
+  import api, {OpenAPI} from "@/api";
+  import type {SessionId} from "@/api";
   import InputField from "@/components/InputField.svelte";
   import {createEventDispatcher} from 'svelte';
   import PasswordInputField from "@/components/PasswordInputField.svelte";
@@ -11,16 +12,17 @@
 
   let error: boolean = false;
 
-  function submit() {
+  const submit = async () => {
     if (!passwordValid) {
       return;
     }
 
-    api.authenticate({
+    await api.authenticate({
       requestBody: {
         password
       }
-    }).then(() => {
+    }).then((resp: SessionId) => {
+      OpenAPI.TOKEN = resp
       dispatch('login')
       password = ''
     }).catch((err) => {

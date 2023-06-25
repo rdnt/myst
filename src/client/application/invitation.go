@@ -7,8 +7,16 @@ import (
 )
 
 func (app *application) CreateInvitation(
+	sessionId []byte,
 	keystoreId string, inviteeUsername string) (invitation.Invitation, error) {
-	k, err := app.enclave.Keystore(keystoreId)
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return invitation.Invitation{}, ErrForbidden
+	}
+
+	k, err := app.enclave.Keystore(app.key, keystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore")
 	}
@@ -20,7 +28,7 @@ func (app *application) CreateInvitation(
 			return invitation.Invitation{}, errors.WithMessage(err, "failed to create keystore")
 		}
 
-		k, err = app.enclave.UpdateKeystore(k)
+		k, err = app.enclave.UpdateKeystore(app.key, k)
 		if err != nil {
 			return invitation.Invitation{}, errors.WithMessage(err, "failed to update keystore")
 		}
@@ -34,7 +42,14 @@ func (app *application) CreateInvitation(
 	return inv, nil
 }
 
-func (app *application) AcceptInvitation(id string) (invitation.Invitation, error) {
+func (app *application) AcceptInvitation(sessionId []byte, id string) (invitation.Invitation, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return invitation.Invitation{}, ErrForbidden
+	}
+
 	inv, err := app.remote.AcceptInvitation(id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to accept invitation")
@@ -43,7 +58,14 @@ func (app *application) AcceptInvitation(id string) (invitation.Invitation, erro
 	return inv, nil
 }
 
-func (app *application) DeleteInvitation(id string) (invitation.Invitation, error) {
+func (app *application) DeleteInvitation(sessionId []byte, id string) (invitation.Invitation, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return invitation.Invitation{}, ErrForbidden
+	}
+
 	inv, err := app.remote.DeleteInvitation(id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to delete invitation")
@@ -57,14 +79,21 @@ func (app *application) DeleteInvitation(id string) (invitation.Invitation, erro
 // using their private key and the invitee's public key, store the encryption
 // key for future use (silent finalization) and finally encrypt the keystore
 // key and attach it to the invitation.
-func (app *application) FinalizeInvitation(invitationId, remoteKeystoreId string,
+func (app *application) FinalizeInvitation(sessionId []byte, invitationId, remoteKeystoreId string,
 	inviteePublicKey []byte) (invitation.Invitation, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return invitation.Invitation{}, ErrForbidden
+	}
+
 	k, err := app.keystoreByRemoteId(remoteKeystoreId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get keystore by remoteId")
 	}
 
-	creds, err := app.enclave.Credentials()
+	creds, err := app.enclave.Credentials(app.key)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get credentials")
 	}
@@ -77,7 +106,14 @@ func (app *application) FinalizeInvitation(invitationId, remoteKeystoreId string
 	return inv, nil
 }
 
-func (app *application) Invitation(id string) (invitation.Invitation, error) {
+func (app *application) Invitation(sessionId []byte, id string) (invitation.Invitation, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return invitation.Invitation{}, ErrForbidden
+	}
+
 	inv, err := app.remote.Invitation(id)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
@@ -86,7 +122,14 @@ func (app *application) Invitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (app *application) Invitations() (map[string]invitation.Invitation, error) {
+func (app *application) Invitations(sessionId []byte) (map[string]invitation.Invitation, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return nil, ErrForbidden
+	}
+
 	invs, err := app.remote.Invitations()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get invitations")

@@ -11,7 +11,9 @@ import (
 )
 
 func (s *Server) GetInvitations(c *gin.Context) {
-	invs, err := s.app.Invitations()
+	sid := sessionId(c)
+
+	invs, err := s.app.Invitations(sid)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -20,7 +22,7 @@ func (s *Server) GetInvitations(c *gin.Context) {
 
 	restInvs := generated.Invitations{}
 	for _, inv := range invs {
-		restInv, err := s.invitationToJSON(inv)
+		restInv, err := s.invitationToJSON(sid, inv)
 		if err != nil {
 			log.Error(err)
 			Error(c, http.StatusInternalServerError)
@@ -34,6 +36,7 @@ func (s *Server) GetInvitations(c *gin.Context) {
 }
 
 func (s *Server) CreateInvitation(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 
 	var req generated.CreateInvitationRequest
@@ -44,14 +47,14 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	inv, err := s.app.CreateInvitation(keystoreId, req.Invitee)
+	inv, err := s.app.CreateInvitation(sid, keystoreId, req.Invitee)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	restInv, err := s.invitationToJSON(inv)
+	restInv, err := s.invitationToJSON(sid, inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -62,9 +65,10 @@ func (s *Server) CreateInvitation(c *gin.Context) {
 }
 
 func (s *Server) AcceptInvitation(c *gin.Context) {
+	sid := sessionId(c)
 	invitationId := c.Param("invitationId")
 
-	inv, err := s.app.AcceptInvitation(invitationId)
+	inv, err := s.app.AcceptInvitation(sid, invitationId)
 	if errors.Is(err, application.ErrInvitationNotFound) {
 		Error(c, http.StatusNotFound)
 		return
@@ -77,7 +81,7 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.invitationToJSON(inv)
+	restInv, err := s.invitationToJSON(sid, inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -88,16 +92,17 @@ func (s *Server) AcceptInvitation(c *gin.Context) {
 }
 
 func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
+	sid := sessionId(c)
 	invitationId := c.Param("invitationId")
 
-	inv, err := s.app.DeleteInvitation(invitationId)
+	inv, err := s.app.DeleteInvitation(sid, invitationId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	restInv, err := s.invitationToJSON(inv)
+	restInv, err := s.invitationToJSON(sid, inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -108,9 +113,10 @@ func (s *Server) DeclineOrCancelInvitation(c *gin.Context) {
 }
 
 func (s *Server) GetInvitation(c *gin.Context) {
+	sid := sessionId(c)
 	invitationId := c.Param("invitationId")
 
-	inv, err := s.app.Invitation(invitationId)
+	inv, err := s.app.Invitation(sid, invitationId)
 	if errors.Is(err, application.ErrInvitationNotFound) {
 		Error(c, http.StatusNotFound)
 		return
@@ -120,7 +126,7 @@ func (s *Server) GetInvitation(c *gin.Context) {
 		return
 	}
 
-	restInv, err := s.invitationToJSON(inv)
+	restInv, err := s.invitationToJSON(sid, inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -131,6 +137,7 @@ func (s *Server) GetInvitation(c *gin.Context) {
 }
 
 func (s *Server) FinalizeInvitation(c *gin.Context) {
+	sid := sessionId(c)
 	invitationId := c.Param("invitationId")
 
 	var req generated.FinalizeInvitationRequest
@@ -140,14 +147,14 @@ func (s *Server) FinalizeInvitation(c *gin.Context) {
 		return
 	}
 
-	inv, err := s.app.FinalizeInvitation(invitationId, req.RemoteKeystoreId, req.InviteePublicKey)
+	inv, err := s.app.FinalizeInvitation(sid, invitationId, req.RemoteKeystoreId, req.InviteePublicKey)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	restInv, err := s.invitationToJSON(inv)
+	restInv, err := s.invitationToJSON(sid, inv)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)

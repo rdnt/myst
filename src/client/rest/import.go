@@ -10,6 +10,7 @@ import (
 )
 
 func (s *Server) DebugImport(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreName := "Passwords"
 	b := []byte("")
 
@@ -22,7 +23,7 @@ func (s *Server) DebugImport(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.CreateKeystore(keystoreName)
+	k, err := s.app.CreateKeystore(sid, keystoreName)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -40,6 +41,7 @@ func (s *Server) DebugImport(c *gin.Context) {
 		password := row[3]
 
 		_, err := s.app.CreateEntry(
+			sid,
 			k.Id,
 			website,
 			username,

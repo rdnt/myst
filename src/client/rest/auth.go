@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"encoding/base64"
 	"errors"
 	"net/http"
 
@@ -10,6 +11,16 @@ import (
 	"myst/src/client/rest/generated"
 )
 
+func sessionId(c *gin.Context) []byte {
+	// GetCurrentUserID returns the username of the currently logged-in user
+	sid, ok := c.Get("sessionId")
+	if !ok {
+		return nil
+	}
+
+	return sid.([]byte)
+}
+
 func (s *Server) Authenticate(c *gin.Context) {
 	var req generated.AuthenticateRequest
 	err := c.ShouldBindJSON(&req)
@@ -18,7 +29,7 @@ func (s *Server) Authenticate(c *gin.Context) {
 		return
 	}
 
-	err = s.app.Authenticate(req.Password)
+	sessionId, err := s.app.Authenticate(req.Password)
 	if errors.Is(err, application.ErrInitializationRequired) {
 		Error(c, http.StatusConflict)
 		return
@@ -31,11 +42,15 @@ func (s *Server) Authenticate(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	sid := base64.StdEncoding.EncodeToString(sessionId)
+
+	c.JSON(http.StatusOK, sid)
 }
 
 func (s *Server) CurrentUser(c *gin.Context) {
-	u, err := s.app.CurrentUser()
+	sid := sessionId(c)
+
+	u, err := s.app.CurrentUser(sid)
 	if errors.Is(err, application.ErrCredentialsNotFound) {
 		Error(c, http.StatusNotFound)
 		return
@@ -44,7 +59,7 @@ func (s *Server) CurrentUser(c *gin.Context) {
 		return
 	}
 
-	restUser, err := s.userToJSON(*u)
+	restUser, err := s.userToJSON(sid, *u)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)

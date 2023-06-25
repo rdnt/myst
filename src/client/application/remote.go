@@ -6,10 +6,17 @@ import (
 	"myst/src/client/application/domain/user"
 )
 
-func (app *application) Register(username, password string) (user.User, error) {
+func (app *application) Register(sessionId []byte, username, password string) (user.User, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return user.User{}, ErrForbidden
+	}
+
 	var mustInit bool
 
-	creds, err := app.enclave.Credentials()
+	creds, err := app.enclave.Credentials(app.key)
 	if errors.Is(err, ErrCredentialsNotFound) {
 		mustInit = true
 	} else if err != nil {
@@ -29,7 +36,7 @@ func (app *application) Register(username, password string) (user.User, error) {
 	creds.Username = username
 	creds.Password = password
 
-	_, err = app.enclave.UpdateCredentials(creds)
+	_, err = app.enclave.UpdateCredentials(app.key, creds)
 	if err != nil {
 		return user.User{}, errors.WithMessage(err, "failed to update credentials")
 	}
@@ -38,8 +45,15 @@ func (app *application) Register(username, password string) (user.User, error) {
 }
 
 // CurrentUser returns the current user if there is one
-func (app *application) CurrentUser() (*user.User, error) {
-	rem, err := app.enclave.Credentials()
+func (app *application) CurrentUser(sessionId []byte) (*user.User, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return nil, ErrForbidden
+	}
+
+	rem, err := app.enclave.Credentials(app.key)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to query credentials")
 	}
@@ -54,8 +68,15 @@ func (app *application) CurrentUser() (*user.User, error) {
 	return u, nil
 }
 
-func (app *application) SharedSecret(userId string) ([]byte, error) {
-	creds, err := app.enclave.Credentials()
+func (app *application) SharedSecret(sessionId []byte, userId string) ([]byte, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return nil, ErrForbidden
+	}
+
+	creds, err := app.enclave.Credentials(app.key)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to query credentials")
 	}

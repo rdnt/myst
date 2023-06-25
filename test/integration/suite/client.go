@@ -1,7 +1,10 @@
 package suite
 
 import (
+	"context"
+	"encoding/base64"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 
@@ -25,6 +28,8 @@ type Client struct {
 	App    application.Application
 	Server *rest.Server
 	Client *generated.ClientWithResponses
+
+	SessionId []byte
 }
 
 func newClient(t *testing.T, serverAddress, address string) *Client {
@@ -52,10 +57,7 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 
 	clientAddr := fmt.Sprintf("http://%s/api", address)
 
-	client, err := generated.NewClientWithResponses(clientAddr)
-	assert.NilError(t, err)
-
-	return &Client{
+	c := &Client{
 		dir: dir,
 
 		Address:        address,
@@ -65,7 +67,20 @@ func newClient(t *testing.T, serverAddress, address string) *Client {
 
 		App:    app,
 		Server: server,
-		Client: client,
+	}
+
+	client, err := generated.NewClientWithResponses(clientAddr, generated.WithRequestEditorFn(c.authenticationMiddleware()))
+	assert.NilError(t, err)
+
+	c.Client = client
+
+	return c
+}
+
+func (c *Client) authenticationMiddleware() generated.RequestEditorFn {
+	return func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer "+base64.StdEncoding.EncodeToString(c.SessionId))
+		return nil
 	}
 }
 

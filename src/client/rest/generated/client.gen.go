@@ -1427,6 +1427,7 @@ func (r RegisterResponse) StatusCode() int {
 type AuthenticateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *SessionId
 	JSONDefault  *Error
 }
 
@@ -1471,6 +1472,7 @@ func (r EnclaveResponse) StatusCode() int {
 type CreateEnclaveResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON201      *SessionId
 	JSONDefault  *Error
 }
 
@@ -2156,6 +2158,13 @@ func ParseAuthenticateResponse(rsp *http.Response) (*AuthenticateResponse, error
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SessionId
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -2208,6 +2217,13 @@ func ParseCreateEnclaveResponse(rsp *http.Response) (*CreateEnclaveResponse, err
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest SessionId
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

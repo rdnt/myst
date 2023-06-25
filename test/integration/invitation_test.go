@@ -13,22 +13,25 @@ import (
 func TestInvitations(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	sessionId, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = sessionId
+
+	_, err = s.Client1.App.Register(sessionId, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	session2Id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
+	assert.NilError(t, err)
+	s.Client2.SessionId = session2Id
+
+	_, err = s.Client2.App.Register(session2Id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
+	session3Id, err := s.Client3.App.Initialize(s.Client3.MasterPassword)
 	assert.NilError(t, err)
+	s.Client3.SessionId = session3Id
 
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
-	assert.NilError(t, err)
-
-	err = s.Client3.App.Initialize(s.Client3.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client3.App.Register(s.Client3.Username, s.Client3.Password)
+	_, err = s.Client3.App.Register(session3Id, s.Client3.Username, s.Client3.Password)
 	assert.NilError(t, err)
 
 	keystore := s.CreateKeystore(t)
@@ -91,16 +94,18 @@ func TestInvitations(t *testing.T) {
 func TestInvitationDelete(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
+
+	_, err = s.Client1.App.Register(s1id, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	s2id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
 	assert.NilError(t, err)
+	s.Client2.SessionId = s2id
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	_, err = s.Client2.App.Register(s2id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
 	keystore := s.CreateKeystore(t)
@@ -133,16 +138,18 @@ func TestInvitationDelete(t *testing.T) {
 func TestInvitationDecline(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
+
+	_, err = s.Client1.App.Register(s1id, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	s2id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
 	assert.NilError(t, err)
+	s.Client2.SessionId = s2id
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	_, err = s.Client2.App.Register(s2id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
 	keystore := s.CreateKeystore(t)
@@ -173,16 +180,18 @@ func TestInvitationDecline(t *testing.T) {
 func TestInvitationAccept(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
+
+	_, err = s.Client1.App.Register(s1id, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	s2id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
 	assert.NilError(t, err)
+	s.Client2.SessionId = s2id
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	_, err = s.Client2.App.Register(s2id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
 	keystore := s.CreateKeystore(t)
@@ -244,16 +253,18 @@ func TestInvitationAccept(t *testing.T) {
 func TestInvitationFinalize(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
+
+	_, err = s.Client1.App.Register(s1id, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	s2id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
 	assert.NilError(t, err)
+	s.Client2.SessionId = s2id
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	_, err = s.Client2.App.Register(s2id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
 	keystore := s.CreateKeystore(t)

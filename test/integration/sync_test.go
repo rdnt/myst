@@ -12,23 +12,25 @@ import (
 func TestKeystoreSyncUpStream(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
+
+	_, err = s.Client1.App.Register(s1id, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	s2id, err := s.Client2.App.Initialize(s.Client2.MasterPassword)
 	assert.NilError(t, err)
+	s.Client2.SessionId = s2id
 
-	err = s.Client2.App.Initialize(s.Client2.MasterPassword)
-	assert.NilError(t, err)
-
-	_, err = s.Client2.App.Register(s.Client2.Username, s.Client2.Password)
+	_, err = s.Client2.App.Register(s2id, s.Client2.Username, s.Client2.Password)
 	assert.NilError(t, err)
 
 	var keystore generated.Keystore
 	t.Run("keystore is created", func(t *testing.T) {
 		keystore = s.CreateKeystore(t)
 
-		ks, err := s.Client1.App.Keystores()
+		ks, err := s.Client1.App.Keystores(s1id)
 		assert.NilError(t, err)
 		assert.Assert(t, len(ks) == 1)
 		assert.Equal(t, ks[keystore.Id].RemoteId, "")
@@ -70,7 +72,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Assert(t, len(*res.JSON200) == 1)
 		assert.Equal(t, (*res.JSON200)[0].RemoteId, rks[0].Id)
 
-		ks, err := s.Client1.App.Keystores()
+		ks, err := s.Client1.App.Keystores(s1id)
 		assert.NilError(t, err)
 		assert.Assert(t, len(ks) == 1)
 		assert.Equal(t, ks[keystore.Id].Version, 3)
@@ -80,7 +82,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		err := s.Client1.App.Sync()
 		assert.NilError(t, err)
 
-		ks, err := s.Client1.App.Keystores()
+		ks, err := s.Client1.App.Keystores(s1id)
 		assert.NilError(t, err)
 		assert.Assert(t, len(ks) == 1)
 		assert.Equal(t, ks[keystore.Id].Version, 3)

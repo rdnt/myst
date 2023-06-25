@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"encoding/base64"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 		return
 	}
 
-	err = s.app.Initialize(req.Password)
+	sessionId, err := s.app.Initialize(req.Password)
 	if errors.Is(err, application.ErrEnclaveExists) {
 		Error(c, http.StatusConflict)
 		return
@@ -28,11 +29,15 @@ func (s *Server) CreateEnclave(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	sid := base64.StdEncoding.EncodeToString(sessionId)
+
+	c.JSON(http.StatusCreated, sid)
 }
 
 func (s *Server) Enclave(c *gin.Context) {
-	exists, err := s.app.IsInitialized()
+	sid := sessionId(c)
+
+	exists, err := s.app.IsInitialized(sid)
 	if errors.Is(err, application.ErrAuthenticationRequired) {
 		Error(c, http.StatusUnauthorized)
 		return

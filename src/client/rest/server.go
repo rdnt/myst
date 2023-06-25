@@ -87,26 +87,30 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 
 	api := r.Group("api")
 
-	api.GET("/health", s.HealthCheck)
 	api.POST("/authenticate", s.Authenticate)
-	api.POST("/auth/register", s.Register)
-	api.POST("/keystores", s.CreateKeystore)
-	api.GET("/keystores", s.Keystores)
-	api.GET("/keystore/:keystoreId", s.Keystore)
-	api.DELETE("/keystore/:keystoreId", s.DeleteKeystore)
-	api.POST("/keystore/:keystoreId/entries", s.CreateEntry)
-	api.PATCH("/keystore/:keystoreId/entry/:entryId", s.UpdateEntry)
-	api.DELETE("/keystore/:keystoreId/entry/:entryId", s.DeleteEntry)
-	api.GET("/invitations", s.GetInvitations)
-	api.GET("/invitation/:invitationId", s.GetInvitation)
-	api.POST("/keystore/:keystoreId/invitations", s.CreateInvitation)
-	api.PATCH("/invitation/:invitationId", s.AcceptInvitation)
-	api.DELETE("/invitation/:invitationId", s.DeclineOrCancelInvitation)
-	api.POST("/invitation/:invitationId", s.FinalizeInvitation)
-	api.GET("/user", s.CurrentUser)
 	api.POST("/enclave", s.CreateEnclave)
-	api.GET("/enclave", s.Enclave)
-	api.POST("/import", s.DebugImport)
+
+	sec := api.Group("/")
+	sec.Use(s.authenticationMiddleware())
+
+	sec.GET("/enclave", s.Enclave)
+	sec.GET("/health", s.HealthCheck)
+	sec.POST("/auth/register", s.Register)
+	sec.POST("/keystores", s.CreateKeystore)
+	sec.GET("/keystores", s.Keystores)
+	sec.GET("/keystore/:keystoreId", s.Keystore)
+	sec.DELETE("/keystore/:keystoreId", s.DeleteKeystore)
+	sec.POST("/keystore/:keystoreId/entries", s.CreateEntry)
+	sec.PATCH("/keystore/:keystoreId/entry/:entryId", s.UpdateEntry)
+	sec.DELETE("/keystore/:keystoreId/entry/:entryId", s.DeleteEntry)
+	sec.GET("/invitations", s.GetInvitations)
+	sec.GET("/invitation/:invitationId", s.GetInvitation)
+	sec.POST("/keystore/:keystoreId/invitations", s.CreateInvitation)
+	sec.PATCH("/invitation/:invitationId", s.AcceptInvitation)
+	sec.DELETE("/invitation/:invitationId", s.DeclineOrCancelInvitation)
+	sec.POST("/invitation/:invitationId", s.FinalizeInvitation)
+	sec.GET("/user", s.CurrentUser)
+	//sec.POST("/import", s.DebugImport)
 
 	return s
 }
@@ -127,7 +131,15 @@ func (s *Server) Stop() error {
 }
 
 func (s *Server) HealthCheck(c *gin.Context) {
-	s.app.HealthCheck()
+	sid := sessionId(c)
+
+	err := s.app.HealthCheck(sid)
+	if err != nil {
+		log.Error(err)
+		Error(c, http.StatusInternalServerError)
+		return
+	}
+
 	c.Status(http.StatusOK)
 }
 

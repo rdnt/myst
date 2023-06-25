@@ -29,7 +29,8 @@ func (app *application) sessionActive(sessionId []byte) bool {
 }
 
 func (app *application) startHealthCheck() {
-	ticker := time.NewTicker(20 * time.Second) // FIXME @rdnt: make this configurable
+	// TODO @rdnt: make this configurable
+	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {

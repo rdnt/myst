@@ -51,7 +51,7 @@
       placeholder="Master Password"
     />
     <div class="footer">
-      <button class="button green" type="submit" class:disabled={!passwordValid}>Login</button>
+      <button class="button green" type="submit" class:disabled={!passwordValid}>Unlock</button>
     </div>
   </div>
 </form>

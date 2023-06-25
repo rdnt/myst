@@ -2,6 +2,7 @@ package application
 
 import (
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -9,16 +10,33 @@ import (
 	"myst/src/client/application/domain/keystore"
 )
 
-func (app *application) Initialize(password string) error {
-	err := app.enclave.Initialize(password)
+func (app *application) Initialize(password string) ([]byte, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	key, err := app.enclave.Initialize(password)
 	if err != nil {
-		return errors.WithMessage(err, "failed to initialize enclave")
+		return nil, errors.WithMessage(err, "failed to initialize enclave")
 	}
 
-	return nil
+	id, err := app.newSession()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to create new session")
+	}
+
+	app.key = key
+
+	return id, nil
 }
 
-func (app *application) IsInitialized() (bool, error) {
+func (app *application) IsInitialized(sessionId []byte) (bool, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return false, ErrAuthenticationRequired
+	}
+
 	isInit, err := app.enclave.IsInitialized()
 	if err != nil {
 		return false, errors.WithMessage(err, "failed to query enclave initialization status")
@@ -31,47 +49,69 @@ func (app *application) IsInitialized() (bool, error) {
 // user in if they have already set-up their account.
 // If the enclave does not exist, then ErrInitializationRequired is returned.
 // If the password is incorrect, ErrAuthenticationFailed is returned.
-func (app *application) Authenticate(password string) error {
-	err := app.enclave.Authenticate(password)
+func (app *application) Authenticate(password string) ([]byte, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	key, err := app.enclave.Authenticate(password)
 	if err != nil {
-		return errors.WithMessage(err, "failed to authenticate against enclave")
+		return nil, errors.WithMessage(err, "failed to authenticate against enclave")
 	}
 
 	var trySignIn bool
-	rem, err := app.enclave.Credentials()
+	rem, err := app.enclave.Credentials(key)
 	if err == nil {
 		trySignIn = true
 	} else if !errors.Is(err, ErrCredentialsNotFound) {
-		return errors.WithMessage(err, "failed to query credentials")
+		return nil, errors.WithMessage(err, "failed to query credentials")
 	}
 
 	if trySignIn {
 		if rem.Address != app.remote.Address() {
-			return ErrRemoteAddressMismatch
+			return nil, ErrRemoteAddressMismatch
 		}
 
 		// TODO: do this in a goroutine on interval to keep JWT fresh
 		err = app.remote.Authenticate(rem.Username, rem.Password)
 		if err != nil {
-			return errors.WithMessage(err, "failed to authenticate against remote")
+			return nil, errors.WithMessage(err, "failed to authenticate against remote")
 		}
 	}
 
+	sessionId, err := app.newSession()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to create new session")
+	}
+
+	app.key = key
+
+	return sessionId, nil
+}
+
+func (app *application) HealthCheck(sessionId []byte) error {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	key := string(sessionId)
+	app.sessions[key] = time.Now()
 	return nil
 }
 
-func (app *application) HealthCheck() {
-	app.enclave.HealthCheck()
-}
+func (app *application) CreateKeystore(sessionId []byte, name string) (keystore.Keystore, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
 
-func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
+	if !app.sessionActive(sessionId) {
+		return keystore.Keystore{}, ErrForbidden
+	}
+
 	name = strings.TrimSpace(name)
 
 	if len(name) == 0 || len(name) > 24 {
 		return keystore.Keystore{}, ErrInvalidKeystoreName
 	}
 
-	ks, err := app.enclave.Keystores()
+	ks, err := app.enclave.Keystores(app.key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to query keystores")
 	}
@@ -85,7 +125,7 @@ func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
 
 	k := keystore.New(keystore.WithName(name))
 
-	k, err = app.enclave.CreateKeystore(k)
+	k, err = app.enclave.CreateKeystore(app.key, k)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to create keystore")
 	}
@@ -93,8 +133,15 @@ func (app *application) CreateKeystore(name string) (keystore.Keystore, error) {
 	return k, nil
 }
 
-func (app *application) DeleteKeystore(id string) error {
-	k, err := app.enclave.Keystore(id)
+func (app *application) DeleteKeystore(sessionId []byte, id string) error {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return ErrForbidden
+	}
+
+	k, err := app.enclave.Keystore(app.key, id)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get keystore")
 	}
@@ -106,7 +153,7 @@ func (app *application) DeleteKeystore(id string) error {
 		}
 	}
 
-	err = app.enclave.DeleteKeystore(id)
+	err = app.enclave.DeleteKeystore(app.key, id)
 	if err != nil {
 		return errors.WithMessage(err, "failed to delete keystore from enclave")
 	}
@@ -114,8 +161,15 @@ func (app *application) DeleteKeystore(id string) error {
 	return nil
 }
 
-func (app *application) Keystore(id string) (keystore.Keystore, error) {
-	k, err := app.enclave.Keystore(id)
+func (app *application) Keystore(sessionId []byte, id string) (keystore.Keystore, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return keystore.Keystore{}, ErrForbidden
+	}
+
+	k, err := app.enclave.Keystore(app.key, id)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystore")
 	}
@@ -124,7 +178,7 @@ func (app *application) Keystore(id string) (keystore.Keystore, error) {
 }
 
 func (app *application) keystoreByRemoteId(id string) (keystore.Keystore, error) {
-	ks, err := app.enclave.Keystores()
+	ks, err := app.enclave.Keystores(app.key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get keystores")
 	}
@@ -138,8 +192,15 @@ func (app *application) keystoreByRemoteId(id string) (keystore.Keystore, error)
 	return keystore.Keystore{}, ErrKeystoreNotFound
 }
 
-func (app *application) Keystores() (map[string]keystore.Keystore, error) {
-	ks, err := app.enclave.Keystores()
+func (app *application) Keystores(sessionId []byte) (map[string]keystore.Keystore, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return nil, ErrForbidden
+	}
+
+	ks, err := app.enclave.Keystores(app.key)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get keystores")
 	}
@@ -150,7 +211,7 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 
 	if app.remote.Authenticated() {
 		// add remote keystores too
-		rem, err := app.enclave.Credentials()
+		rem, err := app.enclave.Credentials(app.key)
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to get credentials")
 		}
@@ -171,7 +232,15 @@ func (app *application) Keystores() (map[string]keystore.Keystore, error) {
 }
 
 func (app *application) CreateEntry(
+	sessionId []byte,
 	keystoreId string, website, username, password, notes string) (entry.Entry, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return entry.Entry{}, ErrForbidden
+	}
+
 	// do not allow empty fields for website, username, password
 	if strings.TrimSpace(website) == "" {
 		return entry.Entry{}, ErrInvalidWebsite
@@ -192,14 +261,14 @@ func (app *application) CreateEntry(
 		entry.WithNotes(notes),
 	)
 
-	k, err := app.enclave.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(app.key, keystoreId)
 	if err != nil {
 		return entry.Entry{}, errors.WithMessage(err, "failed to get keystore")
 	}
 
 	k.Entries[e.Id] = e
 
-	_, err = app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(app.key, k)
 	if err != nil {
 		return entry.Entry{}, errors.WithMessage(err, "failed to update keystore")
 	}
@@ -208,13 +277,21 @@ func (app *application) CreateEntry(
 }
 
 func (app *application) UpdateEntry(
+	sessionId []byte,
 	keystoreId, entryId string, opts UpdateEntryOptions) (entry.Entry, error) {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return entry.Entry{}, ErrForbidden
+	}
+
 	// do not allow empty password
 	if opts.Password != nil && strings.TrimSpace(*opts.Password) == "" {
 		return entry.Entry{}, ErrInvalidPassword
 	}
 
-	k, err := app.enclave.Keystore(keystoreId)
+	k, err := app.enclave.Keystore(app.key, keystoreId)
 	if err != nil {
 		return entry.Entry{}, errors.WithMessage(err, "failed to get keystore")
 	}
@@ -234,7 +311,7 @@ func (app *application) UpdateEntry(
 
 	k.Entries[e.Id] = e
 
-	_, err = app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(app.key, k)
 	if err != nil {
 		return entry.Entry{}, errors.WithMessage(err, "failed to update keystore")
 	}
@@ -242,8 +319,15 @@ func (app *application) UpdateEntry(
 	return e, nil
 }
 
-func (app *application) DeleteEntry(keystoreId, entryId string) error {
-	k, err := app.enclave.Keystore(keystoreId)
+func (app *application) DeleteEntry(sessionId []byte, keystoreId, entryId string) error {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if !app.sessionActive(sessionId) {
+		return ErrForbidden
+	}
+
+	k, err := app.enclave.Keystore(app.key, keystoreId)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get keystore")
 	}
@@ -254,7 +338,7 @@ func (app *application) DeleteEntry(keystoreId, entryId string) error {
 
 	delete(k.Entries, entryId)
 
-	_, err = app.enclave.UpdateKeystore(k)
+	_, err = app.enclave.UpdateKeystore(app.key, k)
 	if err != nil {
 		return errors.WithMessage(err, "failed to update keystore")
 	}

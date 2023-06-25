@@ -18,16 +18,18 @@ func TestRepository(t *testing.T) {
 	pass, err := rand.String(16)
 	assert.NilError(t, err)
 
-	err = repo.Initialize(pass)
+	key, err := repo.Initialize(pass)
 	assert.NilError(t, err)
 
-	err = repo.Authenticate(pass)
+	key2, err := repo.Authenticate(pass)
 	assert.NilError(t, err)
 
-	k, err := repo.CreateKeystore(keystore.New(keystore.WithName("test")))
+	assert.DeepEqual(t, key, key2)
+
+	k, err := repo.CreateKeystore(key, keystore.New(keystore.WithName("test")))
 	assert.NilError(t, err)
 
-	k2, err := repo.Keystore(k.Id)
+	k2, err := repo.Keystore(key, k.Id)
 	assert.NilError(t, err)
 
 	assert.Equal(t, k.Id, k2.Id)

@@ -11,13 +11,13 @@ import (
 func TestAuthorization(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	sessionId, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
 	assert.NilError(t, err)
 
-	_, err = s.Client1.App.Register(s.Client1.Username, s.Client1.Password)
+	_, err = s.Client1.App.Register(sessionId, s.Client1.Username, s.Client1.Password)
 	assert.NilError(t, err)
 
-	u, err := s.Client1.App.CurrentUser()
+	u, err := s.Client1.App.CurrentUser(sessionId)
 	assert.NilError(t, err)
 	assert.Equal(t, u.Username, s.Client1.Username)
 

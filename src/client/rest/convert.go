@@ -9,13 +9,13 @@ import (
 	"myst/src/client/rest/generated"
 )
 
-func (s *Server) invitationToJSON(inv invitation.Invitation) (generated.Invitation, error) {
-	inviter, err := s.userToJSON(inv.Inviter)
+func (s *Server) invitationToJSON(sessionId []byte, inv invitation.Invitation) (generated.Invitation, error) {
+	inviter, err := s.userToJSON(sessionId, inv.Inviter)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
 
-	invitee, err := s.userToJSON(inv.Invitee)
+	invitee, err := s.userToJSON(sessionId, inv.Invitee)
 	if err != nil {
 		return generated.Invitation{}, err
 	}
@@ -38,10 +38,10 @@ func (s *Server) invitationToJSON(inv invitation.Invitation) (generated.Invitati
 	}, nil
 }
 
-func (s *Server) userToJSON(u user.User) (generated.User, error) {
+func (s *Server) userToJSON(sessionId []byte, u user.User) (generated.User, error) {
 	var icon *string
 
-	sharedSecret, err := s.app.SharedSecret(u.Id)
+	sharedSecret, err := s.app.SharedSecret(sessionId, u.Id)
 	if err != nil {
 		return generated.User{}, err
 	}

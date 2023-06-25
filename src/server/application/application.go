@@ -40,7 +40,7 @@ var (
 	ErrKeystoreNotFound     = errors.New("keystore not found")
 	ErrInvalidUsername      = errors.New("invalid username")
 	ErrInvalidPassword      = errors.New("invalid password")
-	ErrAuthenticationFailed = errors.New("authorization failed")
+	ErrAuthenticationFailed = errors.New("authentication failed")
 	ErrInvalidInvitee       = errors.New("invalid inviter")
 	ErrInviterNotFound      = errors.New("inviter not found")
 	ErrInviteeNotFound      = errors.New("invitee not found")

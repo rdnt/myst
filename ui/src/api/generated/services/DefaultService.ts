@@ -15,6 +15,7 @@ import type { Keystore } from '../models/Keystore';
 import type { Keystores } from '../models/Keystores';
 import type { LoginRequest } from '../models/LoginRequest';
 import type { RegisterRequest } from '../models/RegisterRequest';
+import type { SessionId } from '../models/SessionId';
 import type { UpdateEntryRequest } from '../models/UpdateEntryRequest';
 import type { User } from '../models/User';
 
@@ -39,14 +40,14 @@ export class DefaultService {
     /**
      * Sets up the myst enclave with a master password
      * @returns Error Error
-     * @returns any Enclave created
+     * @returns SessionId authentication token
      * @throws ApiError
      */
     public static createEnclave({
 requestBody,
 }: {
 requestBody: CreateEnclaveRequest,
-}): CancelablePromise<Error | any> {
+}): CancelablePromise<Error | SessionId> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/enclave',
@@ -70,7 +71,7 @@ requestBody: CreateEnclaveRequest,
 
     /**
      * Attempts to authenticate the user
-     * @returns any OK
+     * @returns SessionId authentication token
      * @returns Error Error
      * @throws ApiError
      */
@@ -78,7 +79,7 @@ requestBody: CreateEnclaveRequest,
 requestBody,
 }: {
 requestBody: AuthenticateRequest,
-}): CancelablePromise<any | Error> {
+}): CancelablePromise<SessionId | Error> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/authenticate',

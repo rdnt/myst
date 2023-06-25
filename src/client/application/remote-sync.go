@@ -5,7 +5,10 @@ import (
 )
 
 func (app *application) Sync() error {
-	if !app.remote.Authenticated() {
+	app.mux.Lock()
+	defer app.mux.Unlock()
+
+	if app.key == nil || !app.remote.Authenticated() {
 		log.Print("sync: not signed in")
 		return nil
 	}
@@ -13,12 +16,12 @@ func (app *application) Sync() error {
 	log.Println("sync: started")
 	defer log.Print("sync: finished")
 
-	rem, err := app.enclave.Credentials()
+	rem, err := app.enclave.Credentials(app.key)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get credentials")
 	}
 
-	keystores, err := app.enclave.Keystores()
+	keystores, err := app.enclave.Keystores(app.key)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get local keystores")
 	}
@@ -41,7 +44,7 @@ func (app *application) Sync() error {
 		}
 
 		if rk.Version > k.Version {
-			_, err = app.enclave.UpdateKeystore(rk)
+			_, err = app.enclave.UpdateKeystore(app.key, rk)
 			if err != nil {
 				return errors.WithMessage(err, "failed to update local keystore")
 			}

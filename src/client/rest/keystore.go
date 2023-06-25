@@ -11,6 +11,8 @@ import (
 )
 
 func (s *Server) CreateKeystore(c *gin.Context) {
+	sid := sessionId(c)
+
 	var req generated.CreateKeystoreRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -18,7 +20,7 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.CreateKeystore(req.Name)
+	k, err := s.app.CreateKeystore(sid, req.Name)
 	if errors.Is(err, application.ErrInvalidKeystoreName) {
 		Error(c, http.StatusBadRequest)
 		return
@@ -32,9 +34,10 @@ func (s *Server) CreateKeystore(c *gin.Context) {
 }
 
 func (s *Server) Keystore(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 
-	k, err := s.app.Keystore(keystoreId)
+	k, err := s.app.Keystore(sid, keystoreId)
 	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
 	//	Error(c, rest.StatusForbidden, err)
 	//	return
@@ -52,9 +55,10 @@ func (s *Server) Keystore(c *gin.Context) {
 }
 
 func (s *Server) DeleteKeystore(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 
-	err := s.app.DeleteKeystore(keystoreId)
+	err := s.app.DeleteKeystore(sid, keystoreId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
@@ -65,7 +69,9 @@ func (s *Server) DeleteKeystore(c *gin.Context) {
 }
 
 func (s *Server) Keystores(c *gin.Context) {
-	ks, err := s.app.Keystores()
+	sid := sessionId(c)
+
+	ks, err := s.app.Keystores(sid)
 	if errors.Is(err, application.ErrInitializationRequired) {
 		Error(c, http.StatusUnauthorized)
 		return
@@ -90,6 +96,7 @@ func (s *Server) Keystores(c *gin.Context) {
 }
 
 func (s *Server) CreateEntry(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 
 	var req generated.CreateEntryRequest
@@ -99,19 +106,9 @@ func (s *Server) CreateEntry(c *gin.Context) {
 		return
 	}
 
-	k, err := s.app.Keystore(keystoreId)
-	// if errors.Is(err, keystoreservice.ErrAuthenticationRequired) {
-	//	Error(c, rest.StatusForbidden, err)
-	//	return
-	// }
-	if err != nil {
-		log.Error(err)
-		Error(c, http.StatusInternalServerError)
-		return
-	}
-
 	e, err := s.app.CreateEntry(
-		k.Id,
+		sid,
+		keystoreId,
 		req.Website,
 		req.Username,
 		req.Password,
@@ -133,6 +130,7 @@ func (s *Server) CreateEntry(c *gin.Context) {
 }
 
 func (s *Server) UpdateEntry(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 	entryId := c.Param("entryId")
 
@@ -143,7 +141,7 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 		return
 	}
 
-	e, err := s.app.UpdateEntry(keystoreId, entryId,
+	e, err := s.app.UpdateEntry(sid, keystoreId, entryId,
 		application.UpdateEntryOptions{
 			Password: req.Password, Notes: req.Notes,
 		},
@@ -164,10 +162,11 @@ func (s *Server) UpdateEntry(c *gin.Context) {
 }
 
 func (s *Server) DeleteEntry(c *gin.Context) {
+	sid := sessionId(c)
 	keystoreId := c.Param("keystoreId")
 	entryId := c.Param("entryId")
 
-	err := s.app.DeleteEntry(keystoreId, entryId)
+	err := s.app.DeleteEntry(sid, keystoreId, entryId)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)

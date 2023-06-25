@@ -9,6 +9,8 @@ import (
 )
 
 func (s *Server) Register(c *gin.Context) {
+	sid := sessionId(c)
+
 	var req generated.RegisterRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -16,14 +18,14 @@ func (s *Server) Register(c *gin.Context) {
 		return
 	}
 
-	u, err := s.app.Register(req.Username, req.Password)
+	u, err := s.app.Register(sid, req.Username, req.Password)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)
 		return
 	}
 
-	restUser, err := s.userToJSON(u)
+	restUser, err := s.userToJSON(sid, u)
 	if err != nil {
 		log.Error(err)
 		Error(c, http.StatusInternalServerError)

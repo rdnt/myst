@@ -14,8 +14,9 @@ import (
 func TestKeystores(t *testing.T) {
 	s := suite.New(t)
 
-	err := s.Client1.App.Initialize(s.Client1.MasterPassword)
+	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
 	assert.NilError(t, err)
+	s.Client1.SessionId = s1id
 
 	t.Run("keystoresWithKeys are empty", func(t *testing.T) {
 		res, err := s.Client1.Client.KeystoresWithResponse(s.Ctx)

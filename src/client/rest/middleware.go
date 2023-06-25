@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	goerrors "github.com/go-errors/errors"
+	"github.com/pkg/errors"
 
 	"myst/pkg/logger"
 	"myst/pkg/router"
@@ -107,4 +109,41 @@ func loggerMiddleware(c *gin.Context) {
 		path,
 		c.Errors.ByType(gin.ErrorTypePrivate).String(),
 	)
+}
+
+func (s *Server) authenticationMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := s.authenticateWithToken(c)
+		if err != nil {
+			log.Error(err)
+			Error(c, http.StatusForbidden)
+			c.Abort()
+		}
+	}
+}
+
+func (s *Server) authenticateWithToken(c *gin.Context) error {
+	auth := c.GetHeader("Authorization")
+	if auth == "" {
+		return nil
+	}
+
+	parts := strings.Split(auth, "Bearer")
+	if len(parts) != 2 {
+		return errors.New("authentication failed")
+	}
+	auth = strings.TrimSpace(parts[1])
+
+	if auth == "" {
+		return errors.New("authentication required")
+	}
+
+	sid, err := base64.StdEncoding.DecodeString(auth)
+	if err != nil {
+		return errors.Wrap(err, "invalid token")
+	}
+
+	c.Set("sessionId", sid)
+
+	return nil
 }

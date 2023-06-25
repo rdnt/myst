@@ -22,6 +22,7 @@ export type { Keystore } from './models/Keystore';
 export type { Keystores } from './models/Keystores';
 export type { LoginRequest } from './models/LoginRequest';
 export type { RegisterRequest } from './models/RegisterRequest';
+export type { SessionId } from './models/SessionId';
 export type { UnlockKeystoreRequest } from './models/UnlockKeystoreRequest';
 export type { UpdateEntryRequest } from './models/UpdateEntryRequest';
 export type { User } from './models/User';

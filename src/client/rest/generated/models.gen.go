@@ -116,6 +116,9 @@ type RegisterRequest struct {
 	Username string `json:"username"`
 }
 
+// SessionId defines model for SessionId.
+type SessionId = string
+
 // UpdateEntryRequest defines model for UpdateEntryRequest.
 type UpdateEntryRequest struct {
 	Notes    *string `json:"notes,omitempty"`

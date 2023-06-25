@@ -61,8 +61,8 @@
       </div>
       {#if !keystore.readOnly}
         <div class="actions">
-          <button on:click={() => showEditModal = true} class="button"><span class="icon"></span> Edit</button>
-          <button on:click={() => showDeleteModal = true} class="button red"><span class="icon"></span> Delete</button>
+          <button on:click={() => showEditModal = true} class="button"><!--<span class="icon"></span>--> Edit</button>
+          <button on:click={() => showDeleteModal = true} class="button red"><!--<span class="icon"></span>--> Delete</button>
         </div>
       {/if}
     </div>

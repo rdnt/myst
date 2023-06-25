@@ -9,13 +9,16 @@ import (
 )
 
 // CreateInvitation creates an invitation for the given keystoreId, from the
-// given inviter to the invitee. The inviter should be the owner of the keystore.
+// given inviter to the invitee. The inviter should be the owner of the
+// keystore.
 // Errors returned:
-// - ErrKeystoreNotFound if the keystore is not found.
-// - ErrInviterNotFound if the inviter is not found.
-// - ErrInviteeNotFound if the invitee is not found.
-// - ErrForbidden if the inviter is not the owner of the keystore.
-// - ErrInvalidInvitee if the inviter and invitee are the same user.
+//   - ErrKeystoreNotFound if the keystore is not found.
+//   - ErrInviterNotFound if the inviter is not found.
+//   - ErrInviteeNotFound if the invitee is not found.
+//   - ErrForbidden if the inviter is not the owner of the keystore, or an
+//     invitation is already active for the given keystore, inviter, and invitee
+//   - ErrInvalidInvitee if the inviter and invitee are the same user.
+//
 // TODO: return not found if the user does not have read access to the keystore
 func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error) {
 	inviter, err := app.users.User(inviterId)
@@ -43,6 +46,17 @@ func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername 
 
 	if inviter.Id == invitee.Id {
 		return invitation.Invitation{}, ErrInvalidInvitee
+	}
+
+	invs, err := app.invitations.Invitations()
+	if err != nil {
+		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitations")
+	}
+
+	for _, inv := range invs {
+		if inv.InviterId == inviter.Id && inv.InviteeId == invitee.Id && inv.KeystoreId == k.Id {
+			return invitation.Invitation{}, ErrForbidden
+		}
 	}
 
 	inv := invitation.New(

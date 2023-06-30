@@ -29,6 +29,7 @@ func (r *Remote) Reauthenticate() error {
 }
 
 func (r *Remote) Authenticate(username, password string) error {
+	// store for future re-authentication
 	r.username = username
 	r.password = password
 

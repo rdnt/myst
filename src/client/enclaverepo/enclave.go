@@ -15,17 +15,19 @@ import (
 )
 
 type enclave struct {
-	salt      []byte
+	encSalt   []byte
+	signSalt  []byte
 	keystores map[string]keystore.Keystore
 	keys      map[string][]byte
 	creds     *credentials.Credentials
 }
 
-func newEnclave(salt []byte, publicKey, privateKey []byte) *enclave {
+func newEnclave(encSalt, signSalt, publicKey, privateKey []byte) *enclave {
 	return &enclave{
 		keystores: map[string]keystore.Keystore{},
 		keys:      map[string][]byte{},
-		salt:      salt,
+		encSalt:   encSalt,
+		signSalt:  signSalt,
 		creds: &credentials.Credentials{
 			PublicKey:  publicKey,
 			PrivateKey: privateKey,
@@ -102,30 +104,33 @@ func (r *Repository) enclavePath() string {
 	return path.Join(r.path, "data.myst")
 }
 
-func (r *Repository) enclave(argon2idKey []byte) (*enclave, error) {
+func (r *Repository) enclave(keypair []byte) (*enclave, error) {
 	b, err := os.ReadFile(r.enclavePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read enclave file")
 	}
 
-	salt := getSaltFromData(b)
-
 	p := crypto.DefaultArgon2IdParams
 
-	mac := b[p.SaltLength : sha256.Size+p.SaltLength]
-	b = b[p.SaltLength+sha256.Size:]
+	encKey := keypair[0:p.KeyLength]
+	signKey := keypair[p.KeyLength : p.KeyLength*2]
 
-	valid := crypto.VerifyHMAC_SHA256(argon2idKey, mac, b)
+	encSalt, signSalt := getSaltsFromData(b)
+
+	mac := b[p.SaltLength*2 : sha256.Size+p.SaltLength*2]
+	b = b[p.SaltLength*2+sha256.Size:]
+
+	valid := crypto.VerifyHMAC_SHA256(signKey, mac, b)
 	if !valid {
 		return nil, application.ErrAuthenticationFailed
 	}
 
-	b, err = crypto.AES256CBC_Decrypt(argon2idKey, b)
+	b, err = crypto.AES256CBC_Decrypt(encKey, b)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to decrypt enclave")
 	}
 
-	encJson, err := enclaveFromJSON(b, salt)
+	encJson, err := enclaveFromJSON(b, encSalt, signSalt)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create enclave from json")
 	}
@@ -133,6 +138,9 @@ func (r *Repository) enclave(argon2idKey []byte) (*enclave, error) {
 	return encJson, nil
 }
 
-func getSaltFromData(b []byte) []byte {
-	return b[:crypto.DefaultArgon2IdParams.SaltLength]
+func getSaltsFromData(b []byte) (encSalt, signSalt []byte) {
+	encSaltLen := crypto.DefaultArgon2IdParams.SaltLength
+	signSaltLen := crypto.DefaultArgon2IdParams.SaltLength
+
+	return b[:encSaltLen], b[encSaltLen : encSaltLen+signSaltLen]
 }

@@ -26,7 +26,7 @@ require (
 	go.mongodb.org/mongo-driver v1.11.7
 	golang.org/x/crypto v0.10.0
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
-	gotest.tools/v3 v3.4.0
+	gotest.tools/v3 v3.5.0
 	mvdan.cc/sh v2.6.4+incompatible
 )
 

@@ -35,6 +35,11 @@ type Enclave interface {
 type Remote interface {
 	Address() string
 
+	Authenticate(username, password string) error
+	Register(username, password string, publicKey []byte) (user.User, error)
+	Authenticated() bool
+	CurrentUser() *user.User
+
 	CreateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error)
 	Keystores(privateKey []byte) (map[string]keystore.Keystore, error)
@@ -46,11 +51,6 @@ type Remote interface {
 	DeleteInvitation(id string) (invitation.Invitation, error)
 	FinalizeInvitation(invitationId string, privateKey, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
-
-	Authenticate(username, password string) error
-	Register(username, password string, publicKey []byte) (user.User, error)
-	Authenticated() bool
-	CurrentUser() *user.User
 
 	SharedSecret(privateKey []byte, userId string) ([]byte, error)
 }

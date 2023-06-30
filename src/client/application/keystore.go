@@ -71,7 +71,6 @@ func (app *application) Authenticate(password string) ([]byte, error) {
 			return nil, ErrRemoteAddressMismatch
 		}
 
-		// TODO: do this in a goroutine on interval to keep JWT fresh
 		err = app.remote.Authenticate(rem.Username, rem.Password)
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to authenticate against remote")

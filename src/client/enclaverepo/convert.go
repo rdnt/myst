@@ -83,7 +83,7 @@ func enclaveToJSON(e *enclave) ([]byte, error) {
 	return b, nil
 }
 
-func enclaveFromJSON(b, salt []byte) (*enclave, error) {
+func enclaveFromJSON(b, encSalt, signSalt []byte) (*enclave, error) {
 	e := &enclaveJSON{}
 
 	err := json.Unmarshal(b, e)
@@ -113,7 +113,8 @@ func enclaveFromJSON(b, salt []byte) (*enclave, error) {
 	return &enclave{
 		keystores: ks,
 		creds:     rem,
-		salt:      salt,
+		encSalt:   encSalt,
+		signSalt:  signSalt,
 		keys:      e.Keys,
 	}, nil
 }

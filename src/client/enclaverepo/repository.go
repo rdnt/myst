@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"io/fs"
 	"os"
+	"sync"
 
 	"github.com/pkg/errors"
 
@@ -25,8 +26,8 @@ func New(path string) *Repository {
 	return r
 }
 
-func (r *Repository) Keystore(key []byte, id string) (keystore.Keystore, error) {
-	e, err := r.enclave(key)
+func (r *Repository) Keystore(keypair []byte, id string) (keystore.Keystore, error) {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
@@ -39,7 +40,7 @@ func (r *Repository) Keystore(key []byte, id string) (keystore.Keystore, error) 
 	return k, nil
 }
 
-func (r *Repository) Keystores(key []byte) (map[string]keystore.Keystore, error) {
+func (r *Repository) Keystores(keypair []byte) (map[string]keystore.Keystore, error) {
 	_, err := os.ReadFile(r.enclavePath())
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, application.ErrInitializationRequired
@@ -47,7 +48,7 @@ func (r *Repository) Keystores(key []byte) (map[string]keystore.Keystore, error)
 		return nil, errors.Wrap(err, "failed to read enclave")
 	}
 
-	e, err := r.enclave(key)
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to get enclave")
 	}
@@ -84,8 +85,8 @@ func (r *Repository) enclaveExists() (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) DeleteKeystore(key []byte, id string) error {
-	e, err := r.enclave(key)
+func (r *Repository) DeleteKeystore(keypair []byte, id string) error {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return errors.WithMessage(err, "failed to get enclave")
 	}
@@ -95,7 +96,7 @@ func (r *Repository) DeleteKeystore(key []byte, id string) error {
 		return errors.WithMessage(err, "failed to delete keystore")
 	}
 
-	err = r.sealAndWrite(key, e)
+	err = r.sealAndWrite(keypair, e)
 	if err != nil {
 		return errors.WithMessage(err, "failed to seal enclave")
 	}
@@ -103,8 +104,8 @@ func (r *Repository) DeleteKeystore(key []byte, id string) error {
 	return nil
 }
 
-func (r *Repository) CreateKeystore(key []byte, k keystore.Keystore) (keystore.Keystore, error) {
-	e, err := r.enclave(key)
+func (r *Repository) CreateKeystore(keypair []byte, k keystore.Keystore) (keystore.Keystore, error) {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
@@ -114,7 +115,7 @@ func (r *Repository) CreateKeystore(key []byte, k keystore.Keystore) (keystore.K
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to add keystore")
 	}
 
-	err = r.sealAndWrite(key, e)
+	err = r.sealAndWrite(keypair, e)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to seal enclave")
 	}
@@ -135,32 +136,53 @@ func (r *Repository) Initialize(password string) ([]byte, error) {
 
 	p := crypto.DefaultArgon2IdParams
 
-	salt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
+	encSalt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to generate salt")
 	}
 
-	key := crypto.Argon2Id([]byte(password), salt)
+	signSalt, err := crypto.GenerateRandomBytes(uint(p.SaltLength))
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to generate key")
+		return nil, errors.WithMessage(err, "failed to generate salt")
 	}
+
+	var encKey, signKey []byte
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+
+		encKey = crypto.Argon2Id([]byte(password), encSalt)
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		signKey = crypto.Argon2Id([]byte(password), signSalt)
+	}()
+
+	wg.Wait()
 
 	publicKey, privateKey, err := crypto.NewCurve25519Keypair()
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to generate keypair")
 	}
 
-	e := newEnclave(salt, publicKey, privateKey)
+	e := newEnclave(encSalt, signSalt, publicKey, privateKey)
 
-	err = r.sealAndWrite(key, e)
+	keypair := append(encKey, signKey...)
+
+	err = r.sealAndWrite(keypair, e)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to seal enclave")
 	}
 
-	return key, nil
+	return keypair, nil
 }
 
-func (r *Repository) Authenticate(password string) ([]byte, error) {
+func (r *Repository) Authenticate(password string) (keypair []byte, err error) {
 	// we don't defer unlock because hash computation is slow
 
 	b, err := os.ReadFile(r.enclavePath())
@@ -170,25 +192,42 @@ func (r *Repository) Authenticate(password string) ([]byte, error) {
 		return nil, errors.Wrap(err, "failed to read enclave")
 	}
 
-	salt := getSaltFromData(b)
+	encSalt, signSalt := getSaltsFromData(b)
 
-	key := crypto.Argon2Id([]byte(password), salt)
+	var encKey, signKey []byte
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+
+		encKey = crypto.Argon2Id([]byte(password), encSalt)
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		signKey = crypto.Argon2Id([]byte(password), signSalt)
+	}()
+
+	wg.Wait()
 
 	p := crypto.DefaultArgon2IdParams
 
-	mac := b[p.SaltLength : sha256.Size+p.SaltLength]
-	b = b[p.SaltLength+sha256.Size:]
+	mac := b[p.SaltLength*2 : sha256.Size+p.SaltLength*2]
+	b = b[p.SaltLength*2+sha256.Size:]
 
-	valid := crypto.VerifyHMAC_SHA256(key, mac, b)
+	valid := crypto.VerifyHMAC_SHA256(signKey, mac, b)
 	if !valid {
 		return nil, application.ErrAuthenticationFailed
 	}
 
-	return key, nil
+	return append(encKey, signKey...), nil
 }
 
-func (r *Repository) UpdateKeystore(key []byte, k keystore.Keystore) (keystore.Keystore, error) {
-	e, err := r.enclave(key)
+func (r *Repository) UpdateKeystore(keypair []byte, k keystore.Keystore) (keystore.Keystore, error) {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get enclave")
 	}
@@ -198,7 +237,7 @@ func (r *Repository) UpdateKeystore(key []byte, k keystore.Keystore) (keystore.K
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to update keystore")
 	}
 
-	err = r.sealAndWrite(key, e)
+	err = r.sealAndWrite(keypair, e)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to seal enclave")
 	}
@@ -206,22 +245,27 @@ func (r *Repository) UpdateKeystore(key []byte, k keystore.Keystore) (keystore.K
 	return k, nil
 }
 
-func (r *Repository) sealAndWrite(key []byte, e *enclave) error {
+func (r *Repository) sealAndWrite(keypair []byte, e *enclave) error {
 	b, err := enclaveToJSON(e)
 	if err != nil {
 		return errors.WithMessage(err, "failed to marshal enclave")
 	}
 
-	b, err = crypto.AES256CBC_Encrypt(key, b)
+	p := crypto.DefaultArgon2IdParams
+
+	encKey := keypair[:p.KeyLength]
+	signKey := keypair[p.KeyLength:]
+
+	b, err = crypto.AES256CBC_Encrypt(encKey, b)
 	if err != nil {
 		return errors.WithMessage(err, "failed to encrypt enclave")
 	}
 
 	// authenticate
-	mac := crypto.HMAC_SHA256(key, b)
+	mac := crypto.HMAC_SHA256(signKey, b)
 
 	// prepend salt and mac to the ciphertext
-	b = append(e.salt, append(mac, b...)...)
+	b = append(e.encSalt, append(e.signSalt, append(mac, b...)...)...)
 
 	err = os.WriteFile(r.enclavePath(), b, 0600)
 	if err != nil {
@@ -231,15 +275,15 @@ func (r *Repository) sealAndWrite(key []byte, e *enclave) error {
 	return nil
 }
 
-func (r *Repository) UpdateCredentials(key []byte, creds credentials.Credentials) (credentials.Credentials, error) {
-	e, err := r.enclave(key)
+func (r *Repository) UpdateCredentials(keypair []byte, creds credentials.Credentials) (credentials.Credentials, error) {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
 	e.creds = &creds
 
-	err = r.sealAndWrite(key, e)
+	err = r.sealAndWrite(keypair, e)
 	if err != nil {
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to seal enclave")
 	}
@@ -247,8 +291,8 @@ func (r *Repository) UpdateCredentials(key []byte, creds credentials.Credentials
 	return creds, nil
 }
 
-func (r *Repository) Credentials(key []byte) (credentials.Credentials, error) {
-	e, err := r.enclave(key)
+func (r *Repository) Credentials(keypair []byte) (credentials.Credentials, error) {
+	e, err := r.enclave(keypair)
 	if err != nil {
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")
 	}

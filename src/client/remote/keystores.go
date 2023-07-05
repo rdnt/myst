@@ -69,10 +69,11 @@ func (r *Remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, errors.WithMessage(err, "aes256cbc encrypt failed")
 	}
 
-	res, err := r.client.UpdateKeystoreWithResponse(context.Background(), k.RemoteId, generated.UpdateKeystoreRequest{
-		Name:    &k.Name,
-		Payload: &b,
-	})
+	res, err := r.client.UpdateKeystoreWithResponse(context.Background(),
+		k.RemoteId, generated.UpdateKeystoreRequest{
+			Name:    &k.Name,
+			Payload: &b,
+		})
 	if err != nil {
 		return keystore.Keystore{}, errors.Wrap(err, "failed to update keystore")
 	}
@@ -81,14 +82,12 @@ func (r *Remote) UpdateKeystore(k keystore.Keystore) (keystore.Keystore, error) 
 		return keystore.Keystore{}, errors.New("invalid response")
 	}
 
-	k2, err := KeystoreFromJSON(*res.JSON200, k.Key)
+	_, err = KeystoreFromJSON(*res.JSON200, k.Key)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to parse keystore")
 	}
 
-	k2.Key = k.Key
-
-	return k2, nil
+	return k, nil
 }
 
 func (r *Remote) DeleteKeystore(id string) error {

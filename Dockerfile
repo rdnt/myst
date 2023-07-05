@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:kinetic
 
 # update container certificates
 RUN apt-get -y update && apt-get install -y ca-certificates && update-ca-certificates

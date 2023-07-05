@@ -141,7 +141,9 @@ func (r *Remote) DeleteInvitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (r *Remote) FinalizeInvitation(invitationId string, privateKey []byte, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error) {
+func (r *Remote) FinalizeInvitation(
+	invitationId string, privateKey []byte, inviteePublicKey []byte, k keystore.Keystore,
+) (invitation.Invitation, error) {
 	// derive shared secret using the user's private key and the invitee's public key
 	sharedSecret, err := curve25519.X25519(privateKey, inviteePublicKey)
 	if err != nil {
@@ -154,9 +156,11 @@ func (r *Remote) FinalizeInvitation(invitationId string, privateKey []byte, invi
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to encrypt keystore key")
 	}
 
-	res, err := r.client.FinalizeInvitationWithResponse(context.Background(), invitationId, generated.FinalizeInvitationJSONRequestBody{
-		KeystoreKey: encryptedKeystoreKey,
-	})
+	res, err := r.client.FinalizeInvitationWithResponse(context.Background(),
+		invitationId, generated.FinalizeInvitationJSONRequestBody{
+			KeystoreKey: encryptedKeystoreKey,
+		},
+	)
 	if err != nil {
 		return invitation.Invitation{}, errors.Wrap(err, "failed to finalize invitation")
 	}

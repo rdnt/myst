@@ -7,7 +7,7 @@ require (
 	github.com/deepmap/oapi-codegen v1.13.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-co-op/gocron v1.28.3
+	github.com/go-co-op/gocron v1.31.0
 	github.com/go-errors/errors v1.4.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51

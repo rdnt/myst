@@ -23,7 +23,7 @@ require (
 	github.com/rs/cors/wrapper/gin v0.0.0-20230301160956-5c2b877d2a03
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.7.0
-	go.mongodb.org/mongo-driver v1.11.7
+	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.10.0
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	gotest.tools/v3 v3.4.0

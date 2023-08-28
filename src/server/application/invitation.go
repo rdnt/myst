@@ -20,7 +20,8 @@ import (
 //   - ErrInvalidInvitee if the inviter and invitee are the same user.
 //
 // TODO: return not found if the user does not have read access to the keystore
-func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error) {
+func (app *application) CreateInvitation(
+	keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error) {
 	inviter, err := app.users.User(inviterId)
 	if errors.Is(err, ErrUserNotFound) {
 		return invitation.Invitation{}, ErrInviterNotFound
@@ -81,7 +82,8 @@ func (app *application) CreateInvitation(keystoreId, inviterId, inviteeUsername 
 // A user can only accept an invitation if they are the invitee and the
 // invitation's status is pending. If either is not true then ErrForbidden is
 // returned.
-func (app *application) AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error) {
+func (app *application) AcceptInvitation(
+	userId string, invitationId string) (invitation.Invitation, error) {
 	inv, err := app.UserInvitation(userId, invitationId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get user invitation")
@@ -116,7 +118,8 @@ func (app *application) AcceptInvitation(userId string, invitationId string) (in
 // ErrForbidden is returned if the invitation is in a state where the operation
 // cannot be performed. See deleteInvitation, cancelInvitation and
 // declineInvitation for more details on the respective conditions.
-func (app *application) DeleteInvitation(userId, invitationId string) (invitation.Invitation, error) {
+func (app *application) DeleteInvitation(
+	userId, invitationId string) (invitation.Invitation, error) {
 	inv, err := app.invitations.Invitation(invitationId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")
@@ -129,12 +132,14 @@ func (app *application) DeleteInvitation(userId, invitationId string) (invitatio
 	if userId == inv.InviterId {
 		inv, err = app.deleteOrCancelInvitation(inv)
 		if err != nil {
-			return invitation.Invitation{}, errors.WithMessage(err, "failed to delete or cancel invitation")
+			return invitation.Invitation{}, errors.WithMessage(err,
+				"failed to delete or cancel invitation")
 		}
 	} else if userId == inv.InviteeId {
 		inv, err = app.declineInvitation(inv)
 		if err != nil {
-			return invitation.Invitation{}, errors.WithMessage(err, "failed to decline invitation")
+			return invitation.Invitation{}, errors.WithMessage(err,
+				"failed to decline invitation")
 		}
 	}
 
@@ -183,7 +188,8 @@ func (app *application) declineInvitation(inv invitation.Invitation) (invitation
 // its payload by the invitee. If the user doesn't have access to the
 // invitation, ErrInvitationNotFound is returned. ErrForbidden is returned if
 // the user is not the inviter or the invitation is not in the accepted state.
-func (app *application) FinalizeInvitation(userId, invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error) {
+func (app *application) FinalizeInvitation(
+	userId, invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error) {
 	inv, err := app.invitations.Invitation(invitationId)
 	if err != nil {
 		return invitation.Invitation{}, errors.WithMessage(err, "failed to get invitation")

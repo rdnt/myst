@@ -64,7 +64,13 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 		c.String(http.StatusOK, ":)")
 	})
 
-	api := r.Group("/api")
+	s.initRoutes()
+
+	return s
+}
+
+func (s *Server) initRoutes() {
+	api := s.Group("/api")
 
 	api.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, map[string]any{
@@ -92,8 +98,6 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	sec.POST("/invitation/:invitationId", s.FinalizeInvitation)
 	sec.DELETE("/invitation/:invitationId", s.DeleteInvitation)
 	sec.GET("/invitations", s.Invitations)
-
-	return s
 }
 
 func (s *Server) Start(addr string) error {

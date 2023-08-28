@@ -10,7 +10,7 @@ import (
 	"myst/test/integration/suite"
 )
 
-func TestInvitations(t *testing.T) {
+func TestInvitationCreate(t *testing.T) {
 	s := suite.New(t)
 
 	sessionId, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
@@ -177,6 +177,7 @@ func TestInvitationDecline(t *testing.T) {
 		assert.Equal(t, res.JSON200.Status, generated.Declined)
 	})
 }
+
 func TestInvitationAccept(t *testing.T) {
 	s := suite.New(t)
 
@@ -291,7 +292,7 @@ func TestInvitationFinalize(t *testing.T) {
 		keystoreRemoteId = res2.JSON200.Keystore.RemoteId
 	})
 
-	t.Run("The inviter eventually finalizes the invitation", func(t *testing.T) {
+	t.Run("The inviter finalizes the invitation", func(t *testing.T) {
 		res, err := s.Client1.Client.FinalizeInvitationWithResponse(s.Ctx, invitationId,
 			generated.FinalizeInvitationRequest{
 				InviteePublicKey: inviteePublicKey,

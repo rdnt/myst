@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/namsral/flag"
 	"github.com/pkg/errors"
@@ -27,7 +26,6 @@ type Config struct {
 	RemoteAddress string
 	Port          int
 	DataDir       string
-	Slow          bool
 }
 
 func parseFlags() Config {
@@ -37,7 +35,6 @@ func parseFlags() Config {
 	flag.StringVar(&cfg.DataDir, "dir", ".",
 		"Directory within which the user's enclave is stored. If the directory does not exist, it will be created.")
 	flag.IntVar(&cfg.Port, "port", 8081, "Port the client should listen on")
-	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 500ms before starting up")
 
 	flag.Parse()
 
@@ -68,16 +65,12 @@ func main() {
 func run() (cleanup func() error, err error) {
 	cfg := parseFlags()
 
-	if cfg.Slow {
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	logger.EnableDebug = true
-
 	err = createDataDir(cfg.DataDir)
 	if err != nil {
 		return nil, errors.WithMessage(err, "unable to create data directory")
 	}
+
+	logger.EnableDebug = false
 
 	enc := enclaverepo.New(cfg.DataDir)
 

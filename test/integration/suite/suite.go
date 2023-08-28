@@ -23,8 +23,6 @@ type Suite struct {
 }
 
 func New(t *testing.T) *Suite {
-	// all suites should be able to run in parallel. we can run multiple tests
-	// for 'brute forcing' them to catch flaky tests
 	t.Parallel()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -52,13 +50,12 @@ func New(t *testing.T) *Suite {
 	client3.start(t)
 
 	t.Cleanup(func() {
-		fmt.Println("cleanup")
 		cancel()
 
 		client1.stop(t)
 		client2.stop(t)
 		client3.stop(t)
-		// stop the server after clients disconnect
+
 		server.stop(t)
 	})
 
@@ -70,12 +67,6 @@ func New(t *testing.T) *Suite {
 		Client3: client3,
 	}
 }
-
-// func (s *Suite) Run(t *testing.T, name string, fn func(*testing.T)) {
-// 	if !t.Run(name, fn) {
-// 		t.FailNow()
-// 	}
-// }
 
 func (s *Suite) Random(t *testing.T) string {
 	return random(t)

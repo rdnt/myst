@@ -63,10 +63,7 @@ func TestKeystores(t *testing.T) {
 	t.Run("Entry created", func(t *testing.T) {
 		res, err := s.Client1.Client.CreateEntryWithResponse(s.Ctx, keystoreId,
 			generated.CreateEntryJSONRequestBody{
-				Website:  website,
-				Username: username,
-				Password: password,
-				Notes:    notes,
+				Website: website, Username: username, Password: password, Notes: notes,
 			},
 		)
 		assert.NilError(t, err)
@@ -87,10 +84,10 @@ func TestKeystores(t *testing.T) {
 		assert.Equal(t, entryId, res.JSON200.Entries[0].Id)
 	})
 
-	newPassword := s.Random(t)
-	newNotes := s.Random(t)
-
 	t.Run("Entry can be updated", func(t *testing.T) {
+		newPassword := s.Random(t)
+		newNotes := s.Random(t)
+
 		res, err := s.Client1.Client.UpdateEntryWithResponse(s.Ctx, keystoreId, entryId,
 			generated.UpdateEntryJSONRequestBody{
 				Password: optional.Ref(newPassword),

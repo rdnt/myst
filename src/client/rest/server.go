@@ -50,15 +50,9 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	// Custom PrintRouteFunc
 	gin.DebugPrintRouteFunc = printRoutes
 
-	// always use recovery middleware
 	r.Use(recoveryMiddleware)
-
-	// custom logging middleware
 	r.Use(loggerMiddleware)
-
-	// error 404 handling
 	r.NoRoute(noRouteMiddleware("/", embedFolder(ui, "static")))
-
 	r.Use(
 		cors.New(
 			cors.Options{
@@ -110,7 +104,6 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 	sec.DELETE("/invitation/:invitationId", s.DeclineOrCancelInvitation)
 	sec.POST("/invitation/:invitationId", s.FinalizeInvitation)
 	sec.GET("/user", s.CurrentUser)
-	//sec.POST("/import", s.DebugImport)
 
 	return s
 }

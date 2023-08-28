@@ -7,14 +7,6 @@ import (
 	"myst/pkg/uuid"
 )
 
-// var (
-// 	ErrCannotAccept   = errors.New("cannot accept invitation")
-// 	ErrCannotFinalize = errors.New("cannot finalize invitation")
-// 	ErrCannotDecline  = errors.New("cannot decline invitation")
-// 	ErrCannotDelete   = errors.New("cannot delete invitation")
-// 	ErrCannotCancel   = errors.New("cannot cancel invitation")
-// )
-
 type Invitation struct {
 	Id                   string
 	KeystoreId           string
@@ -97,58 +89,3 @@ func (i Invitation) Declined() bool {
 func (i Invitation) Finalized() bool {
 	return i.Status == Finalized
 }
-
-// func (i *Invitation) Accept() error {
-// 	if i.Status != Pending {
-// 		return ErrCannotAccept
-// 	}
-//
-// 	i.Status = Accepted
-// 	i.AcceptedAt = time.Now()
-//
-// 	return nil
-// }
-
-// func (i *Invitation) Finalize(encryptedKeystoreKey []byte) error {
-// 	if i.Status != Accepted {
-// 		return ErrCannotFinalize
-// 	}
-//
-// 	i.EncryptedKeystoreKey = encryptedKeystoreKey
-// 	i.Status = Finalized
-//
-// 	return nil
-// }
-
-// func (i *Invitation) Decline() error {
-// 	if i.Status != Pending {
-// 		return ErrCannotDecline
-// 	}
-//
-// 	i.Status = Declined
-// 	i.DeclinedAt = time.Now()
-//
-// 	return nil
-// }
-
-// func (i *Invitation) Delete() error {
-// 	if i.Status != Pending {
-// 		return ErrCannotDelete
-// 	}
-//
-// 	i.Status = Deleted
-// 	i.DeletedAt = time.Now()
-//
-// 	return nil
-// }
-
-// func (i *Invitation) Cancel() error {
-// 	if i.Status != Accepted {
-// 		return ErrCannotCancel
-// 	}
-//
-// 	i.Status = Deleted
-// 	i.CancelledAt = time.Now()
-//
-// 	return nil
-// }

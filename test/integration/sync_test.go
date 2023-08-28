@@ -9,7 +9,7 @@ import (
 	"myst/test/integration/suite"
 )
 
-func TestKeystoreSyncUpStream(t *testing.T) {
+func TestKeystoreSync(t *testing.T) {
 	s := suite.New(t)
 
 	s1id, err := s.Client1.App.Initialize(s.Client1.MasterPassword)
@@ -46,7 +46,7 @@ func TestKeystoreSyncUpStream(t *testing.T) {
 		assert.Equal(t, len(rks), 0)
 	})
 
-	t.Run("Create invitation for this keystore", func(t *testing.T) {
+	t.Run("invitation is created for this keystore", func(t *testing.T) {
 		_ = s.CreateInvitation(t, keystore.Id)
 	})
 

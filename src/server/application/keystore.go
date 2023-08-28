@@ -13,7 +13,8 @@ import (
 // it to the invitee in case the owner decides to share the keystore with
 // others. The payload is encrypted and stored as-is inside the keystore.
 // If the keystore is not found, ErrKeystoreNotFound is returned.
-func (app *application) CreateKeystore(name, ownerId string, payload []byte) (keystore.Keystore, error) {
+func (app *application) CreateKeystore(
+	name, ownerId string, payload []byte) (keystore.Keystore, error) {
 	u, err := app.users.User(ownerId)
 	if err != nil {
 		return keystore.Keystore{}, errors.WithMessage(err, "failed to get user")
@@ -161,7 +162,8 @@ func (app *application) Keystores() ([]keystore.Keystore, error) {
 // opts are processed. If the keystore is not found, ErrKeystoreNotFound is
 // returned. The userId passed is the initiator of the update, and should be
 // the keystore's owner, otherwise ErrForbidden is returned.
-func (app *application) UpdateKeystore(userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.
+func (app *application) UpdateKeystore(
+	userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.
 	Keystore,
 	error) {
 	k, err := app.keystores.Keystore(keystoreId)

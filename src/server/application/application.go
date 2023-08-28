@@ -66,13 +66,13 @@ type Application interface {
 	UserKeystore(userId, keystoreId string) (keystore.Keystore, error)
 	Keystores() ([]keystore.Keystore, error)
 	UpdateKeystore(userId, keystoreId string, opts UpdateKeystoreOptions) (keystore.Keystore, error)
-	DeleteKeystore(userId string, keystoreId string) error
+	DeleteKeystore(userId, keystoreId string) error
 	UserKeystores(userId string) ([]keystore.Keystore, error)
 
 	CreateInvitation(keystoreId, inviterId, inviteeUsername string) (invitation.Invitation, error)
-	AcceptInvitation(userId string, invitationId string) (invitation.Invitation, error)
+	AcceptInvitation(userId, invitationId string) (invitation.Invitation, error)
 	DeleteInvitation(userId, invitationId string) (invitation.Invitation, error)
-	FinalizeInvitation(userId string, invitationId string, encryptedKeystoreKey []byte) (invitation.Invitation, error)
+	FinalizeInvitation(usrId, invId string, encKeystoreKey []byte) (invitation.Invitation, error)
 	UserInvitation(userId, invitationId string) (invitation.Invitation, error)
 	UserInvitations(userId string, opts UserInvitationsOptions) ([]invitation.Invitation, error)
 }

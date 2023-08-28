@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/namsral/flag"
 	"github.com/pkg/errors"
@@ -19,7 +18,6 @@ var log = logger.New("app", logger.Red)
 
 type Config struct {
 	Port          int
-	Slow          bool
 	MongoAddress  string
 	MongoDatabase string
 	JWTSigningKey string
@@ -29,7 +27,6 @@ func parseFlags() Config {
 	cfg := Config{}
 
 	flag.IntVar(&cfg.Port, "port", 8080, "Port the client should listen on")
-	flag.BoolVar(&cfg.Slow, "slow", false, "Wait 500ms before starting up")
 
 	flag.StringVar(&cfg.MongoAddress, "mongo-addr", "mongodb://localhost:27017",
 		"The address of the mongodb server")
@@ -70,11 +67,7 @@ func run() (cleanup func() error, err error) {
 		return nil, errors.Wrap(err, "could not decode jwt signing key")
 	}
 
-	if cfg.Slow {
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	logger.EnableDebug = true
+	logger.EnableDebug = false
 
 	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
 	if err != nil {

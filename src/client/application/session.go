@@ -9,7 +9,6 @@ import (
 )
 
 func (app *application) newSession() (sessionId []byte, err error) {
-	// check is active are by the same user of the enclave.
 	sessionKey, err := rand.Bytes(16)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to generate session key")

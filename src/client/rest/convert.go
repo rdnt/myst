@@ -42,16 +42,14 @@ func (s *Server) userToJSON(sessionId []byte, u user.User) (generated.User, erro
 	var icon *string
 
 	sharedSecret, err := s.app.SharedSecret(sessionId, u.Id)
-	if err != nil {
-		return generated.User{}, err
-	}
+	if err == nil {
+		ic, err := hashicon.New(sharedSecret)
+		if err != nil {
+			return generated.User{}, err
+		}
 
-	ic, err := hashicon.New(sharedSecret)
-	if err != nil {
-		return generated.User{}, err
+		icon = optional.Ref(ic.ToSVG())
 	}
-
-	icon = optional.Ref(ic.ToSVG())
 
 	return generated.User{
 		Id:        u.Id,

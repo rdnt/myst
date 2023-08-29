@@ -57,6 +57,10 @@ func (app *application) CurrentUser(sessionId []byte) (*user.User, error) {
 		return nil, errors.WithMessage(err, "failed to query credentials")
 	}
 
+	if rem.Address == "" {
+		return nil, ErrCredentialsNotFound
+	}
+
 	u := app.remote.CurrentUser()
 	if u == nil {
 		return nil, nil

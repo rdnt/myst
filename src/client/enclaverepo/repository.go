@@ -297,9 +297,5 @@ func (r *Repository) Credentials(keypair []byte) (credentials.Credentials, error
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
-	if e.creds.Address == "" {
-		return credentials.Credentials{}, application.ErrCredentialsNotFound
-	}
-
 	return e.creds, nil
 }

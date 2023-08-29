@@ -40,9 +40,7 @@
     });
 </script>
 
-{#if $authState === undefined}
-    <!--        <span>Loading...</span>-->
-{:else}
+{#if $authState !== undefined}
     {#if $authState === AuthState.Onboarding}
         <OnboardingForm on:initialized={async () => {
             await checkState()

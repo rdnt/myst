@@ -14,12 +14,12 @@ import (
 )
 
 type enclaveJSON struct {
-	Keystores map[string]keystoreJSON `json:"keystores"`
-	Keys      map[string][]byte       `json:"keys"`
-	Remote    *remoteJSON             `json:"creds,omitempty"`
+	Keystores   map[string]keystoreJSON `json:"keystores"`
+	Keys        map[string][]byte       `json:"keys"`
+	Credentials credentialsJSON         `json:"credentials"`
 }
 
-type remoteJSON struct {
+type credentialsJSON struct {
 	Address    string `json:"address"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
@@ -58,23 +58,18 @@ func enclaveToJSON(e *enclave) ([]byte, error) {
 		ks[k.Id] = keystoreToJSON(k)
 	}
 
-	var jrem *remoteJSON
-	rem := e.creds
-
-	if rem != nil {
-		jrem = &remoteJSON{
-			Address:    rem.Address,
-			Username:   rem.Username,
-			Password:   rem.Password,
-			PublicKey:  rem.PublicKey,
-			PrivateKey: rem.PrivateKey,
-		}
+	jrem := credentialsJSON{
+		Address:    e.creds.Address,
+		Username:   e.creds.Username,
+		Password:   e.creds.Password,
+		PublicKey:  e.creds.PublicKey,
+		PrivateKey: e.creds.PrivateKey,
 	}
 
 	b, err := json.Marshal(enclaveJSON{
-		Keystores: ks,
-		Keys:      e.keys,
-		Remote:    jrem,
+		Keystores:   ks,
+		Keys:        e.keys,
+		Credentials: jrem,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal enclave")
@@ -97,22 +92,17 @@ func enclaveFromJSON(b, encSalt, signSalt []byte) (*enclave, error) {
 		ks[k.Id] = keystoreFromJSON(k)
 	}
 
-	var rem *credentials.Credentials
-	jrem := e.Remote
-
-	if jrem != nil {
-		rem = &credentials.Credentials{
-			Address:    jrem.Address,
-			Username:   jrem.Username,
-			Password:   jrem.Password,
-			PublicKey:  jrem.PublicKey,
-			PrivateKey: jrem.PrivateKey,
-		}
+	creds := credentials.Credentials{
+		Address:    e.Credentials.Address,
+		Username:   e.Credentials.Username,
+		Password:   e.Credentials.Password,
+		PublicKey:  e.Credentials.PublicKey,
+		PrivateKey: e.Credentials.PrivateKey,
 	}
 
 	return &enclave{
 		keystores: ks,
-		creds:     rem,
+		creds:     creds,
 		encSalt:   encSalt,
 		signSalt:  signSalt,
 		keys:      e.Keys,

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import api from "@/api";
+  import api, {OpenAPI} from "@/api";
+  import type { SessionId} from "@/api/generated";
   import InputField from "@/components/InputField.svelte";
   import {createEventDispatcher, onMount} from 'svelte';
   import PasswordInputField from "@/components/PasswordInputField.svelte";
@@ -38,7 +39,8 @@
         requestBody: {
           password,
         }
-      }).then(() => {
+      }).then((resp: SessionId) => {
+        OpenAPI.TOKEN = resp
         dispatch('initialized')
       }).catch((err) => {
         console.error(err)

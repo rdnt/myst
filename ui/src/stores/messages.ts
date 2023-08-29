@@ -44,3 +44,5 @@ const showMsg = (msg: Message) => {
     }
   }, 5000);
 }
+
+export {};

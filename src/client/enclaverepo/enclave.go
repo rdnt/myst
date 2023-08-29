@@ -19,7 +19,7 @@ type enclave struct {
 	signSalt  []byte
 	keystores map[string]keystore.Keystore
 	keys      map[string][]byte
-	creds     *credentials.Credentials
+	creds     credentials.Credentials
 }
 
 func newEnclave(encSalt, signSalt, publicKey, privateKey []byte) *enclave {
@@ -28,7 +28,7 @@ func newEnclave(encSalt, signSalt, publicKey, privateKey []byte) *enclave {
 		keys:      map[string][]byte{},
 		encSalt:   encSalt,
 		signSalt:  signSalt,
-		creds: &credentials.Credentials{
+		creds: credentials.Credentials{
 			PublicKey:  publicKey,
 			PrivateKey: privateKey,
 		},

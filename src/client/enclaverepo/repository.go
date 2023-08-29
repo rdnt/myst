@@ -281,7 +281,7 @@ func (r *Repository) UpdateCredentials(keypair []byte, creds credentials.Credent
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
-	e.creds = &creds
+	e.creds = creds
 
 	err = r.sealAndWrite(keypair, e)
 	if err != nil {
@@ -297,10 +297,9 @@ func (r *Repository) Credentials(keypair []byte) (credentials.Credentials, error
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")
 	}
 
-	rem := e.creds
-	if rem == nil {
+	if e.creds.Address == "" {
 		return credentials.Credentials{}, application.ErrCredentialsNotFound
 	}
 
-	return *rem, nil
+	return e.creds, nil
 }

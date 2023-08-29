@@ -44,7 +44,6 @@ func (app *application) Register(sessionId []byte, username, password string) (u
 	return u, nil
 }
 
-// CurrentUser returns the current user if there is one
 func (app *application) CurrentUser(sessionId []byte) (*user.User, error) {
 	app.mux.Lock()
 	defer app.mux.Unlock()

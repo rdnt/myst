@@ -67,7 +67,7 @@ func run() (cleanup func() error, err error) {
 		return nil, errors.Wrap(err, "could not decode jwt signing key")
 	}
 
-	logger.EnableDebug = false
+	logger.EnableDebug = true
 
 	repo, err := mongorepo.New(cfg.MongoAddress, cfg.MongoDatabase)
 	if err != nil {

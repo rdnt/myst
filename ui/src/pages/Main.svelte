@@ -4,7 +4,7 @@
   import Sidebar from "@/components/Sidebar.svelte";
   import Invitations from "@/pages/Invitations.svelte";
   import Keystores from "@/pages/Keystores.svelte";
-  import {getKeystores, keystores} from "@/stores/keystores.ts";
+  import {getKeystores, keystores} from "@/stores/keystores";
   import {Route, Router} from "svelte-navigator";
   import {onDestroy, onMount} from "svelte";
   import {getCurrentUser} from "@/stores/user";

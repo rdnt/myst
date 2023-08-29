@@ -7,11 +7,6 @@ import (
 	"myst/src/client/application/domain/user"
 )
 
-// Enclave is the repository that handles storing and retrieving of the
-// user's keystores and credentials. It requires initialization and
-// authentication before it can be used. The authentication status can
-// expire after some time if the HealthCheck method is not called
-// regularly.
 type Enclave interface {
 	Initialize(password string) (key []byte, err error)
 	IsInitialized() (bool, error)
@@ -27,11 +22,6 @@ type Enclave interface {
 	Credentials(key []byte) (credentials.Credentials, error)
 }
 
-// Remote is a remote repository that holds upstream enclave/invitations. It is
-// used to sync keystores with a remote server in a secure manner, and to
-// facilitate inviting users to access keystores or accepting invitations to
-// access a keystore from another user. Authenticating with a username and
-// password is required to interface with a remote.
 type Remote interface {
 	Address() string
 
@@ -49,7 +39,8 @@ type Remote interface {
 	Invitation(id string) (invitation.Invitation, error)
 	AcceptInvitation(id string) (invitation.Invitation, error)
 	DeleteInvitation(id string) (invitation.Invitation, error)
-	FinalizeInvitation(invitationId string, privateKey, inviteePublicKey []byte, k keystore.Keystore) (invitation.Invitation, error)
+	FinalizeInvitation(invitationId string, privateKey, inviteePublicKey []byte,
+		k keystore.Keystore) (invitation.Invitation, error)
 	Invitations() (map[string]invitation.Invitation, error)
 
 	SharedSecret(privateKey []byte, userId string) ([]byte, error)

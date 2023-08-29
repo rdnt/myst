@@ -1,4 +1,4 @@
-import type {Invitation} from "@/api";
+import type {Invitation} from "@/api/generated/models/Invitation";
 import api, {ApiError} from "@/api";
 import {writable} from "svelte/store";
 import type {Readable} from "svelte/store";

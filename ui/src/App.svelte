@@ -4,7 +4,7 @@
 </script>
 
 <Router>
-    <Route>
+<!--    <Route>-->
       <AppRoute />
-    </Route>
+<!--    </Route>-->
 </Router>

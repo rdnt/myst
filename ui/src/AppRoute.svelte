@@ -4,10 +4,9 @@
     import OnboardingForm from "@/components/OnboardingForm.svelte";
     import Main from "@/pages/Main.svelte";
     import {onDestroy, onMount} from 'svelte';
-    import {Router, useLocation, useNavigate} from "svelte-navigator";
+    import {Route, Router, useLocation, useNavigate} from "svelte-navigator";
     import api from "@/api";
-    import {AuthState, getAuthState} from "@/stores/authState";
-    import {authState, setAuthState} from "@/stores/authState.js";
+    import {AuthState, authState, getAuthState} from "@/stores/authState";
     import {showError} from "@/stores/messages";
 
     const location = useLocation();
@@ -41,28 +40,23 @@
     });
 </script>
 
-<Router>
-    {#if $authState === undefined}
-        <!--        <span>Loading...</span>-->
-    {:else}
-        {#if $authState === AuthState.Onboarding}
-            <OnboardingForm on:initialized={async () => {
-                //setAuthState(() => AuthState.SignedIn)
-                await checkState()
-            }}/>
-        {:else if $authState === AuthState.SignedOut}
-            <LoginForm on:login={async () => {
-                //setAuthState(() => AuthState.SignedIn)
-                await checkState()
-            } }/>
-        {:else if $authState === AuthState.SignedIn}
-            <Main/>
-        {/if}
+{#if $authState === undefined}
+    <!--        <span>Loading...</span>-->
+{:else}
+    {#if $authState === AuthState.Onboarding}
+        <OnboardingForm on:initialized={async () => {
+            await checkState()
+        }}/>
+    {:else if $authState === AuthState.SignedOut}
+        <LoginForm on:login={async () => {
+            await checkState()
+        } }/>
+    {:else if $authState === AuthState.SignedIn}
+        <Main/>
     {/if}
-</Router>
+{/if}
 
 <Messages/>
-
 
 <style lang="scss">
   $bg: #0a0e11;

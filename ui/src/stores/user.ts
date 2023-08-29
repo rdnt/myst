@@ -26,3 +26,5 @@ export const getCurrentUser = async (): Promise<User | null> => {
         return Promise.reject(e)
     }
 }
+
+export {};

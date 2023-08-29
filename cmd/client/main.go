@@ -70,7 +70,7 @@ func run() (cleanup func() error, err error) {
 		return nil, errors.WithMessage(err, "unable to create data directory")
 	}
 
-	logger.EnableDebug = false
+	logger.EnableDebug = true
 
 	enc := enclaverepo.New(cfg.DataDir)
 

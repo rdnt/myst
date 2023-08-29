@@ -1,9 +1,9 @@
 <script lang="ts">
   import api from "@/api";
+  import type {Invitation} from "@/api/generated";
   import AcceptInvitationModal from "@/components/AcceptInvitationModal.svelte";
   import DeclineInvitationModal from "@/components/DeclineInvitationModal.svelte";
   import FinalizeInvitationModal from "@/components/FinalizeInvitationModal.svelte";
-  import Invitation from "@/components/Invitation.svelte";
   import {hash} from "@/lib/color-hash";
   import {format} from "@/lib/date";
   import {getInvitations, invitations} from "@/stores/invitations";

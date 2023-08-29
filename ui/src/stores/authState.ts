@@ -1,5 +1,4 @@
-import type {User} from "@/api";
-import api, {ApiError} from "@/api";
+import api from "@/api";
 import {writable} from "svelte/store";
 import type {Readable} from "svelte/store";
 
@@ -12,8 +11,6 @@ export enum AuthState {
 const {subscribe, update} = writable<AuthState | undefined>(undefined);
 
 export const authState = {subscribe} as Readable<AuthState | undefined>;
-
-export const setAuthState = update;
 
 export const getAuthState = async (): Promise<AuthState | undefined> => {
     try {
@@ -38,3 +35,5 @@ export const getAuthState = async (): Promise<AuthState | undefined> => {
         return Promise.reject(e)
     }
 }
+
+export {};

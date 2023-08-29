@@ -29,18 +29,23 @@ type Application interface {
 	Keystore(sessionId []byte, id string) (keystore.Keystore, error)
 	Keystores(sessionId []byte) (map[string]keystore.Keystore, error)
 
-	CreateEntry(sessionId []byte, keystoreId string, website, username, password, notes string) (entry.Entry, error)
-	UpdateEntry(sessionId []byte, keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
-	DeleteEntry(sessionId []byte, keystoreId, entryId string) error
+	CreateEntry(sessionId []byte,
+		keystoreId string, website, username, password, notes string) (entry.Entry, error)
+	UpdateEntry(sessionId []byte,
+		keystoreId string, entryId string, opts UpdateEntryOptions) (entry.Entry, error)
+	DeleteEntry(sessionId []byte,
+		keystoreId, entryId string) error
 
 	Register(sessionId []byte, username, password string) (user.User, error)
 	CurrentUser(sessionId []byte) (*user.User, error)
 	SharedSecret(sessionId []byte, userId string) ([]byte, error)
 
-	CreateInvitation(sessionId []byte, keystoreId string, inviteeUsername string) (invitation.Invitation, error)
+	CreateInvitation(sessionId []byte,
+		keystoreId string, inviteeUsername string) (invitation.Invitation, error)
 	AcceptInvitation(sessionId []byte, id string) (invitation.Invitation, error)
 	DeleteInvitation(sessionId []byte, id string) (invitation.Invitation, error)
-	FinalizeInvitation(sessionId []byte, invitationId, remoteKeystoreId string, inviteePublicKey []byte) (invitation.Invitation, error)
+	FinalizeInvitation(sessionId []byte,
+		invitationId, remoteKeystoreId string, inviteePublicKey []byte) (invitation.Invitation, error)
 	Invitations(sessionId []byte) (map[string]invitation.Invitation, error)
 	Invitation(sessionId []byte, id string) (invitation.Invitation, error)
 

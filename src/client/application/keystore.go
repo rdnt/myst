@@ -33,22 +33,18 @@ func (app *application) IsInitialized(sessionId []byte) (bool, error) {
 	app.mux.Lock()
 	defer app.mux.Unlock()
 
-	if !app.sessionActive(sessionId) {
-		return false, ErrAuthenticationRequired
-	}
-
 	isInit, err := app.enclave.IsInitialized()
 	if err != nil {
 		return false, errors.WithMessage(err, "failed to query enclave initialization status")
 	}
 
+	if isInit && !app.sessionActive(sessionId) {
+		return false, ErrAuthenticationRequired
+	}
+
 	return isInit, nil
 }
 
-// Authenticate attempts to authenticate against the enclave, and log the
-// user in if they have already set-up their account.
-// If the enclave does not exist, then ErrInitializationRequired is returned.
-// If the password is incorrect, ErrAuthenticationFailed is returned.
 func (app *application) Authenticate(password string) ([]byte, error) {
 	app.mux.Lock()
 	defer app.mux.Unlock()
@@ -195,8 +191,13 @@ func (app *application) Keystores(sessionId []byte) (map[string]keystore.Keystor
 	app.mux.Lock()
 	defer app.mux.Unlock()
 
-	if !app.sessionActive(sessionId) {
-		return nil, ErrForbidden
+	isInit, err := app.enclave.IsInitialized()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to query enclave initialization status")
+	}
+
+	if isInit && !app.sessionActive(sessionId) {
+		return nil, ErrAuthenticationRequired
 	}
 
 	ks, err := app.enclave.Keystores(app.key)

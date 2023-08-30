@@ -54,15 +54,12 @@ func (app *application) Authenticate(password string) ([]byte, error) {
 		return nil, errors.WithMessage(err, "failed to authenticate against enclave")
 	}
 
-	var trySignIn bool
 	rem, err := app.enclave.Credentials(key)
-	if err == nil {
-		trySignIn = true
-	} else if !errors.Is(err, ErrCredentialsNotFound) {
+	if err != nil {
 		return nil, errors.WithMessage(err, "failed to query credentials")
 	}
 
-	if trySignIn {
+	if rem.Address != "" {
 		if rem.Address != app.remote.Address() {
 			return nil, ErrRemoteAddressMismatch
 		}

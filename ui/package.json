@@ -19,7 +19,7 @@
     "svelte": "^3.49.0",
     "svelte-check": "^3.1.0",
     "svelte-navigator": "^3.1.5",
-    "svelte-preprocess": "^5.0.1",
+    "svelte-preprocess": "^5.0.4",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vite": "^4.1.5"
@@ -27,5 +27,10 @@
   "dependencies": {
     "color-hash": "^2.0.1",
     "date-fns": "^2.28.0"
+  },
+  "overrides": {
+    "openapi-typescript-codegen": {
+      "json-schema-ref-parser": "@apidevtools/json-schema-ref-parser"
+    }
   }
 }

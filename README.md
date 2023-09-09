@@ -8,7 +8,7 @@
 ---
 
 #### Development requirements
-- Go v1.20
+- Go v1.21
 - Node.JS 18
 - golangci-lint v1.53.2 https://golangci-lint.run/usage/install/
 

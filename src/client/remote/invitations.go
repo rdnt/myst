@@ -40,7 +40,8 @@ func (r *Remote) Invitation(id string) (invitation.Invitation, error) {
 	return inv, nil
 }
 
-func (r *Remote) CreateInvitation(keystoreRemoteId, inviteeUsername string) (invitation.Invitation, error) {
+func (r *Remote) CreateInvitation(keystoreRemoteId, inviteeUsername string,
+) (invitation.Invitation, error) {
 	if !r.Authenticated() {
 		return invitation.Invitation{}, application.ErrAuthenticationRequired
 	}

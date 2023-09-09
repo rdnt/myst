@@ -264,7 +264,7 @@ func (r *Repository) sealAndWrite(keypair []byte, e *enclave) error {
 	// authenticate
 	mac := crypto.HMAC_SHA256(signKey, b)
 
-	// prepend salt and mac to the ciphertext
+	// prepend salts and mac to the ciphertext
 	b = append(e.encSalt, append(e.signSalt, append(mac, b...)...)...)
 
 	err = os.WriteFile(r.enclavePath(), b, 0600)
@@ -275,7 +275,8 @@ func (r *Repository) sealAndWrite(keypair []byte, e *enclave) error {
 	return nil
 }
 
-func (r *Repository) UpdateCredentials(keypair []byte, creds credentials.Credentials) (credentials.Credentials, error) {
+func (r *Repository) UpdateCredentials(keypair []byte, creds credentials.Credentials,
+) (credentials.Credentials, error) {
 	e, err := r.enclave(keypair)
 	if err != nil {
 		return credentials.Credentials{}, errors.WithMessage(err, "failed to get enclave")

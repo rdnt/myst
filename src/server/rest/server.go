@@ -51,13 +51,8 @@ func NewServer(app application.Application, jwtSigningKey []byte) *Server {
 	// Custom PrintRouteFunc
 	gin.DebugPrintRouteFunc = printRoutes
 
-	// always use recovery middleware
 	r.Use(recoveryMiddleware)
-
-	// custom logging middleware
 	r.Use(loggerMiddleware)
-
-	// error 404 handling
 	r.NoRoute(noRouteMiddleware)
 
 	r.GET("/", func(c *gin.Context) {

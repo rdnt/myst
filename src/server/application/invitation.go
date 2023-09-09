@@ -146,7 +146,8 @@ func (app *application) DeleteInvitation(
 	return inv, nil
 }
 
-func (app *application) deleteOrCancelInvitation(inv invitation.Invitation) (invitation.Invitation, error) {
+func (app *application) deleteOrCancelInvitation(inv invitation.Invitation,
+) (invitation.Invitation, error) {
 	if inv.Pending() {
 		inv.Status = invitation.Deleted
 		inv.DeletedAt = time.Now()

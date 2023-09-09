@@ -8,8 +8,6 @@ import (
 	"myst/pkg/uuid"
 )
 
-var ()
-
 type User struct {
 	Id           string
 	Username     string

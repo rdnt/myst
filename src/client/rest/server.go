@@ -107,6 +107,7 @@ func NewServer(app application.Application, ui fs.FS) *Server {
 
 	return s
 }
+
 func (s *Server) Start(addr string) error {
 	log.Println("app started on", addr)
 

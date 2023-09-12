@@ -6,10 +6,9 @@ import (
 	"os"
 	"os/signal"
 
+	"fyne.io/systray"
 	"github.com/namsral/flag"
 	"github.com/pkg/errors"
-
-	"fyne.io/systray"
 
 	"myst/pkg/logger"
 	"myst/src/client/application"

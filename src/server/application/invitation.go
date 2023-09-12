@@ -55,7 +55,9 @@ func (app *application) CreateInvitation(
 	}
 
 	for _, inv := range invs {
-		if inv.InviterId == inviter.Id && inv.InviteeId == invitee.Id && inv.KeystoreId == k.Id {
+		if inv.InviterId == inviter.Id && inv.InviteeId == invitee.Id && inv.KeystoreId == k.Id &&
+			(inv.Status != invitation.Cancelled && inv.Status != invitation.Deleted && inv.Status != invitation.
+				Declined) {
 			return invitation.Invitation{}, ErrForbidden
 		}
 	}

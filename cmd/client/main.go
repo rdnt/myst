@@ -9,6 +9,8 @@ import (
 	"github.com/namsral/flag"
 	"github.com/pkg/errors"
 
+	"fyne.io/systray"
+
 	"myst/pkg/logger"
 	"myst/src/client/application"
 	"myst/src/client/enclaverepo"
@@ -19,6 +21,9 @@ import (
 
 //go:embed static/*
 var static embed.FS
+
+//go:embed icon.ico
+var icon []byte
 
 var log = logger.New("client", logger.Red)
 
@@ -49,10 +54,21 @@ func main() {
 		return
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, os.Kill)
 
-	<-c
+	done := make(chan bool, 1)
+
+	systray.Run(onReady, func() {
+		onExit(done)
+	})
+
+	select {
+	case <-interrupt:
+		// if process is interrupted, wait for systray to quit
+		systray.Quit()
+	case <-done:
+	}
 
 	err = cleanup()
 	if err != nil {
@@ -60,6 +76,27 @@ func main() {
 		os.Exit(1)
 		return
 	}
+}
+
+func onReady() {
+	systray.SetIcon(icon)
+
+	title := systray.AddMenuItem("Myst", "")
+	title.Disable()
+
+	systray.AddSeparator()
+
+	quit := systray.AddMenuItem("Quit", "")
+
+	go func() {
+		<-quit.ClickedCh
+		systray.Quit()
+		return
+	}()
+}
+
+func onExit(done chan bool) {
+	done <- true
 }
 
 func run() (cleanup func() error, err error) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"fyne.io/systray"
 	"github.com/namsral/flag"
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, os.Kill)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	done := make(chan bool, 1)
 
@@ -90,7 +91,6 @@ func onReady() {
 	go func() {
 		<-quit.ClickedCh
 		systray.Quit()
-		return
 	}()
 }
 

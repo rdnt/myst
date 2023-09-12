@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
 	"runtime"
+
+	"github.com/spf13/cobra"
 
 	. "myst/pkg/builder/util"
 )
@@ -49,7 +50,7 @@ var buildCmd = &cobra.Command{
 
 		Step("Building client", func() {
 			if runtime.GOOS == "windows" {
-				Run("go build -o build/client/client-$GOOS-$GOARCH.exe cmd/client/main.go")
+				Run("go build -ldflags \"-H=windowsgui\" -o build/client/client-$GOOS-$GOARCH.exe cmd/client/main.go")
 			} else {
 				Run("go build -o build/client/client-$GOOS-$GOARCH cmd/client/main.go")
 			}

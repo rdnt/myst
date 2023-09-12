@@ -26,7 +26,7 @@ func New(app application.Application, remote *remote.Remote) (*Scheduler, error)
 		log:    logger.New("scheduler", logger.DefaultColor),
 	}
 
-	_, err := s.sched.Every(10).Second().
+	_, err := s.sched.Every(1).Second().
 		StartAt(time.Now()).
 		Do(s.sync)
 	if err != nil {

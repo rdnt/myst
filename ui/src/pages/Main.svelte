@@ -23,16 +23,24 @@
   $: ready;
 
   onMount(async () => {
+    await refresh()
+    ready = true
+  })
+
+  const refresh = async () => {
     await getKeystores()
     const u = await getCurrentUser()
     if (u) {
       await getInvitations()
     }
-    ready = true
-  })
+  }
+
+  const interval = setInterval(refresh, 5000);
+
+  onDestroy(() => clearInterval(interval));
 
   const onKeystoreCreated = async (keystore: Keystore) => {
-    await getKeystores()
+    await refresh()
     navigate(`/keystore/${keystore.id}`)
   }
 </script>

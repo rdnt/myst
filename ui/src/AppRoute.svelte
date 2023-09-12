@@ -31,7 +31,7 @@
         }
     }
 
-    const interval = setInterval(checkState, 20000);
+    const interval = setInterval(checkState, 1000);
 
     onDestroy(() => clearInterval(interval));
 

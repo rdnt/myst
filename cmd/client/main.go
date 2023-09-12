@@ -67,7 +67,6 @@ func main() {
 		// if process is interrupted, wait for systray to quit
 		systray.Quit()
 	case <-done:
-
 	}
 
 	err = cleanup()

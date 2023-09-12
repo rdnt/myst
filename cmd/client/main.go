@@ -58,7 +58,7 @@ func main() {
 
 	done := make(chan bool, 1)
 
-	systray.Run(onReady, func() {
+	go systray.Run(onReady, func() {
 		onExit(done)
 	})
 
@@ -67,6 +67,7 @@ func main() {
 		// if process is interrupted, wait for systray to quit
 		systray.Quit()
 	case <-done:
+
 	}
 
 	err = cleanup()

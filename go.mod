@@ -7,7 +7,7 @@ require (
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-co-op/gocron v1.33.1
+	github.com/go-co-op/gocron v1.35.3
 	github.com/go-errors/errors v1.5.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
@@ -45,7 +45,7 @@ require (
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect

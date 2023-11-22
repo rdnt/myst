@@ -3,6 +3,9 @@
 
 [![Build status](https://github.com/rdnt/myst/actions/workflows/build.yml/badge.svg)](https://github.com/rdnt/myst/actions/workflows/build.yml)
 
+![image](https://github.com/rdnt/myst/assets/17600197/d4cabfca-ba75-4426-92fe-704c9ab4ea36)
+
+
 ### Zero-knowledge, end-to-end encrypted password manager.
 
 # /!\ Notice

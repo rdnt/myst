@@ -1,7 +1,7 @@
 name: Deploy server
-on:
-  push:
-    branches: [ main ]
+#on:
+#  push:
+#    branches: [ main ]
 jobs:
   deploy-server:
     name: Deploy server

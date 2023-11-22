@@ -5,6 +5,18 @@
 
 ### Zero-knowledge, end-to-end encrypted password manager.
 
+# /!\ Notice
+
+Myst is a proof of concept that was built as part of my thesis, and although it could be a usable app, it was built in isolation
+and without much user feedback.  
+The security and encryption practices could have edge-cases or be completely broken, since they have not been validated by
+external contributors and the test coverage is not as high as I would want it to be.
+
+I have not yet decided what the future of the project will be, although I would hope it could be useful to some people.  
+A useful at least to me path is for it to become a CLI password manager with password sharing within the local network.
+
+If you have any ideas/suggestions or are interested in collaborating, please either reach out to me or fork away, whatever you prefer.
+
 ---
 
 #### Development requirements
